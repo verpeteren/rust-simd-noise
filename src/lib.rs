@@ -1,42 +1,42 @@
-
 use std::arch::x86_64::*;
-
 
 union M128Array {
     simd: __m128,
-    array: [f32;4] 
+    array: [f32; 4],
 }
 
 union M128iArray {
     simd: __m128i,
-    array: [i32;4] 
+    array: [i32; 4],
 }
 
-const F2: __m128  = unsafe { M128Array { array: [0.36602540378;4]}.simd};
-const G2: __m128  = unsafe { M128Array { array: [0.2113248654;4]}.simd};  
-const G22: __m128  = unsafe { M128Array { array: [2.0 * 0.2113248654;4]}.simd};  
-const POINT_FIVE: __m128  = unsafe { M128Array { array: [0.5;4]}.simd};  
+const F2: __m128 = unsafe {
+    M128Array {
+        array: [0.36602540378; 4],
+    }.simd
+};
+const G2: __m128 = unsafe {
+    M128Array {
+        array: [0.2113248654; 4],
+    }.simd
+};
+const G22: __m128 = unsafe {
+    M128Array {
+        array: [2.0 * 0.2113248654; 4],
+    }.simd
+};
+const POINT_FIVE: __m128 = unsafe { M128Array { array: [0.5; 4] }.simd };
 
-
-const GRAD_X : [f32;12] =
-[
-	1.0,-1.0, 1.0,-1.0,
-	1.0,-1.0, 1.0,-1.0,
-	0.0, 0.0, 0.0, 0.0
+const GRAD_X: [f32; 12] = [
+    1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0,
 ];
 
-const  GRAD_Y : [f32;12] =
-[
-	1.0, 1.0,-1.0,-1.0,
-	0.0, 0.0, 0.0, 0.0,
-	1.0,-1.0, 1.0,-1.0
+const GRAD_Y: [f32; 12] = [
+    1.0, 1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0,
 ];
 
-const  GRAD_Z : [f32;12] = 
-[
-	0.0, 0.0, 0.0, 0.0,
-	1.0, 1.0,-1.0,-1.0,
-	1.0, 1.0,-1.0,-1.0
+const GRAD_Z: [f32; 12] = [
+    0.0, 0.0, 0.0, 0.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0,
 ];
 
 const PERM: [u8; 512] = [
@@ -88,9 +88,8 @@ const PERM_MOD12: [u8; 512] = [
     0, 0,
 ];
 
-
-unsafe fn dot_simd(x1 : __m128, x2: __m128, y1 : __m128, y2: __m128) -> __m128 {
-	_mm_add_ps(_mm_mul_ps(x1, x2), _mm_mul_ps(y1, y2))
+unsafe fn dot_simd(x1: __m128, x2: __m128, y1: __m128, y2: __m128) -> __m128 {
+    _mm_add_ps(_mm_mul_ps(x1, x2), _mm_mul_ps(y1, y2))
 }
 
 #[cfg(any(target_arch = "x86_64"))]
@@ -108,96 +107,139 @@ unsafe fn simplex_2d_sse2(x: __m128, y: __m128) -> __m128 {
     let x0 = _mm_sub_ps(x, _mm_sub_ps(ips, t));
     let y0 = _mm_sub_ps(y, _mm_sub_ps(jps, t));
 
-    let i1 = M128iArray { simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpge_ps(x0, y0)))};    
-    let j1 = M128iArray { simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpgt_ps(y0, x0)))};
-    
+    let i1 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpge_ps(x0, y0))),
+    };
+    let j1 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpgt_ps(y0, x0))),
+    };
+
     let x1 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i1.simd)), G2);
     let y1 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j1.simd)), G2);
     let x2 = _mm_add_ps(_mm_sub_ps(x0, _mm_set1_ps(1.0)), G22);
     let y2 = _mm_add_ps(_mm_sub_ps(y0, _mm_set1_ps(1.0)), G22);
 
-    let ii = M128iArray { simd:_mm_and_si128(i, _mm_set1_epi32(0xff)) };    
-    let jj = M128iArray { simd: _mm_and_si128(j, _mm_set1_epi32(0xff))};
-    
+    let ii = M128iArray {
+        simd: _mm_and_si128(i, _mm_set1_epi32(0xff)),
+    };
+    let jj = M128iArray {
+        simd: _mm_and_si128(j, _mm_set1_epi32(0xff)),
+    };
 
-    let mut gi0 = M128iArray { simd: _mm_setzero_si128()};
-    let mut gi1 = M128iArray { simd: _mm_setzero_si128()};
-    let mut gi2 = M128iArray { simd: _mm_setzero_si128()};
-    
+    // QUESTION: can we fill these with data in one step instead of zeroing then filling them in the loop below
+    let mut gi0 = M128iArray {
+        simd: _mm_setzero_si128(),
+    };
+    let mut gi1 = M128iArray {
+        simd: _mm_setzero_si128(),
+    };
+    let mut gi2 = M128iArray {
+        simd: _mm_setzero_si128(),
+    };
 
+    // QUESTION: could/should I use iterators here?
     for i in 0..4 {
-        gi0.array[i] = PERM_MOD12[(ii.array[i] + PERM[jj.array[i] as usize] as i32) as usize] as i32;
-        gi1.array[i] = PERM_MOD12[(ii.array[i] + i1.array[i]  + PERM[(jj.array[i] + j1.array[i]) as usize] as i32) as usize] as i32;
-        gi2.array[i] = PERM_MOD12[(ii.array[i] + 1+ PERM[(jj.array[i] as i32 + 1) as usize] as i32) as usize] as i32;
+        // QUESTION: Is there a better way to do this without all of the usize and i32 casting?
+        gi0.array[i] =
+            PERM_MOD12[(ii.array[i] + PERM[jj.array[i] as usize] as i32) as usize] as i32;
+
+        gi1.array[i] = PERM_MOD12[(ii.array[i]
+                                      + i1.array[i]
+                                      + PERM[(jj.array[i] + j1.array[i]) as usize] as i32)
+                                      as usize] as i32;
+        gi2.array[i] = PERM_MOD12
+            [(ii.array[i] + 1 + PERM[(jj.array[i] as i32 + 1) as usize] as i32) as usize]
+            as i32;
     }
 
-    let t0 = _mm_sub_ps(_mm_sub_ps(POINT_FIVE, _mm_mul_ps(x0, x0)), _mm_mul_ps(y0, y0));
-	let t1 = _mm_sub_ps(_mm_sub_ps(POINT_FIVE, _mm_mul_ps(x1, x1)), _mm_mul_ps(y1, y1));
-    let t2 = _mm_sub_ps(_mm_sub_ps(POINT_FIVE, _mm_mul_ps(x2, x2)), _mm_mul_ps(y2, y2));
+    let t0 = _mm_sub_ps(
+        _mm_sub_ps(POINT_FIVE, _mm_mul_ps(x0, x0)),
+        _mm_mul_ps(y0, y0),
+    );
+    let t1 = _mm_sub_ps(
+        _mm_sub_ps(POINT_FIVE, _mm_mul_ps(x1, x1)),
+        _mm_mul_ps(y1, y1),
+    );
+    let t2 = _mm_sub_ps(
+        _mm_sub_ps(POINT_FIVE, _mm_mul_ps(x2, x2)),
+        _mm_mul_ps(y2, y2),
+    );
 
     let mut t0q = _mm_mul_ps(t0, t0);
-	t0q = _mm_mul_ps(t0q, t0q);
-	let mut t1q = _mm_mul_ps(t1, t1);
-	t1q = _mm_mul_ps(t1q, t1q);
-	let mut t2q = _mm_mul_ps(t2, t2);
-	t2q = _mm_mul_ps(t2q, t2q);
+    t0q = _mm_mul_ps(t0q, t0q);
+    let mut t1q = _mm_mul_ps(t1, t1);
+    t1q = _mm_mul_ps(t1q, t1q);
+    let mut t2q = _mm_mul_ps(t2, t2);
+    t2q = _mm_mul_ps(t2q, t2q);
 
-    let mut gi0x = M128Array { simd: _mm_setzero_ps()};
-    let mut gi1x = M128Array { simd: _mm_setzero_ps()};
-    let mut gi2x = M128Array { simd: _mm_setzero_ps()};
-    let mut gi0y = M128Array { simd: _mm_setzero_ps()};
-    let mut gi1y = M128Array { simd: _mm_setzero_ps()};
-    let mut gi2y = M128Array { simd: _mm_setzero_ps()};
+    let mut gi0x = M128Array {
+        simd: _mm_setzero_ps(),
+    };
+    let mut gi1x = M128Array {
+        simd: _mm_setzero_ps(),
+    };
+    let mut gi2x = M128Array {
+        simd: _mm_setzero_ps(),
+    };
+    let mut gi0y = M128Array {
+        simd: _mm_setzero_ps(),
+    };
+    let mut gi1y = M128Array {
+        simd: _mm_setzero_ps(),
+    };
+    let mut gi2y = M128Array {
+        simd: _mm_setzero_ps(),
+    };
 
     for i in 0..4 {
         gi0x.array[i] = GRAD_X[gi0.array[i] as usize];
-		gi0y.array[i] = GRAD_Y[gi0.array[i] as usize];
+        gi0y.array[i] = GRAD_Y[gi0.array[i] as usize];
 
+        gi1x.array[i] = GRAD_X[gi1.array[i] as usize];
+        gi1y.array[i] = GRAD_Y[gi1.array[i] as usize];
 
-		gi1x.array[i] = GRAD_X[gi1.array[i] as usize];
-		gi1y.array[i] = GRAD_Y[gi1.array[i] as usize];
-
-
-		gi2x.array[i] = GRAD_X[gi2.array[i] as usize];
+        gi2x.array[i] = GRAD_X[gi2.array[i] as usize];
         gi2y.array[i] = GRAD_Y[gi2.array[i] as usize];
     }
 
     let mut n0 = _mm_mul_ps(t0q, dot_simd(gi0x.simd, gi0y.simd, x0, y0));
-	let mut n1 = _mm_mul_ps(t1q, dot_simd(gi1x.simd, gi1y.simd, x1, y1));
-	let mut n2 = _mm_mul_ps(t2q, dot_simd(gi2x.simd, gi2y.simd, x2, y2));
+    let mut n1 = _mm_mul_ps(t1q, dot_simd(gi1x.simd, gi1y.simd, x1, y1));
+    let mut n2 = _mm_mul_ps(t2q, dot_simd(gi2x.simd, gi2y.simd, x2, y2));
 
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-	n0 = _mm_blendv_ps(n0, _mm_setzero_ps(), cond);
-	cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-	n1 = _mm_blendv_ps(n1, _mm_setzero_ps(), cond);
-	cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-	n2 = _mm_blendv_ps(n2, _mm_setzero_ps(), cond);
-
+    n0 = _mm_blendv_ps(n0, _mm_setzero_ps(), cond);
+    cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
+    n1 = _mm_blendv_ps(n1, _mm_setzero_ps(), cond);
+    cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
+    n2 = _mm_blendv_ps(n2, _mm_setzero_ps(), cond);
 
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
-
 }
 
 #[cfg(any(target_arch = "x86_64"))]
-pub fn helper() -> (f32,f32,f32,f32) {
-unsafe {
-        let mut result = M128Array { simd: _mm_setzero_ps()};
-        let x = _mm_set_ps(1.0,0.5,0.4,0.3);
-        let y = _mm_set_ps(1.0,0.5,0.4,0.3);
-        result.simd = simplex_2d_sse2(x,y);
-        return (result.array[0],result.array[1],result.array[2],result.array[3]);
-}
-
+pub fn helper() -> (f32, f32, f32, f32) {
+    unsafe {
+        let mut result = M128Array {
+            simd: _mm_setzero_ps(),
+        };
+        let x = _mm_set_ps(1.0, 0.5, 0.4, 0.3);
+        let y = _mm_set_ps(1.0, 0.5, 0.4, 0.3);
+        result.simd = simplex_2d_sse2(x, y);
+        return (
+            result.array[0],
+            result.array[1],
+            result.array[2],
+            result.array[3],
+        );
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]    
+    #[test]
     fn first_test() {
-        
-        let (a,b,c,d) = helper();
-        println!("{},{},{},{}",a,b,c,d);
-        
+        let (a, b, c, d) = helper();
+        println!("{},{},{},{}", a, b, c, d);
     }
 }
