@@ -34,19 +34,36 @@ unsafe fn dot_simd(x1: __m128, x2: __m128, y1: __m128, y2: __m128) -> __m128 {
 }
 
 #[cfg(any(target_arch = "x86_64"))]
-#[target_feature(enable = "sse4.1")]
-unsafe fn simplex_2d_sse41(x: __m128, y: __m128) -> __m128 {
+#[target_feature(enable = "sse2")]
+unsafe fn simplex_2d_sse2(x: __m128, y: __m128) -> __m128 {
     let s = _mm_mul_ps(F2, _mm_add_ps(x, y));
-    let ips = _mm_floor_ps(_mm_add_ps(x, s));
-    let jps = _mm_floor_ps(_mm_add_ps(y, s));
+ 
 
-    let i = _mm_cvtps_epi32(ips);
-    let j = _mm_cvtps_epi32(jps);
+    let mut ips = M128Array {
+        simd: _mm_add_ps(x, s),
+    };
+
+    let mut jps = M128Array {
+        simd: _mm_add_ps(y, s),
+    };
+
+    ips.array[0] = ips.array[0].floor();
+    ips.array[1] = ips.array[1].floor();
+    ips.array[2] = ips.array[2].floor();
+    ips.array[3] = ips.array[3].floor();
+    
+    jps.array[0] = jps.array[0].floor();
+    jps.array[1] = jps.array[1].floor();
+    jps.array[2] = jps.array[2].floor();
+    jps.array[3] = jps.array[3].floor();
+    
+    let i = _mm_cvtps_epi32(ips.simd);
+    let j = _mm_cvtps_epi32(jps.simd);
 
     let t = _mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(i, j)), G2);
 
-    let x0 = _mm_sub_ps(x, _mm_sub_ps(ips, t));
-    let y0 = _mm_sub_ps(y, _mm_sub_ps(jps, t));
+    let x0 = _mm_sub_ps(x, _mm_sub_ps(ips.simd, t));
+    let y0 = _mm_sub_ps(y, _mm_sub_ps(jps.simd, t));
 
     let i1 = M128iArray {
         simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpge_ps(x0, y0))),
@@ -181,12 +198,12 @@ unsafe fn simplex_2d_sse41(x: __m128, y: __m128) -> __m128 {
     let mut n2 = _mm_mul_ps(t2q, dot_simd(gi2x.simd, gi2y.simd, x2, y2));
 
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-    n0 = _mm_blendv_ps(n0, _mm_setzero_ps(), cond);
+    n0 = _mm_or_ps(_mm_andnot_ps(cond,n0),_mm_and_ps(cond,_mm_setzero_ps()));
     cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-    n1 = _mm_blendv_ps(n1, _mm_setzero_ps(), cond);
+    n1 = _mm_or_ps(_mm_andnot_ps(cond,n1),_mm_and_ps(cond,_mm_setzero_ps()));
     cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-    n2 = _mm_blendv_ps(n2, _mm_setzero_ps(), cond);
-
+    n2 = _mm_or_ps(_mm_andnot_ps(cond,n2),_mm_and_ps(cond,_mm_setzero_ps()));
+    
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
 }
 
@@ -200,7 +217,7 @@ pub fn helper(a:f32,b:f32,c:f32,d:f32) -> (f32, f32, f32, f32) {
         };
         let x = _mm_set_ps(a,b,c,d);
         let y = _mm_set_ps(a,b,c,d);
-        result.simd = simplex_2d_sse41(x, y);
+        result.simd = simplex_2d_sse2(x, y);
         return (
             result.array[0],
             result.array[1],

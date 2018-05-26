@@ -1,5 +1,5 @@
 use std::arch::x86_64::*;
-use super::shared::*;
+use shared::*;
 
 union M256Array {
     simd: __m256,
