@@ -26,10 +26,20 @@ const G22: __m256 = unsafe {
         array: [2.0 * 0.2113248654; 8],
     }.simd
 };
+const POINT_FIVE: __m256 = unsafe {
+    M256Array {
+        array: [0.5; 8],
+    }.simd
+};
+
+unsafe fn dot_simd(x1: __m256, x2: __m256, y1: __m256, y2: __m256) -> __m256 {
+    _mm256_add_ps(_mm256_mul_ps(x1, x2), _mm256_mul_ps(y1, y2))
+}
+
 
 #[cfg(any(target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
-unsafe fn simplex_2d_avx2(x: __m256, y: __m256)  {
+unsafe fn simplex_2d_avx2(x: __m256, y: __m256) -> __m256 {
     let s = _mm256_mul_ps(F2, _mm256_add_ps(x, y));
     let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
     let jps = _mm256_floor_ps(_mm256_add_ps(y, s));
@@ -57,49 +67,13 @@ unsafe fn simplex_2d_avx2(x: __m256, y: __m256)  {
 
     let gi0 = _mm256_i32gather_epi32(&PERM_MOD12 as *const i32,_mm256_add_epi32(ii,_mm256_i32gather_epi32(&PERM as *const i32,jj,4)),4);
 
-    // QUESTION: can we fill these with data in one step instead of zeroing then filling them in the loop below
-    /*
-    let gi0 = M128iArray {
-        array: [
-            PERM_MOD12[(ii.array[0] + PERM[jj.array[0] as usize] as i32) as usize] as i32,
-            PERM_MOD12[(ii.array[1] + PERM[jj.array[1] as usize] as i32) as usize] as i32,
-            PERM_MOD12[(ii.array[2] + PERM[jj.array[2] as usize] as i32) as usize] as i32,
-            PERM_MOD12[(ii.array[3] + PERM[jj.array[3] as usize] as i32) as usize] as i32
-        ]
-    };
-    let gi1 = M128iArray {
-        array: [
-            PERM_MOD12[(ii.array[0]
-                           + i1.array[0]
-                           + PERM[(jj.array[0] + j1.array[0]) as usize] as i32)
-                           as usize] as i32,
-            PERM_MOD12[(ii.array[1]
-                           + i1.array[1]
-                           + PERM[(jj.array[1] + j1.array[1]) as usize] as i32)
-                           as usize] as i32,
-            PERM_MOD12[(ii.array[2]
-                           + i1.array[2]
-                           + PERM[(jj.array[2] + j1.array[2]) as usize] as i32)
-                           as usize] as i32,
-            PERM_MOD12[(ii.array[3]
-                           + i1.array[3]
-                           + PERM[(jj.array[3] + j1.array[3]) as usize] as i32)
-                           as usize] as i32,
-        ],
-    };
-    let gi2 = M128iArray {
-        array: [
-            PERM_MOD12[(ii.array[0] + 1 + PERM[(jj.array[0] as i32 + 1) as usize] as i32) as usize]
-                as i32,
-            PERM_MOD12[(ii.array[1] + 1 + PERM[(jj.array[1] as i32 + 1) as usize] as i32) as usize]
-                as i32,
-            PERM_MOD12[(ii.array[2] + 1 + PERM[(jj.array[2] as i32 + 1) as usize] as i32) as usize]
-                as i32,
-            PERM_MOD12[(ii.array[3] + 1 + PERM[(jj.array[3] as i32 + 1) as usize] as i32) as usize]
-                as i32,
-        ],
-    };
-
+    let gi1 = _mm256_i32gather_epi32(&PERM_MOD12 as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(ii,i1),
+        _mm256_i32gather_epi32(&PERM as *const i32,_mm256_add_epi32(jj,j1),4)),4);
+    
+    let gi2 = _mm256_i32gather_epi32(&PERM_MOD12 as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(ii,_mm256_set1_epi32(1)),
+        _mm256_i32gather_epi32(&PERM as *const i32,_mm256_add_epi32(jj,_mm256_set1_epi32(1)),4)),4);
    
     let t0 = _mm256_sub_ps(
         _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x0, x0)),
@@ -121,67 +95,48 @@ unsafe fn simplex_2d_avx2(x: __m256, y: __m256)  {
     let mut t2q = _mm256_mul_ps(t2, t2);
     t2q = _mm256_mul_ps(t2q, t2q);
 
-    let gi0x = M128Array {
-        array: [
-            GRAD_X[gi0.array[0] as usize],
-            GRAD_X[gi0.array[1] as usize],
-            GRAD_X[gi0.array[2] as usize],
-            GRAD_X[gi0.array[3] as usize]
-        ]
-    };
-    let gi1x = M128Array {
-        array: [
-            GRAD_X[gi1.array[0] as usize],
-            GRAD_X[gi1.array[1] as usize],
-            GRAD_X[gi1.array[2] as usize],
-            GRAD_X[gi1.array[3] as usize]
-        ]
-    };
-    let gi2x = M128Array {
-         array: [
-            GRAD_X[gi2.array[0] as usize],
-            GRAD_X[gi2.array[1] as usize],
-            GRAD_X[gi2.array[2] as usize],
-            GRAD_X[gi2.array[3] as usize]
-        ]
-    };
-    let gi0y = M128Array {
-         array: [
-            GRAD_Y[gi0.array[0] as usize],
-            GRAD_Y[gi0.array[1] as usize],
-            GRAD_Y[gi0.array[2] as usize],
-            GRAD_Y[gi0.array[3] as usize]
-        ]
-    };
-    let gi1y = M128Array {
-         array: [
-            GRAD_Y[gi1.array[0] as usize],
-            GRAD_Y[gi1.array[1] as usize],
-            GRAD_Y[gi1.array[2] as usize],
-            GRAD_Y[gi1.array[3] as usize]
-        ]
-    };
-    let gi2y = M128Array {
-         array: [
-            GRAD_Y[gi2.array[0] as usize],
-            GRAD_Y[gi2.array[1] as usize],
-            GRAD_Y[gi2.array[2] as usize],
-            GRAD_Y[gi2.array[3] as usize]
-        ]
-    };
+    let gi0x = _mm256_i32gather_ps(&GRAD_X as *const f32,gi0,4);
+    let gi1x = _mm256_i32gather_ps(&GRAD_X as *const f32,gi1,4);
+    let gi2x = _mm256_i32gather_ps(&GRAD_X as *const f32,gi2,4);
+    let gi0y = _mm256_i32gather_ps(&GRAD_Y as *const f32,gi0,4);
+    let gi1y = _mm256_i32gather_ps(&GRAD_Y as *const f32,gi1,4);
+    let gi2y = _mm256_i32gather_ps(&GRAD_Y as *const f32,gi2,4);
     
 
-    let mut n0 = _mm256_mul_ps(t0q, dot_simd(gi0x.simd, gi0y.simd, x0, y0));
-    let mut n1 = _mm256_mul_ps(t1q, dot_simd(gi1x.simd, gi1y.simd, x1, y1));
-    let mut n2 = _mm256_mul_ps(t2q, dot_simd(gi2x.simd, gi2y.simd, x2, y2));
+    let mut n0 = _mm256_mul_ps(t0q, dot_simd(gi0x, gi0y, x0, y0));
+    let mut n1 = _mm256_mul_ps(t1q, dot_simd(gi1x, gi1y, x1, y1));
+    let mut n2 = _mm256_mul_ps(t2q, dot_simd(gi2x, gi2y, x2, y2));
 
-    let mut cond = _mm256_cmplt_ps(t0, _mm256_setzero_ps());
+    let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(),_CMP_LT_OQ);
     n0 = _mm256_blendv_ps(n0, _mm256_setzero_ps(), cond);
-    cond = _mm256_cmplt_ps(t1, _mm256_setzero_ps());
+    cond = _mm256_cmp_ps(t1, _mm256_setzero_ps(),_CMP_LT_OQ);
     n1 = _mm256_blendv_ps(n1, _mm256_setzero_ps(), cond);
-    cond = _mm256_cmplt_ps(t2, _mm256_setzero_ps());
+    cond = _mm256_cmp_ps(t2, _mm256_setzero_ps(),_CMP_LT_OQ);
     n2 = _mm256_blendv_ps(n2, _mm256_setzero_ps(), cond);
 
     _mm256_add_ps(n0, _mm256_add_ps(n1, n2))
-    */
+    
+}
+
+
+#[cfg(any(target_arch = "x86_64"))]
+pub fn helper(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32) -> (f32, f32, f32, f32,f32,f32,f32,f32) {
+    unsafe {
+        let mut result = M256Array {
+            simd: _mm256_setzero_ps(),
+        };
+        let x = _mm256_set_ps(a,b,c,d,e,f,g,h);
+        let y = _mm256_set_ps(a,b,c,d,e,f,g,h);
+        result.simd = simplex_2d_avx2(x, y);
+        return (
+            result.array[0],
+            result.array[1],
+            result.array[2],
+            result.array[3],
+            result.array[4],
+            result.array[5],
+            result.array[6],
+            result.array[7],
+        );
+    }
 }

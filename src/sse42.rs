@@ -193,13 +193,13 @@ unsafe fn simplex_2d_sse41(x: __m128, y: __m128) -> __m128 {
 
 
 #[cfg(any(target_arch = "x86_64"))]
-pub fn helper() -> (f32, f32, f32, f32) {
+pub fn helper(a:f32,b:f32,c:f32,d:f32) -> (f32, f32, f32, f32) {
     unsafe {
         let mut result = M128Array {
             simd: _mm_setzero_ps(),
         };
-        let x = _mm_set_ps(1.0, 0.5, 0.4, 0.3);
-        let y = _mm_set_ps(1.0, 0.5, 0.4, 0.3);
+        let x = _mm_set_ps(a,b,c,d);
+        let y = _mm_set_ps(a,b,c,d);
         result.simd = simplex_2d_sse41(x, y);
         return (
             result.array[0],
