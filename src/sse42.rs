@@ -190,6 +190,26 @@ unsafe fn simplex_2d_sse41(x: __m128, y: __m128) -> __m128 {
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
 }
 
+unsafe fn fbm_2d_sse41 (x : __m128 ,y: __m128 , freq : __m128 , lac: f32, gain:f32, octaves:i32)->__m128
+{	
+	let gain_s = _mm_set1_ps(gain);
+	let lac_s = _mm_set1_ps(lac);
+	let mut xf = _mm_mul_ps(x, freq);
+	let mut yf = _mm_mul_ps(y, freq);
+	let mut result = simplex_2d_sse41(xf, yf);	
+	let mut amp = _mm_set1_ps(1.0);
+	
+
+	for _ in 1..octaves 
+	{
+		xf = _mm_mul_ps(xf, lac_s);
+		yf = _mm_mul_ps(yf, lac_s);		
+		amp = _mm_mul_ps(amp, gain_s);
+		result = _mm_add_ps(result, _mm_mul_ps(simplex_2d_sse41(xf, yf),amp));
+	}
+
+	result
+}
 
 
 #[cfg(any(target_arch = "x86_64"))]
