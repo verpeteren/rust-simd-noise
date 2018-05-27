@@ -144,7 +144,7 @@ unsafe fn _mm256_abs_ps(a:__m256) -> __m256
 	_mm256_and_ps(a, _mm256_castsi256_ps(b))
 }
 
-unsafe fn turbulence_2d_sse2 (x : __m256 ,y: __m256 , freq : __m256 , lac: f32, gain:f32, octaves:i32)->__m256
+unsafe fn turbulence_2d_avx2 (x : __m256 ,y: __m256 , freq : __m256 , lac: f32, gain:f32, octaves:i32)->__m256
 {	
 	let gain_s = _mm256_set1_ps(gain);
 	let lac_s = _mm256_set1_ps(lac);
