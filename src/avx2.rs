@@ -138,7 +138,32 @@ unsafe fn fbm_2d_avx2 (x : __m256 ,y: __m256 , freq : __m256 , lac: f32, gain:f3
 
 	result
 }
+unsafe fn _mm256_abs_ps(a:__m256) -> __m256
+{
+	let b = _mm256_set1_epi32(0x7fffffff);
+	_mm256_and_ps(a, _mm256_castsi256_ps(b))
+}
 
+unsafe fn turbulence_2d_sse2 (x : __m256 ,y: __m256 , freq : __m256 , lac: f32, gain:f32, octaves:i32)->__m256
+{	
+	let gain_s = _mm256_set1_ps(gain);
+	let lac_s = _mm256_set1_ps(lac);
+	let mut xf = _mm256_mul_ps(x, freq);
+	let mut yf = _mm256_mul_ps(y, freq);
+	let mut result = _mm256_abs_ps(simplex_2d_avx2(xf, yf));
+	let mut amp = _mm256_set1_ps(1.0);
+	
+
+	for _ in 1..octaves 
+	{
+		xf = _mm256_mul_ps(xf, lac_s);
+		yf = _mm256_mul_ps(yf, lac_s);		
+		amp = _mm256_mul_ps(amp, gain_s);
+		result = _mm256_add_ps(result,_mm256_abs_ps(_mm256_mul_ps(simplex_2d_avx2(xf, yf),amp)));
+	}
+
+	result
+}
 #[cfg(any(target_arch = "x86_64"))]
 pub fn helper(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32) -> (f32, f32, f32, f32,f32,f32,f32,f32) {
     unsafe {
