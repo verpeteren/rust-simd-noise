@@ -502,7 +502,6 @@ unsafe fn simplex_3d_sse2(x:__m128, y:__m128,z:__m128) -> __m128 {
     let mut n2 = _mm_mul_ps(t2q, dot_simd_3d(gi2x.simd, gi2y.simd, gi2z.simd, x2, y2, z2));
     let mut n3 = _mm_mul_ps(t3q, dot_simd_3d(gi3x.simd, gi3y.simd, gi3z.simd, x3, y3, z3));
 
-	//BlendV(x,y,z) Or(AndNot(z,x), And(z,y)) 
      //if ti < 0 then 0 else ni
 	let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());	
     n0 = _mm_or_ps(_mm_andnot_ps(cond,n0),_mm_and_ps(cond,_mm_setzero_ps()));

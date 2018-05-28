@@ -16,6 +16,11 @@ const F2: __m256 = unsafe {
         array: [0.36602540378; 8],
     }.simd
 };
+const F3: __m256 = unsafe {
+    M256Array {
+        array:[1.0/3.0;8]
+    }.simd
+};
 const G2: __m256 = unsafe {
     M256Array {
         array: [0.2113248654; 8],
@@ -24,6 +29,11 @@ const G2: __m256 = unsafe {
 const G22: __m256 = unsafe {
     M256Array {
         array: [2.0 * 0.2113248654; 8],
+    }.simd
+};
+const G3: __m256 = unsafe {
+    M256Array {
+        array:[1.0/6.0;8]
     }.simd
 };
 const POINT_FIVE: __m256 = unsafe {
@@ -163,6 +173,305 @@ unsafe fn turbulence_2d_avx2 (x : __m256 ,y: __m256 , freq : __m256 , lac: f32, 
 	}
 
 	result
+}
+unsafe fn dot_simd_3d(x1: __m256, y1: __m256, z1: __m256, x2: __m256, y2: __m256, z2: __m256) -> __m256
+{
+	let xx = _mm256_mul_ps(x1, x2);
+	let yy = _mm256_mul_ps(y1, y2);
+	let zz = _mm256_mul_ps(z1, z2);
+	_mm256_add_ps(xx, _mm256_add_ps(yy, zz))
+}
+
+unsafe fn simplex_3d_avx2(x:__m256, y:__m256,z:__m256) -> __m256 {
+
+    let s = M256Array{ simd:_mm256_mul_ps(F3,_mm256_add_ps(x,_mm256_add_ps(y,z)))};
+    let mut i = M256iArray{ simd: _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_add_ps(x,s.simd)))};
+    let mut j = M256iArray{ simd: _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_add_ps(y,s.simd)))};
+    let mut k = M256iArray{ simd: _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_add_ps(z,s.simd)))};
+
+    let t = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(i.simd, _mm256_add_epi32(j.simd, k.simd))), G3);
+	let X0 = _mm256_sub_ps(_mm256_cvtepi32_ps(i.simd), t);
+	let Y0 = _mm256_sub_ps(_mm256_cvtepi32_ps(j.simd), t);
+	let Z0 = _mm256_sub_ps(_mm256_cvtepi32_ps(k.simd), t);
+	let x0 = _mm256_sub_ps(x, X0);
+	let y0 = _mm256_sub_ps(y, Y0);
+	let z0 = _mm256_sub_ps(z, Z0);
+
+	let i1 = M256iArray{ 
+        simd: _mm256_and_si256(_mm256_set1_epi32(1), _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(x0, y0,_CMP_GE_OQ)), _mm256_castps_si256(_mm256_cmp_ps(x0, z0,_CMP_GE_OQ))))
+    };
+	let j1 = M256iArray{
+        simd: _mm256_and_si256(_mm256_set1_epi32(1), _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(y0, x0,_CMP_GT_OQ)), _mm256_castps_si256(_mm256_cmp_ps(y0, z0,_CMP_GT_OQ))))
+    };
+	let k1 = M256iArray{
+        simd: _mm256_and_si256(_mm256_set1_epi32(1), _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(z0, x0,_CMP_GT_OQ)), _mm256_castps_si256(_mm256_cmp_ps(z0, y0,_CMP_GT_OQ))))
+    };
+
+	//for i2
+	let yx_xz = _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(x0, y0,_CMP_GE_OQ)), _mm256_castps_si256(_mm256_cmp_ps(x0, z0,_CMP_LT_OQ)));
+	let zx_xy = _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(x0, z0,_CMP_GE_OQ)), _mm256_castps_si256(_mm256_cmp_ps(x0, y0,_CMP_LT_OQ)));
+
+	//for j2
+	let xy_yz = _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(x0, y0,_CMP_LT_OQ)), _mm256_castps_si256(_mm256_cmp_ps(y0, z0,_CMP_LT_OQ)));
+	let zy_yx = _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(y0, z0,_CMP_GE_OQ)), _mm256_castps_si256(_mm256_cmp_ps(x0, y0,_CMP_GE_OQ)));
+
+	//for k2
+	let yz_zx = _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(y0, z0,_CMP_LT_OQ)), _mm256_castps_si256(_mm256_cmp_ps(x0, z0,_CMP_GE_OQ)));
+	let xz_zy = _mm256_and_si256(_mm256_castps_si256(_mm256_cmp_ps(x0, z0,_CMP_LT_OQ)), _mm256_castps_si256(_mm256_cmp_ps(y0, z0,_CMP_GE_OQ)));
+
+    let i2 = M256iArray{ 
+        simd: _mm256_and_si256(_mm256_set1_epi32(1), _mm256_or_si256(i1.simd, _mm256_or_si256(yx_xz, zx_xy)))
+    };
+	let j2 = M256iArray{
+        simd: _mm256_and_si256(_mm256_set1_epi32(1), _mm256_or_si256(j1.simd, _mm256_or_si256(xy_yz, zy_yx)))
+    };
+	let k2 = M256iArray {
+        simd: _mm256_and_si256(_mm256_set1_epi32(1), _mm256_or_si256(k1.simd, _mm256_or_si256(yz_zx, xz_zy)))
+    };
+
+    let x1 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i1.simd)), G3);
+	let y1 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j1.simd)), G3);
+	let z1 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_cvtepi32_ps(k1.simd)), G3);
+	let x2 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i2.simd)), F3);
+	let y2 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j2.simd)), F3);
+	let z2 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_cvtepi32_ps(k2.simd)), F3);
+	let x3 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_set1_ps(1.0)), POINT_FIVE);
+	let y3 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_set1_ps(1.0)), POINT_FIVE);
+	let z3 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_set1_ps(1.0)), POINT_FIVE);
+
+    i.simd = _mm256_and_si256(i.simd,_mm256_set1_epi32(0xff));
+    j.simd = _mm256_and_si256(j.simd,_mm256_set1_epi32(0xff));
+    k.simd = _mm256_and_si256(k.simd,_mm256_set1_epi32(0xff));
+ 
+    let gi0 = M256iArray {
+        array: [
+            PERM_MOD12[(i.array[0] + PERM[(j.array[0] + PERM[k.array[0] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[1] + PERM[(j.array[1] + PERM[k.array[1] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[2] + PERM[(j.array[2] + PERM[k.array[2] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[3] + PERM[(j.array[3] + PERM[k.array[3] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[4] + PERM[(j.array[4] + PERM[k.array[4] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[5] + PERM[(j.array[5] + PERM[k.array[5] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[6] + PERM[(j.array[6] + PERM[k.array[6] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[7] + PERM[(j.array[7] + PERM[k.array[7] as usize])as usize]) as usize],
+        ]
+    };
+
+    let gi1 = M256iArray {
+        array: [
+            PERM_MOD12[(i.array[0] + i1.array[0] + PERM[(j.array[0] + j1.array[0] + PERM[(k.array[0] + k1.array[0]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[1] + i1.array[1] + PERM[(j.array[1] + j1.array[1] + PERM[(k.array[1] + k1.array[1]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[2] + i1.array[2] + PERM[(j.array[2] + j1.array[2] + PERM[(k.array[2] + k1.array[2]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[3] + i1.array[3] + PERM[(j.array[3] + j1.array[3] + PERM[(k.array[3] + k1.array[3]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[4] + i1.array[4] + PERM[(j.array[4] + j1.array[4] + PERM[(k.array[4] + k1.array[4]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[5] + i1.array[5] + PERM[(j.array[5] + j1.array[5] + PERM[(k.array[5] + k1.array[5]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[6] + i1.array[6] + PERM[(j.array[6] + j1.array[6] + PERM[(k.array[6] + k1.array[6]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[7] + i1.array[7] + PERM[(j.array[7] + j1.array[7] + PERM[(k.array[7] + k1.array[7]) as usize])as usize]) as usize],
+
+        ]
+    };
+    let gi2 = M256iArray {
+        array: [
+            PERM_MOD12[(i.array[0] + i2.array[0] + PERM[(j.array[0] + j2.array[0] + PERM[(k.array[0] + k2.array[0]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[1] + i2.array[1] + PERM[(j.array[1] + j2.array[1] + PERM[(k.array[1] + k2.array[1]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[2] + i2.array[2] + PERM[(j.array[2] + j2.array[2] + PERM[(k.array[2] + k2.array[2]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[3] + i2.array[3] + PERM[(j.array[3] + j2.array[3] + PERM[(k.array[3] + k2.array[3]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[4] + i2.array[4] + PERM[(j.array[4] + j2.array[4] + PERM[(k.array[4] + k2.array[4]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[5] + i2.array[5] + PERM[(j.array[5] + j2.array[5] + PERM[(k.array[5] + k2.array[5]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[6] + i2.array[6] + PERM[(j.array[6] + j2.array[6] + PERM[(k.array[6] + k2.array[6]) as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[7] + i2.array[7] + PERM[(j.array[7] + j2.array[7] + PERM[(k.array[7] + k2.array[7]) as usize])as usize]) as usize],
+
+        ]
+    };
+    let gi3 = M256iArray {
+        array: [
+            PERM_MOD12[(i.array[0] + 1 + PERM[(j.array[0] + 1 + PERM[k.array[0] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[1] + 1 + PERM[(j.array[1] + 1 + PERM[k.array[1] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[2] + 1 + PERM[(j.array[2] + 1 + PERM[k.array[2] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[3] + 1 + PERM[(j.array[3] + 1 + PERM[k.array[3] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[4] + 1 + PERM[(j.array[4] + 1 + PERM[k.array[4] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[5] + 1 + PERM[(j.array[5] + 1 + PERM[k.array[5] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[6] + 1 + PERM[(j.array[6] + 1 + PERM[k.array[6] as usize])as usize]) as usize],
+            PERM_MOD12[(i.array[7] + 1 + PERM[(j.array[7] + 1 + PERM[k.array[7] as usize])as usize]) as usize],
+        ]
+    };
+
+    let t0 = _mm256_sub_ps(_mm256_sub_ps(_mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x0, x0)), _mm256_mul_ps(y0, y0)), _mm256_mul_ps(z0, z0));
+	let t1 = _mm256_sub_ps(_mm256_sub_ps(_mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x1, x1)), _mm256_mul_ps(y1, y1)), _mm256_mul_ps(z1, z1));
+	let t2 = _mm256_sub_ps(_mm256_sub_ps(_mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x2, x2)), _mm256_mul_ps(y2, y2)), _mm256_mul_ps(z2, z2));
+	let t3 = _mm256_sub_ps(_mm256_sub_ps(_mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x3, x3)), _mm256_mul_ps(y3, y3)), _mm256_mul_ps(z3, z3));
+
+	//ti*ti*ti*ti
+	let mut t0q = _mm256_mul_ps(t0, t0);
+	t0q = _mm256_mul_ps(t0q, t0q);
+	let mut t1q = _mm256_mul_ps(t1, t1);
+	t1q = _mm256_mul_ps(t1q, t1q);
+	let mut t2q = _mm256_mul_ps(t2, t2);
+	t2q = _mm256_mul_ps(t2q, t2q);
+	let mut t3q = _mm256_mul_ps(t3, t3);
+	t3q = _mm256_mul_ps(t3q, t3q);
+
+    let gi0x = M256Array{
+        array:[
+            GRAD_X[gi0.array[0] as usize],
+            GRAD_X[gi0.array[1] as usize],
+            GRAD_X[gi0.array[2] as usize],
+            GRAD_X[gi0.array[3] as usize],
+            GRAD_X[gi0.array[4] as usize],
+            GRAD_X[gi0.array[5] as usize],
+            GRAD_X[gi0.array[6] as usize],
+            GRAD_X[gi0.array[7] as usize]
+        ]
+    };
+    let gi0y = M256Array{
+        array:[
+            GRAD_Y[gi0.array[0] as usize],
+            GRAD_Y[gi0.array[1] as usize],
+            GRAD_Y[gi0.array[2] as usize],
+            GRAD_Y[gi0.array[3] as usize],
+            GRAD_Y[gi0.array[4] as usize],
+            GRAD_Y[gi0.array[5] as usize],
+            GRAD_Y[gi0.array[6] as usize],
+            GRAD_Y[gi0.array[7] as usize],
+        ]
+    };
+    let gi0z = M256Array{
+        array:[
+            GRAD_Z[gi0.array[0] as usize],
+            GRAD_Z[gi0.array[1] as usize],
+            GRAD_Z[gi0.array[2] as usize],
+            GRAD_Z[gi0.array[3] as usize],
+            GRAD_Z[gi0.array[4] as usize],
+            GRAD_Z[gi0.array[5] as usize],
+            GRAD_Z[gi0.array[6] as usize],
+            GRAD_Z[gi0.array[7] as usize]
+        ]
+    };
+    let gi1x = M256Array{
+        array:[
+            GRAD_X[gi1.array[0] as usize],
+            GRAD_X[gi1.array[1] as usize],
+            GRAD_X[gi1.array[2] as usize],
+            GRAD_X[gi1.array[3] as usize],
+            GRAD_X[gi1.array[4] as usize],
+            GRAD_X[gi1.array[5] as usize],
+            GRAD_X[gi1.array[6] as usize],
+            GRAD_X[gi1.array[7] as usize]
+        ]
+    };
+    let gi1y = M256Array{
+        array:[
+            GRAD_Y[gi1.array[0] as usize],
+            GRAD_Y[gi1.array[1] as usize],
+            GRAD_Y[gi1.array[2] as usize],
+            GRAD_Y[gi1.array[3] as usize],
+            GRAD_Y[gi1.array[4] as usize],
+            GRAD_Y[gi1.array[5] as usize],
+            GRAD_Y[gi1.array[6] as usize],
+            GRAD_Y[gi1.array[7] as usize]
+
+        ]
+    };
+    let gi1z = M256Array{
+        array:[
+            GRAD_Z[gi1.array[0] as usize],
+            GRAD_Z[gi1.array[1] as usize],
+            GRAD_Z[gi1.array[2] as usize],
+            GRAD_Z[gi1.array[3] as usize],
+            GRAD_Z[gi1.array[4] as usize],
+            GRAD_Z[gi1.array[5] as usize],
+            GRAD_Z[gi1.array[6] as usize],
+            GRAD_Z[gi1.array[7] as usize]
+        ]
+    };
+    let gi2x = M256Array{
+        array:[
+            GRAD_X[gi2.array[0] as usize],
+            GRAD_X[gi2.array[1] as usize],
+            GRAD_X[gi2.array[2] as usize],
+            GRAD_X[gi2.array[3] as usize],
+            GRAD_X[gi2.array[4] as usize],
+            GRAD_X[gi2.array[5] as usize],
+            GRAD_X[gi2.array[6] as usize],
+            GRAD_X[gi2.array[7] as usize]
+        ]
+    };
+    let gi2y = M256Array{
+        array:[
+            GRAD_Y[gi2.array[0] as usize],
+            GRAD_Y[gi2.array[1] as usize],
+            GRAD_Y[gi2.array[2] as usize],
+            GRAD_Y[gi2.array[3] as usize],
+            GRAD_Y[gi2.array[4] as usize],
+            GRAD_Y[gi2.array[5] as usize],
+            GRAD_Y[gi2.array[6] as usize],
+            GRAD_Y[gi2.array[7] as usize]
+        ]
+    };
+    let gi2z = M256Array{
+        array:[
+            GRAD_Z[gi2.array[0] as usize],
+            GRAD_Z[gi2.array[1] as usize],
+            GRAD_Z[gi2.array[2] as usize],
+            GRAD_Z[gi2.array[3] as usize],
+            GRAD_Z[gi2.array[4] as usize],
+            GRAD_Z[gi2.array[5] as usize],
+            GRAD_Z[gi2.array[6] as usize],
+            GRAD_Z[gi2.array[7] as usize]
+        ]
+    };
+    let gi3x = M256Array{
+        array:[
+            GRAD_X[gi3.array[0] as usize],
+            GRAD_X[gi3.array[1] as usize],
+            GRAD_X[gi3.array[2] as usize],
+            GRAD_X[gi3.array[3] as usize],
+            GRAD_X[gi3.array[4] as usize],
+            GRAD_X[gi3.array[5] as usize],
+            GRAD_X[gi3.array[6] as usize],
+            GRAD_X[gi3.array[7] as usize]
+        ]
+    };
+    let gi3y = M256Array{
+        array:[
+            GRAD_Y[gi3.array[0] as usize],
+            GRAD_Y[gi3.array[1] as usize],
+            GRAD_Y[gi3.array[2] as usize],
+            GRAD_Y[gi3.array[3] as usize],
+            GRAD_Y[gi3.array[4] as usize],
+            GRAD_Y[gi3.array[5] as usize],
+            GRAD_Y[gi3.array[6] as usize],
+            GRAD_Y[gi3.array[7] as usize]
+        ]
+    };
+    let gi3z = M256Array{
+        array:[
+            GRAD_Z[gi3.array[0] as usize],
+            GRAD_Z[gi3.array[1] as usize],
+            GRAD_Z[gi3.array[2] as usize],
+            GRAD_Z[gi3.array[3] as usize],
+            GRAD_Z[gi3.array[4] as usize],
+            GRAD_Z[gi3.array[5] as usize],
+            GRAD_Z[gi3.array[6] as usize],
+            GRAD_Z[gi3.array[7] as usize]
+        ]
+    };
+
+    let mut n0 = _mm256_mul_ps(t0q, dot_simd_3d(gi0x.simd, gi0y.simd, gi0z.simd, x0, y0, z0));
+    let mut n1 = _mm256_mul_ps(t1q, dot_simd_3d(gi1x.simd, gi1y.simd, gi1z.simd, x1, y1, z1));
+    let mut n2 = _mm256_mul_ps(t2q, dot_simd_3d(gi2x.simd, gi2y.simd, gi2z.simd, x2, y2, z2));
+    let mut n3 = _mm256_mul_ps(t3q, dot_simd_3d(gi3x.simd, gi3y.simd, gi3z.simd, x3, y3, z3));
+
+     //if ti < 0 then 0 else ni
+	let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(),_CMP_LT_OQ);	
+    n0 = _mm256_blendv_ps(n0,_mm256_setzero_ps(),cond);
+	cond = _mm256_cmp_ps(t1, _mm256_setzero_ps(),_CMP_LT_OQ);
+	n1 = _mm256_blendv_ps(n1,_mm256_setzero_ps(),cond);
+	cond = _mm256_cmp_ps(t2, _mm256_setzero_ps(),_CMP_LT_OQ);
+    n2 = _mm256_blendv_ps(n2,_mm256_setzero_ps(),cond);
+	cond = _mm256_cmp_ps(t3, _mm256_setzero_ps(),_CMP_LT_OQ);
+    n3 = _mm256_blendv_ps(n3,_mm256_setzero_ps(),cond);
+
+	_mm256_add_ps(n0, _mm256_add_ps(n1, _mm256_add_ps(n2, n3)))   
 }
 #[cfg(any(target_arch = "x86_64"))]
 pub fn helper(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32) -> (f32, f32, f32, f32,f32,f32,f32,f32) {
