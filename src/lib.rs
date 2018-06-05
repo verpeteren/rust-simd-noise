@@ -1,4 +1,4 @@
-mod avx2;
+pub mod avx2;
 mod shared;
-mod sse2;
-mod sse41;
+pub mod sse2;
+pub mod sse41;
