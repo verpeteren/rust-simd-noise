@@ -46,7 +46,7 @@ unsafe fn dot_simd(x1: __m256, x2: __m256, y1: __m256, y2: __m256) -> __m256 {
 
 #[cfg(any(target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
-unsafe fn simplex_2d_avx2(x: __m256, y: __m256) -> __m256 {
+unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let s = _mm256_mul_ps(F2, _mm256_add_ps(x, y));
     let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
     let jps = _mm256_floor_ps(_mm256_add_ps(y, s));
@@ -146,62 +146,60 @@ unsafe fn simplex_2d_avx2(x: __m256, y: __m256) -> __m256 {
     _mm256_add_ps(n0, _mm256_add_ps(n1, n2))
 }
 
-unsafe fn fbm_2d_avx2(
-    x: __m256,
-    y: __m256,
-    freq: __m256,
-    lac: f32,
-    gain: f32,
-    octaves: i32,
-) -> __m256 {
-    let gain_s = _mm256_set1_ps(gain);
-    let lac_s = _mm256_set1_ps(lac);
-    let mut xf = _mm256_mul_ps(x, freq);
-    let mut yf = _mm256_mul_ps(y, freq);
-    let mut result = simplex_2d_avx2(xf, yf);
-    let mut amp = _mm256_set1_ps(1.0);
-
-    for _ in 1..octaves {
-        xf = _mm256_mul_ps(xf, lac_s);
-        yf = _mm256_mul_ps(yf, lac_s);
-        amp = _mm256_mul_ps(amp, gain_s);
-        result = _mm256_add_ps(result, _mm256_mul_ps(simplex_2d_avx2(xf, yf), amp));
-    }
-
-    result
-}
 unsafe fn _mm256_abs_ps(a: __m256) -> __m256 {
     let b = _mm256_set1_epi32(0x7fffffff);
     _mm256_and_ps(a, _mm256_castsi256_ps(b))
 }
 
-unsafe fn turbulence_2d_avx2(
+pub unsafe fn fbm_2d(
     x: __m256,
     y: __m256,
     freq: __m256,
-    lac: f32,
-    gain: f32,
+    lac: __m256,
+    gain: __m256,
     octaves: i32,
 ) -> __m256 {
-    let gain_s = _mm256_set1_ps(gain);
-    let lac_s = _mm256_set1_ps(lac);
     let mut xf = _mm256_mul_ps(x, freq);
     let mut yf = _mm256_mul_ps(y, freq);
-    let mut result = _mm256_abs_ps(simplex_2d_avx2(xf, yf));
+    let mut result = simplex_2d(xf, yf);
     let mut amp = _mm256_set1_ps(1.0);
 
     for _ in 1..octaves {
-        xf = _mm256_mul_ps(xf, lac_s);
-        yf = _mm256_mul_ps(yf, lac_s);
-        amp = _mm256_mul_ps(amp, gain_s);
+        xf = _mm256_mul_ps(xf, lac);
+        yf = _mm256_mul_ps(yf, lac);
+        amp = _mm256_mul_ps(amp, gain);
+        result = _mm256_add_ps(result, _mm256_mul_ps(simplex_2d(xf, yf), amp));
+    }
+
+    result
+}
+
+pub unsafe fn turbulence_2d(
+    x: __m256,
+    y: __m256,
+    freq: __m256,
+    lac: __m256,
+    gain: __m256,
+    octaves: i32,
+) -> __m256 {
+    let mut xf = _mm256_mul_ps(x, freq);
+    let mut yf = _mm256_mul_ps(y, freq);
+    let mut result = _mm256_abs_ps(simplex_2d(xf, yf));
+    let mut amp = _mm256_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm256_mul_ps(xf, lac);
+        yf = _mm256_mul_ps(yf, lac);
+        amp = _mm256_mul_ps(amp, gain);
         result = _mm256_add_ps(
             result,
-            _mm256_abs_ps(_mm256_mul_ps(simplex_2d_avx2(xf, yf), amp)),
+            _mm256_abs_ps(_mm256_mul_ps(simplex_2d(xf, yf), amp)),
         );
     }
 
     result
 }
+
 unsafe fn dot_simd_3d(
     x1: __m256,
     y1: __m256,
@@ -216,7 +214,7 @@ unsafe fn dot_simd_3d(
     _mm256_add_ps(xx, _mm256_add_ps(yy, zz))
 }
 
-unsafe fn simplex_3d_avx2(x: __m256, y: __m256, z: __m256) -> __m256 {
+unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let s = M256Array {
         simd: _mm256_mul_ps(F3, _mm256_add_ps(x, _mm256_add_ps(y, z))),
     };
@@ -691,33 +689,171 @@ unsafe fn simplex_3d_avx2(x: __m256, y: __m256, z: __m256) -> __m256 {
 
     _mm256_add_ps(n0, _mm256_add_ps(n1, _mm256_add_ps(n2, n3)))
 }
-#[cfg(any(target_arch = "x86_64"))]
-pub fn helper(
-    a: f32,
-    b: f32,
-    c: f32,
-    d: f32,
-    e: f32,
-    f: f32,
-    g: f32,
-    h: f32,
-) -> (f32, f32, f32, f32, f32, f32, f32, f32) {
-    unsafe {
-        let mut result = M256Array {
-            simd: _mm256_setzero_ps(),
-        };
-        let x = _mm256_set_ps(a, b, c, d, e, f, g, h);
-        let y = _mm256_set_ps(a, b, c, d, e, f, g, h);
-        result.simd = simplex_2d_avx2(x, y);
-        return (
-            result.array[0],
-            result.array[1],
-            result.array[2],
-            result.array[3],
-            result.array[4],
-            result.array[5],
-            result.array[6],
-            result.array[7],
+
+pub unsafe fn fbm_3d(
+    x: __m256,
+    y: __m256,
+    z: __m256,
+    freq: __m256,
+    lac: __m256,
+    gain: __m256,
+    octaves: i32,
+) -> __m256 {
+    let mut xf = _mm256_mul_ps(x, freq);
+    let mut yf = _mm256_mul_ps(y, freq);
+    let mut zf = _mm256_mul_ps(z, freq);
+    let mut result = simplex_3d(xf, yf, zf);
+    let mut amp = _mm256_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm256_mul_ps(xf, lac);
+        yf = _mm256_mul_ps(yf, lac);
+        zf = _mm256_mul_ps(zf, lac);
+        amp = _mm256_mul_ps(amp, gain);
+        result = _mm256_add_ps(result, _mm256_mul_ps(simplex_3d(xf, yf, zf), amp));
+    }
+
+    result
+}
+
+pub unsafe fn turbulence_3d(
+    x: __m256,
+    y: __m256,
+    z: __m256,
+    freq: __m256,
+    lac: __m256,
+    gain: __m256,
+    octaves: i32,
+) -> __m256 {
+    let mut xf = _mm256_mul_ps(x, freq);
+    let mut yf = _mm256_mul_ps(y, freq);
+    let mut zf = _mm256_mul_ps(z, freq);
+    let mut result = _mm256_abs_ps(simplex_3d(xf, yf, zf));
+    let mut amp = _mm256_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm256_mul_ps(xf, lac);
+        yf = _mm256_mul_ps(yf, lac);
+        zf = _mm256_mul_ps(zf, lac);
+        amp = _mm256_mul_ps(amp, gain);
+        result = _mm256_add_ps(
+            result,
+            _mm256_abs_ps(_mm256_mul_ps(simplex_3d(xf, yf, zf), amp)),
         );
+    }
+
+    result
+}
+
+pub fn get_2d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    fractal_settings: FractalSettings,
+) -> Vec<f32> {
+    unsafe {
+        let mut result = Vec::with_capacity(width * height);
+        let mut y = _mm256_set1_ps(start_y);
+        for _ in 0..height {
+            let mut x = _mm256_set_ps(
+                start_x,
+                start_x + 1.0,
+                start_x + 2.0,
+                start_x + 3.0,
+                start_x + 4.0,
+                start_x + 5.0,
+                start_x + 6.0,
+                start_x + 7.0,
+            );
+            for _ in 0..width {
+                result.push(match fractal_settings.noise_type {
+                    NoiseType::FBM => fbm_2d(
+                        x,
+                        y,
+                        _mm256_set1_ps(fractal_settings.freq),
+                        _mm256_set1_ps(fractal_settings.lacunarity),
+                        _mm256_set1_ps(fractal_settings.gain),
+                        fractal_settings.octaves,
+                    ),
+                    NoiseType::Turbulence => turbulence_2d(
+                        x,
+                        y,
+                        _mm256_set1_ps(fractal_settings.freq),
+                        _mm256_set1_ps(fractal_settings.lacunarity),
+                        _mm256_set1_ps(fractal_settings.gain),
+                        fractal_settings.octaves,
+                    ),
+                    NoiseType::Normal => simplex_2d(
+                        _mm256_mul_ps(x, _mm256_set1_ps(fractal_settings.freq)),
+                        _mm256_mul_ps(y, _mm256_set1_ps(fractal_settings.freq)),
+                    ),
+                });
+                x = _mm256_add_ps(x, _mm256_set1_ps(4.0));
+            }
+            y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
+        }
+        ::std::mem::transmute::<Vec<__m256>, Vec<f32>>(result)
+    }
+}
+
+pub fn get_3d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    fractal_settings: FractalSettings,
+) -> Vec<f32> {
+    unsafe {
+        let mut result = Vec::with_capacity(width * height * depth);
+        let mut z = _mm256_set1_ps(start_z);
+        for _ in 0..depth {
+            let mut y = _mm256_set1_ps(start_y);
+            for _ in 0..height {
+                let mut x = _mm256_set_ps(
+                    start_x,
+                    start_x + 1.0,
+                    start_x + 2.0,
+                    start_x + 3.0,
+                    start_x + 4.0,
+                    start_x + 5.0,
+                    start_x + 6.0,
+                    start_x + 7.0,
+                );
+                for _ in 0..width {
+                    result.push(match fractal_settings.noise_type {
+                        NoiseType::FBM => fbm_3d(
+                            x,
+                            y,
+                            z,
+                            _mm256_set1_ps(fractal_settings.freq),
+                            _mm256_set1_ps(fractal_settings.lacunarity),
+                            _mm256_set1_ps(fractal_settings.gain),
+                            fractal_settings.octaves,
+                        ),
+                        NoiseType::Turbulence => turbulence_3d(
+                            x,
+                            y,
+                            z,
+                            _mm256_set1_ps(fractal_settings.freq),
+                            _mm256_set1_ps(fractal_settings.lacunarity),
+                            _mm256_set1_ps(fractal_settings.gain),
+                            fractal_settings.octaves,
+                        ),
+                        NoiseType::Normal => simplex_3d(
+                            _mm256_mul_ps(x, _mm256_set1_ps(fractal_settings.freq)),
+                            _mm256_mul_ps(y, _mm256_set1_ps(fractal_settings.freq)),
+                            _mm256_mul_ps(z, _mm256_set1_ps(fractal_settings.freq)),
+                        ),
+                    });
+                    x = _mm256_add_ps(x, _mm256_set1_ps(4.0));
+                }
+                y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
+            }
+            z = _mm256_add_ps(z, _mm256_set1_ps(1.0));
+        }
+        ::std::mem::transmute::<Vec<__m256>, Vec<f32>>(result)
     }
 }

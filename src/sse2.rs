@@ -657,6 +657,7 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
 
     _mm_add_ps(n0, _mm_add_ps(n1, _mm_add_ps(n2, n3)))
 }
+
 pub unsafe fn fbm_3d(
     x: __m128,
     y: __m128,
@@ -709,7 +710,7 @@ pub unsafe fn turbulence_3d(
     result
 }
 
-fn get_2d_noise(
+pub fn get_2d_noise(
     start_x: f32,
     width: usize,
     start_y: f32,
@@ -752,7 +753,7 @@ fn get_2d_noise(
     }
 }
 
-fn get_3d_noise(
+pub fn get_3d_noise(
     start_x: f32,
     width: usize,
     start_y: f32,
