@@ -1,17 +1,3 @@
-pub enum NoiseType {
-    FBM,
-    Turbulence,
-    Normal,
-}
-
-pub struct FractalSettings {
-    pub freq: f32,
-    pub lacunarity: f32,
-    pub gain: f32,
-    pub octaves: i32,
-    pub noise_type: NoiseType,
-}
-
 pub const GRAD_X: [f32; 12] = [
     1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0,
 ];

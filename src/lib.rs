@@ -3,14 +3,27 @@ mod shared;
 pub mod sse2;
 pub mod sse41;
 
-use shared::*;
+pub enum NoiseType {
+    FBM,
+    Turbulence,
+    Normal,
+}
+
+pub struct FractalSettings {
+    pub freq: f32,
+    pub lacunarity: f32,
+    pub gain: f32,
+    pub octaves: i32,
+    pub noise_type: NoiseType,
+}
+
 
 pub fn get_2d_noise(
     start_x: f32,
     width: usize,
     start_y: f32,
     height: usize,
-    fractal_settings: FractalSettings,
+    fractal_settings:FractalSettings,
 ) -> Vec<f32> {
     if is_x86_feature_detected!("avx2") {
         return avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings);
