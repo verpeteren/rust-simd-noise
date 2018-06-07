@@ -754,17 +754,13 @@ pub fn get_2d_noise(
         let mut y = _mm_set1_ps(start_y);
         let mut i = 0;
         for _ in 0..height {
-            let mut x = _mm_set_ps(start_x, start_x + 1.0, start_x + 2.0, start_x + 3.0);
+            let mut x = _mm_set_ps(start_x + 3.0, start_x + 2.0, start_x + 1.0, start_x);
             for _ in 0..width / 4 {
-                let f = get_2d_noise_helper(x, y, fractal_settings);
-                result[i] = f.array[0];
-                i = i + 1;
-                result[i] = f.array[1];
-                i = i + 1;
-                result[i] = f.array[2];
-                i = i + 1;
-                result[i] = f.array[3];
-                i = i + 1;
+                _mm_storeu_ps(
+                    &mut result[i],
+                    get_2d_noise_helper(x, y, fractal_settings).simd,
+                );
+                i = i + 4;
                 x = _mm_add_ps(x, _mm_set1_ps(4.0));
             }
             if width % 4 != 0 {
