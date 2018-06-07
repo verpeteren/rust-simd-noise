@@ -710,6 +710,37 @@ pub unsafe fn turbulence_3d(
     result
 }
 
+unsafe fn get_2d_noise_helper(
+    x: __m128,
+    y: __m128,
+    fractal_settings: FractalSettings,
+) -> M128Array {
+    M128Array {
+        simd: match fractal_settings.noise_type {
+            NoiseType::FBM => fbm_2d(
+                x,
+                y,
+                _mm_set1_ps(fractal_settings.freq),
+                _mm_set1_ps(fractal_settings.lacunarity),
+                _mm_set1_ps(fractal_settings.gain),
+                fractal_settings.octaves,
+            ),
+            NoiseType::Turbulence => turbulence_2d(
+                x,
+                y,
+                _mm_set1_ps(fractal_settings.freq),
+                _mm_set1_ps(fractal_settings.lacunarity),
+                _mm_set1_ps(fractal_settings.gain),
+                fractal_settings.octaves,
+            ),
+            NoiseType::Normal => simplex_2d(
+                _mm_mul_ps(x, _mm_set1_ps(fractal_settings.freq)),
+                _mm_mul_ps(y, _mm_set1_ps(fractal_settings.freq)),
+            ),
+        },
+    }
+}
+
 pub fn get_2d_noise(
     start_x: f32,
     width: usize,
@@ -719,37 +750,33 @@ pub fn get_2d_noise(
 ) -> Vec<f32> {
     unsafe {
         let mut result = Vec::with_capacity(width * height);
+        result.set_len(width * height);
         let mut y = _mm_set1_ps(start_y);
+        let mut i = 0;
         for _ in 0..height {
             let mut x = _mm_set_ps(start_x, start_x + 1.0, start_x + 2.0, start_x + 3.0);
-            for _ in 0..width {
-                result.push(match fractal_settings.noise_type {
-                    NoiseType::FBM => fbm_2d(
-                        x,
-                        y,
-                        _mm_set1_ps(fractal_settings.freq),
-                        _mm_set1_ps(fractal_settings.lacunarity),
-                        _mm_set1_ps(fractal_settings.gain),
-                        fractal_settings.octaves,
-                    ),
-                    NoiseType::Turbulence => turbulence_2d(
-                        x,
-                        y,
-                        _mm_set1_ps(fractal_settings.freq),
-                        _mm_set1_ps(fractal_settings.lacunarity),
-                        _mm_set1_ps(fractal_settings.gain),
-                        fractal_settings.octaves,
-                    ),
-                    NoiseType::Normal => simplex_2d(
-                        _mm_mul_ps(x, _mm_set1_ps(fractal_settings.freq)),
-                        _mm_mul_ps(y, _mm_set1_ps(fractal_settings.freq)),
-                    ),
-                });
+            for _ in 0..width / 4 {
+                let f = get_2d_noise_helper(x, y, fractal_settings);
+                result[i] = f.array[0];
+                i = i + 1;
+                result[i] = f.array[1];
+                i = i + 1;
+                result[i] = f.array[2];
+                i = i + 1;
+                result[i] = f.array[3];
+                i = i + 1;
                 x = _mm_add_ps(x, _mm_set1_ps(4.0));
+            }
+            if width % 4 != 0 {
+                let f = get_2d_noise_helper(x, y, fractal_settings);
+                for j in 0..width % 4 {
+                    result[i] = f.array[j];
+                    i = i + 1;
+                }
             }
             y = _mm_add_ps(y, _mm_set1_ps(1.0));
         }
-        ::std::mem::transmute::<Vec<__m128>, Vec<f32>>(result)
+        result
     }
 }
 
