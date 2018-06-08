@@ -1,5 +1,6 @@
 pub mod avx2;
 mod shared;
+mod shared_sse;
 pub mod sse2;
 pub mod sse41;
 

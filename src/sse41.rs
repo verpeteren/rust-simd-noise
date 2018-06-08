@@ -2,49 +2,8 @@
 
 use super::*;
 use shared::*;
+use shared_sse::*;
 use std::arch::x86_64::*;
-
-union M128Array {
-    simd: __m128,
-    array: [f32; 4],
-}
-
-union M128iArray {
-    simd: __m128i,
-    array: [i32; 4],
-}
-
-const F2: __m128 = unsafe {
-    M128Array {
-        array: [0.36602540378; 4],
-    }.simd
-};
-const F3: __m128 = unsafe {
-    M128Array {
-        array: [1.0 / 3.0; 4],
-    }.simd
-};
-const G2: __m128 = unsafe {
-    M128Array {
-        array: [0.2113248654; 4],
-    }.simd
-};
-const G22: __m128 = unsafe {
-    M128Array {
-        array: [2.0 * 0.2113248654; 4],
-    }.simd
-};
-const G3: __m128 = unsafe {
-    M128Array {
-        array: [1.0 / 6.0; 4],
-    }.simd
-};
-
-const POINT_FIVE: __m128 = unsafe { M128Array { array: [0.5; 4] }.simd };
-
-unsafe fn dot_simd(x1: __m128, x2: __m128, y1: __m128, y2: __m128) -> __m128 {
-    _mm_add_ps(_mm_mul_ps(x1, x2), _mm_mul_ps(y1, y2))
-}
 
 unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let s = _mm_mul_ps(F2, _mm_add_ps(x, y));
@@ -188,11 +147,6 @@ unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     n2 = _mm_blendv_ps(n2, _mm_setzero_ps(), cond);
 
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
-}
-
-unsafe fn _mm_abs_ps(a: __m128) -> __m128 {
-    let b = _mm_set1_epi32(0x7fffffff);
-    _mm_and_ps(a, _mm_castsi128_ps(b))
 }
 
 pub unsafe fn fbm_2d(
