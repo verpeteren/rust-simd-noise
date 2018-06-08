@@ -2,6 +2,7 @@
 use super::*;
 use shared::*;
 use std::arch::x86_64::*;
+use std::f32;
 
 union M128Array {
     simd: __m128,
@@ -747,8 +748,14 @@ pub fn get_2d_noise(
     start_y: f32,
     height: usize,
     fractal_settings: FractalSettings,
-) -> Vec<f32> {
+) -> (Vec<f32>, f32, f32) {
     unsafe {
+        let mut min_s = M128Array {
+            simd: _mm_set1_ps(f32::MAX),
+        };
+        let mut max_s = M128Array {
+            simd: _mm_set1_ps(f32::MIN),
+        };
         let mut result = Vec::with_capacity(width * height);
         result.set_len(width * height);
         let mut y = _mm_set1_ps(start_y);
@@ -756,10 +763,10 @@ pub fn get_2d_noise(
         for _ in 0..height {
             let mut x = _mm_set_ps(start_x + 3.0, start_x + 2.0, start_x + 1.0, start_x);
             for _ in 0..width / 4 {
-                _mm_storeu_ps(
-                    &mut result[i],
-                    get_2d_noise_helper(x, y, fractal_settings).simd,
-                );
+                let f = get_2d_noise_helper(x, y, fractal_settings).simd;
+                max_s.simd = _mm_max_ps(max_s.simd, f);
+                min_s.simd = _mm_min_ps(min_s.simd, f);
+                _mm_storeu_ps(&mut result[i], f);
                 i = i + 4;
                 x = _mm_add_ps(x, _mm_set1_ps(4.0));
             }
@@ -772,10 +779,55 @@ pub fn get_2d_noise(
             }
             y = _mm_add_ps(y, _mm_set1_ps(1.0));
         }
-        result
+        let mut min = f32::MAX;
+        let mut max = f32::MIN;
+        for i in 0..4 {
+            if min_s.array[i] < min {
+                min = min_s.array[i];
+            }
+            if max_s.array[i] > max {
+                max = max_s.array[i];
+            }
+        }
+        (result, min, max)
     }
 }
 
+pub fn get_2d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    fractal_settings: FractalSettings,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    unsafe {
+        let (mut noise, min, max) = get_2d_noise(start_x, width, start_y, height, fractal_settings);
+        let scale_range = scale_max - scale_min;
+        let range = max - min;
+        let multiplier = scale_range / range;
+        let offset = scale_min - min * multiplier;
+
+        let mut i = 0;
+        while i <= noise.len() - 4 {
+            _mm_storeu_ps(
+                &mut noise[i],
+                _mm_add_ps(
+                    _mm_mul_ps(_mm_set1_ps(multiplier), _mm_loadu_ps(&mut noise[i])),
+                    _mm_set1_ps(offset),
+                ),
+            );
+            i = i + 4;
+        }
+        i = noise.len() - (noise.len() % 4);
+        while i < noise.len() {
+            noise[i] = noise[i] * multiplier + offset;
+            i = i + 1;
+        }
+        noise
+    }
+}
 pub fn get_3d_noise(
     start_x: f32,
     width: usize,
