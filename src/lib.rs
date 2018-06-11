@@ -27,17 +27,9 @@ pub fn get_2d_noise(
     fractal_settings: FractalSettings,
 ) -> (Vec<f32>, f32, f32) {
     if is_x86_feature_detected!("avx2") {
-        return (
-            avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings),
-            0.0,
-            0.0,
-        );
+        return avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings);
     } else if is_x86_feature_detected!("sse4.1") {
-        return (
-            sse41::get_2d_noise(start_x, width, start_y, height, fractal_settings),
-            0.0,
-            0.0,
-        );
+        return sse41::get_2d_noise(start_x, width, start_y, height, fractal_settings);
     } else if is_x86_feature_detected!("sse2") {
         return sse2::get_2d_noise(start_x, width, start_y, height, fractal_settings);
     } else {
@@ -56,7 +48,7 @@ pub fn get_2d_scaled_noise(
     scaled_max: f32,
 ) -> Vec<f32> {
     if is_x86_feature_detected!("avx2") {
-        return sse2::get_2d_scaled_noise(
+        return avx2::get_2d_scaled_noise(
             start_x,
             width,
             start_y,
@@ -66,7 +58,7 @@ pub fn get_2d_scaled_noise(
             scaled_max,
         );
     } else if is_x86_feature_detected!("sse4.1") {
-        return sse2::get_2d_scaled_noise(
+        return sse41::get_2d_scaled_noise(
             start_x,
             width,
             start_y,

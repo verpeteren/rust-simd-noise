@@ -3,6 +3,7 @@
 use super::*;
 use shared::*;
 use std::arch::x86_64::*;
+use std::f32;
 
 union M256Array {
     simd: __m256,
@@ -41,7 +42,7 @@ const G3: __m256 = unsafe {
 };
 const POINT_FIVE: __m256 = unsafe { M256Array { array: [0.5; 8] }.simd };
 
-unsafe fn dot_simd(x1: __m256, x2: __m256, y1: __m256, y2: __m256) -> __m256 {
+unsafe fn dot_simd(x1: __m256, y1: __m256, x2: __m256, y2: __m256) -> __m256 {
     _mm256_add_ps(_mm256_mul_ps(x1, x2), _mm256_mul_ps(y1, y2))
 }
 
@@ -199,6 +200,135 @@ pub unsafe fn turbulence_2d(
     }
 
     result
+}
+pub fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mut Vec<f32>) {
+    unsafe {
+        let scale_range = scale_max - scale_min;
+        let range = max - min;
+        let multiplier = scale_range / range;
+        let offset = scale_min - min * multiplier;
+
+        let mut i = 0;
+        while i <= data.len() - 8 {
+            _mm256_storeu_ps(
+                &mut data[i],
+                _mm256_add_ps(
+                    _mm256_mul_ps(_mm256_set1_ps(multiplier), _mm256_loadu_ps(&mut data[i])),
+                    _mm256_set1_ps(offset),
+                ),
+            );
+            i = i + 8;
+        }
+        i = data.len() - (data.len() % 8);
+        while i < data.len() {
+            data[i] = data[i] * multiplier + offset;
+            i = i + 1;
+        }
+    }
+}
+unsafe fn get_2d_noise_helper(
+    x: __m256,
+    y: __m256,
+    fractal_settings: FractalSettings,
+) -> M256Array {
+    M256Array {
+        simd: match fractal_settings.noise_type {
+            NoiseType::FBM => fbm_2d(
+                x,
+                y,
+                _mm256_set1_ps(fractal_settings.freq),
+                _mm256_set1_ps(fractal_settings.lacunarity),
+                _mm256_set1_ps(fractal_settings.gain),
+                fractal_settings.octaves,
+            ),
+            NoiseType::Turbulence => turbulence_2d(
+                x,
+                y,
+                _mm256_set1_ps(fractal_settings.freq),
+                _mm256_set1_ps(fractal_settings.lacunarity),
+                _mm256_set1_ps(fractal_settings.gain),
+                fractal_settings.octaves,
+            ),
+            NoiseType::Normal => simplex_2d(
+                _mm256_mul_ps(x, _mm256_set1_ps(fractal_settings.freq)),
+                _mm256_mul_ps(y, _mm256_set1_ps(fractal_settings.freq)),
+            ),
+        },
+    }
+}
+
+pub fn get_2d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    fractal_settings: FractalSettings,
+) -> (Vec<f32>, f32, f32) {
+    unsafe {
+        let mut min_s = M256Array {
+            simd: _mm256_set1_ps(f32::MAX),
+        };
+        let mut max_s = M256Array {
+            simd: _mm256_set1_ps(f32::MIN),
+        };
+        let mut result = Vec::with_capacity(width * height);
+        result.set_len(width * height);
+        let mut y = _mm256_set1_ps(start_y);
+        let mut i = 0;
+        for _ in 0..height {
+            let mut x = _mm256_set_ps(
+                start_x + 7.0,
+                start_x + 6.0,
+                start_x + 5.0,
+                start_x + 4.0,
+                start_x + 3.0,
+                start_x + 2.0,
+                start_x + 1.0,
+                start_x,
+            );
+            for _ in 0..width / 8 {
+                let f = get_2d_noise_helper(x, y, fractal_settings).simd;
+                max_s.simd = _mm256_max_ps(max_s.simd, f);
+                min_s.simd = _mm256_min_ps(min_s.simd, f);
+                _mm256_storeu_ps(&mut result[i], f);
+                i = i + 8;
+                x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
+            }
+            if width % 8 != 0 {
+                let f = get_2d_noise_helper(x, y, fractal_settings);
+                for j in 0..width % 8 {
+                    result[i] = f.array[j];
+                    i = i + 1;
+                }
+            }
+            y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
+        }
+        let mut min = f32::MAX;
+        let mut max = f32::MIN;
+        for i in 0..8 {
+            if min_s.array[i] < min {
+                min = min_s.array[i];
+            }
+            if max_s.array[i] > max {
+                max = max_s.array[i];
+            }
+        }
+        (result, min, max)
+    }
+}
+
+pub fn get_2d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    fractal_settings: FractalSettings,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    let (mut noise, min, max) = get_2d_noise(start_x, width, start_y, height, fractal_settings);
+    scale_array(scale_min, scale_max, min, max, &mut noise);
+    noise
 }
 
 unsafe fn dot_simd_3d(
@@ -745,59 +875,6 @@ pub unsafe fn turbulence_3d(
 
     result
 }
-
-pub fn get_2d_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    fractal_settings: FractalSettings,
-) -> Vec<f32> {
-    unsafe {
-        let mut result = Vec::with_capacity(width * height);
-        let mut y = _mm256_set1_ps(start_y);
-        for _ in 0..height {
-            let mut x = _mm256_set_ps(
-                start_x,
-                start_x + 1.0,
-                start_x + 2.0,
-                start_x + 3.0,
-                start_x + 4.0,
-                start_x + 5.0,
-                start_x + 6.0,
-                start_x + 7.0,
-            );
-            for _ in 0..width {
-                result.push(match fractal_settings.noise_type {
-                    NoiseType::FBM => fbm_2d(
-                        x,
-                        y,
-                        _mm256_set1_ps(fractal_settings.freq),
-                        _mm256_set1_ps(fractal_settings.lacunarity),
-                        _mm256_set1_ps(fractal_settings.gain),
-                        fractal_settings.octaves,
-                    ),
-                    NoiseType::Turbulence => turbulence_2d(
-                        x,
-                        y,
-                        _mm256_set1_ps(fractal_settings.freq),
-                        _mm256_set1_ps(fractal_settings.lacunarity),
-                        _mm256_set1_ps(fractal_settings.gain),
-                        fractal_settings.octaves,
-                    ),
-                    NoiseType::Normal => simplex_2d(
-                        _mm256_mul_ps(x, _mm256_set1_ps(fractal_settings.freq)),
-                        _mm256_mul_ps(y, _mm256_set1_ps(fractal_settings.freq)),
-                    ),
-                });
-                x = _mm256_add_ps(x, _mm256_set1_ps(4.0));
-            }
-            y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
-        }
-        ::std::mem::transmute::<Vec<__m256>, Vec<f32>>(result)
-    }
-}
-
 pub fn get_3d_noise(
     start_x: f32,
     width: usize,

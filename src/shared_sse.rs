@@ -37,7 +37,7 @@ pub const G3: __m128 = unsafe {
 };
 pub const POINT_FIVE: __m128 = unsafe { M128Array { array: [0.5; 4] }.simd };
 
-pub unsafe fn dot_simd(x1: __m128, x2: __m128, y1: __m128, y2: __m128) -> __m128 {
+pub unsafe fn dot_simd(x1: __m128, y1: __m128, x2: __m128, y2: __m128) -> __m128 {
     _mm_add_ps(_mm_mul_ps(x1, x2), _mm_mul_ps(y1, y2))
 }
 
