@@ -9,6 +9,7 @@ SIMD noise library for Rust. Currently in alpha. PRs welcome!
 
 ## Todo
 
+* proper doc comments
 * scalar support
 * AVX512 support
 * ARM NEON support
