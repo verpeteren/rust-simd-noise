@@ -42,10 +42,10 @@ let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, fractal_sett
 ```
 
 ## Call noise functions directly
-
-```rust
 Sometimes you need something other than a block, like the points on the surface of a sphere.
 Sometimes you may want to use SSE41 even with AVX2 is available
+
+```rust
 
 // get a block of 100x100 sse41 noise, skip runtime detection
 let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,fractal_settings);
