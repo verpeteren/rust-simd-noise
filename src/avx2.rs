@@ -46,8 +46,6 @@ unsafe fn dot_simd(x1: __m256, y1: __m256, x2: __m256, y2: __m256) -> __m256 {
     _mm256_add_ps(_mm256_mul_ps(x1, x2), _mm256_mul_ps(y1, y2))
 }
 
-#[cfg(any(target_arch = "x86_64"))]
-#[target_feature(enable = "avx2")]
 unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let s = _mm256_mul_ps(F2, _mm256_add_ps(x, y));
     let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
@@ -170,7 +168,7 @@ pub unsafe fn fbm_2d(
         xf = _mm256_mul_ps(xf, lac);
         yf = _mm256_mul_ps(yf, lac);
         amp = _mm256_mul_ps(amp, gain);
-        result = _mm256_add_ps(result, _mm256_mul_ps(simplex_2d(xf, yf), amp));
+        result = _mm256_fmadd_ps(simplex_2d(xf,yf),amp,result);
     }
 
     result
@@ -212,10 +210,7 @@ pub fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mu
         while i <= data.len() - 8 {
             _mm256_storeu_ps(
                 &mut data[i],
-                _mm256_add_ps(
-                    _mm256_mul_ps(_mm256_set1_ps(multiplier), _mm256_loadu_ps(&mut data[i])),
-                    _mm256_set1_ps(offset),
-                ),
+                _mm256_fmadd_ps(_mm256_set1_ps(multiplier),_mm256_loadu_ps(&mut data[i]),_mm256_set1_ps(offset))
             );
             i = i + 8;
         }
