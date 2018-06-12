@@ -38,7 +38,7 @@ let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, fractal_s
 let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200, fractal_settings);
 
 // Get a block of noise scaled between -1 and 1
-let (an_f32_vec,min,max) = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, fractal_settings,-1.0,1.0);
+let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, fractal_settings,-1.0,1.0);
 
 ## Call noise functions directly
 
