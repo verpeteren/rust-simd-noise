@@ -711,32 +711,41 @@ pub fn get_2d_noise(
         let mut max_s = M128Array {
             simd: _mm_set1_ps(f32::MIN),
         };
+        let mut min = f32::MAX;
+        let mut max = f32::MIN;
+
         let mut result = Vec::with_capacity(width * height);
         result.set_len(width * height);
         let mut y = _mm_set1_ps(start_y);
         let mut i = 0;
+        let remainder = width % 4;
         for _ in 0..height {
             let mut x = _mm_set_ps(start_x + 3.0, start_x + 2.0, start_x + 1.0, start_x);
-            let mut xi = 0;
-            while xi <= width - 4 {
+            for _ in 0..width / 4 {
                 let f = get_2d_noise_helper(x, y, fractal_settings).simd;
                 max_s.simd = _mm_max_ps(max_s.simd, f);
                 min_s.simd = _mm_min_ps(min_s.simd, f);
                 _mm_storeu_ps(&mut result[i], f);
                 i = i + 4;
-                xi = xi + 4;
                 x = _mm_add_ps(x, _mm_set1_ps(4.0));
             }
-            let f = get_2d_noise_helper(x, y, fractal_settings);
-            while i < width - (width % 4) - 1 {
-                result[i] = 0.0; //  f.array[xi];
-                xi = xi + 1;
-                i = i + 1;
+            if remainder != 0 {
+                let f = get_2d_noise_helper(x, y, fractal_settings);
+                for j in 0..remainder {
+                    let n = f.array[j];
+                    result[i] = n;
+                    // Note: This is unecessary for large images
+                    if n < min {
+                        min = n;
+                    }
+                    if n > max {
+                        max = n;
+                    }
+                    i = i + 1;
+                }
             }
             y = _mm_add_ps(y, _mm_set1_ps(1.0));
         }
-        let mut min = f32::MAX;
-        let mut max = f32::MIN;
         for i in 0..4 {
             if min_s.array[i] < min {
                 min = min_s.array[i];
