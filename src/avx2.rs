@@ -168,7 +168,7 @@ pub unsafe fn fbm_2d(
         xf = _mm256_mul_ps(xf, lac);
         yf = _mm256_mul_ps(yf, lac);
         amp = _mm256_mul_ps(amp, gain);
-        result = _mm256_fmadd_ps(simplex_2d(xf,yf),amp,result);
+        result = _mm256_fmadd_ps(simplex_2d(xf, yf), amp, result);
     }
 
     result
@@ -210,7 +210,11 @@ pub fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mu
         while i <= data.len() - 8 {
             _mm256_storeu_ps(
                 &mut data[i],
-                _mm256_fmadd_ps(_mm256_set1_ps(multiplier),_mm256_loadu_ps(&mut data[i]),_mm256_set1_ps(offset))
+                _mm256_fmadd_ps(
+                    _mm256_set1_ps(multiplier),
+                    _mm256_loadu_ps(&mut data[i]),
+                    _mm256_set1_ps(offset),
+                ),
             );
             i = i + 8;
         }
@@ -266,10 +270,14 @@ pub fn get_2d_noise(
         let mut max_s = M256Array {
             simd: _mm256_set1_ps(f32::MIN),
         };
+        let mut min = f32::MAX;
+        let mut max = f32::MIN;
+
         let mut result = Vec::with_capacity(width * height);
         result.set_len(width * height);
         let mut y = _mm256_set1_ps(start_y);
         let mut i = 0;
+        let remainder = width % 8;
         for _ in 0..height {
             let mut x = _mm256_set_ps(
                 start_x + 7.0,
@@ -289,17 +297,23 @@ pub fn get_2d_noise(
                 i = i + 8;
                 x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
             }
-            if width % 8 != 0 {
+            if remainder != 0 {
                 let f = get_2d_noise_helper(x, y, fractal_settings);
-                for j in 0..width % 8 {
-                    result[i] = f.array[j];
+                for j in 0..remainder {
+                    let n = f.array[j];
+                    result[i] = n;
+                    // Note: This is unecessary for large images
+                    if n < min {
+                        min = n;
+                    }
+                    if n > max {
+                        max = n;
+                    }
                     i = i + 1;
                 }
             }
             y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
         }
-        let mut min = f32::MAX;
-        let mut max = f32::MIN;
         for i in 0..8 {
             if min_s.array[i] < min {
                 min = min_s.array[i];
@@ -870,6 +884,41 @@ pub unsafe fn turbulence_3d(
 
     result
 }
+unsafe fn get_3d_noise_helper(
+    x: __m256,
+    y: __m256,
+    z: __m256,
+    fractal_settings: FractalSettings,
+) -> M256Array {
+    M256Array {
+        simd: match fractal_settings.noise_type {
+            NoiseType::FBM => fbm_3d(
+                x,
+                y,
+                z,
+                _mm256_set1_ps(fractal_settings.freq),
+                _mm256_set1_ps(fractal_settings.lacunarity),
+                _mm256_set1_ps(fractal_settings.gain),
+                fractal_settings.octaves,
+            ),
+            NoiseType::Turbulence => turbulence_3d(
+                x,
+                y,
+                z,
+                _mm256_set1_ps(fractal_settings.freq),
+                _mm256_set1_ps(fractal_settings.lacunarity),
+                _mm256_set1_ps(fractal_settings.gain),
+                fractal_settings.octaves,
+            ),
+            NoiseType::Normal => simplex_3d(
+                _mm256_mul_ps(x, _mm256_set1_ps(fractal_settings.freq)),
+                _mm256_mul_ps(y, _mm256_set1_ps(fractal_settings.freq)),
+                _mm256_mul_ps(z, _mm256_set1_ps(fractal_settings.freq)),
+            ),
+        },
+    }
+}
+
 pub fn get_3d_noise(
     start_x: f32,
     width: usize,
@@ -878,55 +927,103 @@ pub fn get_3d_noise(
     start_z: f32,
     depth: usize,
     fractal_settings: FractalSettings,
-) -> Vec<f32> {
+) -> (Vec<f32>, f32, f32) {
     unsafe {
+        let mut min_s = M256Array {
+            simd: _mm256_set1_ps(f32::MAX),
+        };
+        let mut max_s = M256Array {
+            simd: _mm256_set1_ps(f32::MIN),
+        };
+        let mut min = f32::MAX;
+        let mut max = f32::MIN;
+
         let mut result = Vec::with_capacity(width * height * depth);
+        result.set_len(width * height * depth);
+        let mut i = 0;
+        let remainder = width % 8;
         let mut z = _mm256_set1_ps(start_z);
         for _ in 0..depth {
-            let mut y = _mm256_set1_ps(start_y);
+            let mut y = _mm256_set_ps(
+                start_y + 7.0,
+                start_y + 6.0,
+                start_y + 5.0,
+                start_y + 4.0,
+                start_y + 3.0,
+                start_y + 2.0,
+                start_y + 1.0,
+                start_y,
+            );
             for _ in 0..height {
                 let mut x = _mm256_set_ps(
-                    start_x,
-                    start_x + 1.0,
-                    start_x + 2.0,
-                    start_x + 3.0,
-                    start_x + 4.0,
-                    start_x + 5.0,
-                    start_x + 6.0,
                     start_x + 7.0,
+                    start_x + 6.0,
+                    start_x + 5.0,
+                    start_x + 4.0,
+                    start_x + 3.0,
+                    start_x + 2.0,
+                    start_x + 1.0,
+                    start_x,
                 );
-                for _ in 0..width {
-                    result.push(match fractal_settings.noise_type {
-                        NoiseType::FBM => fbm_3d(
-                            x,
-                            y,
-                            z,
-                            _mm256_set1_ps(fractal_settings.freq),
-                            _mm256_set1_ps(fractal_settings.lacunarity),
-                            _mm256_set1_ps(fractal_settings.gain),
-                            fractal_settings.octaves,
-                        ),
-                        NoiseType::Turbulence => turbulence_3d(
-                            x,
-                            y,
-                            z,
-                            _mm256_set1_ps(fractal_settings.freq),
-                            _mm256_set1_ps(fractal_settings.lacunarity),
-                            _mm256_set1_ps(fractal_settings.gain),
-                            fractal_settings.octaves,
-                        ),
-                        NoiseType::Normal => simplex_3d(
-                            _mm256_mul_ps(x, _mm256_set1_ps(fractal_settings.freq)),
-                            _mm256_mul_ps(y, _mm256_set1_ps(fractal_settings.freq)),
-                            _mm256_mul_ps(z, _mm256_set1_ps(fractal_settings.freq)),
-                        ),
-                    });
-                    x = _mm256_add_ps(x, _mm256_set1_ps(4.0));
+                for _ in 0..width / 8 {
+                    let f = get_3d_noise_helper(x, y, z, fractal_settings).simd;
+                    max_s.simd = _mm256_max_ps(max_s.simd, f);
+                    min_s.simd = _mm256_min_ps(min_s.simd, f);
+                    _mm256_storeu_ps(&mut result[i], f);
+                    i = i + 8;
+                    x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
                 }
-                y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
+                if remainder != 0 {
+                    let f = get_3d_noise_helper(x, y, z, fractal_settings);
+                    for j in 0..remainder {
+                        let n = f.array[j];
+                        result[i] = n;
+                        // Note: This is unecessary for large images
+                        if n < min {
+                            min = n;
+                        }
+                        if n > max {
+                            max = n;
+                        }
+                        i = i + 1;
+                    }
+                }
+                y = _mm256_add_ps(y, _mm256_set1_ps(8.0));
             }
             z = _mm256_add_ps(z, _mm256_set1_ps(1.0));
         }
-        ::std::mem::transmute::<Vec<__m256>, Vec<f32>>(result)
+        for i in 0..8 {
+            if min_s.array[i] < min {
+                min = min_s.array[i];
+            }
+            if max_s.array[i] > max {
+                max = max_s.array[i];
+            }
+        }
+        (result, min, max)
     }
+}
+
+pub fn get_3d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    fractal_settings: FractalSettings,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    let (mut noise, min, max) = get_3d_noise(
+        start_x,
+        width,
+        start_y,
+        height,
+        start_z,
+        depth,
+        fractal_settings,
+    );
+    scale_array(scale_min, scale_max, min, max, &mut noise);
+    noise
 }

@@ -823,12 +823,16 @@ pub fn get_3d_noise(
         let mut max_s = M128Array {
             simd: _mm_set1_ps(f32::MIN),
         };
+        let mut min = f32::MAX;
+        let mut max = f32::MIN;
+
         let mut result = Vec::with_capacity(width * height * depth);
         result.set_len(width * height * depth);
-        let mut i = 0;
         let mut z = _mm_set1_ps(start_z);
+        let mut i = 0;
+        let remainder = width % 4;
         for _ in 0..depth {
-            let mut y = _mm_set_ps(start_y + 3.0, start_y + 2.0, start_y + 1.0, start_z);
+            let mut y = _mm_set1_ps(start_y);
             for _ in 0..height {
                 let mut x = _mm_set_ps(start_x + 3.0, start_x + 2.0, start_x + 1.0, start_x);
                 for _ in 0..width / 4 {
@@ -839,19 +843,25 @@ pub fn get_3d_noise(
                     i = i + 4;
                     x = _mm_add_ps(x, _mm_set1_ps(4.0));
                 }
-                if width % 4 != 0 {
+                if remainder != 0 {
                     let f = get_3d_noise_helper(x, y, z, fractal_settings);
-                    for j in 0..width % 4 {
-                        result[i] = f.array[j];
+                    for j in 0..remainder {
+                        let n = f.array[j];
+                        result[i] = n;
+                        // Note: This is unecessary for large images
+                        if n < min {
+                            min = n;
+                        }
+                        if n > max {
+                            max = n;
+                        }
                         i = i + 1;
                     }
                 }
-                y = _mm_add_ps(y, _mm_set1_ps(4.0));
+                y = _mm_add_ps(y, _mm_set1_ps(1.0));
             }
             z = _mm_add_ps(z, _mm_set1_ps(1.0));
         }
-        let mut min = f32::MAX;
-        let mut max = f32::MIN;
         for i in 0..4 {
             if min_s.array[i] < min {
                 min = min_s.array[i];
