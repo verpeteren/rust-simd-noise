@@ -157,7 +157,7 @@ pub unsafe fn fbm_2d(
     freq: __m256,
     lac: __m256,
     gain: __m256,
-    octaves: i32,
+    octaves: u8,
 ) -> __m256 {
     let mut xf = _mm256_mul_ps(x, freq);
     let mut yf = _mm256_mul_ps(y, freq);
@@ -180,7 +180,7 @@ pub unsafe fn turbulence_2d(
     freq: __m256,
     lac: __m256,
     gain: __m256,
-    octaves: i32,
+    octaves: u8,
 ) -> __m256 {
     let mut xf = _mm256_mul_ps(x, freq);
     let mut yf = _mm256_mul_ps(y, freq);
@@ -216,12 +216,12 @@ pub fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mu
                     _mm256_set1_ps(offset),
                 ),
             );
-            i = i + 8;
+            i += 8;
         }
         i = data.len() - (data.len() % 8);
         while i < data.len() {
             data[i] = data[i] * multiplier + offset;
-            i = i + 1;
+            i += 1;
         }
     }
 }
@@ -294,7 +294,7 @@ pub fn get_2d_noise(
                 max_s.simd = _mm256_max_ps(max_s.simd, f);
                 min_s.simd = _mm256_min_ps(min_s.simd, f);
                 _mm256_storeu_ps(&mut result[i], f);
-                i = i + 8;
+                i += 8;
                 x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
             }
             if remainder != 0 {
@@ -309,7 +309,7 @@ pub fn get_2d_noise(
                     if n > max {
                         max = n;
                     }
-                    i = i + 1;
+                    i += 1;
                 }
             }
             y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
@@ -837,7 +837,7 @@ pub unsafe fn fbm_3d(
     freq: __m256,
     lac: __m256,
     gain: __m256,
-    octaves: i32,
+    octaves: u8,
 ) -> __m256 {
     let mut xf = _mm256_mul_ps(x, freq);
     let mut yf = _mm256_mul_ps(y, freq);
@@ -863,7 +863,7 @@ pub unsafe fn turbulence_3d(
     freq: __m256,
     lac: __m256,
     gain: __m256,
-    octaves: i32,
+    octaves: u8,
 ) -> __m256 {
     let mut xf = _mm256_mul_ps(x, freq);
     let mut yf = _mm256_mul_ps(y, freq);
@@ -970,7 +970,7 @@ pub fn get_3d_noise(
                     max_s.simd = _mm256_max_ps(max_s.simd, f);
                     min_s.simd = _mm256_min_ps(min_s.simd, f);
                     _mm256_storeu_ps(&mut result[i], f);
-                    i = i + 8;
+                    i += 8;
                     x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
                 }
                 if remainder != 0 {
@@ -985,7 +985,7 @@ pub fn get_3d_noise(
                         if n > max {
                             max = n;
                         }
-                        i = i + 1;
+                        i += 1;
                     }
                 }
                 y = _mm256_add_ps(y, _mm256_set1_ps(8.0));

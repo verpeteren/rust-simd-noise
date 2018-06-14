@@ -171,7 +171,7 @@ pub unsafe fn fbm_2d(
     freq: __m128,
     lacunarity: __m128,
     gain: __m128,
-    octaves: i32,
+    octaves: u8,
 ) -> __m128 {
     let mut xf = _mm_mul_ps(x, freq);
     let mut yf = _mm_mul_ps(y, freq);
@@ -194,7 +194,7 @@ pub unsafe fn turbulence_2d(
     freq: __m128,
     lacunarity: __m128,
     gain: __m128,
-    octaves: i32,
+    octaves: u8,
 ) -> __m128 {
     let mut xf = _mm_mul_ps(x, freq);
     let mut yf = _mm_mul_ps(y, freq);
@@ -621,7 +621,7 @@ pub unsafe fn fbm_3d(
     freq: __m128,
     lac: __m128,
     gain: __m128,
-    octaves: i32,
+    octaves: u8,
 ) -> __m128 {
     let mut xf = _mm_mul_ps(x, freq);
     let mut yf = _mm_mul_ps(y, freq);
@@ -647,7 +647,7 @@ pub unsafe fn turbulence_3d(
     freq: __m128,
     lac: __m128,
     gain: __m128,
-    octaves: i32,
+    octaves: u8,
 ) -> __m128 {
     let mut xf = _mm_mul_ps(x, freq);
     let mut yf = _mm_mul_ps(y, freq);
@@ -726,7 +726,7 @@ pub fn get_2d_noise(
                 max_s.simd = _mm_max_ps(max_s.simd, f);
                 min_s.simd = _mm_min_ps(min_s.simd, f);
                 _mm_storeu_ps(&mut result[i], f);
-                i = i + 4;
+                i += 4;
                 x = _mm_add_ps(x, _mm_set1_ps(4.0));
             }
             if remainder != 0 {
@@ -741,7 +741,7 @@ pub fn get_2d_noise(
                     if n > max {
                         max = n;
                     }
-                    i = i + 1;
+                    i += 1;
                 }
             }
             y = _mm_add_ps(y, _mm_set1_ps(1.0));
@@ -840,7 +840,7 @@ pub fn get_3d_noise(
                     max_s.simd = _mm_max_ps(max_s.simd, f);
                     min_s.simd = _mm_min_ps(min_s.simd, f);
                     _mm_storeu_ps(&mut result[i], f);
-                    i = i + 4;
+                    i += 4;
                     x = _mm_add_ps(x, _mm_set1_ps(4.0));
                 }
                 if remainder != 0 {
@@ -855,7 +855,7 @@ pub fn get_3d_noise(
                         if n > max {
                             max = n;
                         }
-                        i = i + 1;
+                        i += 1;
                     }
                 }
                 y = _mm_add_ps(y, _mm_set1_ps(1.0));

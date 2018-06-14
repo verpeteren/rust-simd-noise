@@ -62,12 +62,12 @@ pub fn scale_array_sse(scale_min: f32, scale_max: f32, min: f32, max: f32, data:
                     _mm_set1_ps(offset),
                 ),
             );
-            i = i + 4;
+            i += 4;
         }
         i = data.len() - (data.len() % 4);
         while i < data.len() {
             data[i] = data[i] * multiplier + offset;
-            i = i + 1;
+            i += 1;
         }
     }
 }
