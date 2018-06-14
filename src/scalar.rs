@@ -3,12 +3,55 @@ use super::*;
 use shared::*;
 use std::f32;
 
+const F2: f32 = 0.36602540378;
 const F3: f32 = 1.0 / 3.0;
+const G2: f32 = 0.2113248654;
 const G3: f32 = 1.0 / 6.0;
 const POINT_FIVE: f32 = 0.5;
 
+pub fn grad2(hash: i32, x: f32, y: f32) -> f32 {
+    let h = hash & 7;
+    let (u, v) = if h < 4 { (x, y) } else { (y, x) };
+
+    let a = if (h & 1) != 0 { -u } else { u };
+    let b = if (h & 2) != 0 { -2.0 * v } else { 2.0 * v };
+    a + b
+}
+
+pub fn simplex_2d(x: f32, y: f32) -> f32 {
+    let s = (x + y) * F2;
+    let xs = x + s;
+    let ys = y + s;
+    let i = xs.floor() as i32;
+    let j = ys.floor() as i32;
+    let t = (i + j) as f32 * G2;
+    let X0 = i as f32 - t;
+    let Y0 = j as f32 - t;
+    let x0 = x - X0;
+    let y0 = y - Y0;
+
+    let (i1, j1) = if x0 > y0 { (1, 0) } else { (0, 1) };
+
+    0.0
+}
+
 fn dot(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) -> f32 {
     x1 * x2 + y1 * y2 + z1 * z2
+}
+
+pub fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
+    let h = hash & 15;
+    let u = if h < 8 { x } else { y };
+    let v = if h < 4 {
+        y
+    } else if h == 12 || h == 14 {
+        x
+    } else {
+        z
+    };
+    let a = if (h & 1) != 0 { -u } else { u };
+    let b = if (h & 2) != 0 { -v } else { v };
+    a + b
 }
 
 pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
