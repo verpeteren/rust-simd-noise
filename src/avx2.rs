@@ -78,13 +78,13 @@ unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let jj = _mm256_and_si256(j, _mm256_set1_epi32(0xff));
 
     let gi0 = _mm256_i32gather_epi32(
-        &PERM_MOD12 as *const i32,
+        &PERM as *const i32,
         _mm256_add_epi32(ii, _mm256_i32gather_epi32(&PERM as *const i32, jj, 4)),
         4,
     );
 
     let gi1 = _mm256_i32gather_epi32(
-        &PERM_MOD12 as *const i32,
+        &PERM as *const i32,
         _mm256_add_epi32(
             _mm256_add_epi32(ii, i1),
             _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(jj, j1), 4),
@@ -93,7 +93,7 @@ unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     );
 
     let gi2 = _mm256_i32gather_epi32(
-        &PERM_MOD12 as *const i32,
+        &PERM as *const i32,
         _mm256_add_epi32(
             _mm256_add_epi32(ii, _mm256_set1_epi32(1)),
             _mm256_i32gather_epi32(
@@ -472,147 +472,91 @@ unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
 
     let gi0 = M256iArray {
         array: [
-            PERM_MOD12
-                [(i.array[0] + PERM[(j.array[0] + PERM[k.array[0] as usize]) as usize]) as usize],
-            PERM_MOD12
-                [(i.array[1] + PERM[(j.array[1] + PERM[k.array[1] as usize]) as usize]) as usize],
-            PERM_MOD12
-                [(i.array[2] + PERM[(j.array[2] + PERM[k.array[2] as usize]) as usize]) as usize],
-            PERM_MOD12
-                [(i.array[3] + PERM[(j.array[3] + PERM[k.array[3] as usize]) as usize]) as usize],
-            PERM_MOD12
-                [(i.array[4] + PERM[(j.array[4] + PERM[k.array[4] as usize]) as usize]) as usize],
-            PERM_MOD12
-                [(i.array[5] + PERM[(j.array[5] + PERM[k.array[5] as usize]) as usize]) as usize],
-            PERM_MOD12
-                [(i.array[6] + PERM[(j.array[6] + PERM[k.array[6] as usize]) as usize]) as usize],
-            PERM_MOD12
-                [(i.array[7] + PERM[(j.array[7] + PERM[k.array[7] as usize]) as usize]) as usize],
+            PERM[(i.array[0] + PERM[(j.array[0] + PERM[k.array[0] as usize]) as usize]) as usize],
+            PERM[(i.array[1] + PERM[(j.array[1] + PERM[k.array[1] as usize]) as usize]) as usize],
+            PERM[(i.array[2] + PERM[(j.array[2] + PERM[k.array[2] as usize]) as usize]) as usize],
+            PERM[(i.array[3] + PERM[(j.array[3] + PERM[k.array[3] as usize]) as usize]) as usize],
+            PERM[(i.array[4] + PERM[(j.array[4] + PERM[k.array[4] as usize]) as usize]) as usize],
+            PERM[(i.array[5] + PERM[(j.array[5] + PERM[k.array[5] as usize]) as usize]) as usize],
+            PERM[(i.array[6] + PERM[(j.array[6] + PERM[k.array[6] as usize]) as usize]) as usize],
+            PERM[(i.array[7] + PERM[(j.array[7] + PERM[k.array[7] as usize]) as usize]) as usize],
         ],
     };
 
     let gi1 = M256iArray {
         array: [
-            PERM_MOD12[(i.array[0] + i1.array[0]
-                           + PERM[(j.array[0]
-                                      + j1.array[0]
-                                      + PERM[(k.array[0] + k1.array[0]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[1] + i1.array[1]
-                           + PERM[(j.array[1]
-                                      + j1.array[1]
-                                      + PERM[(k.array[1] + k1.array[1]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[2] + i1.array[2]
-                           + PERM[(j.array[2]
-                                      + j1.array[2]
-                                      + PERM[(k.array[2] + k1.array[2]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[3] + i1.array[3]
-                           + PERM[(j.array[3]
-                                      + j1.array[3]
-                                      + PERM[(k.array[3] + k1.array[3]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[4] + i1.array[4]
-                           + PERM[(j.array[4]
-                                      + j1.array[4]
-                                      + PERM[(k.array[4] + k1.array[4]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[5] + i1.array[5]
-                           + PERM[(j.array[5]
-                                      + j1.array[5]
-                                      + PERM[(k.array[5] + k1.array[5]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[6] + i1.array[6]
-                           + PERM[(j.array[6]
-                                      + j1.array[6]
-                                      + PERM[(k.array[6] + k1.array[6]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[7] + i1.array[7]
-                           + PERM[(j.array[7]
-                                      + j1.array[7]
-                                      + PERM[(k.array[7] + k1.array[7]) as usize])
-                                      as usize]) as usize],
+            PERM[(i.array[0] + i1.array[0]
+                     + PERM[(j.array[0] + j1.array[0] + PERM[(k.array[0] + k1.array[0]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[1] + i1.array[1]
+                     + PERM[(j.array[1] + j1.array[1] + PERM[(k.array[1] + k1.array[1]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[2] + i1.array[2]
+                     + PERM[(j.array[2] + j1.array[2] + PERM[(k.array[2] + k1.array[2]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[3] + i1.array[3]
+                     + PERM[(j.array[3] + j1.array[3] + PERM[(k.array[3] + k1.array[3]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[4] + i1.array[4]
+                     + PERM[(j.array[4] + j1.array[4] + PERM[(k.array[4] + k1.array[4]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[5] + i1.array[5]
+                     + PERM[(j.array[5] + j1.array[5] + PERM[(k.array[5] + k1.array[5]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[6] + i1.array[6]
+                     + PERM[(j.array[6] + j1.array[6] + PERM[(k.array[6] + k1.array[6]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[7] + i1.array[7]
+                     + PERM[(j.array[7] + j1.array[7] + PERM[(k.array[7] + k1.array[7]) as usize])
+                                as usize]) as usize],
         ],
     };
     let gi2 = M256iArray {
         array: [
-            PERM_MOD12[(i.array[0] + i2.array[0]
-                           + PERM[(j.array[0]
-                                      + j2.array[0]
-                                      + PERM[(k.array[0] + k2.array[0]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[1] + i2.array[1]
-                           + PERM[(j.array[1]
-                                      + j2.array[1]
-                                      + PERM[(k.array[1] + k2.array[1]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[2] + i2.array[2]
-                           + PERM[(j.array[2]
-                                      + j2.array[2]
-                                      + PERM[(k.array[2] + k2.array[2]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[3] + i2.array[3]
-                           + PERM[(j.array[3]
-                                      + j2.array[3]
-                                      + PERM[(k.array[3] + k2.array[3]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[4] + i2.array[4]
-                           + PERM[(j.array[4]
-                                      + j2.array[4]
-                                      + PERM[(k.array[4] + k2.array[4]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[5] + i2.array[5]
-                           + PERM[(j.array[5]
-                                      + j2.array[5]
-                                      + PERM[(k.array[5] + k2.array[5]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[6] + i2.array[6]
-                           + PERM[(j.array[6]
-                                      + j2.array[6]
-                                      + PERM[(k.array[6] + k2.array[6]) as usize])
-                                      as usize]) as usize],
-            PERM_MOD12[(i.array[7] + i2.array[7]
-                           + PERM[(j.array[7]
-                                      + j2.array[7]
-                                      + PERM[(k.array[7] + k2.array[7]) as usize])
-                                      as usize]) as usize],
+            PERM[(i.array[0] + i2.array[0]
+                     + PERM[(j.array[0] + j2.array[0] + PERM[(k.array[0] + k2.array[0]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[1] + i2.array[1]
+                     + PERM[(j.array[1] + j2.array[1] + PERM[(k.array[1] + k2.array[1]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[2] + i2.array[2]
+                     + PERM[(j.array[2] + j2.array[2] + PERM[(k.array[2] + k2.array[2]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[3] + i2.array[3]
+                     + PERM[(j.array[3] + j2.array[3] + PERM[(k.array[3] + k2.array[3]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[4] + i2.array[4]
+                     + PERM[(j.array[4] + j2.array[4] + PERM[(k.array[4] + k2.array[4]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[5] + i2.array[5]
+                     + PERM[(j.array[5] + j2.array[5] + PERM[(k.array[5] + k2.array[5]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[6] + i2.array[6]
+                     + PERM[(j.array[6] + j2.array[6] + PERM[(k.array[6] + k2.array[6]) as usize])
+                                as usize]) as usize],
+            PERM[(i.array[7] + i2.array[7]
+                     + PERM[(j.array[7] + j2.array[7] + PERM[(k.array[7] + k2.array[7]) as usize])
+                                as usize]) as usize],
         ],
     };
     let gi3 = M256iArray {
         array: [
-            PERM_MOD12[(i.array[0]
-                           + 1
-                           + PERM[(j.array[0] + 1 + PERM[k.array[0] as usize]) as usize])
-                           as usize],
-            PERM_MOD12[(i.array[1]
-                           + 1
-                           + PERM[(j.array[1] + 1 + PERM[k.array[1] as usize]) as usize])
-                           as usize],
-            PERM_MOD12[(i.array[2]
-                           + 1
-                           + PERM[(j.array[2] + 1 + PERM[k.array[2] as usize]) as usize])
-                           as usize],
-            PERM_MOD12[(i.array[3]
-                           + 1
-                           + PERM[(j.array[3] + 1 + PERM[k.array[3] as usize]) as usize])
-                           as usize],
-            PERM_MOD12[(i.array[4]
-                           + 1
-                           + PERM[(j.array[4] + 1 + PERM[k.array[4] as usize]) as usize])
-                           as usize],
-            PERM_MOD12[(i.array[5]
-                           + 1
-                           + PERM[(j.array[5] + 1 + PERM[k.array[5] as usize]) as usize])
-                           as usize],
-            PERM_MOD12[(i.array[6]
-                           + 1
-                           + PERM[(j.array[6] + 1 + PERM[k.array[6] as usize]) as usize])
-                           as usize],
-            PERM_MOD12[(i.array[7]
-                           + 1
-                           + PERM[(j.array[7] + 1 + PERM[k.array[7] as usize]) as usize])
-                           as usize],
+            PERM[(i.array[0] + 1 + PERM[(j.array[0] + 1 + PERM[k.array[0] as usize]) as usize])
+                     as usize],
+            PERM[(i.array[1] + 1 + PERM[(j.array[1] + 1 + PERM[k.array[1] as usize]) as usize])
+                     as usize],
+            PERM[(i.array[2] + 1 + PERM[(j.array[2] + 1 + PERM[k.array[2] as usize]) as usize])
+                     as usize],
+            PERM[(i.array[3] + 1 + PERM[(j.array[3] + 1 + PERM[k.array[3] as usize]) as usize])
+                     as usize],
+            PERM[(i.array[4] + 1 + PERM[(j.array[4] + 1 + PERM[k.array[4] as usize]) as usize])
+                     as usize],
+            PERM[(i.array[5] + 1 + PERM[(j.array[5] + 1 + PERM[k.array[5] as usize]) as usize])
+                     as usize],
+            PERM[(i.array[6] + 1 + PERM[(j.array[6] + 1 + PERM[k.array[6] as usize]) as usize])
+                     as usize],
+            PERM[(i.array[7] + 1 + PERM[(j.array[7] + 1 + PERM[k.array[7] as usize]) as usize])
+                     as usize],
         ],
     };
 

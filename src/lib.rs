@@ -28,14 +28,13 @@ pub fn get_2d_noise(
     fractal_settings: FractalSettings,
 ) -> (Vec<f32>, f32, f32) {
     if is_x86_feature_detected!("avx2") {
-        return avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings);
+        avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings)
     } else if is_x86_feature_detected!("sse4.1") {
-        return sse41::get_2d_noise(start_x, width, start_y, height, fractal_settings);
+        sse41::get_2d_noise(start_x, width, start_y, height, fractal_settings)
     } else if is_x86_feature_detected!("sse2") {
-        return sse2::get_2d_noise(start_x, width, start_y, height, fractal_settings);
+        sse2::get_2d_noise(start_x, width, start_y, height, fractal_settings)
     } else {
-        // TODO: add scalar fallback
-        panic!("simdnoise requires SSE2 or better");
+        scalar::get_2d_noise(start_x, width, start_y, height, fractal_settings)
     }
 }
 
@@ -79,8 +78,15 @@ pub fn get_2d_scaled_noise(
             scaled_max,
         )
     } else {
-        //TODO add scalar fallback
-        panic!("simd noise requires SSE2 or better");
+        scalar::get_2d_scaled_noise(
+            start_x,
+            width,
+            start_y,
+            height,
+            fractal_settings,
+            scaled_min,
+            scaled_max,
+        )
     }
 }
 pub fn get_3d_noise(

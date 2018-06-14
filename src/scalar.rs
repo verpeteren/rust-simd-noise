@@ -6,6 +6,7 @@ use std::f32;
 const F2: f32 = 0.36602540378;
 const F3: f32 = 1.0 / 3.0;
 const G2: f32 = 0.2113248654;
+const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
 const POINT_FIVE: f32 = 0.5;
 
@@ -31,12 +32,152 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
     let y0 = y - Y0;
 
     let (i1, j1) = if x0 > y0 { (1, 0) } else { (0, 1) };
+    let x1 = x0 - i1 as f32 + G2;
+    let y1 = y0 - j1 as f32 + G2;
+    let x2 = x0 - 1.0 + G22;
+    let y2 = y0 - 1.0 + G22;
 
-    0.0
+    let ii = i & 0xff;
+    let jj = j & 0xff;
+    unsafe {
+        let t0 = 0.5 - x0 * x0 - y0 * y0;
+        let n0 = if t0 < 0.0 {
+            0.0
+        } else {
+            t0 * t0 * t0 * t0
+                * grad2(
+                    *PERM.get_unchecked((ii + *PERM.get_unchecked(jj as usize)) as usize),
+                    x0,
+                    y0,
+                )
+        };
+        let t1 = 0.5 - x1 * x1 - y1 * y1;
+        let n1 = if t1 < 0.0 {
+            0.0
+        } else {
+            t1 * t1 * t1 * t1
+                * grad2(
+                    *PERM.get_unchecked(
+                        (ii + i1 + *PERM.get_unchecked((jj + j1) as usize)) as usize,
+                    ),
+                    x1,
+                    y1,
+                )
+        };
+        let t2 = 0.5 - x2 * x2 - y2 * y2;
+        let n2 = if t2 < 0.0 {
+            0.0
+        } else {
+            t2 * t2 * t2 * t2
+                * grad2(
+                    *PERM.get_unchecked((ii + 1 + *PERM.get_unchecked((jj + 1) as usize)) as usize),
+                    x2,
+                    y2,
+                )
+        };
+
+        n0 + n1 + n2
+    }
 }
 
-fn dot(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32) -> f32 {
-    x1 * x2 + y1 * y2 + z1 * z2
+pub fn fbm_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+    let mut xf = x * freq;
+    let mut yf = y * freq;
+    let mut result = simplex_2d(xf, yf);
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        yf = yf * lacunarity;
+        amp = amp * gain;
+        result = result + (simplex_2d(xf, yf) * amp);
+    }
+    result
+}
+
+pub fn turbulence_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+    let mut xf = x * freq;
+    let mut yf = y * freq;
+    let mut result = simplex_2d(xf, yf).abs();
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        yf = yf * lacunarity;
+        amp = amp * gain;
+        result = result + (simplex_2d(xf, yf) * amp).abs();
+    }
+    result
+}
+
+pub fn get_2d_noise_helper(x: f32, y: f32, fractal_settings: FractalSettings) -> f32 {
+    match fractal_settings.noise_type {
+        NoiseType::FBM => fbm_2d(
+            x,
+            y,
+            fractal_settings.freq,
+            fractal_settings.lacunarity,
+            fractal_settings.gain,
+            fractal_settings.octaves,
+        ),
+        NoiseType::Turbulence => turbulence_2d(
+            x,
+            y,
+            fractal_settings.freq,
+            fractal_settings.lacunarity,
+            fractal_settings.gain,
+            fractal_settings.octaves,
+        ),
+        NoiseType::Normal => simplex_2d(x * fractal_settings.freq, y * fractal_settings.freq),
+    }
+}
+
+pub fn get_2d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    fractal_settings: FractalSettings,
+) -> (Vec<f32>, f32, f32) {
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let noise = (0..width * height)
+        .map(|mut i| {
+            let x = (i % width) as f32 + start_x;
+            i = i / width;
+            let y = (i % height) as f32 + start_y;
+            let f = get_2d_noise_helper(x, y, fractal_settings);
+            if f < min {
+                min = f;
+            }
+            if f > max {
+                max = f;
+            }
+            f
+        })
+        .collect();
+    (noise, min, max)
+}
+
+pub fn get_2d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    fractal_settings: FractalSettings,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    let (mut noise, min, max) = get_2d_noise(start_x, width, start_y, height, fractal_settings);
+    let scale_range = scale_max - scale_min;
+    let range = max - min;
+    let multiplier = scale_range / range;
+    let offset = scale_min - min * multiplier;
+    for f in &mut noise {
+        *f = *f * multiplier + offset;
+    }
+    noise
 }
 
 pub fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
@@ -99,87 +240,55 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     let jj = j & 255;
     let kk = k & 255;
     unsafe {
-        let gi0 = *PERM_MOD12.get_unchecked(
-            (ii + *PERM.get_unchecked((jj + *PERM.get_unchecked(kk as usize)) as usize)) as usize,
-        ) as usize;
-        let gi1 = *PERM_MOD12.get_unchecked(
-            (ii
-                + i1
-                + *PERM.get_unchecked((jj + j1 + *PERM.get_unchecked((kk + k1) as usize)) as usize))
-                as usize,
-        ) as usize;
-        let gi2 = *PERM_MOD12.get_unchecked(
-            (ii
-                + i2
-                + *PERM.get_unchecked((jj + j2 + *PERM.get_unchecked((kk + k2) as usize)) as usize))
-                as usize,
-        ) as usize;
-        let gi3 = *PERM_MOD12.get_unchecked(
-            (ii
-                + 1
-                + *PERM.get_unchecked((jj + 1 + *PERM.get_unchecked((kk + 1) as usize)) as usize))
-                as usize,
-        ) as usize;
-
-        let mut t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
+        let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
         let n0 = if t0 < 0.0 {
             0.0
         } else {
-            t0 = t0 * t0;
-            t0 * t0 * t0 * t0
-                * dot(
-                    *GRAD_X.get_unchecked(gi0),
-                    *GRAD_Y.get_unchecked(gi0),
-                    *GRAD_Z.get_unchecked(gi0),
-                    x0,
-                    y0,
-                    z0,
-                )
+            let gi0 = *PERM.get_unchecked(
+                (ii + *PERM.get_unchecked((jj + *PERM.get_unchecked(kk as usize)) as usize))
+                    as usize,
+            );
+
+            t0 * t0 * t0 * t0 * grad3(gi0, x0, y0, z0)
         };
-        let mut t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
+        let t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
         let n1 = if t1 < 0.0 {
             0.0
         } else {
-            t1 = t1 * t1;
-            t1 * t1 * t1 * t1
-                * dot(
-                    *GRAD_X.get_unchecked(gi1),
-                    *GRAD_Y.get_unchecked(gi1),
-                    *GRAD_Z.get_unchecked(gi1),
-                    x1,
-                    y1,
-                    z1,
-                )
+            let gi1 = *PERM.get_unchecked(
+                (ii + i1
+                    + *PERM.get_unchecked(
+                        (jj + j1 + *PERM.get_unchecked((kk + k1) as usize)) as usize,
+                    )) as usize,
+            );
+
+            t1 * t1 * t1 * t1 * grad3(gi1, x1, y1, z1)
         };
-        let mut t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
+        let t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
         let n2 = if t2 < 0.0 {
             0.0
         } else {
-            t2 = t2 * t2;
-            t2 * t2 * t2 * t2
-                * dot(
-                    *GRAD_X.get_unchecked(gi2),
-                    *GRAD_Y.get_unchecked(gi2),
-                    *GRAD_Z.get_unchecked(gi2),
-                    x2,
-                    y2,
-                    z2,
-                )
+            let gi2 = *PERM.get_unchecked(
+                (ii + i2
+                    + *PERM.get_unchecked(
+                        (jj + j2 + *PERM.get_unchecked((kk + k2) as usize)) as usize,
+                    )) as usize,
+            );
+
+            t2 * t2 * t2 * t2 * grad3(gi2, x2, y2, z2)
         };
-        let mut t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
+        let t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
         let n3 = if t3 < 0.0 {
             0.0
         } else {
-            t3 = t3 * t3;
-            t3 * t3 * t3 * t3
-                * dot(
-                    *GRAD_X.get_unchecked(gi3),
-                    *GRAD_Y.get_unchecked(gi3),
-                    *GRAD_Z.get_unchecked(gi3),
-                    x3,
-                    y3,
-                    z3,
-                )
+            let gi3 = *PERM.get_unchecked(
+                (ii + 1
+                    + *PERM
+                        .get_unchecked((jj + 1 + *PERM.get_unchecked((kk + 1) as usize)) as usize))
+                    as usize,
+            );
+
+            t3 * t3 * t3 * t3 * grad3(gi3, x3, y3, z3)
         };
 
         n0 + n1 + n2 + n3
