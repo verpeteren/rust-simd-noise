@@ -1,5 +1,5 @@
 # rust-simd-noise
-SIMD noise library for Rust. Currently in alpha. PRs welcome!
+SIMD noise library for Rust. Currently in beta. PRs welcome!
 
 ## Features
 
