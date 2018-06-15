@@ -3,6 +3,7 @@ Suer fast SIMD noise library for Rust. Currently in beta. PRs welcome!
 <p align="center">
  <img src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
 </p>
+
 ## Features
 
 * SSE2, SSE41, and AVX2 instruction sets
