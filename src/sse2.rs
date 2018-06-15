@@ -5,6 +5,7 @@ use shared_sse::*;
 use std::arch::x86_64::*;
 use std::f32;
 
+// SSE2 has no blendv instruction, so we do it by hand
 #[inline(always)]
 unsafe fn blendv(a: __m128, b: __m128, mask: __m128) -> __m128 {
     _mm_or_ps(_mm_andnot_ps(mask, a), _mm_and_ps(mask, b))
@@ -185,10 +186,11 @@ pub unsafe fn turbulence_2d(
 }
 unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(15));
-    let mask = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(8)));
-    let u = blendv(y, x, mask);
 
-    let mask = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(4)));
+    let mut u = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(8)));
+    u = blendv(y, x, u);
+
+    let mut v = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(4)));
     let mut h12_or_14 = _mm_castsi128_ps(_mm_cmpeq_epi32(
         _mm_setzero_si128(),
         _mm_or_si128(
@@ -197,7 +199,7 @@ unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 
         ),
     ));
     h12_or_14 = blendv(x, z, h12_or_14);
-    let v = blendv(h12_or_14, y, mask);
+    v = blendv(h12_or_14, y, v);
 
     let h_and_1 = _mm_castsi128_ps(_mm_cmpeq_epi32(
         _mm_setzero_si128(),
@@ -462,13 +464,13 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
 
     //if ti < 0 then 0 else ni
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-    n0 = _mm_or_ps(_mm_andnot_ps(cond, n0), _mm_and_ps(cond, _mm_setzero_ps()));
+    n0 = blendv(n0, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-    n1 = _mm_or_ps(_mm_andnot_ps(cond, n1), _mm_and_ps(cond, _mm_setzero_ps()));
+    n1 = blendv(n1, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-    n2 = _mm_or_ps(_mm_andnot_ps(cond, n2), _mm_and_ps(cond, _mm_setzero_ps()));
+    n2 = blendv(n2, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t3, _mm_setzero_ps());
-    n3 = _mm_or_ps(_mm_andnot_ps(cond, n3), _mm_and_ps(cond, _mm_setzero_ps()));
+    n3 = blendv(n3, _mm_setzero_ps(), cond);
 
     _mm_add_ps(n0, _mm_add_ps(n1, _mm_add_ps(n2, n3)))
 }
@@ -703,6 +705,7 @@ pub fn get_3d_noise(
                     x = _mm_add_ps(x, _mm_set1_ps(4.0));
                 }
                 if remainder != 0 {
+                    println!("WOO");
                     let f = get_3d_noise_helper(x, y, z, fractal_settings);
                     for j in 0..remainder {
                         let n = f.array[j];
