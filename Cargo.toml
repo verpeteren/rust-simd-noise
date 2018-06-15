@@ -1,6 +1,7 @@
-      [package]
+[package]
 name = "simdnoise"
 version = "0.1.0"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 
 [dependencies]
+rand = "*"

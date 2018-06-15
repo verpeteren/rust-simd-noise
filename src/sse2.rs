@@ -17,7 +17,6 @@ unsafe fn floor_sse2(f: __m128) -> __m128 {
     _mm_sub_ps(t, _mm_and_ps(_mm_cmplt_ps(f, t), _mm_set1_ps(1.0)))
 }
 
-
 unsafe fn grad2_simd(hash: __m128i, x: __m128, y: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(7));
     let mask = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(4)));
@@ -122,11 +121,11 @@ pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let mut n2 = _mm_mul_ps(t2q, grad2_simd(gi2.simd, x2, y2));
 
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-    n0 = blendv_sse2(n0,_mm_setzero_ps(),cond); 
+    n0 = blendv_sse2(n0, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-    n1 = blendv_sse2(n1,_mm_setzero_ps(),cond); 
+    n1 = blendv_sse2(n1, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-    n2 = blendv_sse2(n2,_mm_setzero_ps(),cond); 
+    n2 = blendv_sse2(n2, _mm_setzero_ps(), cond);
 
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
 }
@@ -176,7 +175,8 @@ pub unsafe fn turbulence_2d(
 
     result
 }
-unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 {
+
+pub unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(15));
 
     let mut u = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(8)));
@@ -186,8 +186,8 @@ unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 
     let mut h12_or_14 = _mm_castsi128_ps(_mm_cmpeq_epi32(
         _mm_setzero_si128(),
         _mm_or_si128(
-            _mm_cmpeq_epi32(h, _mm_set1_epi32(14)),
             _mm_cmpeq_epi32(h, _mm_set1_epi32(12)),
+            _mm_cmpeq_epi32(h, _mm_set1_epi32(14)),
         ),
     ));
     h12_or_14 = blendv_sse2(x, z, h12_or_14);
@@ -202,10 +202,23 @@ unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 
         _mm_and_si128(h, _mm_set1_epi32(2)),
     ));
 
-    _mm_add_ps(
-        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
-        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
-    )
+    let result = M128Array {
+        simd: _mm_add_ps(
+            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u),u, h_and_1),
+            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v),v, h_and_2),
+        ),
+    };
+    let hashA = M128iArray { simd: hash };
+    let xA = M128Array { simd: x };
+    let yA = M128Array { simd: y };
+    let zA = M128Array { simd: z };
+/*    for i in 0..4 {
+        println!(
+            "({},{},{},{}) = {}",
+            xA.array[i], yA.array[i], zA.array[i], hashA.array[i], result.array[i]
+        );
+    }*/
+    result.simd
 }
 pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let s = _mm_mul_ps(F3, _mm_add_ps(x, _mm_add_ps(y, z)));
@@ -219,12 +232,9 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let k = _mm_cvtps_epi32(kps);
 
     let t = _mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(i, _mm_add_epi32(j, k))), G3);
-    let X0 = _mm_sub_ps(ips, t);
-    let Y0 = _mm_sub_ps(jps, t);
-    let Z0 = _mm_sub_ps(kps, t);
-    let x0 = _mm_sub_ps(x, X0);
-    let y0 = _mm_sub_ps(y, Y0);
-    let z0 = _mm_sub_ps(z, Z0);
+    let x0 = _mm_sub_ps(x, _mm_sub_ps(ips, t));
+    let y0 = _mm_sub_ps(y, _mm_sub_ps(jps, t));
+    let z0 = _mm_sub_ps(z, _mm_sub_ps(kps, t));
 
     let i1 = M128iArray {
         simd: _mm_and_si128(
@@ -676,7 +686,6 @@ pub fn get_3d_noise(
                     x = _mm_add_ps(x, _mm_set1_ps(4.0));
                 }
                 if remainder != 0 {
-                    println!("WOO");
                     let f = get_3d_noise_helper(x, y, z, fractal_settings);
                     for j in 0..remainder {
                         let n = f.array[j];

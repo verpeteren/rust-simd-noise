@@ -142,11 +142,15 @@ pub fn get_2d_noise(
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let noise = (0..width * height)
-        .map(|mut i| {
-            let x = (i % width) as f32 + start_x;
-            i = i / width;
-            let y = (i % height) as f32 + start_y;
+    let mut result = Vec::with_capacity(width * height);
+    unsafe {
+        result.set_len(width * height);
+    }
+    let mut i = 0;
+    let mut y = start_y;
+    for _ in 0..height {
+        let mut x = start_x;
+        for _ in 0..width {
             let f = get_2d_noise_helper(x, y, fractal_settings);
             if f < min {
                 min = f;
@@ -154,10 +158,13 @@ pub fn get_2d_noise(
             if f > max {
                 max = f;
             }
-            f
-        })
-        .collect();
-    (noise, min, max)
+            result[i] = f;
+            i += 1;
+            x += 1.0;
+        }
+        y += 1.0;
+    }
+    (result, min, max)
 }
 
 pub fn get_2d_scaled_noise(
@@ -192,6 +199,7 @@ pub fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
     };
     let a = if (h & 1) != 0 { -u } else { u };
     let b = if (h & 2) != 0 { -v } else { v };
+//    println!("({},{},{},{}) = {}", x, y, z, hash, a + b);
     a + b
 }
 
@@ -376,24 +384,33 @@ pub fn get_3d_noise(
 ) -> (Vec<f32>, f32, f32) {
     let mut min = f32::MAX;
     let mut max = f32::MIN;
-
-    let noise = (0..width * height * depth)
-        .map(|mut i| {
-            let x = (i % width) as f32 + start_x;
-            i = i / width;
-            let y = (i % height) as f32 + start_y;
-            let z = (i / height) as f32 + start_z;
-            let f = get_3d_noise_helper(x, y, z, fractal_settings);
-            if f < min {
-                min = f;
+    let mut result = Vec::with_capacity(width * height * depth);
+    unsafe {
+        result.set_len(width * height * depth);
+    }
+    let mut i = 0;
+    let mut z = start_z;
+    for _ in 0..depth {
+        let mut y = start_y;
+        for _ in 0..height {
+            let mut x = start_x;
+            for _ in 0..width {
+                let f = get_3d_noise_helper(x, y, z, fractal_settings);
+                if f < min {
+                    min = f;
+                }
+                if f > max {
+                    max = f;
+                }
+                result[i] = f;
+                i += 1;
+                x += 1.0;
             }
-            if f > max {
-                max = f;
-            }
-            f
-        })
-        .collect();
-    (noise, min, max)
+            y += 1.0;
+        }
+        z += 1.0;
+    }
+    (result, min, max)
 }
 
 pub fn get_3d_scaled_noise(
