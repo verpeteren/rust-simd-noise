@@ -1,7 +1,7 @@
 # rust-simd-noise
 Suer fast SIMD noise library for Rust. Currently in beta. PRs welcome!
 <p align="center">
- <img width="320" src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
+ <img width="240" src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
 </p>
 
 ## Features
