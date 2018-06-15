@@ -42,8 +42,25 @@ const G3: __m256 = unsafe {
 };
 const POINT_FIVE: __m256 = unsafe { M256Array { array: [0.5; 8] }.simd };
 
-unsafe fn dot_simd(x1: __m256, y1: __m256, x2: __m256, y2: __m256) -> __m256 {
-    _mm256_add_ps(_mm256_mul_ps(x1, x2), _mm256_mul_ps(y1, y2))
+unsafe fn grad2_simd(hash: __m256i, x: __m256, y: __m256) -> __m256 {
+    let h = _mm256_and_si256(hash, _mm256_set1_epi32(7));
+    let mask = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(4), h));
+    let u = _mm256_blendv_ps(y, x, mask);
+    let v = _mm256_mul_ps(_mm256_set1_ps(2.0), _mm256_blendv_ps(x, y, mask));
+
+    let h_and_1 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_and_si256(h, _mm256_set1_epi32(1)),
+    ));
+    let h_and_2 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_and_si256(h, _mm256_set1_epi32(2)),
+    ));
+
+    _mm256_add_ps(
+        _mm256_blendv_ps(_mm256_sub_ps(_mm256_setzero_ps(), u), u, h_and_1),
+        _mm256_blendv_ps(_mm256_sub_ps(_mm256_setzero_ps(), v), v, h_and_2),
+    )
 }
 
 unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
@@ -125,16 +142,9 @@ unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let mut t2q = _mm256_mul_ps(t2, t2);
     t2q = _mm256_mul_ps(t2q, t2q);
 
-    let gi0x = _mm256_i32gather_ps(&GRAD_X as *const f32, gi0, 4);
-    let gi1x = _mm256_i32gather_ps(&GRAD_X as *const f32, gi1, 4);
-    let gi2x = _mm256_i32gather_ps(&GRAD_X as *const f32, gi2, 4);
-    let gi0y = _mm256_i32gather_ps(&GRAD_Y as *const f32, gi0, 4);
-    let gi1y = _mm256_i32gather_ps(&GRAD_Y as *const f32, gi1, 4);
-    let gi2y = _mm256_i32gather_ps(&GRAD_Y as *const f32, gi2, 4);
-
-    let mut n0 = _mm256_mul_ps(t0q, dot_simd(gi0x, gi0y, x0, y0));
-    let mut n1 = _mm256_mul_ps(t1q, dot_simd(gi1x, gi1y, x1, y1));
-    let mut n2 = _mm256_mul_ps(t2q, dot_simd(gi2x, gi2y, x2, y2));
+    let mut n0 = _mm256_mul_ps(t0q, grad2_simd(gi0, x0, y0));
+    let mut n1 = _mm256_mul_ps(t1q, grad2_simd(gi1, x1, y1));
+    let mut n2 = _mm256_mul_ps(t2q, grad2_simd(gi2, x2, y2));
 
     let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(), _CMP_LT_OQ);
     n0 = _mm256_blendv_ps(n0, _mm256_setzero_ps(), cond);
@@ -340,44 +350,57 @@ pub fn get_2d_scaled_noise(
     noise
 }
 
-unsafe fn dot_simd_3d(
-    x1: __m256,
-    y1: __m256,
-    z1: __m256,
-    x2: __m256,
-    y2: __m256,
-    z2: __m256,
-) -> __m256 {
-    let xx = _mm256_mul_ps(x1, x2);
-    let yy = _mm256_mul_ps(y1, y2);
-    let zz = _mm256_mul_ps(z1, z2);
-    _mm256_add_ps(xx, _mm256_add_ps(yy, zz))
+pub unsafe fn grad3d_simd(hash: __m256i, x: __m256, y: __m256, z: __m256) -> __m256 {
+    let h = _mm256_and_si256(hash, _mm256_set1_epi32(15));
+
+    let mut u = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(8), h));
+    u = _mm256_blendv_ps(y, x, u);
+
+    let mut v = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(4), h));
+    let mut h12_or_14 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_or_si256(
+            _mm256_cmpeq_epi32(h, _mm256_set1_epi32(12)),
+            _mm256_cmpeq_epi32(h, _mm256_set1_epi32(14)),
+        ),
+    ));
+    h12_or_14 = _mm256_blendv_ps(x, z, h12_or_14);
+    v = _mm256_blendv_ps(h12_or_14, y, v);
+
+    let h_and_1 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_and_si256(h, _mm256_set1_epi32(1)),
+    ));
+    let h_and_2 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_and_si256(h, _mm256_set1_epi32(2)),
+    ));
+
+    _mm256_add_ps(
+        _mm256_blendv_ps(_mm256_sub_ps(_mm256_setzero_ps(), u), u, h_and_1),
+        _mm256_blendv_ps(_mm256_sub_ps(_mm256_setzero_ps(), v), v, h_and_2),
+    )
 }
 
 unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
-    let s = M256Array {
-        simd: _mm256_mul_ps(F3, _mm256_add_ps(x, _mm256_add_ps(y, z))),
-    };
-    let mut i = M256iArray {
-        simd: _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_add_ps(x, s.simd))),
-    };
-    let mut j = M256iArray {
-        simd: _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_add_ps(y, s.simd))),
-    };
-    let mut k = M256iArray {
-        simd: _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_add_ps(z, s.simd))),
-    };
+    let s = _mm256_mul_ps(F3, _mm256_add_ps(x, _mm256_add_ps(y, z)));
+
+    let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
+    let jps = _mm256_floor_ps(_mm256_add_ps(y, s));
+    let kps = _mm256_floor_ps(_mm256_add_ps(z, s));
+
+    let i = _mm256_cvtps_epi32(ips);
+    let j = _mm256_cvtps_epi32(jps);
+    let k = _mm256_cvtps_epi32(kps);
 
     let t = _mm256_mul_ps(
-        _mm256_cvtepi32_ps(_mm256_add_epi32(i.simd, _mm256_add_epi32(j.simd, k.simd))),
+        _mm256_cvtepi32_ps(_mm256_add_epi32(i, _mm256_add_epi32(j, k))),
         G3,
     );
-    let X0 = _mm256_sub_ps(_mm256_cvtepi32_ps(i.simd), t);
-    let Y0 = _mm256_sub_ps(_mm256_cvtepi32_ps(j.simd), t);
-    let Z0 = _mm256_sub_ps(_mm256_cvtepi32_ps(k.simd), t);
-    let x0 = _mm256_sub_ps(x, X0);
-    let y0 = _mm256_sub_ps(y, Y0);
-    let z0 = _mm256_sub_ps(z, Z0);
+
+    let x0 = _mm256_sub_ps(x, _mm256_sub_ps(ips, t));
+    let y0 = _mm256_sub_ps(y, _mm256_sub_ps(jps, t));
+    let z0 = _mm256_sub_ps(z, _mm256_sub_ps(kps, t));
 
     let i1 = M256iArray {
         simd: _mm256_and_si256(
@@ -393,7 +416,7 @@ unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
             _mm256_set1_epi32(1),
             _mm256_and_si256(
                 _mm256_castps_si256(_mm256_cmp_ps(y0, x0, _CMP_GT_OQ)),
-                _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GT_OQ)),
+                _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GE_OQ)),
             ),
         ),
     };
@@ -466,124 +489,154 @@ unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let y3 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_set1_ps(1.0)), POINT_FIVE);
     let z3 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_set1_ps(1.0)), POINT_FIVE);
 
-    i.simd = _mm256_and_si256(i.simd, _mm256_set1_epi32(0xff));
-    j.simd = _mm256_and_si256(j.simd, _mm256_set1_epi32(0xff));
-    k.simd = _mm256_and_si256(k.simd, _mm256_set1_epi32(0xff));
+    let ii = M256iArray {
+        simd: _mm256_and_si256(i, _mm256_set1_epi32(0xff)),
+    };
+    let jj = M256iArray {
+        simd: _mm256_and_si256(j, _mm256_set1_epi32(0xff)),
+    };
+    let kk = M256iArray {
+        simd: _mm256_and_si256(k, _mm256_set1_epi32(0xff)),
+    };
 
     let gi0 = M256iArray {
         array: [
-            PERM[(i.array[0] + PERM[(j.array[0] + PERM[k.array[0] as usize]) as usize]) as usize],
-            PERM[(i.array[1] + PERM[(j.array[1] + PERM[k.array[1] as usize]) as usize]) as usize],
-            PERM[(i.array[2] + PERM[(j.array[2] + PERM[k.array[2] as usize]) as usize]) as usize],
-            PERM[(i.array[3] + PERM[(j.array[3] + PERM[k.array[3] as usize]) as usize]) as usize],
-            PERM[(i.array[4] + PERM[(j.array[4] + PERM[k.array[4] as usize]) as usize]) as usize],
-            PERM[(i.array[5] + PERM[(j.array[5] + PERM[k.array[5] as usize]) as usize]) as usize],
-            PERM[(i.array[6] + PERM[(j.array[6] + PERM[k.array[6] as usize]) as usize]) as usize],
-            PERM[(i.array[7] + PERM[(j.array[7] + PERM[k.array[7] as usize]) as usize]) as usize],
+            PERM[(ii.array[0] + PERM[(jj.array[0] + PERM[kk.array[0] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[1] + PERM[(jj.array[1] + PERM[kk.array[1] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[2] + PERM[(jj.array[2] + PERM[kk.array[2] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[3] + PERM[(jj.array[3] + PERM[kk.array[3] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[4] + PERM[(jj.array[4] + PERM[kk.array[4] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[5] + PERM[(jj.array[5] + PERM[kk.array[5] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[6] + PERM[(jj.array[6] + PERM[kk.array[6] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[7] + PERM[(jj.array[7] + PERM[kk.array[7] as usize]) as usize])
+                     as usize],
         ],
     };
 
     let gi1 = M256iArray {
         array: [
-            PERM[(i.array[0] + i1.array[0]
-                     + PERM[(j.array[0] + j1.array[0] + PERM[(k.array[0] + k1.array[0]) as usize])
+            PERM[(ii.array[0] + i1.array[0]
+                     + PERM[(jj.array[0] + j1.array[0] + PERM[(kk.array[0] + k1.array[0]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[1] + i1.array[1]
-                     + PERM[(j.array[1] + j1.array[1] + PERM[(k.array[1] + k1.array[1]) as usize])
+            PERM[(ii.array[1] + i1.array[1]
+                     + PERM[(jj.array[1] + j1.array[1] + PERM[(kk.array[1] + k1.array[1]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[2] + i1.array[2]
-                     + PERM[(j.array[2] + j1.array[2] + PERM[(k.array[2] + k1.array[2]) as usize])
+            PERM[(ii.array[2] + i1.array[2]
+                     + PERM[(jj.array[2] + j1.array[2] + PERM[(kk.array[2] + k1.array[2]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[3] + i1.array[3]
-                     + PERM[(j.array[3] + j1.array[3] + PERM[(k.array[3] + k1.array[3]) as usize])
+            PERM[(ii.array[3] + i1.array[3]
+                     + PERM[(jj.array[3] + j1.array[3] + PERM[(kk.array[3] + k1.array[3]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[4] + i1.array[4]
-                     + PERM[(j.array[4] + j1.array[4] + PERM[(k.array[4] + k1.array[4]) as usize])
+            PERM[(ii.array[4] + i1.array[4]
+                     + PERM[(jj.array[4] + j1.array[4] + PERM[(kk.array[4] + k1.array[4]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[5] + i1.array[5]
-                     + PERM[(j.array[5] + j1.array[5] + PERM[(k.array[5] + k1.array[5]) as usize])
+            PERM[(ii.array[5] + i1.array[5]
+                     + PERM[(jj.array[5] + j1.array[5] + PERM[(kk.array[5] + k1.array[5]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[6] + i1.array[6]
-                     + PERM[(j.array[6] + j1.array[6] + PERM[(k.array[6] + k1.array[6]) as usize])
+            PERM[(ii.array[6] + i1.array[6]
+                     + PERM[(jj.array[6] + j1.array[6] + PERM[(kk.array[6] + k1.array[6]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[7] + i1.array[7]
-                     + PERM[(j.array[7] + j1.array[7] + PERM[(k.array[7] + k1.array[7]) as usize])
+            PERM[(ii.array[7] + i1.array[7]
+                     + PERM[(jj.array[7] + j1.array[7] + PERM[(kk.array[7] + k1.array[7]) as usize])
                                 as usize]) as usize],
         ],
     };
     let gi2 = M256iArray {
         array: [
-            PERM[(i.array[0] + i2.array[0]
-                     + PERM[(j.array[0] + j2.array[0] + PERM[(k.array[0] + k2.array[0]) as usize])
+            PERM[(ii.array[0] + i2.array[0]
+                     + PERM[(jj.array[0] + j2.array[0] + PERM[(kk.array[0] + k2.array[0]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[1] + i2.array[1]
-                     + PERM[(j.array[1] + j2.array[1] + PERM[(k.array[1] + k2.array[1]) as usize])
+            PERM[(ii.array[1] + i2.array[1]
+                     + PERM[(jj.array[1] + j2.array[1] + PERM[(kk.array[1] + k2.array[1]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[2] + i2.array[2]
-                     + PERM[(j.array[2] + j2.array[2] + PERM[(k.array[2] + k2.array[2]) as usize])
+            PERM[(ii.array[2] + i2.array[2]
+                     + PERM[(jj.array[2] + j2.array[2] + PERM[(kk.array[2] + k2.array[2]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[3] + i2.array[3]
-                     + PERM[(j.array[3] + j2.array[3] + PERM[(k.array[3] + k2.array[3]) as usize])
+            PERM[(ii.array[3] + i2.array[3]
+                     + PERM[(jj.array[3] + j2.array[3] + PERM[(kk.array[3] + k2.array[3]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[4] + i2.array[4]
-                     + PERM[(j.array[4] + j2.array[4] + PERM[(k.array[4] + k2.array[4]) as usize])
+            PERM[(ii.array[4] + i2.array[4]
+                     + PERM[(jj.array[4] + j2.array[4] + PERM[(kk.array[4] + k2.array[4]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[5] + i2.array[5]
-                     + PERM[(j.array[5] + j2.array[5] + PERM[(k.array[5] + k2.array[5]) as usize])
+            PERM[(ii.array[5] + i2.array[5]
+                     + PERM[(jj.array[5] + j2.array[5] + PERM[(kk.array[5] + k2.array[5]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[6] + i2.array[6]
-                     + PERM[(j.array[6] + j2.array[6] + PERM[(k.array[6] + k2.array[6]) as usize])
+            PERM[(ii.array[6] + i2.array[6]
+                     + PERM[(jj.array[6] + j2.array[6] + PERM[(kk.array[6] + k2.array[6]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[7] + i2.array[7]
-                     + PERM[(j.array[7] + j2.array[7] + PERM[(k.array[7] + k2.array[7]) as usize])
+            PERM[(ii.array[7] + i2.array[7]
+                     + PERM[(jj.array[7] + j2.array[7] + PERM[(kk.array[7] + k2.array[7]) as usize])
                                 as usize]) as usize],
         ],
     };
     let gi3 = M256iArray {
         array: [
-            PERM[(i.array[0] + 1 + PERM[(j.array[0] + 1 + PERM[k.array[0] as usize]) as usize])
+            PERM[(ii.array[0]
+                     + 1
+                     + PERM[(jj.array[0] + 1 + PERM[(kk.array[0] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[1] + 1 + PERM[(j.array[1] + 1 + PERM[k.array[1] as usize]) as usize])
+            PERM[(ii.array[1]
+                     + 1
+                     + PERM[(jj.array[1] + 1 + PERM[(kk.array[1] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[2] + 1 + PERM[(j.array[2] + 1 + PERM[k.array[2] as usize]) as usize])
+            PERM[(ii.array[2]
+                     + 1
+                     + PERM[(jj.array[2] + 1 + PERM[(kk.array[2] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[3] + 1 + PERM[(j.array[3] + 1 + PERM[k.array[3] as usize]) as usize])
+            PERM[(ii.array[3]
+                     + 1
+                     + PERM[(jj.array[3] + 1 + PERM[(kk.array[3] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[4] + 1 + PERM[(j.array[4] + 1 + PERM[k.array[4] as usize]) as usize])
+            PERM[(ii.array[4]
+                     + 1
+                     + PERM[(jj.array[4] + 1 + PERM[(kk.array[4] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[5] + 1 + PERM[(j.array[5] + 1 + PERM[k.array[5] as usize]) as usize])
+            PERM[(ii.array[5]
+                     + 1
+                     + PERM[(jj.array[5] + 1 + PERM[(kk.array[5] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[6] + 1 + PERM[(j.array[6] + 1 + PERM[k.array[6] as usize]) as usize])
+            PERM[(ii.array[6]
+                     + 1
+                     + PERM[(jj.array[6] + 1 + PERM[(kk.array[6] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[7] + 1 + PERM[(j.array[7] + 1 + PERM[k.array[7] as usize]) as usize])
+            PERM[(ii.array[7]
+                     + 1
+                     + PERM[(jj.array[7] + 1 + PERM[(kk.array[7] + 1) as usize]) as usize])
                      as usize],
         ],
     };
 
     let t0 = _mm256_sub_ps(
         _mm256_sub_ps(
-            _mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x0, x0)),
+            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x0, x0)),
             _mm256_mul_ps(y0, y0),
         ),
         _mm256_mul_ps(z0, z0),
     );
     let t1 = _mm256_sub_ps(
         _mm256_sub_ps(
-            _mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x1, x1)),
+            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x1, x1)),
             _mm256_mul_ps(y1, y1),
         ),
         _mm256_mul_ps(z1, z1),
     );
     let t2 = _mm256_sub_ps(
         _mm256_sub_ps(
-            _mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x2, x2)),
+            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x2, x2)),
             _mm256_mul_ps(y2, y2),
         ),
         _mm256_mul_ps(z2, z2),
     );
     let t3 = _mm256_sub_ps(
         _mm256_sub_ps(
-            _mm256_sub_ps(_mm256_set1_ps(0.6), _mm256_mul_ps(x3, x3)),
+            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x3, x3)),
             _mm256_mul_ps(y3, y3),
         ),
         _mm256_mul_ps(z3, z3),
@@ -599,167 +652,10 @@ unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let mut t3q = _mm256_mul_ps(t3, t3);
     t3q = _mm256_mul_ps(t3q, t3q);
 
-    let gi0x = M256Array {
-        array: [
-            GRAD_X[gi0.array[0] as usize],
-            GRAD_X[gi0.array[1] as usize],
-            GRAD_X[gi0.array[2] as usize],
-            GRAD_X[gi0.array[3] as usize],
-            GRAD_X[gi0.array[4] as usize],
-            GRAD_X[gi0.array[5] as usize],
-            GRAD_X[gi0.array[6] as usize],
-            GRAD_X[gi0.array[7] as usize],
-        ],
-    };
-    let gi0y = M256Array {
-        array: [
-            GRAD_Y[gi0.array[0] as usize],
-            GRAD_Y[gi0.array[1] as usize],
-            GRAD_Y[gi0.array[2] as usize],
-            GRAD_Y[gi0.array[3] as usize],
-            GRAD_Y[gi0.array[4] as usize],
-            GRAD_Y[gi0.array[5] as usize],
-            GRAD_Y[gi0.array[6] as usize],
-            GRAD_Y[gi0.array[7] as usize],
-        ],
-    };
-    let gi0z = M256Array {
-        array: [
-            GRAD_Z[gi0.array[0] as usize],
-            GRAD_Z[gi0.array[1] as usize],
-            GRAD_Z[gi0.array[2] as usize],
-            GRAD_Z[gi0.array[3] as usize],
-            GRAD_Z[gi0.array[4] as usize],
-            GRAD_Z[gi0.array[5] as usize],
-            GRAD_Z[gi0.array[6] as usize],
-            GRAD_Z[gi0.array[7] as usize],
-        ],
-    };
-    let gi1x = M256Array {
-        array: [
-            GRAD_X[gi1.array[0] as usize],
-            GRAD_X[gi1.array[1] as usize],
-            GRAD_X[gi1.array[2] as usize],
-            GRAD_X[gi1.array[3] as usize],
-            GRAD_X[gi1.array[4] as usize],
-            GRAD_X[gi1.array[5] as usize],
-            GRAD_X[gi1.array[6] as usize],
-            GRAD_X[gi1.array[7] as usize],
-        ],
-    };
-    let gi1y = M256Array {
-        array: [
-            GRAD_Y[gi1.array[0] as usize],
-            GRAD_Y[gi1.array[1] as usize],
-            GRAD_Y[gi1.array[2] as usize],
-            GRAD_Y[gi1.array[3] as usize],
-            GRAD_Y[gi1.array[4] as usize],
-            GRAD_Y[gi1.array[5] as usize],
-            GRAD_Y[gi1.array[6] as usize],
-            GRAD_Y[gi1.array[7] as usize],
-        ],
-    };
-    let gi1z = M256Array {
-        array: [
-            GRAD_Z[gi1.array[0] as usize],
-            GRAD_Z[gi1.array[1] as usize],
-            GRAD_Z[gi1.array[2] as usize],
-            GRAD_Z[gi1.array[3] as usize],
-            GRAD_Z[gi1.array[4] as usize],
-            GRAD_Z[gi1.array[5] as usize],
-            GRAD_Z[gi1.array[6] as usize],
-            GRAD_Z[gi1.array[7] as usize],
-        ],
-    };
-    let gi2x = M256Array {
-        array: [
-            GRAD_X[gi2.array[0] as usize],
-            GRAD_X[gi2.array[1] as usize],
-            GRAD_X[gi2.array[2] as usize],
-            GRAD_X[gi2.array[3] as usize],
-            GRAD_X[gi2.array[4] as usize],
-            GRAD_X[gi2.array[5] as usize],
-            GRAD_X[gi2.array[6] as usize],
-            GRAD_X[gi2.array[7] as usize],
-        ],
-    };
-    let gi2y = M256Array {
-        array: [
-            GRAD_Y[gi2.array[0] as usize],
-            GRAD_Y[gi2.array[1] as usize],
-            GRAD_Y[gi2.array[2] as usize],
-            GRAD_Y[gi2.array[3] as usize],
-            GRAD_Y[gi2.array[4] as usize],
-            GRAD_Y[gi2.array[5] as usize],
-            GRAD_Y[gi2.array[6] as usize],
-            GRAD_Y[gi2.array[7] as usize],
-        ],
-    };
-    let gi2z = M256Array {
-        array: [
-            GRAD_Z[gi2.array[0] as usize],
-            GRAD_Z[gi2.array[1] as usize],
-            GRAD_Z[gi2.array[2] as usize],
-            GRAD_Z[gi2.array[3] as usize],
-            GRAD_Z[gi2.array[4] as usize],
-            GRAD_Z[gi2.array[5] as usize],
-            GRAD_Z[gi2.array[6] as usize],
-            GRAD_Z[gi2.array[7] as usize],
-        ],
-    };
-    let gi3x = M256Array {
-        array: [
-            GRAD_X[gi3.array[0] as usize],
-            GRAD_X[gi3.array[1] as usize],
-            GRAD_X[gi3.array[2] as usize],
-            GRAD_X[gi3.array[3] as usize],
-            GRAD_X[gi3.array[4] as usize],
-            GRAD_X[gi3.array[5] as usize],
-            GRAD_X[gi3.array[6] as usize],
-            GRAD_X[gi3.array[7] as usize],
-        ],
-    };
-    let gi3y = M256Array {
-        array: [
-            GRAD_Y[gi3.array[0] as usize],
-            GRAD_Y[gi3.array[1] as usize],
-            GRAD_Y[gi3.array[2] as usize],
-            GRAD_Y[gi3.array[3] as usize],
-            GRAD_Y[gi3.array[4] as usize],
-            GRAD_Y[gi3.array[5] as usize],
-            GRAD_Y[gi3.array[6] as usize],
-            GRAD_Y[gi3.array[7] as usize],
-        ],
-    };
-    let gi3z = M256Array {
-        array: [
-            GRAD_Z[gi3.array[0] as usize],
-            GRAD_Z[gi3.array[1] as usize],
-            GRAD_Z[gi3.array[2] as usize],
-            GRAD_Z[gi3.array[3] as usize],
-            GRAD_Z[gi3.array[4] as usize],
-            GRAD_Z[gi3.array[5] as usize],
-            GRAD_Z[gi3.array[6] as usize],
-            GRAD_Z[gi3.array[7] as usize],
-        ],
-    };
-
-    let mut n0 = _mm256_mul_ps(
-        t0q,
-        dot_simd_3d(gi0x.simd, gi0y.simd, gi0z.simd, x0, y0, z0),
-    );
-    let mut n1 = _mm256_mul_ps(
-        t1q,
-        dot_simd_3d(gi1x.simd, gi1y.simd, gi1z.simd, x1, y1, z1),
-    );
-    let mut n2 = _mm256_mul_ps(
-        t2q,
-        dot_simd_3d(gi2x.simd, gi2y.simd, gi2z.simd, x2, y2, z2),
-    );
-    let mut n3 = _mm256_mul_ps(
-        t3q,
-        dot_simd_3d(gi3x.simd, gi3y.simd, gi3z.simd, x3, y3, z3),
-    );
+    let mut n0 = _mm256_mul_ps(t0q, grad3d_simd(gi0.simd, x0, y0, z0));
+    let mut n1 = _mm256_mul_ps(t1q, grad3d_simd(gi1.simd, x1, y1, z1));
+    let mut n2 = _mm256_mul_ps(t2q, grad3d_simd(gi2.simd, x2, y2, z2));
+    let mut n3 = _mm256_mul_ps(t3q, grad3d_simd(gi3.simd, x3, y3, z3));
 
     //if ti < 0 then 0 else ni
     let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(), _CMP_LT_OQ);

@@ -15,12 +15,9 @@ pub fn main() {
     unsafe {
         for i in 0 .. 100000 {
         let mut rng = rand::thread_rng();
- //       let x = rng.gen_range(-1000.0,1000.0); 
-  //      let y = rng.gen_range(-1000.0,1000.0);
-   //     let z = rng.gen_range(-1000.0,1000.0);
-        let x = 527.2876;
-        let y = -270.11255; 
-        let z = 813.88745;
+       let x = rng.gen_range(-1000.0,1000.0); 
+        let y = rng.gen_range(-1000.0,1000.0);
+        let z = rng.gen_range(-1000.0,1000.0);
 
         let scalar = simdnoise::scalar::simplex_3d( x, y, z);
         let simd = M128Array {

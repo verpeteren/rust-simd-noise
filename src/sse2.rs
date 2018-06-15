@@ -202,23 +202,10 @@ pub unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m
         _mm_and_si128(h, _mm_set1_epi32(2)),
     ));
 
-    let result = M128Array {
-        simd: _mm_add_ps(
+    _mm_add_ps(
             blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
             blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
-        ),
-    };
-    let hashA = M128iArray { simd: hash };
-    let xA = M128Array { simd: x };
-    let yA = M128Array { simd: y };
-    let zA = M128Array { simd: z };
-    /*    for i in 0..4 {
-        println!(
-            "({},{},{},{}) = {}",
-            xA.array[i], yA.array[i], zA.array[i], hashA.array[i], result.array[i]
-        );
-    }*/
-    result.simd
+        )
 }
 pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let s = _mm_mul_ps(F3, _mm_add_ps(x, _mm_add_ps(y, z)));
