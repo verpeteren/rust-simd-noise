@@ -164,7 +164,7 @@ pub unsafe fn turbulence_2d(
     result
 }
 
-pub unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 {
+unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(15));
 
     let mut u = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(8)));

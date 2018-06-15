@@ -350,7 +350,7 @@ pub fn get_2d_scaled_noise(
     noise
 }
 
-pub unsafe fn grad3d_simd(hash: __m256i, x: __m256, y: __m256, z: __m256) -> __m256 {
+unsafe fn grad3d_simd(hash: __m256i, x: __m256, y: __m256, z: __m256) -> __m256 {
     let h = _mm256_and_si256(hash, _mm256_set1_epi32(15));
 
     let mut u = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(8), h));
@@ -785,7 +785,7 @@ pub fn get_3d_noise(
         let mut z = _mm256_set1_ps(start_z);
         for _ in 0..depth {
             let mut y = _mm256_set1_ps(start_y);
-           for _ in 0..height {
+            for _ in 0..height {
                 let mut x = _mm256_set_ps(
                     start_x + 7.0,
                     start_x + 6.0,

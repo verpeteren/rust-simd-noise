@@ -10,7 +10,7 @@ const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
 const POINT_FIVE: f32 = 0.5;
 
-pub fn grad2(hash: i32, x: f32, y: f32) -> f32 {
+fn grad2(hash: i32, x: f32, y: f32) -> f32 {
     let h = hash & 7;
     let (u, v) = if h < 4 { (x, y) } else { (y, x) };
 
@@ -187,7 +187,7 @@ pub fn get_2d_scaled_noise(
     noise
 }
 
-pub fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
+fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
     let h = hash & 15;
     let u = if h < 8 { x } else { y };
     let v = if h < 4 {
