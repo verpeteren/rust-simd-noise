@@ -4,25 +4,25 @@ SIMD noise library for Rust. Currently in alpha. PRs welcome!
 ## Features
 
 * SSE2, SSE41, and AVX2 instruction sets
+* runtime detection picks the best available instruction set
 * simplex noise, fractal brownian motion, and turbulence
 * 2d and 3d
 
 ## Todo
 
 * proper doc comments
-* scalar support
 * AVX512 support
 * ARM NEON support
 * Voroni and other noise types
 
 ## Get a block of noise with runtime SIMD detection
 
-The library will at runtime pick the fastest available options between SSE2, SSE41, and AVX2
+The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2
 
 ```rust
 use simdnoise::*;
 
-// A struct to set up nosie parameters
+// A struct to set up noise parameters
 let fractal_settings = simdnoise::FractalSettings {
       freq: 0.04,
       lacunarity: 0.5,
@@ -51,6 +51,7 @@ Sometimes you may want to use SSE41 even with AVX2 is available
 // get a block of 100x100 sse41 noise, skip runtime detection
 let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,fractal_settings);
 
+// send your own SIMD x,y values to the noise functions directly
 unsafe {
   // sse2 simplex noise
   let x = _mm_set1_ps(5.0);

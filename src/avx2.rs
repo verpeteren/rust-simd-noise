@@ -784,17 +784,8 @@ pub fn get_3d_noise(
         let remainder = width % 8;
         let mut z = _mm256_set1_ps(start_z);
         for _ in 0..depth {
-            let mut y = _mm256_set_ps(
-                start_y + 7.0,
-                start_y + 6.0,
-                start_y + 5.0,
-                start_y + 4.0,
-                start_y + 3.0,
-                start_y + 2.0,
-                start_y + 1.0,
-                start_y,
-            );
-            for _ in 0..height {
+            let mut y = _mm256_set1_ps(start_y);
+           for _ in 0..height {
                 let mut x = _mm256_set_ps(
                     start_x + 7.0,
                     start_x + 6.0,
@@ -828,7 +819,7 @@ pub fn get_3d_noise(
                         i += 1;
                     }
                 }
-                y = _mm256_add_ps(y, _mm256_set1_ps(8.0));
+                y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
             }
             z = _mm256_add_ps(z, _mm256_set1_ps(1.0));
         }
