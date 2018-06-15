@@ -1,8 +1,8 @@
 # rust-simd-noise
 Suer fast SIMD noise library for Rust. Currently in beta. PRs welcome!
-
+<p align="center">
 ![alt text](https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg)
-
+</p>
 ## Features
 
 * SSE2, SSE41, and AVX2 instruction sets
