@@ -204,15 +204,15 @@ pub unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m
 
     let result = M128Array {
         simd: _mm_add_ps(
-            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u),u, h_and_1),
-            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v),v, h_and_2),
+            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
+            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
         ),
     };
     let hashA = M128iArray { simd: hash };
     let xA = M128Array { simd: x };
     let yA = M128Array { simd: y };
     let zA = M128Array { simd: z };
-/*    for i in 0..4 {
+    /*    for i in 0..4 {
         println!(
             "({},{},{},{}) = {}",
             xA.array[i], yA.array[i], zA.array[i], hashA.array[i], result.array[i]
@@ -236,6 +236,16 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let y0 = _mm_sub_ps(y, _mm_sub_ps(jps, t));
     let z0 = _mm_sub_ps(z, _mm_sub_ps(kps, t));
 
+  /* Really tricky section handling a series of nested conditionals 
+   * This table can be helpful for following the logic
+             ijk1 ijk2
+	x>=y>=z -> 100  110
+	x>z>y   -> 100  101
+	z>x>y   -> 001  101
+	z>y>x   -> 001  011
+	y>z>x   -> 010  011
+	y>x>=z  -> 010  110
+	*/
     let i1 = M128iArray {
         simd: _mm_and_si128(
             _mm_set1_epi32(1),
@@ -250,7 +260,7 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
             _mm_set1_epi32(1),
             _mm_and_si128(
                 _mm_castps_si128(_mm_cmpgt_ps(y0, x0)),
-                _mm_castps_si128(_mm_cmpgt_ps(y0, z0)),
+                _mm_castps_si128(_mm_cmpge_ps(y0, z0)),
             ),
         ),
     };
@@ -316,6 +326,7 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let x1 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i1.simd)), G3);
     let y1 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j1.simd)), G3);
     let z1 = _mm_add_ps(_mm_sub_ps(z0, _mm_cvtepi32_ps(k1.simd)), G3);
+
     let x2 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i2.simd)), F3);
     let y2 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j2.simd)), F3);
     let z2 = _mm_add_ps(_mm_sub_ps(z0, _mm_cvtepi32_ps(k2.simd)), F3);
@@ -427,7 +438,6 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
         ),
         _mm_mul_ps(z3, z3),
     );
-
     //ti*ti*ti*ti
     let mut t0q = _mm_mul_ps(t0, t0);
     t0q = _mm_mul_ps(t0q, t0q);

@@ -199,7 +199,7 @@ pub fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
     };
     let a = if (h & 1) != 0 { -u } else { u };
     let b = if (h & 2) != 0 { -v } else { v };
-//    println!("({},{},{},{}) = {}", x, y, z, hash, a + b);
+    //    println!("({},{},{},{}) = {}", x, y, z, hash, a + b);
     a + b
 }
 
@@ -237,6 +237,7 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     let x1 = x0 - i1 as f32 + G3;
     let y1 = y0 - j1 as f32 + G3;
     let z1 = z0 - k1 as f32 + G3;
+
     let x2 = x0 - i2 as f32 + F3;
     let y2 = y0 - j2 as f32 + F3;
     let z2 = z0 - k2 as f32 + F3;
@@ -247,8 +248,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     let ii = i & 255;
     let jj = j & 255;
     let kk = k & 255;
+
     unsafe {
-        let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
+        let t0 = 0.5 - x0 * x0 - y0 * y0 - z0 * z0;
         let n0 = if t0 < 0.0 {
             0.0
         } else {
@@ -259,7 +261,7 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
 
             t0 * t0 * t0 * t0 * grad3(gi0, x0, y0, z0)
         };
-        let t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
+        let t1 = 0.5 - x1 * x1 - y1 * y1 - z1 * z1;
         let n1 = if t1 < 0.0 {
             0.0
         } else {
@@ -272,7 +274,7 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
 
             t1 * t1 * t1 * t1 * grad3(gi1, x1, y1, z1)
         };
-        let t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
+        let t2 = 0.5 - x2 * x2 - y2 * y2 - z2 * z2;
         let n2 = if t2 < 0.0 {
             0.0
         } else {
@@ -285,7 +287,7 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
 
             t2 * t2 * t2 * t2 * grad3(gi2, x2, y2, z2)
         };
-        let t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
+        let t3 = 0.5 - x3 * x3 - y3 * y3 - z3 * z3;
         let n3 = if t3 < 0.0 {
             0.0
         } else {
