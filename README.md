@@ -1,4 +1,4 @@
-<img align="right" width="120" src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
+<img align="left" width="120" src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
 
 # rust-simd-noise
 Super fast SIMD noise library for Rust. Currently in beta. PRs welcome!
