@@ -5,17 +5,24 @@ use shared_sse::*;
 use std::arch::x86_64::*;
 use std::f32;
 
-// SSE2 has no blendv instruction, so we do it by hand
+// SSE2 has no blendv_sse2 instruction, so we do it by hand
 #[inline(always)]
-unsafe fn blendv(a: __m128, b: __m128, mask: __m128) -> __m128 {
+unsafe fn blendv_sse2(a: __m128, b: __m128, mask: __m128) -> __m128 {
     _mm_or_ps(_mm_andnot_ps(mask, a), _mm_and_ps(mask, b))
 }
+
+#[inline(always)]
+unsafe fn floor_sse2(f: __m128) -> __m128 {
+    let t = _mm_cvtepi32_ps(_mm_cvttps_epi32(f));
+    _mm_sub_ps(t, _mm_and_ps(_mm_cmplt_ps(f, t), _mm_set1_ps(1.0)))
+}
+
 
 unsafe fn grad2_simd(hash: __m128i, x: __m128, y: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(7));
     let mask = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(4)));
-    let u = blendv(y, x, mask);
-    let v = _mm_mul_ps(_mm_set1_ps(2.0), blendv(x, y, mask));
+    let u = blendv_sse2(y, x, mask);
+    let v = _mm_mul_ps(_mm_set1_ps(2.0), blendv_sse2(x, y, mask));
 
     let h_and_1 = _mm_castsi128_ps(_mm_cmpeq_epi32(
         _mm_setzero_si128(),
@@ -27,39 +34,24 @@ unsafe fn grad2_simd(hash: __m128i, x: __m128, y: __m128) -> __m128 {
     ));
 
     _mm_add_ps(
-        blendv(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
-        blendv(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
+        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
+        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
     )
 }
 
 pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let s = _mm_mul_ps(F2, _mm_add_ps(x, y));
 
-    let mut ips = M128Array {
-        simd: _mm_add_ps(x, s),
-    };
+    let ips = floor_sse2(_mm_add_ps(x, s));
+    let jps = floor_sse2(_mm_add_ps(y, s));
 
-    let mut jps = M128Array {
-        simd: _mm_add_ps(y, s),
-    };
-
-    ips.array[0] = ips.array[0].floor();
-    ips.array[1] = ips.array[1].floor();
-    ips.array[2] = ips.array[2].floor();
-    ips.array[3] = ips.array[3].floor();
-
-    jps.array[0] = jps.array[0].floor();
-    jps.array[1] = jps.array[1].floor();
-    jps.array[2] = jps.array[2].floor();
-    jps.array[3] = jps.array[3].floor();
-
-    let i = _mm_cvtps_epi32(ips.simd);
-    let j = _mm_cvtps_epi32(jps.simd);
+    let i = _mm_cvtps_epi32(ips);
+    let j = _mm_cvtps_epi32(jps);
 
     let t = _mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(i, j)), G2);
 
-    let x0 = _mm_sub_ps(x, _mm_sub_ps(ips.simd, t));
-    let y0 = _mm_sub_ps(y, _mm_sub_ps(jps.simd, t));
+    let x0 = _mm_sub_ps(x, _mm_sub_ps(ips, t));
+    let y0 = _mm_sub_ps(y, _mm_sub_ps(jps, t));
 
     let i1 = M128iArray {
         simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpge_ps(x0, y0))),
@@ -130,11 +122,11 @@ pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let mut n2 = _mm_mul_ps(t2q, grad2_simd(gi2.simd, x2, y2));
 
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-    n0 = _mm_or_ps(_mm_andnot_ps(cond, n0), _mm_and_ps(cond, _mm_setzero_ps()));
+    n0 = blendv_sse2(n0,_mm_setzero_ps(),cond); 
     cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-    n1 = _mm_or_ps(_mm_andnot_ps(cond, n1), _mm_and_ps(cond, _mm_setzero_ps()));
+    n1 = blendv_sse2(n1,_mm_setzero_ps(),cond); 
     cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-    n2 = _mm_or_ps(_mm_andnot_ps(cond, n2), _mm_and_ps(cond, _mm_setzero_ps()));
+    n2 = blendv_sse2(n2,_mm_setzero_ps(),cond); 
 
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
 }
@@ -188,18 +180,18 @@ unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 
     let h = _mm_and_si128(hash, _mm_set1_epi32(15));
 
     let mut u = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(8)));
-    u = blendv(y, x, u);
+    u = blendv_sse2(y, x, u);
 
     let mut v = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(4)));
     let mut h12_or_14 = _mm_castsi128_ps(_mm_cmpeq_epi32(
         _mm_setzero_si128(),
         _mm_or_si128(
-            _mm_cmpeq_epi32(h, _mm_set1_epi32(12)),
             _mm_cmpeq_epi32(h, _mm_set1_epi32(14)),
+            _mm_cmpeq_epi32(h, _mm_set1_epi32(12)),
         ),
     ));
-    h12_or_14 = blendv(x, z, h12_or_14);
-    v = blendv(h12_or_14, y, v);
+    h12_or_14 = blendv_sse2(x, z, h12_or_14);
+    v = blendv_sse2(h12_or_14, y, v);
 
     let h_and_1 = _mm_castsi128_ps(_mm_cmpeq_epi32(
         _mm_setzero_si128(),
@@ -211,56 +203,25 @@ unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 
     ));
 
     _mm_add_ps(
-        blendv(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
-        blendv(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
+        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
+        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
     )
 }
 pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
-    let s = M128Array {
-        simd: _mm_mul_ps(F3, _mm_add_ps(x, _mm_add_ps(y, z))),
-    };
-    let ips = M128Array {
-        simd: _mm_add_ps(x, s.simd),
-    };
-    let jps = M128Array {
-        simd: _mm_add_ps(y, s.simd),
-    };
-    let kps = M128Array {
-        simd: _mm_add_ps(z, s.simd),
-    };
+    let s = _mm_mul_ps(F3, _mm_add_ps(x, _mm_add_ps(y, z)));
 
-    let mut i = M128iArray {
-        array: [
-            ips.array[0].floor() as i32,
-            ips.array[1].floor() as i32,
-            ips.array[2].floor() as i32,
-            ips.array[3].floor() as i32,
-        ],
-    };
-    let mut j = M128iArray {
-        array: [
-            jps.array[0].floor() as i32,
-            jps.array[1].floor() as i32,
-            jps.array[2].floor() as i32,
-            jps.array[3].floor() as i32,
-        ],
-    };
-    let mut k = M128iArray {
-        array: [
-            kps.array[0].floor() as i32,
-            kps.array[1].floor() as i32,
-            kps.array[2].floor() as i32,
-            kps.array[3].floor() as i32,
-        ],
-    };
+    let ips = floor_sse2(_mm_add_ps(x, s));
+    let jps = floor_sse2(_mm_add_ps(y, s));
+    let kps = floor_sse2(_mm_add_ps(z, s));
 
-    let t = _mm_mul_ps(
-        _mm_cvtepi32_ps(_mm_add_epi32(i.simd, _mm_add_epi32(j.simd, k.simd))),
-        G3,
-    );
-    let X0 = _mm_sub_ps(_mm_cvtepi32_ps(i.simd), t);
-    let Y0 = _mm_sub_ps(_mm_cvtepi32_ps(j.simd), t);
-    let Z0 = _mm_sub_ps(_mm_cvtepi32_ps(k.simd), t);
+    let i = _mm_cvtps_epi32(ips);
+    let j = _mm_cvtps_epi32(jps);
+    let k = _mm_cvtps_epi32(kps);
+
+    let t = _mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(i, _mm_add_epi32(j, k))), G3);
+    let X0 = _mm_sub_ps(ips, t);
+    let Y0 = _mm_sub_ps(jps, t);
+    let Z0 = _mm_sub_ps(kps, t);
     let x0 = _mm_sub_ps(x, X0);
     let y0 = _mm_sub_ps(y, Y0);
     let z0 = _mm_sub_ps(z, Z0);
@@ -352,96 +313,106 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let y3 = _mm_add_ps(_mm_sub_ps(y0, _mm_set1_ps(1.0)), POINT_FIVE);
     let z3 = _mm_add_ps(_mm_sub_ps(z0, _mm_set1_ps(1.0)), POINT_FIVE);
 
-    i.simd = _mm_and_si128(i.simd, _mm_set1_epi32(0xff));
-    j.simd = _mm_and_si128(j.simd, _mm_set1_epi32(0xff));
-    k.simd = _mm_and_si128(k.simd, _mm_set1_epi32(0xff));
+    let ii = M128iArray {
+        simd: _mm_and_si128(i, _mm_set1_epi32(0xff)),
+    };
+    let jj = M128iArray {
+        simd: _mm_and_si128(j, _mm_set1_epi32(0xff)),
+    };
+    let kk = M128iArray {
+        simd: _mm_and_si128(k, _mm_set1_epi32(0xff)),
+    };
 
     let gi0 = M128iArray {
         array: [
-            PERM[(i.array[0] + PERM[(j.array[0] + PERM[k.array[0] as usize]) as usize]) as usize],
-            PERM[(i.array[1] + PERM[(j.array[1] + PERM[k.array[1] as usize]) as usize]) as usize],
-            PERM[(i.array[2] + PERM[(j.array[2] + PERM[k.array[2] as usize]) as usize]) as usize],
-            PERM[(i.array[3] + PERM[(j.array[3] + PERM[k.array[3] as usize]) as usize]) as usize],
+            PERM[(ii.array[0] + PERM[(jj.array[0] + PERM[kk.array[0] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[1] + PERM[(jj.array[1] + PERM[kk.array[1] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[2] + PERM[(jj.array[2] + PERM[kk.array[2] as usize]) as usize])
+                     as usize],
+            PERM[(ii.array[3] + PERM[(jj.array[3] + PERM[kk.array[3] as usize]) as usize])
+                     as usize],
         ],
     };
 
     let gi1 = M128iArray {
         array: [
-            PERM[(i.array[0] + i1.array[0]
-                     + PERM[(j.array[0] + j1.array[0] + PERM[(k.array[0] + k1.array[0]) as usize])
+            PERM[(ii.array[0] + i1.array[0]
+                     + PERM[(jj.array[0] + j1.array[0] + PERM[(kk.array[0] + k1.array[0]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[1] + i1.array[1]
-                     + PERM[(j.array[1] + j1.array[1] + PERM[(k.array[1] + k1.array[1]) as usize])
+            PERM[(ii.array[1] + i1.array[1]
+                     + PERM[(jj.array[1] + j1.array[1] + PERM[(kk.array[1] + k1.array[1]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[2] + i1.array[2]
-                     + PERM[(j.array[2] + j1.array[2] + PERM[(k.array[2] + k1.array[2]) as usize])
+            PERM[(ii.array[2] + i1.array[2]
+                     + PERM[(jj.array[2] + j1.array[2] + PERM[(kk.array[2] + k1.array[2]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[3] + i1.array[3]
-                     + PERM[(j.array[3] + j1.array[3] + PERM[(k.array[3] + k1.array[3]) as usize])
+            PERM[(ii.array[3] + i1.array[3]
+                     + PERM[(jj.array[3] + j1.array[3] + PERM[(kk.array[3] + k1.array[3]) as usize])
                                 as usize]) as usize],
         ],
     };
     let gi2 = M128iArray {
         array: [
-            PERM[(i.array[0] + i2.array[0]
-                     + PERM[(j.array[0] + j2.array[0] + PERM[(k.array[0] + k2.array[0]) as usize])
+            PERM[(ii.array[0] + i2.array[0]
+                     + PERM[(jj.array[0] + j2.array[0] + PERM[(kk.array[0] + k2.array[0]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[1] + i2.array[1]
-                     + PERM[(j.array[1] + j2.array[1] + PERM[(k.array[1] + k2.array[1]) as usize])
+            PERM[(ii.array[1] + i2.array[1]
+                     + PERM[(jj.array[1] + j2.array[1] + PERM[(kk.array[1] + k2.array[1]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[2] + i2.array[2]
-                     + PERM[(j.array[2] + j2.array[2] + PERM[(k.array[2] + k2.array[2]) as usize])
+            PERM[(ii.array[2] + i2.array[2]
+                     + PERM[(jj.array[2] + j2.array[2] + PERM[(kk.array[2] + k2.array[2]) as usize])
                                 as usize]) as usize],
-            PERM[(i.array[3] + i2.array[3]
-                     + PERM[(j.array[3] + j2.array[3] + PERM[(k.array[3] + k2.array[3]) as usize])
+            PERM[(ii.array[3] + i2.array[3]
+                     + PERM[(jj.array[3] + j2.array[3] + PERM[(kk.array[3] + k2.array[3]) as usize])
                                 as usize]) as usize],
         ],
     };
     let gi3 = M128iArray {
         array: [
-            PERM[(i.array[0]
+            PERM[(ii.array[0]
                      + 1
-                     + PERM[(j.array[0] + 1 + PERM[(k.array[0] + 1) as usize]) as usize])
+                     + PERM[(jj.array[0] + 1 + PERM[(kk.array[0] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[1]
+            PERM[(ii.array[1]
                      + 1
-                     + PERM[(j.array[1] + 1 + PERM[(k.array[1] + 1) as usize]) as usize])
+                     + PERM[(jj.array[1] + 1 + PERM[(kk.array[1] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[2]
+            PERM[(ii.array[2]
                      + 1
-                     + PERM[(j.array[2] + 1 + PERM[(k.array[2] + 1) as usize]) as usize])
+                     + PERM[(jj.array[2] + 1 + PERM[(kk.array[2] + 1) as usize]) as usize])
                      as usize],
-            PERM[(i.array[3]
+            PERM[(ii.array[3]
                      + 1
-                     + PERM[(j.array[3] + 1 + PERM[(k.array[3] + 1) as usize]) as usize])
+                     + PERM[(jj.array[3] + 1 + PERM[(kk.array[3] + 1) as usize]) as usize])
                      as usize],
         ],
     };
 
     let t0 = _mm_sub_ps(
         _mm_sub_ps(
-            _mm_sub_ps(_mm_set1_ps(0.5), _mm_mul_ps(x0, x0)),
+            _mm_sub_ps(POINT_FIVE, _mm_mul_ps(x0, x0)),
             _mm_mul_ps(y0, y0),
         ),
         _mm_mul_ps(z0, z0),
     );
     let t1 = _mm_sub_ps(
         _mm_sub_ps(
-            _mm_sub_ps(_mm_set1_ps(0.5), _mm_mul_ps(x1, x1)),
+            _mm_sub_ps(POINT_FIVE, _mm_mul_ps(x1, x1)),
             _mm_mul_ps(y1, y1),
         ),
         _mm_mul_ps(z1, z1),
     );
     let t2 = _mm_sub_ps(
         _mm_sub_ps(
-            _mm_sub_ps(_mm_set1_ps(0.5), _mm_mul_ps(x2, x2)),
+            _mm_sub_ps(POINT_FIVE, _mm_mul_ps(x2, x2)),
             _mm_mul_ps(y2, y2),
         ),
         _mm_mul_ps(z2, z2),
     );
     let t3 = _mm_sub_ps(
         _mm_sub_ps(
-            _mm_sub_ps(_mm_set1_ps(0.5), _mm_mul_ps(x3, x3)),
+            _mm_sub_ps(POINT_FIVE, _mm_mul_ps(x3, x3)),
             _mm_mul_ps(y3, y3),
         ),
         _mm_mul_ps(z3, z3),
@@ -464,13 +435,13 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
 
     //if ti < 0 then 0 else ni
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-    n0 = blendv(n0, _mm_setzero_ps(), cond);
+    n0 = blendv_sse2(n0, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-    n1 = blendv(n1, _mm_setzero_ps(), cond);
+    n1 = blendv_sse2(n1, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-    n2 = blendv(n2, _mm_setzero_ps(), cond);
+    n2 = blendv_sse2(n2, _mm_setzero_ps(), cond);
     cond = _mm_cmplt_ps(t3, _mm_setzero_ps());
-    n3 = blendv(n3, _mm_setzero_ps(), cond);
+    n3 = blendv_sse2(n3, _mm_setzero_ps(), cond);
 
     _mm_add_ps(n0, _mm_add_ps(n1, _mm_add_ps(n2, n3)))
 }
