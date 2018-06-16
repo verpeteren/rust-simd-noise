@@ -21,14 +21,14 @@ Super fast SIMD noise library for Rust. Currently in beta. PRs welcome!
 * scalar_2d ... bench:  74,207,703 ns/iter (+/- 2,184,952)
 * sse2_2d   ... bench:  23,863,725 ns/iter (+/- 746,331)
 * sse41_2d  ... bench:  22,440,765 ns/iter (+/- 995,336)
-* avx2_2d   ... bench:  12,301,826 ns/iter (+/- 409,890)
+* avx2_2d   ... bench:  12,022,253 ns/iter (+/- 508,793)
 
 ### 3D 100x100x100 FBM Noise, 3 Octaves
 
 * scalar_3d ... bench: 102,543,499 ns/iter (+/- 3,310,472)
 * sse2_3d   ... bench:  39,991,825 ns/iter (+/- 1,043,332)
 * sse41_3d  ... bench:  38,852,436 ns/iter (+/- 1,350,831)
-* avx2_3d   ... bench:  24,147,997 ns/iter (+/- 1,065,838)
+* avx2_3d   ... bench:  23,231,237 ns/iter (+/- 777,420)
 
 ## Todo
 

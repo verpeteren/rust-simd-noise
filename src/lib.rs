@@ -264,30 +264,30 @@ mod benchmarks {
 
     #[bench]
     fn b2d_1_scalar(b: &mut Bencher) {
-        b.iter(|| black_box(scalar::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
+        b.iter(|| black_box(scalar::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn b2d_2_sse2(b: &mut Bencher) {
-        b.iter(|| black_box(sse2::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
+        b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn b2d_3_sse41(b: &mut Bencher) {
-        b.iter(|| black_box(sse41::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
+        b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn b2d_4_avx2d(b: &mut Bencher) {
-        b.iter(|| black_box(avx2::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
+        b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0,1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn b3d_1_scalar(b: &mut Bencher) {
         b.iter(|| {
             black_box(scalar::get_3d_noise(
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 FRACTAL_SETTINGS,
             ))
         });
@@ -297,11 +297,11 @@ mod benchmarks {
         b.iter(|| {
             black_box(sse2::get_3d_noise(
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 FRACTAL_SETTINGS,
             ))
         });
@@ -311,11 +311,11 @@ mod benchmarks {
         b.iter(|| {
             black_box(sse41::get_3d_noise(
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 FRACTAL_SETTINGS,
             ))
         });
@@ -325,11 +325,11 @@ mod benchmarks {
         b.iter(|| {
             black_box(avx2::get_3d_noise(
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 0.0,
-                25,
+                100,
                 FRACTAL_SETTINGS,
             ))
         });

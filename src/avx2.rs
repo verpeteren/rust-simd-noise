@@ -115,18 +115,9 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
         4,
     );
 
-    let t0 = _mm256_sub_ps(
-        _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x0, x0)),
-        _mm256_mul_ps(y0, y0),
-    );
-    let t1 = _mm256_sub_ps(
-        _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x1, x1)),
-        _mm256_mul_ps(y1, y1),
-    );
-    let t2 = _mm256_sub_ps(
-        _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x2, x2)),
-        _mm256_mul_ps(y2, y2),
-    );
+    let t0 = _mm256_fnmadd_ps(y0, y0, _mm256_fnmadd_ps(x0, x0, POINT_FIVE));
+    let t1 = _mm256_fnmadd_ps(y1, y1, _mm256_fnmadd_ps(x1, x1, POINT_FIVE));
+    let t2 = _mm256_fnmadd_ps(y2, y2, _mm256_fnmadd_ps(x2, x2, POINT_FIVE));
 
     let mut t0q = _mm256_mul_ps(t0, t0);
     t0q = _mm256_mul_ps(t0q, t0q);
@@ -537,34 +528,10 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
         4,
     );
 
-    let t0 = _mm256_sub_ps(
-        _mm256_sub_ps(
-            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x0, x0)),
-            _mm256_mul_ps(y0, y0),
-        ),
-        _mm256_mul_ps(z0, z0),
-    );
-    let t1 = _mm256_sub_ps(
-        _mm256_sub_ps(
-            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x1, x1)),
-            _mm256_mul_ps(y1, y1),
-        ),
-        _mm256_mul_ps(z1, z1),
-    );
-    let t2 = _mm256_sub_ps(
-        _mm256_sub_ps(
-            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x2, x2)),
-            _mm256_mul_ps(y2, y2),
-        ),
-        _mm256_mul_ps(z2, z2),
-    );
-    let t3 = _mm256_sub_ps(
-        _mm256_sub_ps(
-            _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x3, x3)),
-            _mm256_mul_ps(y3, y3),
-        ),
-        _mm256_mul_ps(z3, z3),
-    );
+    let t0 = _mm256_fnmadd_ps(z0,z0,_mm256_fnmadd_ps(y0, y0, _mm256_fnmadd_ps(x0, x0, POINT_FIVE)));
+    let t1 = _mm256_fnmadd_ps(z1,z1,_mm256_fnmadd_ps(y1, y1, _mm256_fnmadd_ps(x1, x1, POINT_FIVE)));
+    let t2 = _mm256_fnmadd_ps(z2,z2,_mm256_fnmadd_ps(y2, y2, _mm256_fnmadd_ps(x2, x2, POINT_FIVE)));
+    let t3 = _mm256_fnmadd_ps(z3,z3,_mm256_fnmadd_ps(y3, y3, _mm256_fnmadd_ps(x3, x3, POINT_FIVE)));
 
     //ti*ti*ti*ti
     let mut t0q = _mm256_mul_ps(t0, t0);
