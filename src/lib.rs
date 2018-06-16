@@ -236,7 +236,6 @@ mod tests {
     fn avx2_2d(b: &mut Bencher) {
         b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
     }
-
     #[bench]
     fn scalar_3d(b: &mut Bencher) {
         b.iter(|| {

@@ -56,7 +56,7 @@ pub fn scale_array_sse(scale_min: f32, scale_max: f32, min: f32, max: f32, data:
         let mut i = 0;
         while i <= data.len() - 4 {
             _mm_storeu_ps(
-                &mut data[i],
+                data.get_unchecked_mut(i),
                 _mm_add_ps(
                     _mm_mul_ps(_mm_set1_ps(multiplier), _mm_loadu_ps(&mut data[i])),
                     _mm_set1_ps(offset),
@@ -66,7 +66,7 @@ pub fn scale_array_sse(scale_min: f32, scale_max: f32, min: f32, max: f32, data:
         }
         i = data.len() - (data.len() % 4);
         while i < data.len() {
-            data[i] = data[i] * multiplier + offset;
+            *data.get_unchecked_mut(i) = data.get_unchecked(i) * multiplier + offset;
             i += 1;
         }
     }
