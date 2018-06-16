@@ -39,7 +39,7 @@ Super fast SIMD noise library for Rust. Currently in beta. PRs welcome!
 
 ## Usage Notes
 
-By default the Rust compiler will not target AVX2 and SSE41 instructions even if you machine supports them, you have to specify the
+By default the Rust compiler will not target AVX2 and SSE41 instructions even if your machine supports them, you have to specify the
 `target-cpu` in RUSTFLAGS when building your project. For example you can add this to your .cargo/config file
 
 ```
