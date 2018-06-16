@@ -1,3 +1,6 @@
+#![feature(test)]
+extern crate test;
+
 pub mod avx2;
 pub mod scalar;
 mod shared;
@@ -200,5 +203,94 @@ pub fn get_3d_scaled_noise(
             scaled_min,
             scaled_max,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use test::{black_box, Bencher};
+
+    const fractal_settings: FractalSettings = FractalSettings {
+        freq: 0.04,
+        lacunarity: 0.5,
+        gain: 2.0,
+        octaves: 3,
+        noise_type: NoiseType::FBM,
+    };
+
+    #[bench]
+    fn scalar_2d(b: &mut Bencher) {
+        b.iter(|| black_box(scalar::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+    }
+    #[bench]
+    fn sse2_2d(b: &mut Bencher) {
+        b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+    }
+    #[bench]
+    fn sse41_2d(b: &mut Bencher) {
+        b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+    }
+    #[bench]
+    fn avx2_2d(b: &mut Bencher) {
+        b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+    }
+
+    #[bench]
+    fn scalar_3d(b: &mut Bencher) {
+        b.iter(|| {
+            black_box(scalar::get_3d_noise(
+                0.0,
+                100,
+                0.0,
+                100,
+                0.0,
+                100,
+                fractal_settings,
+            ))
+        });
+    }
+    #[bench]
+    fn sse2_3d(b: &mut Bencher) {
+        b.iter(|| {
+            black_box(sse2::get_3d_noise(
+                0.0,
+                100,
+                0.0,
+                100,
+                0.0,
+                100,
+                fractal_settings,
+            ))
+        });
+    }
+    #[bench]
+    fn sse41_3d(b: &mut Bencher) {
+        b.iter(|| {
+            black_box(sse41::get_3d_noise(
+                0.0,
+                100,
+                0.0,
+                100,
+                0.0,
+                100,
+                fractal_settings,
+            ))
+        });
+    }
+    #[bench]
+    fn avx2_3d(b: &mut Bencher) {
+        b.iter(|| {
+            black_box(avx2::get_3d_noise(
+                0.0,
+                100,
+                0.0,
+                100,
+                0.0,
+                100,
+                fractal_settings,
+            ))
+        });
     }
 }

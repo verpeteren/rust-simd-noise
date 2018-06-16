@@ -203,9 +203,9 @@ unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 
     ));
 
     _mm_add_ps(
-            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
-            blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
-        )
+        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), u), u, h_and_1),
+        blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
+    )
 }
 pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let s = _mm_mul_ps(F3, _mm_add_ps(x, _mm_add_ps(y, z)));
@@ -223,7 +223,7 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let y0 = _mm_sub_ps(y, _mm_sub_ps(jps, t));
     let z0 = _mm_sub_ps(z, _mm_sub_ps(kps, t));
 
-  /* Really tricky section handling a series of nested conditionals 
+    /* Really tricky section handling a series of nested conditionals 
    * This table can be helpful for following the logic
              ijk1 ijk2
 	x>=y>=z -> 100  110
@@ -735,15 +735,4 @@ pub fn get_3d_scaled_noise(
     );
     scale_array_sse(scale_min, scale_max, min, max, &mut noise);
     noise
-}
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_2d() {
-        let r = get_2d_noise(-1, 1, 100, -1, 1, 100);
-    }
-    #[test]
-    fn test_3d() {
-        let r = get_3d_noise(-1, 1, 100, -1, 1, 100, -1, 1, 100);
-    }
 }

@@ -32,7 +32,7 @@ pub const G22: __m128 = unsafe {
 };
 pub const G3: __m128 = unsafe {
     M128Array {
-        array: [1.0/6.0; 4],
+        array: [1.0 / 6.0; 4],
     }.simd
 };
 pub const POINT_FIVE: __m128 = unsafe { M128Array { array: [0.5; 4] }.simd };
