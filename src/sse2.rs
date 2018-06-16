@@ -73,26 +73,82 @@ pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
 
     let gi0 = M128iArray {
         array: [
-            PERM[(ii.array[0] + PERM[jj.array[0] as usize]) as usize],
-            PERM[(ii.array[1] + PERM[jj.array[1] as usize]) as usize],
-            PERM[(ii.array[2] + PERM[jj.array[2] as usize]) as usize],
-            PERM[(ii.array[3] + PERM[jj.array[3] as usize]) as usize],
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(0)
+                    + *PERM.get_unchecked(*jj.array.get_unchecked(0) as usize))
+                    as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(1)
+                    + *PERM.get_unchecked(*jj.array.get_unchecked(1) as usize))
+                    as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(2)
+                    + *PERM.get_unchecked(*jj.array.get_unchecked(2) as usize))
+                    as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(3)
+                    + *PERM.get_unchecked(*jj.array.get_unchecked(3) as usize))
+                    as usize,
+            ),
         ],
     };
     let gi1 = M128iArray {
         array: [
-            PERM[(ii.array[0] + i1.array[0] + PERM[(jj.array[0] + j1.array[0]) as usize]) as usize],
-            PERM[(ii.array[1] + i1.array[1] + PERM[(jj.array[1] + j1.array[1]) as usize]) as usize],
-            PERM[(ii.array[2] + i1.array[2] + PERM[(jj.array[2] + j1.array[2]) as usize]) as usize],
-            PERM[(ii.array[3] + i1.array[3] + PERM[(jj.array[3] + j1.array[3]) as usize]) as usize],
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(0) + *i1.array.get_unchecked(0)
+                    + *PERM.get_unchecked(
+                        (*jj.array.get_unchecked(0) + *j1.array.get_unchecked(0)) as usize,
+                    )) as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(1) + *i1.array.get_unchecked(1)
+                    + *PERM.get_unchecked(
+                        (*jj.array.get_unchecked(1) + *j1.array.get_unchecked(1)) as usize,
+                    )) as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(2) + *i1.array.get_unchecked(2)
+                    + *PERM.get_unchecked(
+                        (*jj.array.get_unchecked(2) + *j1.array.get_unchecked(2)) as usize,
+                    )) as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(3) + *i1.array.get_unchecked(3)
+                    + *PERM.get_unchecked(
+                        (*jj.array.get_unchecked(3) + *j1.array.get_unchecked(3)) as usize,
+                    )) as usize,
+            ),
         ],
     };
     let gi2 = M128iArray {
         array: [
-            PERM[(ii.array[0] + 1 + PERM[(jj.array[0] + 1) as usize]) as usize],
-            PERM[(ii.array[1] + 1 + PERM[(jj.array[1] + 1) as usize]) as usize],
-            PERM[(ii.array[2] + 1 + PERM[(jj.array[2] + 1) as usize]) as usize],
-            PERM[(ii.array[3] + 1 + PERM[(jj.array[3] + 1) as usize]) as usize],
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(0)
+                    + 1
+                    + *PERM.get_unchecked((*jj.array.get_unchecked(0) + 1) as usize))
+                    as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(1)
+                    + 1
+                    + *PERM.get_unchecked((*jj.array.get_unchecked(1) + 1) as usize))
+                    as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(2)
+                    + 1
+                    + *PERM.get_unchecked((*jj.array.get_unchecked(2) + 1) as usize))
+                    as usize,
+            ),
+            *PERM.get_unchecked(
+                (*ii.array.get_unchecked(3)
+                    + 1
+                    + *PERM.get_unchecked((*jj.array.get_unchecked(3) + 1) as usize))
+                    as usize,
+            ),
         ],
     };
 
