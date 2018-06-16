@@ -7,7 +7,7 @@ Super fast SIMD noise library for Rust. Currently in beta. PRs welcome!
 
 ## Features
 
-* SSE2, SSE41, and AVX2 instruction sets
+* SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
 * runtime detection picks the best available instruction set
 * simplex noise, fractal brownian motion, and turbulence
 * 2d and 3d
