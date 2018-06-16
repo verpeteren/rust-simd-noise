@@ -10,11 +10,6 @@ union M256Array {
     array: [f32; 8],
 }
 
-union M256iArray {
-    simd: __m256i,
-    array: [i32; 8],
-}
-
 const F2: __m256 = unsafe {
     M256Array {
         array: [0.36602540378; 8],
@@ -156,6 +151,7 @@ unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     _mm256_add_ps(n0, _mm256_add_ps(n1, n2))
 }
 
+#[inline(always)]
 unsafe fn _mm256_abs_ps(a: __m256) -> __m256 {
     let b = _mm256_set1_epi32(0x7fffffff);
     _mm256_and_ps(a, _mm256_castsi256_ps(b))
@@ -222,7 +218,7 @@ pub fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mu
                 &mut data[i],
                 _mm256_fmadd_ps(
                     _mm256_set1_ps(multiplier),
-                    _mm256_loadu_ps(&mut data[i]),
+                    _mm256_loadu_ps(data.get_unchecked_mut(i)),
                     _mm256_set1_ps(offset),
                 ),
             );
@@ -230,7 +226,7 @@ pub fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mu
         }
         i = data.len() - (data.len() % 8);
         while i < data.len() {
-            data[i] = data[i] * multiplier + offset;
+            *data.get_unchecked_mut(i) = *data.get_unchecked(i) * multiplier + offset;
             i += 1;
         }
     }

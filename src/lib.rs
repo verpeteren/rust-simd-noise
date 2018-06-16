@@ -212,7 +212,7 @@ mod tests {
     use super::*;
     use test::{black_box, Bencher};
 
-    const fractal_settings: FractalSettings = FractalSettings {
+    const FRACTAL_SETTINGS: FractalSettings = FractalSettings {
         freq: 0.04,
         lacunarity: 0.5,
         gain: 2.0,
@@ -222,19 +222,19 @@ mod tests {
 
     #[bench]
     fn scalar_2d(b: &mut Bencher) {
-        b.iter(|| black_box(scalar::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+        b.iter(|| black_box(scalar::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn sse2_2d(b: &mut Bencher) {
-        b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+        b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn sse41_2d(b: &mut Bencher) {
-        b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+        b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn avx2_2d(b: &mut Bencher) {
-        b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, fractal_settings)));
+        b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
     fn scalar_3d(b: &mut Bencher) {
@@ -246,7 +246,7 @@ mod tests {
                 100,
                 0.0,
                 100,
-                fractal_settings,
+                FRACTAL_SETTINGS,
             ))
         });
     }
@@ -260,7 +260,7 @@ mod tests {
                 100,
                 0.0,
                 100,
-                fractal_settings,
+                FRACTAL_SETTINGS,
             ))
         });
     }
@@ -274,7 +274,7 @@ mod tests {
                 100,
                 0.0,
                 100,
-                fractal_settings,
+                FRACTAL_SETTINGS,
             ))
         });
     }
@@ -288,7 +288,7 @@ mod tests {
                 100,
                 0.0,
                 100,
-                fractal_settings,
+                FRACTAL_SETTINGS,
             ))
         });
     }
