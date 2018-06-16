@@ -115,6 +115,7 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
         4,
     );
 
+    // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
     let t0 = _mm256_fnmadd_ps(y0, y0, _mm256_fnmadd_ps(x0, x0, POINT_FIVE));
     let t1 = _mm256_fnmadd_ps(y1, y1, _mm256_fnmadd_ps(x1, x1, POINT_FIVE));
     let t2 = _mm256_fnmadd_ps(y2, y2, _mm256_fnmadd_ps(x2, x2, POINT_FIVE));
@@ -462,6 +463,7 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let y3 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_set1_ps(1.0)), POINT_FIVE);
     let z3 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_set1_ps(1.0)), POINT_FIVE);
 
+    // Wrap indices at 256 so it will fit in the PERM array
     let ii = _mm256_and_si256(i, _mm256_set1_epi32(0xff));
     let jj = _mm256_and_si256(j, _mm256_set1_epi32(0xff));
     let kk = _mm256_and_si256(k, _mm256_set1_epi32(0xff));
@@ -528,6 +530,7 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
         4,
     );
 
+    // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y - z*z
     let t0 = _mm256_fnmadd_ps(z0,z0,_mm256_fnmadd_ps(y0, y0, _mm256_fnmadd_ps(x0, x0, POINT_FIVE)));
     let t1 = _mm256_fnmadd_ps(z1,z1,_mm256_fnmadd_ps(y1, y1, _mm256_fnmadd_ps(x1, x1, POINT_FIVE)));
     let t2 = _mm256_fnmadd_ps(z2,z2,_mm256_fnmadd_ps(y2, y2, _mm256_fnmadd_ps(x2, x2, POINT_FIVE)));
@@ -581,7 +584,7 @@ pub unsafe fn fbm_3d(
         yf = _mm256_mul_ps(yf, lac);
         zf = _mm256_mul_ps(zf, lac);
         amp = _mm256_mul_ps(amp, gain);
-        result = _mm256_add_ps(result, _mm256_mul_ps(simplex_3d(xf, yf, zf), amp));
+        result = _mm256_fmadd_ps(simplex_3d(xf, yf,zf), amp, result);
     }
 
     result

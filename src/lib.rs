@@ -275,7 +275,7 @@ mod benchmarks {
         b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
     }
     #[bench]
-    fn b2d_4_avx2d(b: &mut Bencher) {
+    fn b2d_4_avx2(b: &mut Bencher) {
         b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0,1000, FRACTAL_SETTINGS)));
     }
     #[bench]
