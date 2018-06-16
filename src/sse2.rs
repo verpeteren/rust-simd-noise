@@ -1,4 +1,3 @@
-#![allow(non_snake_case)]
 use super::*;
 use shared::*;
 use shared_sse::*;

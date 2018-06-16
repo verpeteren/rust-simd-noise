@@ -1,5 +1,3 @@
-#![allow(non_snake_case)]
-
 use super::*;
 use shared::*;
 use std::arch::x86_64::*;
@@ -58,7 +56,7 @@ unsafe fn grad2_simd(hash: __m256i, x: __m256, y: __m256) -> __m256 {
     )
 }
 
-unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
+pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let s = _mm256_mul_ps(F2, _mm256_add_ps(x, y));
     let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
     let jps = _mm256_floor_ps(_mm256_add_ps(y, s));
@@ -205,7 +203,7 @@ pub unsafe fn turbulence_2d(
 
     result
 }
-pub fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mut Vec<f32>) {
+fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mut Vec<f32>) {
     unsafe {
         let scale_range = scale_max - scale_min;
         let range = max - min;
@@ -378,7 +376,7 @@ unsafe fn grad3d_simd(hash: __m256i, x: __m256, y: __m256, z: __m256) -> __m256 
     )
 }
 
-unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
+pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let s = _mm256_mul_ps(F3, _mm256_add_ps(x, _mm256_add_ps(y, z)));
 
     let ips = _mm256_floor_ps(_mm256_add_ps(x, s));

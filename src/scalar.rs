@@ -1,4 +1,3 @@
-#![allow(non_snake_case)]
 use super::*;
 use shared::*;
 use std::f32;
@@ -26,10 +25,8 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
     let i = xs.floor() as i32;
     let j = ys.floor() as i32;
     let t = (i + j) as f32 * G2;
-    let X0 = i as f32 - t;
-    let Y0 = j as f32 - t;
-    let x0 = x - X0;
-    let y0 = y - Y0;
+    let x0 = x - (i as f32 - t);
+    let y0 = y - (j as f32 - t);
 
     let (i1, j1) = if x0 > y0 { (1, 0) } else { (0, 1) };
     let x1 = x0 - i1 as f32 + G2;
@@ -39,6 +36,7 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
 
     let ii = i & 0xff;
     let jj = j & 0xff;
+
     unsafe {
         let t0 = 0.5 - x0 * x0 - y0 * y0;
         let n0 = if t0 < 0.0 {
@@ -110,7 +108,7 @@ pub fn turbulence_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octa
     result
 }
 
-pub fn get_2d_noise_helper(x: f32, y: f32, fractal_settings: FractalSettings) -> f32 {
+fn get_2d_noise_helper(x: f32, y: f32, fractal_settings: FractalSettings) -> f32 {
     match fractal_settings.noise_type {
         NoiseType::FBM => fbm_2d(
             x,
@@ -158,7 +156,9 @@ pub fn get_2d_noise(
             if f > max {
                 max = f;
             }
-            result[i] = f;
+            unsafe {
+                *result.get_unchecked_mut(i) = f;
+            }
             i += 1;
             x += 1.0;
         }
@@ -199,7 +199,6 @@ fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
     };
     let a = if (h & 1) != 0 { -u } else { u };
     let b = if (h & 2) != 0 { -v } else { v };
-    //    println!("({},{},{},{}) = {}", x, y, z, hash, a + b);
     a + b
 }
 
@@ -209,12 +208,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     let j = (y + s).floor() as i32;
     let k = (z + s).floor() as i32;
     let t = (i + j + k) as f32 * G3;
-    let X0 = i as f32 - t;
-    let Y0 = j as f32 - t;
-    let Z0 = k as f32 - t;
-    let x0 = x - X0;
-    let y0 = y - Y0;
-    let z0 = z - Z0;
+    let x0 = x - (i as f32 - t);
+    let y0 = y - (j as f32 - t);
+    let z0 = z - (k as f32 - t);
 
     let (i1, j1, k1, i2, j2, k2) = if x0 >= y0 {
         if y0 >= z0 {
@@ -347,7 +343,7 @@ pub fn turbulence_3d(
     result
 }
 
-pub fn get_3d_noise_helper(x: f32, y: f32, z: f32, fractal_settings: FractalSettings) -> f32 {
+fn get_3d_noise_helper(x: f32, y: f32, z: f32, fractal_settings: FractalSettings) -> f32 {
     match fractal_settings.noise_type {
         NoiseType::FBM => fbm_3d(
             x,
@@ -404,7 +400,9 @@ pub fn get_3d_noise(
                 if f > max {
                     max = f;
                 }
-                result[i] = f;
+                unsafe {
+                    *result.get_unchecked_mut(i) = f;
+                }
                 i += 1;
                 x += 1.0;
             }

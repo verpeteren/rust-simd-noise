@@ -8,21 +8,43 @@ mod shared_sse;
 pub mod sse2;
 pub mod sse41;
 
+/// Specifies what type of noise to generate.
 #[derive(Copy, Clone)]
 pub enum NoiseType {
+    /// Fractal brownian motion on top of simplex noise
     FBM,
+    /// Turbulence on top of simplex noise
     Turbulence,
+    /// Simplex Noise
     Normal,
 }
+
+/// Contains parameters for noise functions. When using
+/// `Normal` noise, only frequency is used.
 #[derive(Copy, Clone)]
 pub struct FractalSettings {
+    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good 
+    /// starting value for experimentation is around 0.05
     pub freq: f32,
+    /// Lacunarity affects how the octaves are layered together. A good starting value to
+    /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
     pub lacunarity: f32,
+    /// Gain affects how the octaves are layered together. A good starting value is 2.0
     pub gain: f32,
+    /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+    /// and will increase runtime linearlly.
     pub octaves: u8,
+    /// The type of noise to generate.  
     pub noise_type: NoiseType,
 }
 
+/// Gets a width X height sized block of 2d noise, unscaled,
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_2d_noise(
     start_x: f32,
     width: usize,
@@ -41,6 +63,12 @@ pub fn get_2d_noise(
     }
 }
 
+/// Gets a width X height sized block of scaled 2d noise
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_2d_scaled_noise(
     start_x: f32,
     width: usize,
@@ -92,6 +120,14 @@ pub fn get_2d_scaled_noise(
         )
     }
 }
+
+/// Gets a width X height X depth sized block of 3d noise, unscaled,
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_3d_noise(
     start_x: f32,
     width: usize,
@@ -144,6 +180,12 @@ pub fn get_3d_noise(
     }
 }
 
+/// Gets a width X height X depth sized block of scaled 3d noise
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_3d_scaled_noise(
     start_x: f32,
     width: usize,
@@ -207,7 +249,7 @@ pub fn get_3d_scaled_noise(
 }
 
 #[cfg(test)]
-mod tests {
+mod benchmarks {
 
     use super::*;
     use test::{black_box, Bencher};
@@ -221,73 +263,73 @@ mod tests {
     };
 
     #[bench]
-    fn scalar_2d(b: &mut Bencher) {
-        b.iter(|| black_box(scalar::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+    fn b2d_1_scalar(b: &mut Bencher) {
+        b.iter(|| black_box(scalar::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
     }
     #[bench]
-    fn sse2_2d(b: &mut Bencher) {
-        b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+    fn b2d_2_sse2(b: &mut Bencher) {
+        b.iter(|| black_box(sse2::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
     }
     #[bench]
-    fn sse41_2d(b: &mut Bencher) {
-        b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+    fn b2d_3_sse41(b: &mut Bencher) {
+        b.iter(|| black_box(sse41::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
     }
     #[bench]
-    fn avx2_2d(b: &mut Bencher) {
-        b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+    fn b2d_4_avx2d(b: &mut Bencher) {
+        b.iter(|| black_box(avx2::get_2d_noise(0.0, 150, 0.0, 150, FRACTAL_SETTINGS)));
     }
     #[bench]
-    fn scalar_3d(b: &mut Bencher) {
+    fn b3d_1_scalar(b: &mut Bencher) {
         b.iter(|| {
             black_box(scalar::get_3d_noise(
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 FRACTAL_SETTINGS,
             ))
         });
     }
     #[bench]
-    fn sse2_3d(b: &mut Bencher) {
+    fn b3d_2_sse2(b: &mut Bencher) {
         b.iter(|| {
             black_box(sse2::get_3d_noise(
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 FRACTAL_SETTINGS,
             ))
         });
     }
     #[bench]
-    fn sse41_3d(b: &mut Bencher) {
+    fn b3d_3_sse41(b: &mut Bencher) {
         b.iter(|| {
             black_box(sse41::get_3d_noise(
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 FRACTAL_SETTINGS,
             ))
         });
     }
     #[bench]
-    fn avx2_3d(b: &mut Bencher) {
+    fn b3d_4_avx2(b: &mut Bencher) {
         b.iter(|| {
             black_box(avx2::get_3d_noise(
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 0.0,
-                100,
+                25,
                 FRACTAL_SETTINGS,
             ))
         });
