@@ -1,3 +1,6 @@
+//! Non SIMD accelerated versions of noise functions, 
+//! guaranteed to work wherever rust works.
+
 use super::*;
 use shared::*;
 use std::f32;
@@ -12,12 +15,13 @@ const POINT_FIVE: f32 = 0.5;
 fn grad2(hash: i32, x: f32, y: f32) -> f32 {
     let h = hash & 7;
     let (u, v) = if h < 4 { (x, y) } else { (y, x) };
-
     let a = if (h & 1) != 0 { -u } else { u };
     let b = if (h & 2) != 0 { -2.0 * v } else { 2.0 * v };
     a + b
 }
 
+/// Get a single value of 2d simplex noise, results
+/// are not scaled.
 pub fn simplex_2d(x: f32, y: f32) -> f32 {
     let s = (x + y) * F2;
     let xs = x + s;
@@ -78,6 +82,8 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
     }
 }
 
+/// Get a single value of 2d fractal brownian motion. See
+/// [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn fbm_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
@@ -93,6 +99,8 @@ pub fn fbm_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8
     result
 }
 
+/// Get a single value of 2d turbulence. 
+/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn turbulence_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
@@ -130,6 +138,11 @@ fn get_2d_noise_helper(x: f32, y: f32, fractal_settings: FractalSettings) -> f32
     }
 }
 
+/// Gets a width X height sized block of 2d noise, unscaled.
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_2d_noise(
     start_x: f32,
     width: usize,
@@ -167,6 +180,10 @@ pub fn get_2d_noise(
     (result, min, max)
 }
 
+/// Gets a width X height sized block of scaled 2d noise
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_2d_scaled_noise(
     start_x: f32,
     width: usize,
@@ -202,6 +219,8 @@ fn grad3(hash: i32, x: f32, y: f32, z: f32) -> f32 {
     a + b
 }
 
+/// Get a single value of 3d simplex noise, results
+/// are not scaled.
 pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     let s = (x + y + z) * F3;
     let i = (x + s).floor() as i32;
@@ -301,6 +320,8 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     }
 }
 
+/// Get a single value of 3d fractal brownian motion. See
+/// [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
@@ -318,6 +339,8 @@ pub fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, oct
     result
 }
 
+/// Get a single value of 3d turbulence. 
+/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn turbulence_3d(
     x: f32,
     y: f32,
@@ -371,6 +394,11 @@ fn get_3d_noise_helper(x: f32, y: f32, z: f32, fractal_settings: FractalSettings
     }
 }
 
+/// Gets a width X height X depth sized block of 3d noise, unscaled,
+/// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_3d_noise(
     start_x: f32,
     width: usize,
@@ -413,6 +441,10 @@ pub fn get_3d_noise(
     (result, min, max)
 }
 
+/// Gets a width X height X depth sized block of scaled 3d noise
+/// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_3d_scaled_noise(
     start_x: f32,
     width: usize,

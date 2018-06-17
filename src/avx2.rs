@@ -1,3 +1,13 @@
+//! AVX2 and FMA3 Accelerated noise functions. 
+//! CPUs since ~2013 (Intel) and ~2015 (AMD) support this.
+//! It is about twice as fast as the SSE2 version.
+//!
+//! Use `is_x86_feature_detected!("avx2")` provided
+//! by the Rust stanard library to detect at runtime.
+//!
+//! When using the `get_` functions, you will get a performance boost when width
+//! is evenly divisble by 8, and when it is not small relative height and depth.
+
 use super::*;
 use shared::*;
 use std::arch::x86_64::*;
@@ -56,6 +66,8 @@ unsafe fn grad2_simd(hash: __m256i, x: __m256, y: __m256) -> __m256 {
     )
 }
 
+/// Get a single value of 2d simplex noise, results
+/// are not scaled.
 pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let s = _mm256_mul_ps(F2, _mm256_add_ps(x, y));
     let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
@@ -147,6 +159,8 @@ unsafe fn _mm256_abs_ps(a: __m256) -> __m256 {
     _mm256_and_ps(a, _mm256_castsi256_ps(b))
 }
 
+/// Get a single value of 2d fractal brownian motion. See
+/// [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn fbm_2d(
     x: __m256,
     y: __m256,
@@ -170,6 +184,8 @@ pub unsafe fn fbm_2d(
     result
 }
 
+/// Get a single value of 2d turbulence. 
+/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn turbulence_2d(
     x: __m256,
     y: __m256,
@@ -221,6 +237,7 @@ fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mut Ve
         }
     }
 }
+
 unsafe fn get_2d_noise_helper(
     x: __m256,
     y: __m256,
@@ -252,6 +269,11 @@ unsafe fn get_2d_noise_helper(
     }
 }
 
+/// Gets a width X height sized block of 2d noise, unscaled.
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_2d_noise(
     start_x: f32,
     width: usize,
@@ -322,6 +344,10 @@ pub fn get_2d_noise(
     }
 }
 
+/// Gets a width X height sized block of scaled 2d noise
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_2d_scaled_noise(
     start_x: f32,
     width: usize,
@@ -368,6 +394,8 @@ unsafe fn grad3d_simd(hash: __m256i, x: __m256, y: __m256, z: __m256) -> __m256 
     )
 }
 
+/// Get a single value of 3d simplex noise, results
+/// are not scaled.
 pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let s = _mm256_mul_ps(F3, _mm256_add_ps(x, _mm256_add_ps(y, z)));
 
@@ -564,6 +592,8 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     _mm256_add_ps(n0, _mm256_add_ps(n1, _mm256_add_ps(n2, n3)))
 }
 
+/// Get a single value of 3d fractal brownian motion. See
+/// [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn fbm_3d(
     x: __m256,
     y: __m256,
@@ -590,6 +620,8 @@ pub unsafe fn fbm_3d(
     result
 }
 
+/// Get a single value of 3d turbulence. 
+/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn turbulence_3d(
     x: __m256,
     y: __m256,
@@ -618,6 +650,7 @@ pub unsafe fn turbulence_3d(
 
     result
 }
+
 unsafe fn get_3d_noise_helper(
     x: __m256,
     y: __m256,
@@ -653,6 +686,11 @@ unsafe fn get_3d_noise_helper(
     }
 }
 
+/// Gets a width X height X depth sized block of 3d noise, unscaled,
+/// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_3d_noise(
     start_x: f32,
     width: usize,
@@ -729,6 +767,10 @@ pub fn get_3d_noise(
     }
 }
 
+/// Gets a width X height X depth sized block of scaled 3d noise
+/// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_3d_scaled_noise(
     start_x: f32,
     width: usize,

@@ -1,3 +1,14 @@
+//! SSE41 Accelerated noise functions. 
+//! The vast majority of Intel/AMD cpus running support this.
+//! It is only a few % faster than SSE2 though.
+//!
+//! Use `is_x86_feature_detected!("sse4.1")` provided
+//! by the Rust stanard library to detect at runtime.
+//!
+//! When using the `get_` functions, you will get a performance boost when width
+//! is evenly divisble by 4, and when it is not small relative height and depth.
+
+
 use super::*;
 use shared::*;
 use shared_sse::*;
@@ -25,6 +36,8 @@ unsafe fn grad2_simd(hash: __m128i, x: __m128, y: __m128) -> __m128 {
     )
 }
 
+/// Get a single value of 2d simplex noise, results
+/// are not scaled.
 pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let s = _mm_mul_ps(F2, _mm_add_ps(x, y));
 
@@ -173,6 +186,8 @@ pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
 }
 
+/// Get a single value of 2d fractal brownian motion. See
+/// [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn fbm_2d(
     x: __m128,
     y: __m128,
@@ -196,6 +211,8 @@ pub unsafe fn fbm_2d(
     result
 }
 
+/// Get a single value of 2d turbulence. 
+/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn turbulence_2d(
     x: __m128,
     y: __m128,
@@ -250,6 +267,9 @@ unsafe fn grad3d_simd(hash: __m128i, x: __m128, y: __m128, z: __m128) -> __m128 
         _mm_blendv_ps(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_2),
     )
 }
+
+/// Get a single value of 3d simplex noise, results
+/// are not scaled.
 pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let s = _mm_mul_ps(F3, _mm_add_ps(x, _mm_add_ps(y, z)));
 
@@ -588,6 +608,8 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     _mm_add_ps(n0, _mm_add_ps(n1, _mm_add_ps(n2, n3)))
 }
 
+/// Get a single value of 3d fractal brownian motion. See
+/// [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn fbm_3d(
     x: __m128,
     y: __m128,
@@ -614,6 +636,8 @@ pub unsafe fn fbm_3d(
     result
 }
 
+/// Get a single value of 3d turbulence. 
+/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub unsafe fn turbulence_3d(
     x: __m128,
     y: __m128,
@@ -671,6 +695,11 @@ unsafe fn get_2d_noise_helper(
     }
 }
 
+/// Gets a width X height sized block of 2d noise, unscaled.
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_2d_noise(
     start_x: f32,
     width: usize,
@@ -732,6 +761,10 @@ pub fn get_2d_noise(
     }
 }
 
+/// Gets a width X height sized block of scaled 2d noise
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_2d_scaled_noise(
     start_x: f32,
     width: usize,
@@ -781,6 +814,11 @@ unsafe fn get_3d_noise_helper(
     }
 }
 
+/// Gets a width X height X depth sized block of 3d noise, unscaled,
+/// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
 pub fn get_3d_noise(
     start_x: f32,
     width: usize,
@@ -848,6 +886,10 @@ pub fn get_3d_noise(
     }
 }
 
+/// Gets a width X height X depth sized block of scaled 3d noise
+/// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 pub fn get_3d_scaled_noise(
     start_x: f32,
     width: usize,
