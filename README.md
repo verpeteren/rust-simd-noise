@@ -33,10 +33,9 @@ Super fast SIMD noise library for Rust. Currently in beta. PRs welcome!
 
 ## Todo
 
-* proper doc comments
 * AVX512 support
 * ARM NEON support
-* Voroni and other noise types
+* Voroni, Cell, and other noise types
 
 ## Usage Notes
 
