@@ -1,4 +1,5 @@
 [package]
+exclude = ["*.jpg"]
 name = "simdnoise"
 version = "1.0.0"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
