@@ -1,4 +1,4 @@
-//! Non SIMD accelerated versions of noise functions, 
+//! Non SIMD accelerated versions of noise functions,
 //! guaranteed to work wherever rust works.
 
 use super::*;
@@ -99,7 +99,7 @@ pub fn fbm_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8
     result
 }
 
-/// Get a single value of 2d turbulence. 
+/// Get a single value of 2d turbulence.
 /// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn turbulence_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
@@ -339,7 +339,7 @@ pub fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, oct
     result
 }
 
-/// Get a single value of 3d turbulence. 
+/// Get a single value of 3d turbulence.
 /// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn turbulence_3d(
     x: f32,

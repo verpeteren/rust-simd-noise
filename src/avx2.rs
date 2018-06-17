@@ -1,4 +1,4 @@
-//! AVX2 and FMA3 Accelerated noise functions. 
+//! AVX2 and FMA3 Accelerated noise functions.
 //! CPUs since ~2013 (Intel) and ~2015 (AMD) support this.
 //! It is about twice as fast as the SSE2 version.
 //!
@@ -7,7 +7,6 @@
 //!
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 8, and when it is not small relative height and depth.
-
 use super::*;
 use shared::*;
 use std::arch::x86_64::*;
@@ -33,6 +32,7 @@ const G2: __m256 = unsafe {
         array: [0.2113248654; 8],
     }.simd
 };
+
 const G22: __m256 = unsafe {
     M256Array {
         array: [2.0 * 0.2113248654; 8],
@@ -45,6 +45,7 @@ const G3: __m256 = unsafe {
 };
 const POINT_FIVE: __m256 = unsafe { M256Array { array: [0.5; 8] }.simd };
 
+#[target_feature(enable = "avx2")]
 unsafe fn grad2_simd(hash: __m256i, x: __m256, y: __m256) -> __m256 {
     let h = _mm256_and_si256(hash, _mm256_set1_epi32(7));
     let mask = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(4), h));
@@ -68,6 +69,7 @@ unsafe fn grad2_simd(hash: __m256i, x: __m256, y: __m256) -> __m256 {
 
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
+#[target_feature(enable = "avx2")]
 pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let s = _mm256_mul_ps(F2, _mm256_add_ps(x, y));
     let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
@@ -153,7 +155,7 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     _mm256_add_ps(n0, _mm256_add_ps(n1, n2))
 }
 
-#[inline(always)]
+#[target_feature(enable = "avx2")]
 unsafe fn _mm256_abs_ps(a: __m256) -> __m256 {
     let b = _mm256_set1_epi32(0x7fffffff);
     _mm256_and_ps(a, _mm256_castsi256_ps(b))
@@ -161,6 +163,7 @@ unsafe fn _mm256_abs_ps(a: __m256) -> __m256 {
 
 /// Get a single value of 2d fractal brownian motion. See
 /// [FractalSettings](../struct.FractalSettings.html) for more details.
+#[target_feature(enable = "avx2")]
 pub unsafe fn fbm_2d(
     x: __m256,
     y: __m256,
@@ -184,8 +187,9 @@ pub unsafe fn fbm_2d(
     result
 }
 
-/// Get a single value of 2d turbulence. 
+/// Get a single value of 2d turbulence.
 /// See [FractalSettings](../struct.FractalSettings.html) for more details.
+#[target_feature(enable = "avx2")]
 pub unsafe fn turbulence_2d(
     x: __m256,
     y: __m256,
@@ -211,33 +215,34 @@ pub unsafe fn turbulence_2d(
 
     result
 }
-fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mut Vec<f32>) {
-    unsafe {
-        let scale_range = scale_max - scale_min;
-        let range = max - min;
-        let multiplier = scale_range / range;
-        let offset = scale_min - min * multiplier;
 
-        let mut i = 0;
-        while i <= data.len() - 8 {
-            _mm256_storeu_ps(
-                &mut data[i],
-                _mm256_fmadd_ps(
-                    _mm256_set1_ps(multiplier),
-                    _mm256_loadu_ps(data.get_unchecked_mut(i)),
-                    _mm256_set1_ps(offset),
-                ),
-            );
-            i += 8;
-        }
-        i = data.len() - (data.len() % 8);
-        while i < data.len() {
-            *data.get_unchecked_mut(i) = *data.get_unchecked(i) * multiplier + offset;
-            i += 1;
-        }
+#[target_feature(enable = "avx2")]
+unsafe fn scale_array(scale_min: f32, scale_max: f32, min: f32, max: f32, data: &mut Vec<f32>) {
+    let scale_range = scale_max - scale_min;
+    let range = max - min;
+    let multiplier = scale_range / range;
+    let offset = scale_min - min * multiplier;
+
+    let mut i = 0;
+    while i <= data.len() - 8 {
+        _mm256_storeu_ps(
+            &mut data[i],
+            _mm256_fmadd_ps(
+                _mm256_set1_ps(multiplier),
+                _mm256_loadu_ps(data.get_unchecked_mut(i)),
+                _mm256_set1_ps(offset),
+            ),
+        );
+        i += 8;
+    }
+    i = data.len() - (data.len() % 8);
+    while i < data.len() {
+        *data.get_unchecked_mut(i) = *data.get_unchecked(i) * multiplier + offset;
+        i += 1;
     }
 }
 
+#[target_feature(enable = "avx2")]
 unsafe fn get_2d_noise_helper(
     x: __m256,
     y: __m256,
@@ -274,81 +279,81 @@ unsafe fn get_2d_noise_helper(
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-pub fn get_2d_noise(
+#[target_feature(enable = "avx2")]
+pub unsafe fn get_2d_noise(
     start_x: f32,
     width: usize,
     start_y: f32,
     height: usize,
     fractal_settings: FractalSettings,
 ) -> (Vec<f32>, f32, f32) {
-    unsafe {
-        let mut min_s = M256Array {
-            simd: _mm256_set1_ps(f32::MAX),
-        };
-        let mut max_s = M256Array {
-            simd: _mm256_set1_ps(f32::MIN),
-        };
-        let mut min = f32::MAX;
-        let mut max = f32::MIN;
+    let mut min_s = M256Array {
+        simd: _mm256_set1_ps(f32::MAX),
+    };
+    let mut max_s = M256Array {
+        simd: _mm256_set1_ps(f32::MIN),
+    };
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
 
-        let mut result = Vec::with_capacity(width * height);
-        result.set_len(width * height);
-        let mut y = _mm256_set1_ps(start_y);
-        let mut i = 0;
-        let remainder = width % 8;
-        for _ in 0..height {
-            let mut x = _mm256_set_ps(
-                start_x + 7.0,
-                start_x + 6.0,
-                start_x + 5.0,
-                start_x + 4.0,
-                start_x + 3.0,
-                start_x + 2.0,
-                start_x + 1.0,
-                start_x,
-            );
-            for _ in 0..width / 8 {
-                let f = get_2d_noise_helper(x, y, fractal_settings).simd;
-                max_s.simd = _mm256_max_ps(max_s.simd, f);
-                min_s.simd = _mm256_min_ps(min_s.simd, f);
-                _mm256_storeu_ps(result.get_unchecked_mut(i), f);
-                i += 8;
-                x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
-            }
-            if remainder != 0 {
-                let f = get_2d_noise_helper(x, y, fractal_settings);
-                for j in 0..remainder {
-                    let n = *f.array.get_unchecked(j);
-                    *result.get_unchecked_mut(i) = n;
-                    // Note: This is unecessary for large images
-                    if n < min {
-                        min = n;
-                    }
-                    if n > max {
-                        max = n;
-                    }
-                    i += 1;
+    let mut result = Vec::with_capacity(width * height);
+    result.set_len(width * height);
+    let mut y = _mm256_set1_ps(start_y);
+    let mut i = 0;
+    let remainder = width % 8;
+    for _ in 0..height {
+        let mut x = _mm256_set_ps(
+            start_x + 7.0,
+            start_x + 6.0,
+            start_x + 5.0,
+            start_x + 4.0,
+            start_x + 3.0,
+            start_x + 2.0,
+            start_x + 1.0,
+            start_x,
+        );
+        for _ in 0..width / 8 {
+            let f = get_2d_noise_helper(x, y, fractal_settings).simd;
+            max_s.simd = _mm256_max_ps(max_s.simd, f);
+            min_s.simd = _mm256_min_ps(min_s.simd, f);
+            _mm256_storeu_ps(result.get_unchecked_mut(i), f);
+            i += 8;
+            x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
+        }
+        if remainder != 0 {
+            let f = get_2d_noise_helper(x, y, fractal_settings);
+            for j in 0..remainder {
+                let n = *f.array.get_unchecked(j);
+                *result.get_unchecked_mut(i) = n;
+                // Note: This is unecessary for large images
+                if n < min {
+                    min = n;
                 }
-            }
-            y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
-        }
-        for i in 0..8 {
-            if *min_s.array.get_unchecked(i) < min {
-                min = *min_s.array.get_unchecked(i);
-            }
-            if *max_s.array.get_unchecked(i) > max {
-                max = *max_s.array.get_unchecked(i);
+                if n > max {
+                    max = n;
+                }
+                i += 1;
             }
         }
-        (result, min, max)
+        y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
     }
+    for i in 0..8 {
+        if *min_s.array.get_unchecked(i) < min {
+            min = *min_s.array.get_unchecked(i);
+        }
+        if *max_s.array.get_unchecked(i) > max {
+            max = *max_s.array.get_unchecked(i);
+        }
+    }
+    (result, min, max)
 }
 
 /// Gets a width X height sized block of scaled 2d noise
 /// `start_x` and `start_y` can be used to provide an offset in the
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-pub fn get_2d_scaled_noise(
+#[target_feature(enable = "avx2")]
+pub unsafe fn get_2d_scaled_noise(
     start_x: f32,
     width: usize,
     start_y: f32,
@@ -362,6 +367,7 @@ pub fn get_2d_scaled_noise(
     noise
 }
 
+#[target_feature(enable = "avx2")]
 unsafe fn grad3d_simd(hash: __m256i, x: __m256, y: __m256, z: __m256) -> __m256 {
     let h = _mm256_and_si256(hash, _mm256_set1_epi32(15));
 
@@ -396,6 +402,7 @@ unsafe fn grad3d_simd(hash: __m256i, x: __m256, y: __m256, z: __m256) -> __m256 
 
 /// Get a single value of 3d simplex noise, results
 /// are not scaled.
+#[target_feature(enable = "avx2")]
 pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let s = _mm256_mul_ps(F3, _mm256_add_ps(x, _mm256_add_ps(y, z)));
 
@@ -559,10 +566,26 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     );
 
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y - z*z
-    let t0 = _mm256_fnmadd_ps(z0,z0,_mm256_fnmadd_ps(y0, y0, _mm256_fnmadd_ps(x0, x0, POINT_FIVE)));
-    let t1 = _mm256_fnmadd_ps(z1,z1,_mm256_fnmadd_ps(y1, y1, _mm256_fnmadd_ps(x1, x1, POINT_FIVE)));
-    let t2 = _mm256_fnmadd_ps(z2,z2,_mm256_fnmadd_ps(y2, y2, _mm256_fnmadd_ps(x2, x2, POINT_FIVE)));
-    let t3 = _mm256_fnmadd_ps(z3,z3,_mm256_fnmadd_ps(y3, y3, _mm256_fnmadd_ps(x3, x3, POINT_FIVE)));
+    let t0 = _mm256_fnmadd_ps(
+        z0,
+        z0,
+        _mm256_fnmadd_ps(y0, y0, _mm256_fnmadd_ps(x0, x0, POINT_FIVE)),
+    );
+    let t1 = _mm256_fnmadd_ps(
+        z1,
+        z1,
+        _mm256_fnmadd_ps(y1, y1, _mm256_fnmadd_ps(x1, x1, POINT_FIVE)),
+    );
+    let t2 = _mm256_fnmadd_ps(
+        z2,
+        z2,
+        _mm256_fnmadd_ps(y2, y2, _mm256_fnmadd_ps(x2, x2, POINT_FIVE)),
+    );
+    let t3 = _mm256_fnmadd_ps(
+        z3,
+        z3,
+        _mm256_fnmadd_ps(y3, y3, _mm256_fnmadd_ps(x3, x3, POINT_FIVE)),
+    );
 
     //ti*ti*ti*ti
     let mut t0q = _mm256_mul_ps(t0, t0);
@@ -594,6 +617,7 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
 
 /// Get a single value of 3d fractal brownian motion. See
 /// [FractalSettings](../struct.FractalSettings.html) for more details.
+#[target_feature(enable = "avx2")]
 pub unsafe fn fbm_3d(
     x: __m256,
     y: __m256,
@@ -614,14 +638,15 @@ pub unsafe fn fbm_3d(
         yf = _mm256_mul_ps(yf, lac);
         zf = _mm256_mul_ps(zf, lac);
         amp = _mm256_mul_ps(amp, gain);
-        result = _mm256_fmadd_ps(simplex_3d(xf, yf,zf), amp, result);
+        result = _mm256_fmadd_ps(simplex_3d(xf, yf, zf), amp, result);
     }
 
     result
 }
 
-/// Get a single value of 3d turbulence. 
+/// Get a single value of 3d turbulence.
 /// See [FractalSettings](../struct.FractalSettings.html) for more details.
+#[target_feature(enable = "avx2")]
 pub unsafe fn turbulence_3d(
     x: __m256,
     y: __m256,
@@ -651,6 +676,7 @@ pub unsafe fn turbulence_3d(
     result
 }
 
+#[target_feature(enable = "avx2")]
 unsafe fn get_3d_noise_helper(
     x: __m256,
     y: __m256,
@@ -691,7 +717,8 @@ unsafe fn get_3d_noise_helper(
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-pub fn get_3d_noise(
+#[target_feature(enable = "avx2")]
+pub unsafe fn get_3d_noise(
     start_x: f32,
     width: usize,
     start_y: f32,
@@ -700,78 +727,77 @@ pub fn get_3d_noise(
     depth: usize,
     fractal_settings: FractalSettings,
 ) -> (Vec<f32>, f32, f32) {
-    unsafe {
-        let mut min_s = M256Array {
-            simd: _mm256_set1_ps(f32::MAX),
-        };
-        let mut max_s = M256Array {
-            simd: _mm256_set1_ps(f32::MIN),
-        };
-        let mut min = f32::MAX;
-        let mut max = f32::MIN;
+    let mut min_s = M256Array {
+        simd: _mm256_set1_ps(f32::MAX),
+    };
+    let mut max_s = M256Array {
+        simd: _mm256_set1_ps(f32::MIN),
+    };
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
 
-        let mut result = Vec::with_capacity(width * height * depth);
-        result.set_len(width * height * depth);
-        let mut i = 0;
-        let remainder = width % 8;
-        let mut z = _mm256_set1_ps(start_z);
-        for _ in 0..depth {
-            let mut y = _mm256_set1_ps(start_y);
-            for _ in 0..height {
-                let mut x = _mm256_set_ps(
-                    start_x + 7.0,
-                    start_x + 6.0,
-                    start_x + 5.0,
-                    start_x + 4.0,
-                    start_x + 3.0,
-                    start_x + 2.0,
-                    start_x + 1.0,
-                    start_x,
-                );
-                for _ in 0..width / 8 {
-                    let f = get_3d_noise_helper(x, y, z, fractal_settings).simd;
-                    max_s.simd = _mm256_max_ps(max_s.simd, f);
-                    min_s.simd = _mm256_min_ps(min_s.simd, f);
-                    _mm256_storeu_ps(&mut result[i], f);
-                    i += 8;
-                    x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
-                }
-                if remainder != 0 {
-                    let f = get_3d_noise_helper(x, y, z, fractal_settings);
-                    for j in 0..remainder {
-                        let n = f.array[j];
-                        result[i] = n;
-                        // Note: This is unecessary for large images
-                        if n < min {
-                            min = n;
-                        }
-                        if n > max {
-                            max = n;
-                        }
-                        i += 1;
+    let mut result = Vec::with_capacity(width * height * depth);
+    result.set_len(width * height * depth);
+    let mut i = 0;
+    let remainder = width % 8;
+    let mut z = _mm256_set1_ps(start_z);
+    for _ in 0..depth {
+        let mut y = _mm256_set1_ps(start_y);
+        for _ in 0..height {
+            let mut x = _mm256_set_ps(
+                start_x + 7.0,
+                start_x + 6.0,
+                start_x + 5.0,
+                start_x + 4.0,
+                start_x + 3.0,
+                start_x + 2.0,
+                start_x + 1.0,
+                start_x,
+            );
+            for _ in 0..width / 8 {
+                let f = get_3d_noise_helper(x, y, z, fractal_settings).simd;
+                max_s.simd = _mm256_max_ps(max_s.simd, f);
+                min_s.simd = _mm256_min_ps(min_s.simd, f);
+                _mm256_storeu_ps(&mut result[i], f);
+                i += 8;
+                x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
+            }
+            if remainder != 0 {
+                let f = get_3d_noise_helper(x, y, z, fractal_settings);
+                for j in 0..remainder {
+                    let n = f.array[j];
+                    result[i] = n;
+                    // Note: This is unecessary for large images
+                    if n < min {
+                        min = n;
                     }
+                    if n > max {
+                        max = n;
+                    }
+                    i += 1;
                 }
-                y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
             }
-            z = _mm256_add_ps(z, _mm256_set1_ps(1.0));
+            y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
         }
-        for i in 0..8 {
-            if min_s.array[i] < min {
-                min = min_s.array[i];
-            }
-            if max_s.array[i] > max {
-                max = max_s.array[i];
-            }
-        }
-        (result, min, max)
+        z = _mm256_add_ps(z, _mm256_set1_ps(1.0));
     }
+    for i in 0..8 {
+        if min_s.array[i] < min {
+            min = min_s.array[i];
+        }
+        if max_s.array[i] > max {
+            max = max_s.array[i];
+        }
+    }
+    (result, min, max)
 }
 
 /// Gets a width X height X depth sized block of scaled 3d noise
 /// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-pub fn get_3d_scaled_noise(
+#[target_feature(enable = "avx2")]
+pub unsafe fn get_3d_scaled_noise(
     start_x: f32,
     width: usize,
     start_y: f32,

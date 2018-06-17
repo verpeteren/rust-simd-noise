@@ -1,51 +1,41 @@
-//! Fast, SIMD accelerated noise generation functions 
+//! Fast, SIMD accelerated noise generation functions
 //! with optional runtime feature detection.
-//! 
+//!
 //! [Github Link](https://github.com/jackmott/rust-simd-noise)
-//! 
+//!
 //! ## Features
-//! 
+//!
 //! * SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
 //! * AVX2 version also leverages FMA3
 //! * Runtime detection picks the best available instruction set
 //! * Simplex noise, fractal brownian motion, and turbulence
 //! * 2d and 3d
-//! 
+//!
 //! ## Benchmarks
 //! *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
 //! *Single Threaded*
-//! 
+//!
 //! ### 2D 1000x1000 FBM Noise, 3 Octaves
-//! 
+//!
 //! * scalar_2d ... bench:  74,207,703 ns/iter (+/- 2,184,952)
 //! * sse2_2d   ... bench:  23,863,725 ns/iter (+/- 746,331)
 //! * sse41_2d  ... bench:  22,440,765 ns/iter (+/- 995,336)
 //! * avx2_2d   ... bench:  12,022,253 ns/iter (+/- 508,793)
-//! 
+//!
 //! ### 3D 100x100x100 FBM Noise, 3 Octaves
-//! 
+//!
 //! * scalar_3d ... bench: 102,543,499 ns/iter (+/- 3,310,472)
 //! * sse2_3d   ... bench:  39,991,825 ns/iter (+/- 1,043,332)
 //! * sse41_3d  ... bench:  38,852,436 ns/iter (+/- 1,350,831)
 //! * avx2_3d   ... bench:  23,231,237 ns/iter (+/- 777,420)
-//! 
-//! ## Usage Notes
-//! 
-//! By default the Rust compiler will not target AVX2 and SSE41 instructions even if your machine supports them, you have to specify the
-//! `target-cpu` in RUSTFLAGS when building your project. For example you can add this to your .cargo/config file
-//! 
-//! ```
-//! [build]
-//! rustflags = ["-C","target-cpu=native"]
-//! ```
-//! 
+//!
 //! ## Get a block of noise with runtime SIMD detection
-//! 
+//!
 //! The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2
-//! 
+//!
 //! ```rust
 //! use simdnoise::*;
-//! 
+//!
 //! // A struct to set up noise parameters
 //! let fractal_settings = simdnoise::FractalSettings {
 //!       freq: 0.04,
@@ -53,28 +43,28 @@
 //!       gain: 2.0,
 //!       octaves: 3,
 //!       noise_type: simdnoise::NoiseType::FBM,
-//! }; 
-//! 
+//! };
+//!
 //! // Get a block of 2d 800x600 noise, with no scaling of resulting values
 //! // min and max values are returned so you can apply your own scaling
 //! let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, fractal_settings);
-//! 
+//!
 //! // Get a block of 200x200x200 3d noise
 //! let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200, fractal_settings);
-//! 
+//!
 //! // Get a block of noise scaled between -1 and 1
 //! let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, fractal_settings,-1.0,1.0);
 //! ```
-//! 
+//!
 //! ## Call noise functions directly
 //! Sometimes you need something other than a block, like the points on the surface of a sphere.
 //! Sometimes you may want to use SSE41 even with AVX2 is available
-//! 
+//!
 //! ```rust
-//! 
+//!
 //! // get a block of 100x100 sse41 noise, skip runtime detection
 //! let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,fractal_settings);
-//! 
+//!
 //! // send your own SIMD x,y values to the noise functions directly
 //! unsafe {
 //!   // sse2 simplex noise
@@ -118,7 +108,7 @@ pub enum NoiseType {
 /// `Normal` noise, only frequency is used.
 #[derive(Copy, Clone)]
 pub struct FractalSettings {
-    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good 
+    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
     /// starting value for experimentation is around 0.05
     pub freq: f32,
     /// Lacunarity affects how the octaves are layered together. A good starting value to
@@ -148,11 +138,11 @@ pub fn get_2d_noise(
     fractal_settings: FractalSettings,
 ) -> (Vec<f32>, f32, f32) {
     if is_x86_feature_detected!("avx2") {
-        avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings)
+        unsafe { avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings) }
     } else if is_x86_feature_detected!("sse4.1") {
-        sse41::get_2d_noise(start_x, width, start_y, height, fractal_settings)
+        unsafe { sse41::get_2d_noise(start_x, width, start_y, height, fractal_settings) }
     } else if is_x86_feature_detected!("sse2") {
-        sse2::get_2d_noise(start_x, width, start_y, height, fractal_settings)
+        unsafe { sse2::get_2d_noise(start_x, width, start_y, height, fractal_settings) }
     } else {
         scalar::get_2d_noise(start_x, width, start_y, height, fractal_settings)
     }
@@ -174,35 +164,41 @@ pub fn get_2d_scaled_noise(
     scaled_max: f32,
 ) -> Vec<f32> {
     if is_x86_feature_detected!("avx2") {
-        avx2::get_2d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
-        )
+        unsafe {
+            avx2::get_2d_scaled_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                fractal_settings,
+                scaled_min,
+                scaled_max,
+            )
+        }
     } else if is_x86_feature_detected!("sse4.1") {
-        sse41::get_2d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
-        )
+        unsafe {
+            sse41::get_2d_scaled_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                fractal_settings,
+                scaled_min,
+                scaled_max,
+            )
+        }
     } else if is_x86_feature_detected!("sse2") {
-        sse2::get_2d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
-        )
+        unsafe {
+            sse2::get_2d_scaled_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                fractal_settings,
+                scaled_min,
+                scaled_max,
+            )
+        }
     } else {
         scalar::get_2d_scaled_noise(
             start_x,
@@ -233,35 +229,41 @@ pub fn get_3d_noise(
     fractal_settings: FractalSettings,
 ) -> (Vec<f32>, f32, f32) {
     if is_x86_feature_detected!("avx2") {
-        avx2::get_3d_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-        )
+        unsafe {
+            avx2::get_3d_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                start_z,
+                depth,
+                fractal_settings,
+            )
+        }
     } else if is_x86_feature_detected!("sse4.1") {
-        sse41::get_3d_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-        )
+        unsafe {
+            sse41::get_3d_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                start_z,
+                depth,
+                fractal_settings,
+            )
+        }
     } else if is_x86_feature_detected!("sse2") {
-        sse2::get_3d_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-        )
+        unsafe {
+            sse2::get_3d_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                start_z,
+                depth,
+                fractal_settings,
+            )
+        }
     } else {
         scalar::get_3d_noise(
             start_x,
@@ -293,41 +295,47 @@ pub fn get_3d_scaled_noise(
     scaled_max: f32,
 ) -> Vec<f32> {
     if is_x86_feature_detected!("avx2") {
-        avx2::get_3d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
-        )
+        unsafe {
+            avx2::get_3d_scaled_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                start_z,
+                depth,
+                fractal_settings,
+                scaled_min,
+                scaled_max,
+            )
+        }
     } else if is_x86_feature_detected!("sse4.1") {
-        sse41::get_3d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
-        )
+        unsafe {
+            sse41::get_3d_scaled_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                start_z,
+                depth,
+                fractal_settings,
+                scaled_min,
+                scaled_max,
+            )
+        }
     } else if is_x86_feature_detected!("sse2") {
-        sse2::get_3d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
-        )
+        unsafe {
+            sse2::get_3d_scaled_noise(
+                start_x,
+                width,
+                start_y,
+                height,
+                start_z,
+                depth,
+                fractal_settings,
+                scaled_min,
+                scaled_max,
+            )
+        }
     } else {
         scalar::get_3d_scaled_noise(
             start_x,
@@ -363,15 +371,21 @@ mod benchmarks {
     }
     #[bench]
     fn b2d_2_sse2(b: &mut Bencher) {
-        b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+        unsafe {
+            b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+        }
     }
     #[bench]
     fn b2d_3_sse41(b: &mut Bencher) {
-        b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+        unsafe {
+            b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+        }
     }
     #[bench]
     fn b2d_4_avx2(b: &mut Bencher) {
-        b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0,1000, FRACTAL_SETTINGS)));
+        unsafe {
+            b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+        }
     }
     #[bench]
     fn b3d_1_scalar(b: &mut Bencher) {
@@ -389,44 +403,50 @@ mod benchmarks {
     }
     #[bench]
     fn b3d_2_sse2(b: &mut Bencher) {
-        b.iter(|| {
-            black_box(sse2::get_3d_noise(
-                0.0,
-                100,
-                0.0,
-                100,
-                0.0,
-                100,
-                FRACTAL_SETTINGS,
-            ))
-        });
+        unsafe {
+            b.iter(|| {
+                black_box(sse2::get_3d_noise(
+                    0.0,
+                    100,
+                    0.0,
+                    100,
+                    0.0,
+                    100,
+                    FRACTAL_SETTINGS,
+                ))
+            });
+        }
     }
     #[bench]
     fn b3d_3_sse41(b: &mut Bencher) {
-        b.iter(|| {
-            black_box(sse41::get_3d_noise(
-                0.0,
-                100,
-                0.0,
-                100,
-                0.0,
-                100,
-                FRACTAL_SETTINGS,
-            ))
-        });
+        unsafe {
+            b.iter(|| {
+                black_box(sse41::get_3d_noise(
+                    0.0,
+                    100,
+                    0.0,
+                    100,
+                    0.0,
+                    100,
+                    FRACTAL_SETTINGS,
+                ))
+            });
+        }
     }
     #[bench]
     fn b3d_4_avx2(b: &mut Bencher) {
-        b.iter(|| {
-            black_box(avx2::get_3d_noise(
-                0.0,
-                100,
-                0.0,
-                100,
-                0.0,
-                100,
-                FRACTAL_SETTINGS,
-            ))
-        });
+        unsafe {
+            b.iter(|| {
+                black_box(avx2::get_3d_noise(
+                    0.0,
+                    100,
+                    0.0,
+                    100,
+                    0.0,
+                    100,
+                    FRACTAL_SETTINGS,
+                ))
+            });
+        }
     }
 }
