@@ -3,6 +3,7 @@
 # SIMDNoise
 Super fast SIMD noise library for Rust. PRs welcome!  
 Available on [crates.io](https://crates.io/crates/simdnoise).  
+[Documentation](https://docs.rs/simdnoise/1.0.2/simdnoise/).  
 Requires nightly until 1.27 drops  
 
 ## Features
@@ -44,24 +45,23 @@ The library will, at runtime, pick the fastest available options between SSE2, S
 ```rust
 use simdnoise::*;
 
-// A struct to set up noise parameters
-let fractal_settings = simdnoise::FractalSettings {
+// Set up noise type and parameters
+let noise_type = simdnoise::NoiseType::FBM {
       freq: 0.04,
       lacunarity: 0.5,
       gain: 2.0,
       octaves: 3,
-      noise_type: simdnoise::NoiseType::FBM,
 }; 
 
 // Get a block of 2d 800x600 noise, with no scaling of resulting values
 // min and max values are returned so you can apply your own scaling
-let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, fractal_settings);
+let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, noise_type);
 
 // Get a block of 200x200x200 3d noise
-let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200, fractal_settings);
+let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200, noise_type);
 
 // Get a block of noise scaled between -1 and 1
-let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, fractal_settings,-1.0,1.0);
+let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, noise_type,-1.0,1.0);
 ```
 
 ## Call noise functions directly
@@ -71,7 +71,7 @@ Sometimes you may want to use SSE41 even with AVX2 is available
 ```rust
 
 // get a block of 100x100 sse41 noise, skip runtime detection
-let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,fractal_settings);
+let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,noise_type);
 
 // send your own SIMD x,y values to the noise functions directly
 unsafe {

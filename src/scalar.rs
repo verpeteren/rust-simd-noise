@@ -82,8 +82,7 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
     }
 }
 
-/// Get a single value of 2d fractal brownian motion. See
-/// [FractalSettings](../struct.FractalSettings.html) for more details.
+/// Get a single value of 2d fractal brownian motion.
 pub fn fbm_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
@@ -100,7 +99,6 @@ pub fn fbm_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8
 }
 
 /// Get a single value of 2d turbulence.
-/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn turbulence_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
@@ -116,25 +114,43 @@ pub fn turbulence_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octa
     result
 }
 
-fn get_2d_noise_helper(x: f32, y: f32, fractal_settings: FractalSettings) -> f32 {
-    match fractal_settings.noise_type {
-        NoiseType::FBM => fbm_2d(
-            x,
-            y,
-            fractal_settings.freq,
-            fractal_settings.lacunarity,
-            fractal_settings.gain,
-            fractal_settings.octaves,
-        ),
-        NoiseType::Turbulence => turbulence_2d(
-            x,
-            y,
-            fractal_settings.freq,
-            fractal_settings.lacunarity,
-            fractal_settings.gain,
-            fractal_settings.octaves,
-        ),
-        NoiseType::Normal => simplex_2d(x * fractal_settings.freq, y * fractal_settings.freq),
+/// Get a single value of 2d ridge noise..
+pub fn ridge_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+    let mut xf = x * freq;
+    let mut yf = y * freq;
+    let mut result = simplex_2d(xf, yf).abs();
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        yf = yf * lacunarity;
+        amp = amp * gain;
+        result = result + (1.0 - (simplex_2d(xf, yf) * amp).abs());
+    }
+    result
+}
+
+fn get_2d_noise_helper(x: f32, y: f32, noise_type: NoiseType) -> f32 {
+    match noise_type {
+        NoiseType::Fbm {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => fbm_2d(x, y, freq, lacunarity, gain, octaves),
+        NoiseType::Turbulence {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => turbulence_2d(x, y, freq, lacunarity, gain, octaves),
+        NoiseType::Ridge {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => ridge_2d(x, y, freq, lacunarity, gain, octaves),
+        NoiseType::Normal { freq } => simplex_2d(x * freq, y * freq),
     }
 }
 
@@ -148,7 +164,7 @@ pub fn get_2d_noise(
     width: usize,
     start_y: f32,
     height: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     let mut min = f32::MAX;
     let mut max = f32::MIN;
@@ -162,7 +178,7 @@ pub fn get_2d_noise(
     for _ in 0..height {
         let mut x = start_x;
         for _ in 0..width {
-            let f = get_2d_noise_helper(x, y, fractal_settings);
+            let f = get_2d_noise_helper(x, y, noise_type);
             if f < min {
                 min = f;
             }
@@ -189,11 +205,11 @@ pub fn get_2d_scaled_noise(
     width: usize,
     start_y: f32,
     height: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
     scale_min: f32,
     scale_max: f32,
 ) -> Vec<f32> {
-    let (mut noise, min, max) = get_2d_noise(start_x, width, start_y, height, fractal_settings);
+    let (mut noise, min, max) = get_2d_noise(start_x, width, start_y, height, noise_type);
     let scale_range = scale_max - scale_min;
     let range = max - min;
     let multiplier = scale_range / range;
@@ -320,8 +336,7 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     }
 }
 
-/// Get a single value of 3d fractal brownian motion. See
-/// [FractalSettings](../struct.FractalSettings.html) for more details.
+/// Get a single value of 3d fractal brownian motion.
 pub fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
@@ -339,8 +354,25 @@ pub fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, oct
     result
 }
 
+/// Get a single value of 2d ridge noise.
+pub fn ridge_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+    let mut xf = x * freq;
+    let mut yf = y * freq;
+    let mut zf = z * freq;
+    let mut result = simplex_3d(xf, yf, zf).abs();
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        yf = yf * lacunarity;
+        zf = zf * lacunarity;
+        amp = amp * gain;
+        result = result + (1.0 - (simplex_3d(xf, yf, zf) * amp).abs());
+    }
+    result
+}
+
 /// Get a single value of 3d turbulence.
-/// See [FractalSettings](../struct.FractalSettings.html) for more details.
 pub fn turbulence_3d(
     x: f32,
     y: f32,
@@ -366,31 +398,27 @@ pub fn turbulence_3d(
     result
 }
 
-fn get_3d_noise_helper(x: f32, y: f32, z: f32, fractal_settings: FractalSettings) -> f32 {
-    match fractal_settings.noise_type {
-        NoiseType::FBM => fbm_3d(
-            x,
-            y,
-            z,
-            fractal_settings.freq,
-            fractal_settings.lacunarity,
-            fractal_settings.gain,
-            fractal_settings.octaves,
-        ),
-        NoiseType::Turbulence => turbulence_3d(
-            x,
-            y,
-            z,
-            fractal_settings.freq,
-            fractal_settings.lacunarity,
-            fractal_settings.gain,
-            fractal_settings.octaves,
-        ),
-        NoiseType::Normal => simplex_3d(
-            x * fractal_settings.freq,
-            y * fractal_settings.freq,
-            z * fractal_settings.freq,
-        ),
+fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
+    match noise_type {
+        NoiseType::Fbm {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => fbm_3d(x, y, z, freq, lacunarity, gain, octaves),
+        NoiseType::Ridge {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => ridge_3d(x, y, z, freq, lacunarity, gain, octaves),
+        NoiseType::Turbulence {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => turbulence_3d(x, y, z, freq, lacunarity, gain, octaves),
+        NoiseType::Normal { freq } => simplex_3d(x * freq, y * freq, z * freq),
     }
 }
 
@@ -406,7 +434,7 @@ pub fn get_3d_noise(
     height: usize,
     start_z: f32,
     depth: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     let mut min = f32::MAX;
     let mut max = f32::MIN;
@@ -421,7 +449,7 @@ pub fn get_3d_noise(
         for _ in 0..height {
             let mut x = start_x;
             for _ in 0..width {
-                let f = get_3d_noise_helper(x, y, z, fractal_settings);
+                let f = get_3d_noise_helper(x, y, z, noise_type);
                 if f < min {
                     min = f;
                 }
@@ -452,19 +480,12 @@ pub fn get_3d_scaled_noise(
     height: usize,
     start_z: f32,
     depth: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
     scale_min: f32,
     scale_max: f32,
 ) -> Vec<f32> {
-    let (mut noise, min, max) = get_3d_noise(
-        start_x,
-        width,
-        start_y,
-        height,
-        start_z,
-        depth,
-        fractal_settings,
-    );
+    let (mut noise, min, max) =
+        get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type);
     let scale_range = scale_max - scale_min;
     let range = max - min;
     let multiplier = scale_range / range;

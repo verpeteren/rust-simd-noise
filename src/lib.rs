@@ -15,14 +15,14 @@
 //! *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
 //! *Single Threaded*
 //!
-//! ### 2D 1000x1000 FBM Noise, 3 Octaves
+//! ### 2D 1000x1000 Fbm Noise, 3 Octaves
 //!
 //! * scalar_2d ... bench:  74,207,703 ns/iter (+/- 2,184,952)
 //! * sse2_2d   ... bench:  23,863,725 ns/iter (+/- 746,331)
 //! * sse41_2d  ... bench:  22,440,765 ns/iter (+/- 995,336)
 //! * avx2_2d   ... bench:  12,022,253 ns/iter (+/- 508,793)
 //!
-//! ### 3D 100x100x100 FBM Noise, 3 Octaves
+//! ### 3D 100x100x100 Fbm Noise, 3 Octaves
 //!
 //! * scalar_3d ... bench: 102,543,499 ns/iter (+/- 3,310,472)
 //! * sse2_3d   ... bench:  39,991,825 ns/iter (+/- 1,043,332)
@@ -36,24 +36,24 @@
 //! ```rust
 //! use simdnoise::*;
 //!
-//! // A struct to set up noise parameters
-//! let fractal_settings = simdnoise::FractalSettings {
+//! //  Set your noise type
+//! let noise_type = simdnoise::NoiseType::Fbm {
 //!       freq: 0.04,
 //!       lacunarity: 0.5,
 //!       gain: 2.0,
 //!       octaves: 3,
-//!       noise_type: simdnoise::NoiseType::FBM,
 //! };
 //!
 //! // Get a block of 2d 800x600 noise, with no scaling of resulting values
 //! // min and max values are returned so you can apply your own scaling
-//! let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, fractal_settings);
+//! let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, noise_type);
 //!
 //! // Get a block of 200x200x200 3d noise
-//! let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200, fractal_settings);
+//! let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200,noise_type);
+//!
 //!
 //! // Get a block of noise scaled between -1 and 1
-//! let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, fractal_settings,-1.0,1.0);
+//! let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, noise_type,-1.0,1.0);
 //! ```
 //!
 //! ## Call noise functions directly
@@ -63,7 +63,7 @@
 //! ```rust
 //!
 //! // get a block of 100x100 sse41 noise, skip runtime detection
-//! let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,fractal_settings);
+//! let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,noise_type);
 //!
 //! // send your own SIMD x,y values to the noise functions directly
 //! unsafe {
@@ -93,34 +93,57 @@ mod shared_sse;
 pub mod sse2;
 pub mod sse41;
 
-/// Specifies what type of noise to generate.
+/// Specifies what type of noise to generate and contains any relevant settings.
 #[derive(Copy, Clone)]
 pub enum NoiseType {
-    /// Fractal brownian motion on top of simplex noise
-    FBM,
-    /// Turbulence on top of simplex noise
-    Turbulence,
+    /// Fractal Brownian Motion
+    Fbm {
+        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+        /// starting value for experimentation is around 0.05
+        freq: f32,
+        /// Lacunarity affects how the octaves are layered together. A good starting value to
+        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
+        lacunarity: f32,
+        /// Gain affects how the octaves are layered together. A good starting value is 2.0
+        gain: f32,
+        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+        /// and will increase runtime linearlly.
+        octaves: u8,
+    },
+    /// Turbulence aka Billow
+    Turbulence {
+        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+        /// starting value for experimentation is around 0.05
+        freq: f32,
+        /// Lacunarity affects how the octaves are layered together. A good starting value to
+        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
+        lacunarity: f32,
+        /// Gain affects how the octaves are layered together. A good starting value is 2.0
+        gain: f32,
+        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+        /// and will increase runtime linearlly.
+        octaves: u8,
+    },
+    /// Rige Noise
+    Ridge {
+        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+        /// starting value for experimentation is around 0.05
+        freq: f32,
+        /// Lacunarity affects how the octaves are layered together. A good starting value to
+        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
+        lacunarity: f32,
+        /// Gain affects how the octaves are layered together. A good starting value is 2.0
+        gain: f32,
+        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+        /// and will increase runtime linearlly.
+        octaves: u8,
+    },
     /// Simplex Noise
-    Normal,
-}
-
-/// Contains parameters for noise functions. When using
-/// `Normal` noise, only frequency is used.
-#[derive(Copy, Clone)]
-pub struct FractalSettings {
-    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
-    /// starting value for experimentation is around 0.05
-    pub freq: f32,
-    /// Lacunarity affects how the octaves are layered together. A good starting value to
-    /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
-    pub lacunarity: f32,
-    /// Gain affects how the octaves are layered together. A good starting value is 2.0
-    pub gain: f32,
-    /// Specifies how many layers of nose to combine. More octaves can yeild more detail
-    /// and will increase runtime linearlly.
-    pub octaves: u8,
-    /// The type of noise to generate.  
-    pub noise_type: NoiseType,
+    Normal {
+        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+        /// starting value for experimentation is around 0.05
+        freq: f32,
+    },
 }
 
 /// Gets a width X height sized block of 2d noise, unscaled,
@@ -135,16 +158,16 @@ pub fn get_2d_noise(
     width: usize,
     start_y: f32,
     height: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     if is_x86_feature_detected!("avx2") {
-        unsafe { avx2::get_2d_noise(start_x, width, start_y, height, fractal_settings) }
+        unsafe { avx2::get_2d_noise(start_x, width, start_y, height, noise_type) }
     } else if is_x86_feature_detected!("sse4.1") {
-        unsafe { sse41::get_2d_noise(start_x, width, start_y, height, fractal_settings) }
+        unsafe { sse41::get_2d_noise(start_x, width, start_y, height, noise_type) }
     } else if is_x86_feature_detected!("sse2") {
-        unsafe { sse2::get_2d_noise(start_x, width, start_y, height, fractal_settings) }
+        unsafe { sse2::get_2d_noise(start_x, width, start_y, height, noise_type) }
     } else {
-        scalar::get_2d_noise(start_x, width, start_y, height, fractal_settings)
+        scalar::get_2d_noise(start_x, width, start_y, height, noise_type)
     }
 }
 
@@ -159,55 +182,31 @@ pub fn get_2d_scaled_noise(
     width: usize,
     start_y: f32,
     height: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
     scaled_min: f32,
     scaled_max: f32,
 ) -> Vec<f32> {
     if is_x86_feature_detected!("avx2") {
         unsafe {
             avx2::get_2d_scaled_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                fractal_settings,
-                scaled_min,
-                scaled_max,
+                start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
             )
         }
     } else if is_x86_feature_detected!("sse4.1") {
         unsafe {
             sse41::get_2d_scaled_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                fractal_settings,
-                scaled_min,
-                scaled_max,
+                start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
             )
         }
     } else if is_x86_feature_detected!("sse2") {
         unsafe {
             sse2::get_2d_scaled_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                fractal_settings,
-                scaled_min,
-                scaled_max,
+                start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
             )
         }
     } else {
         scalar::get_2d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
+            start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
         )
     }
 }
@@ -226,54 +225,16 @@ pub fn get_3d_noise(
     height: usize,
     start_z: f32,
     depth: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     if is_x86_feature_detected!("avx2") {
-        unsafe {
-            avx2::get_3d_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth,
-                fractal_settings,
-            )
-        }
+        unsafe { avx2::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type) }
     } else if is_x86_feature_detected!("sse4.1") {
-        unsafe {
-            sse41::get_3d_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth,
-                fractal_settings,
-            )
-        }
+        unsafe { sse41::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type) }
     } else if is_x86_feature_detected!("sse2") {
-        unsafe {
-            sse2::get_3d_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth,
-                fractal_settings,
-            )
-        }
+        unsafe { sse2::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type) }
     } else {
-        scalar::get_3d_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-        )
+        scalar::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type)
     }
 }
 
@@ -290,63 +251,34 @@ pub fn get_3d_scaled_noise(
     height: usize,
     start_z: f32,
     depth: usize,
-    fractal_settings: FractalSettings,
+    noise_type: NoiseType,
     scaled_min: f32,
     scaled_max: f32,
 ) -> Vec<f32> {
     if is_x86_feature_detected!("avx2") {
         unsafe {
             avx2::get_3d_scaled_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth,
-                fractal_settings,
-                scaled_min,
+                start_x, width, start_y, height, start_z, depth, noise_type, scaled_min,
                 scaled_max,
             )
         }
     } else if is_x86_feature_detected!("sse4.1") {
         unsafe {
             sse41::get_3d_scaled_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth,
-                fractal_settings,
-                scaled_min,
+                start_x, width, start_y, height, start_z, depth, noise_type, scaled_min,
                 scaled_max,
             )
         }
     } else if is_x86_feature_detected!("sse2") {
         unsafe {
             sse2::get_3d_scaled_noise(
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth,
-                fractal_settings,
-                scaled_min,
+                start_x, width, start_y, height, start_z, depth, noise_type, scaled_min,
                 scaled_max,
             )
         }
     } else {
         scalar::get_3d_scaled_noise(
-            start_x,
-            width,
-            start_y,
-            height,
-            start_z,
-            depth,
-            fractal_settings,
-            scaled_min,
-            scaled_max,
+            start_x, width, start_y, height, start_z, depth, noise_type, scaled_min, scaled_max,
         )
     }
 }
@@ -357,64 +289,47 @@ mod benchmarks {
     use super::*;
     use test::{black_box, Bencher};
 
-    const FRACTAL_SETTINGS: FractalSettings = FractalSettings {
+    const NOISE_TYPE: NoiseType = NoiseType::Fbm {
         freq: 0.04,
         lacunarity: 0.5,
         gain: 2.0,
         octaves: 3,
-        noise_type: NoiseType::FBM,
     };
 
     #[bench]
     fn b2d_1_scalar(b: &mut Bencher) {
-        b.iter(|| black_box(scalar::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+        b.iter(|| black_box(scalar::get_2d_noise(0.0, 1000, 0.0, 1000, NOISE_TYPE)));
     }
     #[bench]
     fn b2d_2_sse2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+            b.iter(|| black_box(sse2::get_2d_noise(0.0, 1000, 0.0, 1000, NOISE_TYPE)));
         }
     }
     #[bench]
     fn b2d_3_sse41(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+            b.iter(|| black_box(sse41::get_2d_noise(0.0, 1000, 0.0, 1000, NOISE_TYPE)));
         }
     }
     #[bench]
     fn b2d_4_avx2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, FRACTAL_SETTINGS)));
+            b.iter(|| black_box(avx2::get_2d_noise(0.0, 1000, 0.0, 1000, NOISE_TYPE)));
         }
     }
     #[bench]
     fn b3d_1_scalar(b: &mut Bencher) {
         b.iter(|| {
             black_box(scalar::get_3d_noise(
-                0.0,
-                100,
-                0.0,
-                100,
-                0.0,
-                100,
-                FRACTAL_SETTINGS,
+                0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE,
             ))
         });
     }
     #[bench]
     fn b3d_2_sse2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| {
-                black_box(sse2::get_3d_noise(
-                    0.0,
-                    100,
-                    0.0,
-                    100,
-                    0.0,
-                    100,
-                    FRACTAL_SETTINGS,
-                ))
-            });
+            b.iter(|| black_box(sse2::get_3d_noise(0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE)));
         }
     }
     #[bench]
@@ -422,13 +337,7 @@ mod benchmarks {
         unsafe {
             b.iter(|| {
                 black_box(sse41::get_3d_noise(
-                    0.0,
-                    100,
-                    0.0,
-                    100,
-                    0.0,
-                    100,
-                    FRACTAL_SETTINGS,
+                    0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE,
                 ))
             });
         }
@@ -436,17 +345,7 @@ mod benchmarks {
     #[bench]
     fn b3d_4_avx2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| {
-                black_box(avx2::get_3d_noise(
-                    0.0,
-                    100,
-                    0.0,
-                    100,
-                    0.0,
-                    100,
-                    FRACTAL_SETTINGS,
-                ))
-            });
+            b.iter(|| black_box(avx2::get_3d_noise(0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE)));
         }
     }
 }
