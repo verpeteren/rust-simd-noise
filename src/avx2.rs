@@ -83,20 +83,14 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let x0 = _mm256_sub_ps(x, _mm256_sub_ps(ips, t));
     let y0 = _mm256_sub_ps(y, _mm256_sub_ps(jps, t));
 
-    let i1 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
-        _mm256_castps_si256(_mm256_cmp_ps(x0, y0, _CMP_GE_OQ)),
-    );
+    let i1 = _mm256_castps_si256(_mm256_cmp_ps(x0, y0, _CMP_GE_OQ));
 
-    let j1 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
-        _mm256_castps_si256(_mm256_cmp_ps(y0, x0, _CMP_GT_OQ)),
-    );
+    let j1 = _mm256_castps_si256(_mm256_cmp_ps(y0, x0, _CMP_GT_OQ));
 
-    let x1 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i1)), G2);
-    let y1 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j1)), G2);
-    let x2 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_set1_ps(1.0)), G22);
-    let y2 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_set1_ps(1.0)), G22);
+    let x1 = _mm256_add_ps(_mm256_add_ps(x0, _mm256_cvtepi32_ps(i1)), G2);
+    let y1 = _mm256_add_ps(_mm256_add_ps(y0, _mm256_cvtepi32_ps(j1)), G2);
+    let x2 = _mm256_add_ps(_mm256_add_ps(x0, _mm256_set1_ps(-1.0)), G22);
+    let y2 = _mm256_add_ps(_mm256_add_ps(y0, _mm256_set1_ps(-1.0)), G22);
 
     let ii = _mm256_and_si256(i, _mm256_set1_epi32(0xff));
     let jj = _mm256_and_si256(j, _mm256_set1_epi32(0xff));
@@ -110,8 +104,8 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let gi1 = _mm256_i32gather_epi32(
         &PERM as *const i32,
         _mm256_add_epi32(
-            _mm256_add_epi32(ii, i1),
-            _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(jj, j1), 4),
+            _mm256_sub_epi32(ii, i1),
+            _mm256_i32gather_epi32(&PERM as *const i32, _mm256_sub_epi32(jj, j1), 4),
         ),
         4,
     );
@@ -119,10 +113,10 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let gi2 = _mm256_i32gather_epi32(
         &PERM as *const i32,
         _mm256_add_epi32(
-            _mm256_add_epi32(ii, _mm256_set1_epi32(1)),
+            _mm256_sub_epi32(ii, _mm256_set1_epi32(-1)),
             _mm256_i32gather_epi32(
                 &PERM as *const i32,
-                _mm256_add_epi32(jj, _mm256_set1_epi32(1)),
+                _mm256_sub_epi32(jj, _mm256_set1_epi32(-1)),
                 4,
             ),
         ),
@@ -146,11 +140,11 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256) -> __m256 {
     let mut n2 = _mm256_mul_ps(t2q, grad2_simd(gi2, x2, y2));
 
     let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n0 = _mm256_blendv_ps(n0, _mm256_setzero_ps(), cond);
+    n0 = _mm256_andnot_ps(cond, n0);
     cond = _mm256_cmp_ps(t1, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n1 = _mm256_blendv_ps(n1, _mm256_setzero_ps(), cond);
+    n1 = _mm256_andnot_ps(cond, n1);
     cond = _mm256_cmp_ps(t2, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n2 = _mm256_blendv_ps(n2, _mm256_setzero_ps(), cond);
+    n2 = _mm256_andnot_ps(cond, n2);
 
     _mm256_add_ps(n0, _mm256_add_ps(n1, n2))
 }
@@ -467,26 +461,20 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let y0 = _mm256_sub_ps(y, _mm256_sub_ps(jps, t));
     let z0 = _mm256_sub_ps(z, _mm256_sub_ps(kps, t));
 
-    let i1 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
+    let i1 = 
         _mm256_and_si256(
             _mm256_castps_si256(_mm256_cmp_ps(x0, y0, _CMP_GE_OQ)),
             _mm256_castps_si256(_mm256_cmp_ps(x0, z0, _CMP_GE_OQ)),
-        ),
     );
-    let j1 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
+    let j1 = 
         _mm256_and_si256(
             _mm256_castps_si256(_mm256_cmp_ps(y0, x0, _CMP_GT_OQ)),
             _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GE_OQ)),
-        ),
     );
-    let k1 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
+    let k1 = 
         _mm256_and_si256(
             _mm256_castps_si256(_mm256_cmp_ps(z0, x0, _CMP_GT_OQ)),
             _mm256_castps_si256(_mm256_cmp_ps(z0, y0, _CMP_GT_OQ)),
-        ),
     );
 
     //for i2
@@ -519,28 +507,22 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
         _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GE_OQ)),
     );
 
-    let i2 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
-        _mm256_or_si256(i1, _mm256_or_si256(yx_xz, zx_xy)),
-    );
-    let j2 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
-        _mm256_or_si256(j1, _mm256_or_si256(xy_yz, zy_yx)),
-    );
-    let k2 = _mm256_and_si256(
-        _mm256_set1_epi32(1),
-        _mm256_or_si256(k1, _mm256_or_si256(yz_zx, xz_zy)),
-    );
+    let i2 = 
+        _mm256_or_si256(i1, _mm256_or_si256(yx_xz, zx_xy));
+    let j2 = 
+        _mm256_or_si256(j1, _mm256_or_si256(xy_yz, zy_yx));
+    let k2 = 
+        _mm256_or_si256(k1, _mm256_or_si256(yz_zx, xz_zy));
 
-    let x1 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i1)), G3);
-    let y1 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j1)), G3);
-    let z1 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_cvtepi32_ps(k1)), G3);
-    let x2 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i2)), F3);
-    let y2 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j2)), F3);
-    let z2 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_cvtepi32_ps(k2)), F3);
-    let x3 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_set1_ps(1.0)), POINT_FIVE);
-    let y3 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_set1_ps(1.0)), POINT_FIVE);
-    let z3 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_set1_ps(1.0)), POINT_FIVE);
+    let x1 = _mm256_add_ps(_mm256_add_ps(x0, _mm256_cvtepi32_ps(i1)), G3);
+    let y1 = _mm256_add_ps(_mm256_add_ps(y0, _mm256_cvtepi32_ps(j1)), G3);
+    let z1 = _mm256_add_ps(_mm256_add_ps(z0, _mm256_cvtepi32_ps(k1)), G3);
+    let x2 = _mm256_add_ps(_mm256_add_ps(x0, _mm256_cvtepi32_ps(i2)), F3);
+    let y2 = _mm256_add_ps(_mm256_add_ps(y0, _mm256_cvtepi32_ps(j2)), F3);
+    let z2 = _mm256_add_ps(_mm256_add_ps(z0, _mm256_cvtepi32_ps(k2)), F3);
+    let x3 = _mm256_add_ps(_mm256_add_ps(x0, _mm256_set1_ps(-1.0)), POINT_FIVE);
+    let y3 = _mm256_add_ps(_mm256_add_ps(y0, _mm256_set1_ps(-1.0)), POINT_FIVE);
+    let z3 = _mm256_add_ps(_mm256_add_ps(z0, _mm256_set1_ps(-1.0)), POINT_FIVE);
 
     // Wrap indices at 256 so it will fit in the PERM array
     let ii = _mm256_and_si256(i, _mm256_set1_epi32(0xff));
@@ -562,12 +544,12 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let gi1 = _mm256_i32gather_epi32(
         &PERM as *const i32,
         _mm256_add_epi32(
-            _mm256_add_epi32(ii, i1),
+            _mm256_sub_epi32(ii, i1),
             _mm256_i32gather_epi32(
                 &PERM as *const i32,
                 _mm256_add_epi32(
-                    _mm256_add_epi32(jj, j1),
-                    _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(kk, k1), 4),
+                    _mm256_sub_epi32(jj, j1),
+                    _mm256_i32gather_epi32(&PERM as *const i32, _mm256_sub_epi32(kk, k1), 4),
                 ),
                 4,
             ),
@@ -577,12 +559,12 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let gi2 = _mm256_i32gather_epi32(
         &PERM as *const i32,
         _mm256_add_epi32(
-            _mm256_add_epi32(ii, i2),
+            _mm256_sub_epi32(ii, i2),
             _mm256_i32gather_epi32(
                 &PERM as *const i32,
                 _mm256_add_epi32(
-                    _mm256_add_epi32(jj, j2),
-                    _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(kk, k2), 4),
+                    _mm256_sub_epi32(jj, j2),
+                    _mm256_i32gather_epi32(&PERM as *const i32, _mm256_sub_epi32(kk, k2), 4),
                 ),
                 4,
             ),
@@ -592,14 +574,14 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let gi3 = _mm256_i32gather_epi32(
         &PERM as *const i32,
         _mm256_add_epi32(
-            _mm256_add_epi32(ii, _mm256_set1_epi32(1)),
+            _mm256_sub_epi32(ii, _mm256_set1_epi32(-1)),
             _mm256_i32gather_epi32(
                 &PERM as *const i32,
                 _mm256_add_epi32(
-                    _mm256_add_epi32(jj, _mm256_set1_epi32(1)),
+                    _mm256_sub_epi32(jj, _mm256_set1_epi32(-1)),
                     _mm256_i32gather_epi32(
                         &PERM as *const i32,
-                        _mm256_add_epi32(kk, _mm256_set1_epi32(1)),
+                        _mm256_sub_epi32(kk, _mm256_set1_epi32(-1)),
                         4,
                     ),
                 ),
@@ -648,13 +630,13 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
 
     //if ti < 0 then 0 else ni
     let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n0 = _mm256_blendv_ps(n0, _mm256_setzero_ps(), cond);
+    n0 = _mm256_andnot_ps(cond,n0);
     cond = _mm256_cmp_ps(t1, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n1 = _mm256_blendv_ps(n1, _mm256_setzero_ps(), cond);
+    n1 = _mm256_andnot_ps(cond,n1);
     cond = _mm256_cmp_ps(t2, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n2 = _mm256_blendv_ps(n2, _mm256_setzero_ps(), cond);
+    n2 = _mm256_andnot_ps(cond,n2);
     cond = _mm256_cmp_ps(t3, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n3 = _mm256_blendv_ps(n3, _mm256_setzero_ps(), cond);
+    n3 = _mm256_andnot_ps(cond,n3);
 
     _mm256_add_ps(n0, _mm256_add_ps(n1, _mm256_add_ps(n2, n3)))
 }

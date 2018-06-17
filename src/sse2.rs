@@ -66,16 +66,16 @@ pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let y0 = _mm_sub_ps(y, _mm_sub_ps(jps, t));
 
     let i1 = M128iArray {
-        simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpge_ps(x0, y0))),
-    };
+        simd: _mm_castps_si128(_mm_cmpge_ps(x0, y0)),
+    };  
     let j1 = M128iArray {
-        simd: _mm_and_si128(_mm_set1_epi32(1), _mm_castps_si128(_mm_cmpgt_ps(y0, x0))),
+        simd: _mm_castps_si128(_mm_cmpgt_ps(y0, x0)),
     };
 
-    let x1 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i1.simd)), G2);
-    let y1 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j1.simd)), G2);
-    let x2 = _mm_add_ps(_mm_sub_ps(x0, _mm_set1_ps(1.0)), G22);
-    let y2 = _mm_add_ps(_mm_sub_ps(y0, _mm_set1_ps(1.0)), G22);
+    let x1 = _mm_add_ps(_mm_add_ps(x0, _mm_cvtepi32_ps(i1.simd)), G2);
+    let y1 = _mm_add_ps(_mm_add_ps(y0, _mm_cvtepi32_ps(j1.simd)), G2);
+    let x2 = _mm_add_ps(_mm_add_ps(x0, _mm_set1_ps(-1.0)), G22);
+    let y2 = _mm_add_ps(_mm_add_ps(y0, _mm_set1_ps(-1.0)), G22);
 
     let ii = M128iArray {
         simd: _mm_and_si128(i, _mm_set1_epi32(0xff)),
@@ -111,27 +111,27 @@ pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let gi1 = M128iArray {
         array: [
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(0) + *i1.array.get_unchecked(0)
+                (*ii.array.get_unchecked(0) - *i1.array.get_unchecked(0)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(0) + *j1.array.get_unchecked(0)) as usize,
+                        (*jj.array.get_unchecked(0) - *j1.array.get_unchecked(0)) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(1) + *i1.array.get_unchecked(1)
+                (*ii.array.get_unchecked(1) - *i1.array.get_unchecked(1)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(1) + *j1.array.get_unchecked(1)) as usize,
+                        (*jj.array.get_unchecked(1) - *j1.array.get_unchecked(1)) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(2) + *i1.array.get_unchecked(2)
+                (*ii.array.get_unchecked(2) - *i1.array.get_unchecked(2)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(2) + *j1.array.get_unchecked(2)) as usize,
+                        (*jj.array.get_unchecked(2) - *j1.array.get_unchecked(2)) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(3) + *i1.array.get_unchecked(3)
+                (*ii.array.get_unchecked(3) - *i1.array.get_unchecked(3)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(3) + *j1.array.get_unchecked(3)) as usize,
+                        (*jj.array.get_unchecked(3) - *j1.array.get_unchecked(3)) as usize,
                     )) as usize,
             ),
         ],
@@ -190,11 +190,11 @@ pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     let mut n2 = _mm_mul_ps(t2q, grad2_simd(gi2.simd, x2, y2));
 
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-    n0 = blendv_sse2(n0, _mm_setzero_ps(), cond);
+    n0 = _mm_andnot_ps(cond,n0);
     cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-    n1 = blendv_sse2(n1, _mm_setzero_ps(), cond);
+    n1 = _mm_andnot_ps(cond,n1);
     cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-    n2 = blendv_sse2(n2, _mm_setzero_ps(), cond);
+    n2 = _mm_andnot_ps(cond,n2);
 
     _mm_add_ps(n0, _mm_add_ps(n1, n2))
 }
@@ -343,31 +343,25 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
 	y>x>=z  -> 010  110
 	*/
     let i1 = M128iArray {
-        simd: _mm_and_si128(
-            _mm_set1_epi32(1),
+        simd:
             _mm_and_si128(
                 _mm_castps_si128(_mm_cmpge_ps(x0, y0)),
                 _mm_castps_si128(_mm_cmpge_ps(x0, z0)),
             ),
-        ),
     };
     let j1 = M128iArray {
-        simd: _mm_and_si128(
-            _mm_set1_epi32(1),
+        simd: 
             _mm_and_si128(
                 _mm_castps_si128(_mm_cmpgt_ps(y0, x0)),
                 _mm_castps_si128(_mm_cmpge_ps(y0, z0)),
             ),
-        ),
     };
     let k1 = M128iArray {
-        simd: _mm_and_si128(
-            _mm_set1_epi32(1),
+        simd: 
             _mm_and_si128(
                 _mm_castps_si128(_mm_cmpgt_ps(z0, x0)),
                 _mm_castps_si128(_mm_cmpgt_ps(z0, y0)),
             ),
-        ),
     };
 
     //for i2
@@ -401,34 +395,28 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     );
 
     let i2 = M128iArray {
-        simd: _mm_and_si128(
-            _mm_set1_epi32(1),
+        simd: 
             _mm_or_si128(i1.simd, _mm_or_si128(yx_xz, zx_xy)),
-        ),
     };
     let j2 = M128iArray {
-        simd: _mm_and_si128(
-            _mm_set1_epi32(1),
+        simd: 
             _mm_or_si128(j1.simd, _mm_or_si128(xy_yz, zy_yx)),
-        ),
     };
     let k2 = M128iArray {
-        simd: _mm_and_si128(
-            _mm_set1_epi32(1),
+        simd: 
             _mm_or_si128(k1.simd, _mm_or_si128(yz_zx, xz_zy)),
-        ),
     };
 
-    let x1 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i1.simd)), G3);
-    let y1 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j1.simd)), G3);
-    let z1 = _mm_add_ps(_mm_sub_ps(z0, _mm_cvtepi32_ps(k1.simd)), G3);
+    let x1 = _mm_add_ps(_mm_add_ps(x0, _mm_cvtepi32_ps(i1.simd)), G3);
+    let y1 = _mm_add_ps(_mm_add_ps(y0, _mm_cvtepi32_ps(j1.simd)), G3);
+    let z1 = _mm_add_ps(_mm_add_ps(z0, _mm_cvtepi32_ps(k1.simd)), G3);
 
-    let x2 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i2.simd)), F3);
-    let y2 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j2.simd)), F3);
-    let z2 = _mm_add_ps(_mm_sub_ps(z0, _mm_cvtepi32_ps(k2.simd)), F3);
-    let x3 = _mm_add_ps(_mm_sub_ps(x0, _mm_set1_ps(1.0)), POINT_FIVE);
-    let y3 = _mm_add_ps(_mm_sub_ps(y0, _mm_set1_ps(1.0)), POINT_FIVE);
-    let z3 = _mm_add_ps(_mm_sub_ps(z0, _mm_set1_ps(1.0)), POINT_FIVE);
+    let x2 = _mm_add_ps(_mm_add_ps(x0, _mm_cvtepi32_ps(i2.simd)), F3);
+    let y2 = _mm_add_ps(_mm_add_ps(y0, _mm_cvtepi32_ps(j2.simd)), F3);
+    let z2 = _mm_add_ps(_mm_add_ps(z0, _mm_cvtepi32_ps(k2.simd)), F3);
+    let x3 = _mm_add_ps(_mm_add_ps(x0, _mm_set1_ps(-1.0)), POINT_FIVE);
+    let y3 = _mm_add_ps(_mm_add_ps(y0, _mm_set1_ps(-1.0)), POINT_FIVE);
+    let z3 = _mm_add_ps(_mm_add_ps(z0, _mm_set1_ps(-1.0)), POINT_FIVE);
 
     let ii = M128iArray {
         simd: _mm_and_si128(i, _mm_set1_epi32(0xff)),
@@ -480,38 +468,38 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let gi1 = M128iArray {
         array: [
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(0) + *i1.array.get_unchecked(0)
+                (*ii.array.get_unchecked(0) - *i1.array.get_unchecked(0)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(0) + *j1.array.get_unchecked(0)
+                        (*jj.array.get_unchecked(0) - *j1.array.get_unchecked(0)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(0) + *k1.array.get_unchecked(0)) as usize,
+                                (*kk.array.get_unchecked(0) - *k1.array.get_unchecked(0)) as usize,
                             )) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(1) + *i1.array.get_unchecked(1)
+                (*ii.array.get_unchecked(1) - *i1.array.get_unchecked(1)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(1) + *j1.array.get_unchecked(1)
+                        (*jj.array.get_unchecked(1) - *j1.array.get_unchecked(1)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(1) + *k1.array.get_unchecked(1)) as usize,
+                                (*kk.array.get_unchecked(1) - *k1.array.get_unchecked(1)) as usize,
                             )) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(2) + *i1.array.get_unchecked(2)
+                (*ii.array.get_unchecked(2) - *i1.array.get_unchecked(2)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(2) + *j1.array.get_unchecked(2)
+                        (*jj.array.get_unchecked(2) - *j1.array.get_unchecked(2)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(2) + *k1.array.get_unchecked(2)) as usize,
+                                (*kk.array.get_unchecked(2) - *k1.array.get_unchecked(2)) as usize,
                             )) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(3) + *i1.array.get_unchecked(3)
+                (*ii.array.get_unchecked(3) - *i1.array.get_unchecked(3)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(3) + *j1.array.get_unchecked(3)
+                        (*jj.array.get_unchecked(3) - *j1.array.get_unchecked(3)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(3) + *k1.array.get_unchecked(3)) as usize,
+                                (*kk.array.get_unchecked(3) - *k1.array.get_unchecked(3)) as usize,
                             )) as usize,
                     )) as usize,
             ),
@@ -520,38 +508,38 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
     let gi2 = M128iArray {
         array: [
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(0) + *i2.array.get_unchecked(0)
+                (*ii.array.get_unchecked(0) - *i2.array.get_unchecked(0)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(0) + *j2.array.get_unchecked(0)
+                        (*jj.array.get_unchecked(0) - *j2.array.get_unchecked(0)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(0) + *k2.array.get_unchecked(0)) as usize,
+                                (*kk.array.get_unchecked(0) - *k2.array.get_unchecked(0)) as usize,
                             )) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(1) + *i2.array.get_unchecked(1)
+                (*ii.array.get_unchecked(1) - *i2.array.get_unchecked(1)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(1) + *j2.array.get_unchecked(1)
+                        (*jj.array.get_unchecked(1) - *j2.array.get_unchecked(1)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(1) + *k2.array.get_unchecked(1)) as usize,
+                                (*kk.array.get_unchecked(1) - *k2.array.get_unchecked(1)) as usize,
                             )) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(2) + *i2.array.get_unchecked(2)
+                (*ii.array.get_unchecked(2) - *i2.array.get_unchecked(2)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(2) + *j2.array.get_unchecked(2)
+                        (*jj.array.get_unchecked(2) - *j2.array.get_unchecked(2)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(2) + *k2.array.get_unchecked(2)) as usize,
+                                (*kk.array.get_unchecked(2) - *k2.array.get_unchecked(2)) as usize,
                             )) as usize,
                     )) as usize,
             ),
             *PERM.get_unchecked(
-                (*ii.array.get_unchecked(3) + *i2.array.get_unchecked(3)
+                (*ii.array.get_unchecked(3) - *i2.array.get_unchecked(3)
                     + *PERM.get_unchecked(
-                        (*jj.array.get_unchecked(3) + *j2.array.get_unchecked(3)
+                        (*jj.array.get_unchecked(3) - *j2.array.get_unchecked(3)
                             + *PERM.get_unchecked(
-                                (*kk.array.get_unchecked(3) + *k2.array.get_unchecked(3)) as usize,
+                                (*kk.array.get_unchecked(3) - *k2.array.get_unchecked(3)) as usize,
                             )) as usize,
                     )) as usize,
             ),
@@ -643,13 +631,13 @@ pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
 
     //if ti < 0 then 0 else ni
     let mut cond = _mm_cmplt_ps(t0, _mm_setzero_ps());
-    n0 = blendv_sse2(n0, _mm_setzero_ps(), cond);
+    n0 = _mm_andnot_ps(cond,n0);
     cond = _mm_cmplt_ps(t1, _mm_setzero_ps());
-    n1 = blendv_sse2(n1, _mm_setzero_ps(), cond);
+    n1 = _mm_andnot_ps(cond,n1);
     cond = _mm_cmplt_ps(t2, _mm_setzero_ps());
-    n2 = blendv_sse2(n2, _mm_setzero_ps(), cond);
+    n2 = _mm_andnot_ps(cond,n2);
     cond = _mm_cmplt_ps(t3, _mm_setzero_ps());
-    n3 = blendv_sse2(n3, _mm_setzero_ps(), cond);
+    n3 = _mm_andnot_ps(cond,n3);
 
     _mm_add_ps(n0, _mm_add_ps(n1, _mm_add_ps(n2, n3)))
 }
