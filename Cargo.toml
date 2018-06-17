@@ -12,4 +12,4 @@ repository = "https://github.com/jackmott/rust-simd-noise"
 categories = ["Game engines","Multimedia","Rendering"]
 
 [dependencies]
-rand = "*"
+rand = "0.5.1"
