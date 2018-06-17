@@ -118,7 +118,7 @@ pub fn turbulence_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octa
 pub fn ridge_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
-    let mut result = simplex_2d(xf, yf).abs();
+    let mut result = 1.0 - simplex_2d(xf, yf).abs();
     let mut amp = 1.0;
 
     for _ in 1..octaves {
@@ -359,7 +359,7 @@ pub fn ridge_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, o
     let mut xf = x * freq;
     let mut yf = y * freq;
     let mut zf = z * freq;
-    let mut result = simplex_3d(xf, yf, zf).abs();
+    let mut result = 1.0 - simplex_3d(xf, yf, zf).abs();
     let mut amp = 1.0;
 
     for _ in 1..octaves {

@@ -198,7 +198,7 @@ pub unsafe fn ridge_2d(
 ) -> __m256 {
     let mut xf = _mm256_mul_ps(x, freq);
     let mut yf = _mm256_mul_ps(y, freq);
-    let mut result = _mm256_abs_ps(simplex_2d(xf, yf));
+    let mut result = _mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_abs_ps(simplex_2d(xf, yf)));
     let mut amp = _mm256_set1_ps(1.0);
 
     for _ in 1..octaves {
@@ -207,10 +207,7 @@ pub unsafe fn ridge_2d(
         amp = _mm256_mul_ps(amp, gain);
         result = _mm256_add_ps(
             result,
-            _mm256_sub_ps(
-                _mm256_set1_ps(1.0),
-                _mm256_abs_ps(_mm256_mul_ps(simplex_2d(xf, yf), amp)),
-            ),
+            _mm256_fnmadd_ps(_mm256_abs_ps(simplex_2d(xf, yf)), amp, _mm256_set1_ps(1.0)),
         );
     }
 
@@ -704,7 +701,7 @@ pub unsafe fn ridge_3d(
     let mut xf = _mm256_mul_ps(x, freq);
     let mut yf = _mm256_mul_ps(y, freq);
     let mut zf = _mm256_mul_ps(z, freq);
-    let mut result = _mm256_abs_ps(simplex_3d(xf, yf, zf));
+    let mut result = _mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_abs_ps(simplex_3d(xf, yf, zf)));
     let mut amp = _mm256_set1_ps(1.0);
 
     for _ in 1..octaves {
@@ -714,9 +711,10 @@ pub unsafe fn ridge_3d(
         amp = _mm256_mul_ps(amp, gain);
         result = _mm256_add_ps(
             result,
-            _mm256_sub_ps(
+            _mm256_fnmadd_ps(
+                _mm256_abs_ps(simplex_3d(xf, yf, zf)),
+                amp,
                 _mm256_set1_ps(1.0),
-                _mm256_abs_ps(_mm256_mul_ps(simplex_3d(xf, yf, zf), amp)),
             ),
         );
     }

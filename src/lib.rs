@@ -8,7 +8,7 @@
 //! * SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
 //! * AVX2 version also leverages FMA3
 //! * Runtime detection picks the best available instruction set
-//! * Simplex noise, fractal brownian motion, and turbulence
+//! * Simplex noise, fractal brownian motion, turbulence, and ridge.
 //! * 2d and 3d
 //!
 //! ## Benchmarks

@@ -223,7 +223,7 @@ pub unsafe fn ridge_2d(
 ) -> __m128 {
     let mut xf = _mm_mul_ps(x, freq);
     let mut yf = _mm_mul_ps(y, freq);
-    let mut result = _mm_abs_ps(simplex_2d(xf, yf));
+    let mut result = _mm_sub_ps(_mm_set1_ps(1.0),_mm_abs_ps(simplex_2d(xf, yf)));
     let mut amp = _mm_set1_ps(1.0);
 
     for _ in 1..octaves {
@@ -681,7 +681,7 @@ pub unsafe fn ridge_3d(
     let mut xf = _mm_mul_ps(x, freq);
     let mut yf = _mm_mul_ps(y, freq);
     let mut zf = _mm_mul_ps(z, freq);
-    let mut result = _mm_abs_ps(simplex_3d(xf, yf, zf));
+    let mut result = _mm_sub_ps(_mm_set1_ps(1.0),_mm_abs_ps(simplex_3d(xf, yf, zf)));
     let mut amp = _mm_set1_ps(1.0);
 
     for _ in 1..octaves {
