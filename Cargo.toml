@@ -7,7 +7,7 @@ description = "SIMD accelerate noise library with runtime feature detection"
 license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/simdnoise/"
 readme = "README.md"
-keywords = ["SIMD", "noise", "simplex", "perlin","fractal", "performance","gamedev"]
+keywords = ["SIMD", "noise", "simplex", "perlin","performance"]
 repository = "https://github.com/jackmott/rust-simd-noise"
 categories = ["Game engines","Multimedia","Rendering"]
 
