@@ -2,7 +2,7 @@
 
 # rust-simd-noise
 Super fast SIMD noise library for Rust. Currently in beta. PRs welcome!
-
+Available on [crates.io](https://crates.io/crates/simdnoise)
 
 
 ## Features
