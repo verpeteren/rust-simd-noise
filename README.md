@@ -1,7 +1,7 @@
 <img align="left" width="120" src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
 
 # SIMDNoise
-Super fast SIMD noise library for Rust. Currently in beta. PRs welcome!
+Super fast SIMD noise library for Rust. PRs welcome!
 Available on [crates.io](https://crates.io/crates/simdnoise)
 
 
