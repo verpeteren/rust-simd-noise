@@ -124,7 +124,7 @@ pub enum NoiseType {
         /// and will increase runtime linearlly.
         octaves: u8,
     },
-    /// Rige Noise
+    /// Ridge Noise
     Ridge {
         /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
         /// starting value for experimentation is around 0.05
