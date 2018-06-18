@@ -7,10 +7,11 @@ use std::f32;
 
 const F2: f32 = 0.36602540378;
 const F3: f32 = 1.0 / 3.0;
+const F4: f32 = 0.309016994;
 const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
-const POINT_FIVE: f32 = 0.5;
+const G4: f32 = 0.138196601;
 
 fn grad2(hash: i32, x: f32, y: f32) -> f32 {
     let h = hash & 7;
@@ -272,9 +273,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     let x2 = x0 - i2 as f32 + F3;
     let y2 = y0 - j2 as f32 + F3;
     let z2 = z0 - k2 as f32 + F3;
-    let x3 = x0 - 1.0 + POINT_FIVE;
-    let y3 = y0 - 1.0 + POINT_FIVE;
-    let z3 = z0 - 1.0 + POINT_FIVE;
+    let x3 = x0 - 1.5;
+    let y3 = y0 - 1.5;
+    let z3 = z0 - 1.5;
 
     let ii = i & 255;
     let jj = j & 255;
@@ -354,7 +355,7 @@ pub fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, oct
     result
 }
 
-/// Get a single value of 2d ridge noise.
+/// Get a single value of 3d ridge noise.
 pub fn ridge_3d(x: f32, y: f32, z: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     let mut xf = x * freq;
     let mut yf = y * freq;
@@ -486,6 +487,333 @@ pub fn get_3d_scaled_noise(
 ) -> Vec<f32> {
     let (mut noise, min, max) =
         get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type);
+    let scale_range = scale_max - scale_min;
+    let range = max - min;
+    let multiplier = scale_range / range;
+    let offset = scale_min - min * multiplier;
+    for f in &mut noise {
+        *f = *f * multiplier + offset;
+    }
+    noise
+}
+
+fn grad4(hash: i32, x: f32, y: f32, z: f32, w: f32) -> f32 {
+    let h = hash & 31;
+    let u = if h < 24 { x } else { y };
+    let v = if h < 16 { y } else { z };
+    let w = if h < 8 { x } else { w };
+
+    let a = if (h & 1) != 0 { -u } else { u };
+    let b = if (h & 2) != 0 { -v } else { v };
+    let c = if (h & 4) != 0 { -w } else { w };
+    a + b + c
+}
+
+pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
+    let s = (x + y + z + w) * F4;
+    let xs = x + s;
+    let ys = y + s;
+    let zs = z + s;
+    let ws = w + s;
+    let i = xs.floor() as i32;
+    let j = ys.floor() as i32;
+    let k = zs.floor() as i32;
+    let l = ws.floor() as i32;
+
+    let t = (i + j + k + l) as f32 * G4;
+    let x0 = x - (i as f32 - t);
+    let y0 = y - (j as f32 - t);
+    let z0 = z - (k as f32 - t);
+    let w0 = w - (l as f32 - t);
+
+    let c1 = if x0 > y0 { 32 } else { 0 };
+    let c2 = if x0 > z0 { 16 } else { 0 };
+    let c3 = if y0 > z0 { 8 } else { 0 };
+    let c4 = if x0 > w0 { 4 } else { 0 };
+    let c5 = if y0 > w0 { 2 } else { 0 };
+    let c6 = if z0 > w0 { 1 } else { 0 };
+    let c = c1 + c2 + c3 + c4 + c5 + c6;
+
+    let i1 = if SIMPLEX[c as usize][0] >= 3 { 1 } else { 0 };
+    let j1 = if SIMPLEX[c as usize][1] >= 3 { 1 } else { 0 };
+    let k1 = if SIMPLEX[c as usize][2] >= 3 { 1 } else { 0 };
+    let l1 = if SIMPLEX[c as usize][3] >= 3 { 1 } else { 0 };
+
+    let i2 = if SIMPLEX[c as usize][0] >= 2 { 1 } else { 0 };
+    let j2 = if SIMPLEX[c as usize][1] >= 2 { 1 } else { 0 };
+    let k2 = if SIMPLEX[c as usize][2] >= 2 { 1 } else { 0 };
+    let l2 = if SIMPLEX[c as usize][3] >= 2 { 1 } else { 0 };
+
+    let i3 = if SIMPLEX[c as usize][0] >= 1 { 1 } else { 0 };
+    let j3 = if SIMPLEX[c as usize][1] >= 1 { 1 } else { 0 };
+    let k3 = if SIMPLEX[c as usize][2] >= 1 { 1 } else { 0 };
+    let l3 = if SIMPLEX[c as usize][3] >= 1 { 1 } else { 0 };
+
+    let x1 = x0 - i1 as f32 + G4; // Offsets for second corner in (x,y,z,w) coords
+    let y1 = y0 - j1 as f32 + G4;
+    let z1 = z0 - k1 as f32 + G4;
+    let w1 = w0 - l1 as f32 + G4;
+    let x2 = x0 - i2 as f32 + 2.0 * G4; // Offsets for third corner in (x,y,z,w) coords
+    let y2 = y0 - j2 as f32 + 2.0 * G4;
+    let z2 = z0 - k2 as f32 + 2.0 * G4;
+    let w2 = w0 - l2 as f32 + 2.0 * G4;
+    let x3 = x0 - i3 as f32 + 3.0 * G4; // Offsets for fourth corner in (x,y,z,w) coords
+    let y3 = y0 - j3 as f32 + 3.0 * G4;
+    let z3 = z0 - k3 as f32 + 3.0 * G4;
+    let w3 = w0 - l3 as f32 + 3.0 * G4;
+    let x4 = x0 - 1.0 + 4.0 * G4; // Offsets for last corner in (x,y,z,w) coords
+    let y4 = y0 - 1.0 + 4.0 * G4;
+    let z4 = z0 - 1.0 + 4.0 * G4;
+    let w4 = w0 - 1.0 + 4.0 * G4;
+
+    let ii = i & 0xff;
+    let jj = j & 0xff;
+    let kk = k & 0xff;
+    let ll = l & 0xff;
+
+    let mut t0 = 0.5 - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
+    let n0 = if t0 < 0.0 {
+        0.0
+    } else {
+        t0 = t0 * t0;
+        t0 = t0 * t0;
+        let h = PERM[(ii + PERM[(jj + PERM[(kk + PERM[ll as usize]) as usize]) as usize]) as usize];
+        t0 * grad4(h, x0, y0, z0, w0)
+    };
+
+    let mut t1 = 0.5 - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
+    let n1 = if t1 < 0.0 {
+        0.0
+    } else {
+        t1 = t1 * t1;
+        t1 = t1 * t1;
+        let h = PERM[(ii + i1
+                         + PERM[(jj + j1 + PERM[(kk + k1 + PERM[(ll + l1) as usize]) as usize])
+                                    as usize]) as usize];
+        t1 * grad4(h, x1, y1, z1, w1)
+    };
+
+    let mut t2 = 0.5 - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
+    let n2 = if t2 < 0.0 {
+        0.0
+    } else {
+        t2 = t2 * t2;
+        t2 = t2 * t2;
+        let h = PERM[(ii + i2
+                         + PERM[(jj + j2 + PERM[(kk + k2 + PERM[(ll + l2) as usize]) as usize])
+                                    as usize]) as usize];
+        t2 * grad4(h, x2, y2, z2, w2)
+    };
+
+    let mut t3 = 0.5 - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
+    let n3 = if t3 < 0.0 {
+        0.0
+    } else {
+        t3 = t3 * t3;
+        t3 = t3 * t3;
+        let h = PERM[(ii + i3
+                         + PERM[(jj + j3 + PERM[(kk + k3 + PERM[(ll + l3) as usize]) as usize])
+                                    as usize]) as usize] & 31;
+        t3 * grad4(h, x3, y3, z3, w3)
+    };
+
+    let mut t4 = 0.5 - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
+    let n4 = if t4 < 0.0 {
+        0.0
+    } else {
+        t4 = t4 * t4;
+        t4 = t4 * t4;
+        let h = PERM[(ii + 1
+                         + PERM[(jj + 1 + PERM[(kk + 1 + PERM[(ll + 1) as usize]) as usize])
+                                    as usize]) as usize] & 31;
+        t4 * grad4(h, x4, y4, z4, w4)
+    };
+    n0 + n1 + n2 + n3 + n4
+}
+/// Get a single value of 4d fractal brownian motion.
+pub fn fbm_4d(
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+    freq: f32,
+    lacunarity: f32,
+    gain: f32,
+    octaves: u8,
+) -> f32 {
+    let mut xf = x * freq;
+    let mut yf = y * freq;
+    let mut zf = z * freq;
+    let mut wf = w * freq;
+    let mut result = simplex_4d(xf, yf, zf, wf);
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        yf = yf * lacunarity;
+        zf = zf * lacunarity;
+        wf = wf * lacunarity;
+        amp = amp * gain;
+        result = result + (simplex_4d(xf, yf, zf, wf) * amp);
+    }
+    result
+}
+
+/// Get a single value of 4d ridge noise.
+pub fn ridge_4d(
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+    freq: f32,
+    lacunarity: f32,
+    gain: f32,
+    octaves: u8,
+) -> f32 {
+    let mut xf = x * freq;
+    let mut yf = y * freq;
+    let mut zf = z * freq;
+    let mut wf = w * freq;
+    let mut result = 1.0 - simplex_4d(xf, yf, zf, wf).abs();
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        yf = yf * lacunarity;
+        zf = zf * lacunarity;
+        wf = wf * lacunarity;
+        amp = amp * gain;
+        result = result + (1.0 - (simplex_4d(xf, yf, zf, wf) * amp).abs());
+    }
+    result
+}
+
+/// Get a single value of 4d turbulence.
+pub fn turbulence_4d(
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+    freq: f32,
+    lacunarity: f32,
+    gain: f32,
+    octaves: u8,
+) -> f32 {
+    let mut xf = x * freq;
+    let mut yf = y * freq;
+    let mut zf = z * freq;
+    let mut wf = w * freq;
+    let mut result = simplex_4d(xf, yf, zf, wf).abs();
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        yf = yf * lacunarity;
+        zf = zf * lacunarity;
+        wf = wf * lacunarity;
+        amp = amp * gain;
+        result = result + (simplex_4d(xf, yf, zf, wf) * amp).abs();
+    }
+    result
+}
+
+fn get_4d_noise_helper(x: f32, y: f32, z: f32, w: f32, noise_type: NoiseType) -> f32 {
+    match noise_type {
+        NoiseType::Fbm {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => fbm_4d(x, y, z, w, freq, lacunarity, gain, octaves),
+        NoiseType::Ridge {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => ridge_4d(x, y, z, w, freq, lacunarity, gain, octaves),
+        NoiseType::Turbulence {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => turbulence_4d(x, y, z, w, freq, lacunarity, gain, octaves),
+        NoiseType::Normal { freq } => simplex_4d(x * freq, y * freq, z * freq, w * freq),
+    }
+}
+
+/// Gets a width X height X depth x time sized block of 3d noise, unscaled,
+/// `start_*` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_4d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    start_w: f32,
+    time: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+    let mut result = Vec::with_capacity(width * height * depth * time);
+    unsafe {
+        result.set_len(width * height * depth * time);
+    }
+    let mut i = 0;
+    let mut w = start_w;
+    for _ in 0..time {
+        let mut z = start_z;
+        for _ in 0..depth {
+            let mut y = start_y;
+            for _ in 0..height {
+                let mut x = start_x;
+                for _ in 0..width {
+                    let f = get_4d_noise_helper(x, y, z, w, noise_type);
+                    if f < min {
+                        min = f;
+                    }
+                    if f > max {
+                        max = f;
+                    }
+                    unsafe {
+                        *result.get_unchecked_mut(i) = f;
+                    }
+                    i += 1;
+                    x += 1.0;
+                }
+                y += 1.0;
+            }
+            z += 1.0;
+        }
+        w += 1.0;
+    }
+    (result, min, max)
+}
+
+/// Gets a width X height X depth x time sized block of scaled 3d noise
+/// `start_*` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
+pub fn get_4d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    start_w: f32,
+    time: usize,
+    noise_type: NoiseType,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    let (mut noise, min, max) = get_4d_noise(
+        start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+    );
     let scale_range = scale_max - scale_min;
     let range = max - min;
     let multiplier = scale_range / range;
