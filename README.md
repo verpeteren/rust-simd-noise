@@ -37,6 +37,7 @@ Requires nightly until 1.27 drops
 * AVX512 support
 * ARM NEON support
 * Voroni, Cell, and other noise types
+* 1D? 4D? Noise.
 
 ## Get a block of noise with runtime SIMD detection
 
