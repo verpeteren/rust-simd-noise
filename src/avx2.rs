@@ -16,7 +16,6 @@ union M256Array {
     simd: __m256,
     array: [f32; 8],
 }
-
 const F2: __m256 = unsafe {
     M256Array {
         array: [0.36602540378; 8],
@@ -25,6 +24,11 @@ const F2: __m256 = unsafe {
 const F3: __m256 = unsafe {
     M256Array {
         array: [1.0 / 3.0; 8],
+    }.simd
+};
+pub const F4: __m256 = unsafe {
+    M256Array {
+        array: [0.309016994; 8],
     }.simd
 };
 const G2: __m256 = unsafe {
@@ -43,6 +47,29 @@ const G3: __m256 = unsafe {
         array: [1.0 / 6.0; 8],
     }.simd
 };
+pub const G4: __m256 = unsafe {
+    M256Array {
+        array: [0.138196601; 8],
+    }.simd
+};
+pub const G24: __m256 = unsafe {
+    M256Array {
+        array: [2.0 * 0.138196601; 8],
+    }.simd
+};
+
+pub const G34: __m256 = unsafe {
+    M256Array {
+        array: [3.0 * 0.138196601; 8],
+    }.simd
+};
+
+pub const G44: __m256 = unsafe {
+    M256Array {
+        array: [4.0 * 0.138196601; 8],
+    }.simd
+};
+
 const POINT_FIVE: __m256 = unsafe { M256Array { array: [0.5; 8] }.simd };
 
 #[target_feature(enable = "avx2")]
@@ -461,20 +488,17 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
     let y0 = _mm256_sub_ps(y, _mm256_sub_ps(jps, t));
     let z0 = _mm256_sub_ps(z, _mm256_sub_ps(kps, t));
 
-    let i1 = 
-        _mm256_and_si256(
-            _mm256_castps_si256(_mm256_cmp_ps(x0, y0, _CMP_GE_OQ)),
-            _mm256_castps_si256(_mm256_cmp_ps(x0, z0, _CMP_GE_OQ)),
+    let i1 = _mm256_and_si256(
+        _mm256_castps_si256(_mm256_cmp_ps(x0, y0, _CMP_GE_OQ)),
+        _mm256_castps_si256(_mm256_cmp_ps(x0, z0, _CMP_GE_OQ)),
     );
-    let j1 = 
-        _mm256_and_si256(
-            _mm256_castps_si256(_mm256_cmp_ps(y0, x0, _CMP_GT_OQ)),
-            _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GE_OQ)),
+    let j1 = _mm256_and_si256(
+        _mm256_castps_si256(_mm256_cmp_ps(y0, x0, _CMP_GT_OQ)),
+        _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GE_OQ)),
     );
-    let k1 = 
-        _mm256_and_si256(
-            _mm256_castps_si256(_mm256_cmp_ps(z0, x0, _CMP_GT_OQ)),
-            _mm256_castps_si256(_mm256_cmp_ps(z0, y0, _CMP_GT_OQ)),
+    let k1 = _mm256_and_si256(
+        _mm256_castps_si256(_mm256_cmp_ps(z0, x0, _CMP_GT_OQ)),
+        _mm256_castps_si256(_mm256_cmp_ps(z0, y0, _CMP_GT_OQ)),
     );
 
     //for i2
@@ -507,12 +531,9 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
         _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GE_OQ)),
     );
 
-    let i2 = 
-        _mm256_or_si256(i1, _mm256_or_si256(yx_xz, zx_xy));
-    let j2 = 
-        _mm256_or_si256(j1, _mm256_or_si256(xy_yz, zy_yx));
-    let k2 = 
-        _mm256_or_si256(k1, _mm256_or_si256(yz_zx, xz_zy));
+    let i2 = _mm256_or_si256(i1, _mm256_or_si256(yx_xz, zx_xy));
+    let j2 = _mm256_or_si256(j1, _mm256_or_si256(xy_yz, zy_yx));
+    let k2 = _mm256_or_si256(k1, _mm256_or_si256(yz_zx, xz_zy));
 
     let x1 = _mm256_add_ps(_mm256_add_ps(x0, _mm256_cvtepi32_ps(i1)), G3);
     let y1 = _mm256_add_ps(_mm256_add_ps(y0, _mm256_cvtepi32_ps(j1)), G3);
@@ -630,13 +651,13 @@ pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256) -> __m256 {
 
     //if ti < 0 then 0 else ni
     let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n0 = _mm256_andnot_ps(cond,n0);
+    n0 = _mm256_andnot_ps(cond, n0);
     cond = _mm256_cmp_ps(t1, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n1 = _mm256_andnot_ps(cond,n1);
+    n1 = _mm256_andnot_ps(cond, n1);
     cond = _mm256_cmp_ps(t2, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n2 = _mm256_andnot_ps(cond,n2);
+    n2 = _mm256_andnot_ps(cond, n2);
     cond = _mm256_cmp_ps(t3, _mm256_setzero_ps(), _CMP_LT_OQ);
-    n3 = _mm256_andnot_ps(cond,n3);
+    n3 = _mm256_andnot_ps(cond, n3);
 
     _mm256_add_ps(n0, _mm256_add_ps(n1, _mm256_add_ps(n2, n3)))
 }
@@ -890,3 +911,613 @@ pub unsafe fn get_3d_scaled_noise(
     scale_array(scale_min, scale_max, min, max, &mut noise);
     noise
 }
+#[target_feature(enable = "avx2")]
+unsafe fn grad4_simd(hash: __m256i, x: __m256, y: __m256, z: __m256, t: __m256) -> __m256 {
+    let h = _mm256_and_si256(hash, _mm256_set1_epi32(31));
+    let mut mask = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(24), h));
+    let u = _mm256_blendv_ps(y, x, mask);
+    mask = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(16), h));
+    let v = _mm256_blendv_ps(z, y, mask);
+    mask = _mm256_castsi256_ps(_mm256_cmpgt_epi32(_mm256_set1_epi32(8), h));
+    let w = _mm256_blendv_ps(t, z, mask);
+
+    let h_and_1 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_and_si256(h, _mm256_set1_epi32(1)),
+    ));
+    let h_and_2 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_and_si256(h, _mm256_set1_epi32(2)),
+    ));
+    let h_and_4 = _mm256_castsi256_ps(_mm256_cmpeq_epi32(
+        _mm256_setzero_si256(),
+        _mm256_and_si256(h, _mm256_set1_epi32(4)),
+    ));
+
+    _mm256_add_ps(
+        _mm256_blendv_ps(_mm256_sub_ps(_mm256_setzero_ps(), u), u, h_and_1),
+        _mm256_add_ps(
+            _mm256_blendv_ps(_mm256_sub_ps(_mm256_setzero_ps(), v), v, h_and_2),
+            _mm256_blendv_ps(_mm256_sub_ps(_mm256_setzero_ps(), w), w, h_and_4),
+        ),
+    )
+}
+/// Get a single value of 4d simplex noise, results
+/// are not scaled.
+#[target_feature(enable = "avx2")]
+pub unsafe fn simplex_4d(x: __m256, y: __m256, z: __m256, w: __m256) -> __m256 {
+    let s = _mm256_mul_ps(F4, _mm256_add_ps(x, _mm256_add_ps(y, _mm256_add_ps(z, w))));
+
+    let ips = _mm256_floor_ps(_mm256_add_ps(x, s));
+    let jps = _mm256_floor_ps(_mm256_add_ps(y, s));
+    let kps = _mm256_floor_ps(_mm256_add_ps(z, s));
+    let lps = _mm256_floor_ps(_mm256_add_ps(w, s));
+
+    let i = _mm256_cvtps_epi32(ips);
+    let j = _mm256_cvtps_epi32(jps);
+    let k = _mm256_cvtps_epi32(kps);
+    let l = _mm256_cvtps_epi32(lps);
+
+    let t = _mm256_mul_ps(
+        _mm256_cvtepi32_ps(_mm256_add_epi32(
+            i,
+            _mm256_add_epi32(j, _mm256_add_epi32(k, l)),
+        )),
+        G4,
+    );
+    let x0 = _mm256_sub_ps(x, _mm256_sub_ps(ips, t));
+    let y0 = _mm256_sub_ps(y, _mm256_sub_ps(jps, t));
+    let z0 = _mm256_sub_ps(z, _mm256_sub_ps(kps, t));
+    let w0 = _mm256_sub_ps(w, _mm256_sub_ps(lps, t));
+
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(x0, y0, _CMP_GT_OQ));
+    let c1 = _mm256_and_si256(cond, _mm256_set1_epi32(32));
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(x0, z0, _CMP_GT_OQ));
+    let c2 = _mm256_and_si256(cond, _mm256_set1_epi32(16));
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GT_OQ));
+    let c3 = _mm256_and_si256(cond, _mm256_set1_epi32(8));
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(x0, w0, _CMP_GT_OQ));
+    let c4 = _mm256_and_si256(cond, _mm256_set1_epi32(4));
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GT_OQ));
+    let c5 = _mm256_and_si256(cond, _mm256_set1_epi32(2));
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(z0, z0, _CMP_GT_OQ));
+    let c6 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+    let c = _mm256_or_si256(
+        c1,
+        _mm256_or_si256(
+            c2,
+            _mm256_or_si256(c3, _mm256_or_si256(c4, _mm256_or_si256(c5, c6))),
+        ),
+    );
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX0 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
+    let i1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX1 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
+    let j1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX2 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
+    let k1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX3 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
+    let l1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+    //---
+    let sc = _mm256_i32gather_epi32(&SIMPLEX0 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
+    let i2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX1 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
+    let j2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX2 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
+    let k2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX3 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
+    let l2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+    //--
+    let sc = _mm256_i32gather_epi32(&SIMPLEX0 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
+    let i3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX1 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
+    let j3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX2 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
+    let k3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let sc = _mm256_i32gather_epi32(&SIMPLEX3 as *const i32, c, 4);
+    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
+    let l3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+
+    let x1 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i1)), G4);
+    let y1 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j1)), G4);
+    let z1 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_cvtepi32_ps(k1)), G4);
+    let w1 = _mm256_add_ps(_mm256_sub_ps(w0, _mm256_cvtepi32_ps(l1)), G4);
+    let x2 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i2)), G24);
+    let y2 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j2)), G24);
+    let z2 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_cvtepi32_ps(k2)), G24);
+    let w2 = _mm256_add_ps(_mm256_sub_ps(w0, _mm256_cvtepi32_ps(l2)), G24);
+    let x3 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i3)), G34);
+    let y3 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j3)), G34);
+    let z3 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_cvtepi32_ps(k3)), G34);
+    let w3 = _mm256_add_ps(_mm256_sub_ps(w0, _mm256_cvtepi32_ps(l3)), G34);
+    let x4 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_set1_ps(1.0)), G44);
+    let y4 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_set1_ps(1.0)), G44);
+    let z4 = _mm256_add_ps(_mm256_sub_ps(z0, _mm256_set1_ps(1.0)), G44);
+    let w4 = _mm256_add_ps(_mm256_sub_ps(w0, _mm256_set1_ps(1.0)), G44);
+
+    let ii = _mm256_and_si256(i, _mm256_set1_epi32(0xff));
+    let jj = _mm256_and_si256(j, _mm256_set1_epi32(0xff));
+    let kk = _mm256_and_si256(k, _mm256_set1_epi32(0xff));
+    let ll = _mm256_and_si256(l, _mm256_set1_epi32(0xff));
+
+    let lp = _mm256_i32gather_epi32(&PERM as *const i32, ll, 4);
+    let kp = _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(kk, lp), 4);
+    let jp = _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(jj, kp), 4);
+    let gi0 = _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(ii, jp), 4);
+
+    let lp = _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(ll, l1), 4);
+    let kp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(kk, k1), lp),
+        4,
+    );
+    let jp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(jj, j1), kp),
+        4,
+    );
+    let gi1 = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(ii, i1), jp),
+        4,
+    );
+
+    let lp = _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(ll, l2), 4);
+    let kp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(kk, k2), lp),
+        4,
+    );
+    let jp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(jj, j2), kp),
+        4,
+    );
+    let gi2 = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(ii, i2), jp),
+        4,
+    );
+
+    let lp = _mm256_i32gather_epi32(&PERM as *const i32, _mm256_add_epi32(ll, l3), 4);
+    let kp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(kk, k3), lp),
+        4,
+    );
+    let jp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(jj, j3), kp),
+        4,
+    );
+    let gi3 = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(ii, i3), jp),
+        4,
+    );
+
+    let lp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(ll, _mm256_set1_epi32(1)),
+        4,
+    );
+    let kp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(kk, _mm256_set1_epi32(1)), lp),
+        4,
+    );
+    let jp = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(jj, _mm256_set1_epi32(1)), kp),
+        4,
+    );
+    let gi4 = _mm256_i32gather_epi32(
+        &PERM as *const i32,
+        _mm256_add_epi32(_mm256_add_epi32(ii, _mm256_set1_epi32(1)), jp),
+        4,
+    );
+
+    let t0 = _mm256_sub_ps(
+        _mm256_sub_ps(
+            _mm256_sub_ps(
+                _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x0, x0)),
+                _mm256_mul_ps(y0, y0),
+            ),
+            _mm256_mul_ps(z0, z0),
+        ),
+        _mm256_mul_ps(w0, w0),
+    );
+    let t1 = _mm256_sub_ps(
+        _mm256_sub_ps(
+            _mm256_sub_ps(
+                _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x1, x1)),
+                _mm256_mul_ps(y1, y1),
+            ),
+            _mm256_mul_ps(z1, z1),
+        ),
+        _mm256_mul_ps(w1, w1),
+    );
+    let t2 = _mm256_sub_ps(
+        _mm256_sub_ps(
+            _mm256_sub_ps(
+                _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x2, x2)),
+                _mm256_mul_ps(y2, y2),
+            ),
+            _mm256_mul_ps(z2, z2),
+        ),
+        _mm256_mul_ps(w2, w2),
+    );
+    let t3 = _mm256_sub_ps(
+        _mm256_sub_ps(
+            _mm256_sub_ps(
+                _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x3, x3)),
+                _mm256_mul_ps(y3, y3),
+            ),
+            _mm256_mul_ps(z3, z3),
+        ),
+        _mm256_mul_ps(w3, w3),
+    );
+    let t4 = _mm256_sub_ps(
+        _mm256_sub_ps(
+            _mm256_sub_ps(
+                _mm256_sub_ps(POINT_FIVE, _mm256_mul_ps(x4, x4)),
+                _mm256_mul_ps(y4, y4),
+            ),
+            _mm256_mul_ps(z4, z4),
+        ),
+        _mm256_mul_ps(w4, w4),
+    );
+    //ti*ti*ti*ti
+    let mut t0q = _mm256_mul_ps(t0, t0);
+    t0q = _mm256_mul_ps(t0q, t0q);
+    let mut t1q = _mm256_mul_ps(t1, t1);
+    t1q = _mm256_mul_ps(t1q, t1q);
+    let mut t2q = _mm256_mul_ps(t2, t2);
+    t2q = _mm256_mul_ps(t2q, t2q);
+    let mut t3q = _mm256_mul_ps(t3, t3);
+    t3q = _mm256_mul_ps(t3q, t3q);
+    let mut t4q = _mm256_mul_ps(t4, t4);
+    t4q = _mm256_mul_ps(t4q, t4q);
+
+    let mut n0 = _mm256_mul_ps(t0q, grad4_simd(gi0, x0, y0, z0, w0));
+    let mut n1 = _mm256_mul_ps(t1q, grad4_simd(gi1, x1, y1, z1, w1));
+    let mut n2 = _mm256_mul_ps(t2q, grad4_simd(gi2, x2, y2, z2, w2));
+    let mut n3 = _mm256_mul_ps(t3q, grad4_simd(gi3, x3, y3, z3, w3));
+    let mut n4 = _mm256_mul_ps(t4q, grad4_simd(gi4, x4, y4, z4, w4));
+
+    //if ti < 0 then 0 else ni
+    let mut cond = _mm256_cmp_ps(t0, _mm256_setzero_ps(), _CMP_LT_OQ);
+    n0 = _mm256_andnot_ps(cond, n0);
+    cond = _mm256_cmp_ps(t1, _mm256_setzero_ps(), _CMP_LT_OQ);
+    n1 = _mm256_andnot_ps(cond, n1);
+    cond = _mm256_cmp_ps(t2, _mm256_setzero_ps(), _CMP_LT_OQ);
+    n2 = _mm256_andnot_ps(cond, n2);
+    cond = _mm256_cmp_ps(t3, _mm256_setzero_ps(), _CMP_LT_OQ);
+    n3 = _mm256_andnot_ps(cond, n3);
+    cond = _mm256_cmp_ps(t4, _mm256_setzero_ps(), _CMP_LT_OQ);
+    n4 = _mm256_andnot_ps(cond, n4);
+
+    _mm256_add_ps(
+        n0,
+        _mm256_add_ps(n1, _mm256_add_ps(n2, _mm256_add_ps(n3, n4))),
+    )
+}
+/// Get a single value of 4d fractal brownian motion.
+#[target_feature(enable = "avx2")]
+pub unsafe fn fbm_4d(
+    x: __m256,
+    y: __m256,
+    z: __m256,
+    w: __m256,
+    freq: __m256,
+    lac: __m256,
+    gain: __m256,
+    octaves: u8,
+) -> __m256 {
+    let mut xf = _mm256_mul_ps(x, freq);
+    let mut yf = _mm256_mul_ps(y, freq);
+    let mut zf = _mm256_mul_ps(z, freq);
+    let mut wf = _mm256_mul_ps(w, freq);
+    let mut result = simplex_4d(xf, yf, zf, wf);
+    let mut amp = _mm256_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm256_mul_ps(xf, lac);
+        yf = _mm256_mul_ps(yf, lac);
+        zf = _mm256_mul_ps(zf, lac);
+        wf = _mm256_mul_ps(wf, lac);
+        amp = _mm256_mul_ps(amp, gain);
+        result = _mm256_add_ps(result, _mm256_mul_ps(simplex_4d(xf, yf, zf, wf), amp));
+    }
+
+    result
+}
+
+/// Get a single value of 4d ridge noise.
+#[target_feature(enable = "avx2")]
+pub unsafe fn ridge_4d(
+    x: __m256,
+    y: __m256,
+    z: __m256,
+    w: __m256,
+    freq: __m256,
+    lac: __m256,
+    gain: __m256,
+    octaves: u8,
+) -> __m256 {
+    let mut xf = _mm256_mul_ps(x, freq);
+    let mut yf = _mm256_mul_ps(y, freq);
+    let mut zf = _mm256_mul_ps(z, freq);
+    let mut wf = _mm256_mul_ps(w, freq);
+    let mut result = _mm256_sub_ps(
+        _mm256_set1_ps(1.0),
+        _mm256_abs_ps(simplex_4d(xf, yf, zf, wf)),
+    );
+    let mut amp = _mm256_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm256_mul_ps(xf, lac);
+        yf = _mm256_mul_ps(yf, lac);
+        zf = _mm256_mul_ps(zf, lac);
+        wf = _mm256_mul_ps(wf, lac);
+        amp = _mm256_mul_ps(amp, gain);
+        result = _mm256_add_ps(
+            result,
+            _mm256_sub_ps(
+                _mm256_set1_ps(1.0),
+                _mm256_abs_ps(_mm256_mul_ps(simplex_4d(xf, yf, zf, wf), amp)),
+            ),
+        );
+    }
+
+    result
+}
+
+/// Get a single value of 4d turbulence.
+#[target_feature(enable = "avx2")]
+pub unsafe fn turbulence_4d(
+    x: __m256,
+    y: __m256,
+    z: __m256,
+    w: __m256,
+    freq: __m256,
+    lac: __m256,
+    gain: __m256,
+    octaves: u8,
+) -> __m256 {
+    let mut xf = _mm256_mul_ps(x, freq);
+    let mut yf = _mm256_mul_ps(y, freq);
+    let mut zf = _mm256_mul_ps(z, freq);
+    let mut wf = _mm256_mul_ps(w, freq);
+    let mut result = _mm256_abs_ps(simplex_4d(xf, yf, zf, wf));
+    let mut amp = _mm256_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm256_mul_ps(xf, lac);
+        yf = _mm256_mul_ps(yf, lac);
+        zf = _mm256_mul_ps(zf, lac);
+        wf = _mm256_mul_ps(wf, lac);
+        amp = _mm256_mul_ps(amp, gain);
+        result = _mm256_add_ps(
+            result,
+            _mm256_abs_ps(_mm256_mul_ps(simplex_4d(xf, yf, zf, wf), amp)),
+        );
+    }
+
+    result
+}
+
+#[target_feature(enable = "avx2")]
+unsafe fn get_4d_noise_helper(
+    x: __m256,
+    y: __m256,
+    z: __m256,
+    w: __m256,
+    noise_type: NoiseType,
+) -> M256Array {
+    M256Array {
+        simd: match noise_type {
+            NoiseType::Fbm {
+                freq,
+                lacunarity,
+                gain,
+                octaves,
+            } => fbm_4d(
+                x,
+                y,
+                z,
+                w,
+                _mm256_set1_ps(freq),
+                _mm256_set1_ps(lacunarity),
+                _mm256_set1_ps(gain),
+                octaves,
+            ),
+            NoiseType::Ridge {
+                freq,
+                lacunarity,
+                gain,
+                octaves,
+            } => ridge_4d(
+                x,
+                y,
+                z,
+                w,
+                _mm256_set1_ps(freq),
+                _mm256_set1_ps(lacunarity),
+                _mm256_set1_ps(gain),
+                octaves,
+            ),
+            NoiseType::Turbulence {
+                freq,
+                lacunarity,
+                gain,
+                octaves,
+            } => turbulence_4d(
+                x,
+                y,
+                z,
+                w,
+                _mm256_set1_ps(freq),
+                _mm256_set1_ps(lacunarity),
+                _mm256_set1_ps(gain),
+                octaves,
+            ),
+            NoiseType::Normal { freq } => simplex_4d(
+                _mm256_mul_ps(x, _mm256_set1_ps(freq)),
+                _mm256_mul_ps(y, _mm256_set1_ps(freq)),
+                _mm256_mul_ps(z, _mm256_set1_ps(freq)),
+                _mm256_mul_ps(w, _mm256_set1_ps(freq)),
+            ),
+        },
+    }
+}
+/// Gets a width X height X depth x time sized block of 4d noise, unscaled,
+/// `start_*` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+#[target_feature(enable = "avx2")]
+pub unsafe fn get_4d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    start_w: f32,
+    time: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    let mut min_s = M256Array {
+        simd: _mm256_set1_ps(f32::MAX),
+    };
+    let mut max_s = M256Array {
+        simd: _mm256_set1_ps(f32::MIN),
+    };
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let mut result = Vec::with_capacity(width * height * depth * time);
+    result.set_len(width * height * depth * time);
+    let mut i = 0;
+    let remainder = width % 8;
+    let mut w = _mm256_set1_ps(start_w);
+    for _ in 0..time {
+        let mut z = _mm256_set1_ps(start_z);
+        for _ in 0..depth {
+            let mut y = _mm256_set1_ps(start_y);
+            for _ in 0..height {
+                let mut x = _mm256_set_ps(
+                    start_x + 7.0,
+                    start_x + 6.0,
+                    start_x + 5.0,
+                    start_x + 4.0,
+                    start_x + 3.0,
+                    start_x + 2.0,
+                    start_x + 1.0,
+                    start_x,
+                );
+                for _ in 0..width / 8 {
+                    let f = get_4d_noise_helper(x, y, z, w, noise_type).simd;
+                    max_s.simd = _mm256_max_ps(max_s.simd, f);
+                    min_s.simd = _mm256_min_ps(min_s.simd, f);
+                    _mm256_storeu_ps(result.get_unchecked_mut(i), f);
+                    i += 8;
+                    x = _mm256_add_ps(x, _mm256_set1_ps(8.0));
+                }
+                if remainder != 0 {
+                    let f = get_4d_noise_helper(x, y, z, w, noise_type);
+                    for j in 0..remainder {
+                        let n = f.array[j];
+                        *result.get_unchecked_mut(i) = n;
+                        // Note: This is unecessary for large images
+                        if n < min {
+                            min = n;
+                        }
+                        if n > max {
+                            max = n;
+                        }
+                        i += 1;
+                    }
+                }
+                y = _mm256_add_ps(y, _mm256_set1_ps(1.0));
+            }
+            z = _mm256_add_ps(z, _mm256_set1_ps(1.0));
+        }
+        w = _mm256_add_ps(w, _mm256_set1_ps(1.0));
+    }
+    for i in 0..8 {
+        if *min_s.array.get_unchecked(i) < min {
+            min = *min_s.array.get_unchecked(i);
+        }
+        if *max_s.array.get_unchecked(i) > max {
+            max = *max_s.array.get_unchecked(i);
+        }
+    }
+    (result, min, max)
+}
+
+/// Gets a width X height X depth X time sized block of scaled 4d noise
+/// `start_*` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
+#[target_feature(enable = "avx2")]
+pub unsafe fn get_4d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    start_w: f32,
+    time: usize,
+    noise_type: NoiseType,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    let (mut noise, min, max) = get_4d_noise(
+        start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+    );
+    scale_array(scale_min, scale_max, min, max, &mut noise);
+    noise
+}
+
+pub const SIMPLEX0: [i32; 64] = [
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 2, 2,
+    1, 1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 3, 0, 3, 2, 0, 0, 0, 3, 0, 3, 3,
+];
+
+pub const SIMPLEX1: [i32; 64] = [
+    1, 1, 0, 2, 0, 0, 0, 2, 2, 0, 3, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 3, 0, 0, 0, 3, 3,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 2, 2,
+];
+
+pub const SIMPLEX2: [i32; 64] = [
+    2, 3, 0, 3, 0, 0, 0, 3, 1, 0, 1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    2, 3, 0, 0, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1,
+];
+
+pub const SIMPLEX3: [i32; 64] = [
+    3, 2, 0, 1, 0, 0, 0, 0, 3, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 2, 0, 0, 0, 1, 0,
+    3, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 1, 0, 0, 3, 0, 0, 0, 2, 0, 1, 0,
+];

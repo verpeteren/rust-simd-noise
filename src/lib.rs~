@@ -70,7 +70,7 @@
 //!   // sse2 simplex noise
 //!   let x = _mm_set1_ps(5.0);
 //!   let y = _mm_set1_ps(10.0);
-//!   let f : __m32 = simdnoise::sse2::simplex_2d(x,y);
+//!   let f : __m128 = simdnoise::sse2::simplex_2d(x,y);
 //!   
 //!   // avx2 turbulence
 //!   let x = _mm256_set1_ps(5.0);
@@ -322,14 +322,14 @@ mod benchmarks {
     fn b3d_1_scalar(b: &mut Bencher) {
         b.iter(|| {
             black_box(scalar::get_3d_noise(
-                0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE,
+                0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE,
             ))
         });
     }
     #[bench]
     fn b3d_2_sse2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(sse2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
+            b.iter(|| black_box(sse2::get_3d_noise(0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE)));
         }
     }
     #[bench]
@@ -337,7 +337,7 @@ mod benchmarks {
         unsafe {
             b.iter(|| {
                 black_box(sse41::get_3d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE,
+                    0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE,
                 ))
             });
         }
@@ -345,45 +345,7 @@ mod benchmarks {
     #[bench]
     fn b3d_4_avx2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(avx2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
-        }
-    }
-    #[bench]
-    fn b4d1_scalar(b: &mut Bencher) {
-            b.iter(|| {
-                black_box(scalar::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
-                ))
-            });
-    }
-    #[bench]
-    fn b4d1_sse2(b: &mut Bencher) {
-        unsafe {
-            b.iter(|| {
-                black_box(sse2::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
-                ))
-            });
-        }
-    }
-    #[bench]
-    fn b4d3_sse41(b: &mut Bencher) {
-        unsafe {
-            b.iter(|| {
-                black_box(sse41::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
-                ))
-            });
-        }
-    }
-#[bench]
-    fn b4d3_avx2(b: &mut Bencher) {
-        unsafe {
-            b.iter(|| {
-                black_box(avx2::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
-                ))
-            });
+            b.iter(|| black_box(avx2::get_3d_noise(0.0, 100, 0.0, 100, 0.0, 100, NOISE_TYPE)));
         }
     }
 }

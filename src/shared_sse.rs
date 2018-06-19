@@ -1,5 +1,4 @@
 use std::arch::x86_64::*;
-
 pub union M128Array {
     pub simd: __m128,
     pub array: [f32; 4],
@@ -20,6 +19,11 @@ pub const F3: __m128 = unsafe {
         array: [1.0 / 3.0; 4],
     }.simd
 };
+pub const F4: __m128 = unsafe {
+    M128Array {
+        array: [0.309016994; 4],
+    }.simd
+};
 pub const G2: __m128 = unsafe {
     M128Array {
         array: [0.2113248654; 4],
@@ -35,6 +39,29 @@ pub const G3: __m128 = unsafe {
         array: [1.0 / 6.0; 4],
     }.simd
 };
+pub const G4: __m128 = unsafe {
+    M128Array {
+        array: [0.138196601; 4],
+    }.simd
+};
+pub const G24: __m128 = unsafe {
+    M128Array {
+        array: [2.0 * 0.138196601; 4],
+    }.simd
+};
+
+pub const G34: __m128 = unsafe {
+    M128Array {
+        array: [3.0 * 0.138196601; 4],
+    }.simd
+};
+
+pub const G44: __m128 = unsafe {
+    M128Array {
+        array: [4.0 * 0.138196601; 4],
+    }.simd
+};
+
 pub const POINT_FIVE: __m128 = unsafe { M128Array { array: [0.5; 4] }.simd };
 
 #[target_feature(enable = "sse2")]
@@ -73,3 +100,4 @@ pub unsafe fn scale_array_sse(
         i += 1;
     }
 }
+
