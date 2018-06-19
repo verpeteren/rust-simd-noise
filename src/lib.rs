@@ -3,33 +3,49 @@
 //!
 //! [Github Link](https://github.com/jackmott/rust-simd-noise)
 //!
-//! ## Features
+//!## Features
 //!
-//! * SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
-//! * AVX2 version also leverages FMA3
-//! * Runtime detection picks the best available instruction set
-//! * Simplex noise, fractal brownian motion, turbulence, and ridge.
-//! * 2d and 3d
+//!* SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
+//!* AVX2 version also leverages FMA3
+//!* Runtime detection picks the best available instruction set
+//!* Simplex noise, fractal brownian motion, turbulence, and ridge
+//!* 2D, 3D, and 4D
 //!
-//! ## Benchmarks
-//! *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
-//! *Single Threaded*
+//!## Benchmarks
+//!*Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
+//!*Single Threaded*
 //!
-//! ### 2D 1000x1000 Fbm Noise, 3 Octaves
+//!### 2D 1000x1000 FBM Noise, 3 Octaves
 //!
-//! * scalar_2d ... bench:  74,207,703 ns/iter (+/- 2,184,952)
-//! * sse2_2d   ... bench:  23,863,725 ns/iter (+/- 746,331)
-//! * sse41_2d  ... bench:  22,440,765 ns/iter (+/- 995,336)
-//! * avx2_2d   ... bench:  12,022,253 ns/iter (+/- 508,793)
+//!* scalar ... bench:  74,686,044 ns/iter (+/- 3,053,838)
+//!* sse2   ... bench:  23,619,783 ns/iter (+/- 1,008,879)
+//!* sse41  ... bench:  21,847,769 ns/iter (+/- 914,364)
+//!* avx2   ... bench:  11,791,738 ns/iter (+/- 446,718)
 //!
-//! ### 3D 100x100x100 Fbm Noise, 3 Octaves
+//!### 3D 64x64x64 FBM Noise, 3 Octaves
 //!
-//! * scalar_3d ... bench: 102,543,499 ns/iter (+/- 3,310,472)
-//! * sse2_3d   ... bench:  39,991,825 ns/iter (+/- 1,043,332)
-//! * sse41_3d  ... bench:  38,852,436 ns/iter (+/- 1,350,831)
-//! * avx2_3d   ... bench:  23,231,237 ns/iter (+/- 777,420)
+//!* scalar ... bench:  22,219,344 ns/iter (+/- 817,769)
+//!* sse2   ... bench:  10,331,856 ns/iter (+/- 450,920)
+//!* sse41  ... bench:   9,766,523 ns/iter (+/- 604,034)
+//!* avx2   ... bench:   5,566,535 ns/iter (+/- 181,791)
 //!
-//! ## Get a block of noise with runtime SIMD detection
+//!### 4D 24x24x24x24 FBM Noise, 3 Octaves
+//!
+//!* scalar  ... bench:  48,324,536 ns/iter (+/- 1,813,984)
+//!* sse2    ... bench:  26,955,224 ns/iter (+/- 1,253,751)
+//!* sse41   ... bench:  25,792,680 ns/iter (+/- 749,234)
+//!* avx2    ... bench:  13,080,348 ns/iter (+/- 491,006)
+//!
+//!## Todo
+//!
+//!* AVX512 support
+//!* ARM NEON support
+//!* Voroni, Cell, and other noise types
+//!* 1D Noise?
+//!
+//!# Examples
+//!
+//!## Get a block of noise with runtime SIMD detection
 //!
 //! The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2
 //!
@@ -410,40 +426,40 @@ mod benchmarks {
     }
     #[bench]
     fn b3d_1_scalar(b: &mut Bencher) {
-        b.iter(|| black_box(scalar::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
+        b.iter(|| black_box(scalar::get_3d_noise(0.0, 64, 0.0, 64, 0.0, 64, NOISE_TYPE)));
     }
     #[bench]
     fn b3d_2_sse2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(sse2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
+            b.iter(|| black_box(sse2::get_3d_noise(0.0, 64, 0.0, 64, 0.0, 64, NOISE_TYPE)));
         }
     }
     #[bench]
     fn b3d_3_sse41(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(sse41::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
+            b.iter(|| black_box(sse41::get_3d_noise(0.0, 64, 0.0, 64, 0.0, 64, NOISE_TYPE)));
         }
     }
     #[bench]
     fn b3d_4_avx2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(avx2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
+            b.iter(|| black_box(avx2::get_3d_noise(0.0, 64, 0.0, 64, 0.0, 64, NOISE_TYPE)));
         }
     }
     #[bench]
     fn b4d1_scalar(b: &mut Bencher) {
         b.iter(|| {
             black_box(scalar::get_4d_noise(
-                0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
+                0.0, 24, 0.0, 24, 0.0, 24, 0.0, 24, NOISE_TYPE,
             ))
         });
     }
     #[bench]
-    fn b4d1_sse2(b: &mut Bencher) {
+    fn b4d2_sse2(b: &mut Bencher) {
         unsafe {
             b.iter(|| {
                 black_box(sse2::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
+                    0.0, 24, 0.0, 24, 0.0, 24, 0.0, 24, NOISE_TYPE,
                 ))
             });
         }
@@ -453,17 +469,17 @@ mod benchmarks {
         unsafe {
             b.iter(|| {
                 black_box(sse41::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
+                    0.0, 24, 0.0, 24, 0.0, 24, 0.0, 24, NOISE_TYPE,
                 ))
             });
         }
     }
     #[bench]
-    fn b4d3_avx2(b: &mut Bencher) {
+    fn b4d4_avx2(b: &mut Bencher) {
         unsafe {
             b.iter(|| {
                 black_box(avx2::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
+                    0.0, 24, 0.0, 24, 0.0, 24, 0.0, 24, NOISE_TYPE,
                 ))
             });
         }

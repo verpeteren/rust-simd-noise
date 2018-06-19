@@ -3,7 +3,7 @@
 # SIMDNoise
 Super fast SIMD noise library for Rust. PRs welcome!  
 Available on [crates.io](https://crates.io/crates/simdnoise).  
-[Documentation](https://docs.rs/simdnoise/2.0.0/simdnoise/).  
+[Documentation](https://docs.rs/simdnoise/2.1.0/simdnoise/).  
 Requires nightly until 1.27 drops  
 
 ## Features
@@ -20,17 +20,24 @@ Requires nightly until 1.27 drops
 
 ### 2D 1000x1000 FBM Noise, 3 Octaves
 
-* scalar_2d ... bench:  74,207,703 ns/iter (+/- 2,184,952)
-* sse2_2d   ... bench:  23,863,725 ns/iter (+/- 746,331)
-* sse41_2d  ... bench:  22,440,765 ns/iter (+/- 995,336)
-* avx2_2d   ... bench:  11,955,262 ns/iter (+/- 508,793)
+* scalar ... bench:  74,686,044 ns/iter (+/- 3,053,838)
+* sse2   ... bench:  23,619,783 ns/iter (+/- 1,008,879)
+* sse41  ... bench:  21,847,769 ns/iter (+/- 914,364)
+* avx2   ... bench:  11,791,738 ns/iter (+/- 446,718)
 
-### 3D 100x100x100 FBM Noise, 3 Octaves
+### 3D 64x64x64 FBM Noise, 3 Octaves
 
-* scalar_3d ... bench: 102,543,499 ns/iter (+/- 3,310,472)
-* sse2_3d   ... bench:  39,991,825 ns/iter (+/- 1,043,332)
-* sse41_3d  ... bench:  38,852,436 ns/iter (+/- 1,350,831)
-* avx2_3d   ... bench:  22,681,050 ns/iter (+/- 777,420)
+* scalar ... bench:  22,219,344 ns/iter (+/- 817,769)
+* sse2   ... bench:  10,331,856 ns/iter (+/- 450,920)
+* sse41  ... bench:   9,766,523 ns/iter (+/- 604,034)
+* avx2   ... bench:   5,566,535 ns/iter (+/- 181,791)
+
+### 4D 24x24x24x24 FBM Noise, 3 Octaves
+
+* scalar  ... bench:  48,324,536 ns/iter (+/- 1,813,984)
+* sse2    ... bench:  26,955,224 ns/iter (+/- 1,253,751)
+* sse41   ... bench:  25,792,680 ns/iter (+/- 749,234)
+* avx2    ... bench:  13,080,348 ns/iter (+/- 491,006)
 
 ## Todo
 
