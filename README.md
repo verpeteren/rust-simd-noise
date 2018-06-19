@@ -3,7 +3,7 @@
 # SIMDNoise
 Super fast SIMD noise library for Rust. PRs welcome!  
 Available on [crates.io](https://crates.io/crates/simdnoise).  
-[Documentation](https://docs.rs/simdnoise/2.1.0/simdnoise/).  
+[Documentation](https://docs.rs/simdnoise/2.2.0/simdnoise/).  
 Requires nightly until 1.27 drops  
 
 ## Features
