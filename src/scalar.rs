@@ -13,6 +13,153 @@ const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
 const G4: f32 = 0.138196601;
 
+fn grad1(hash: i32, x: f32) -> f32 {
+    let h = hash & 15;
+    let grad = if h & 8 != 0 {
+        -(1.0 + (h & 7) as f32)
+    } else {
+        1.0 + (h & 7) as f32
+    };
+    grad * x
+}
+
+pub fn simplex_1d(x: f32) -> f32 {
+    let i0 = x.floor() as i32;
+    let i1 = i0 + 1;
+    let x0 = x - i0 as f32;
+    let x1 = x0 - 1.0;
+
+    let mut t0 = 1.0 - x0 * x0;
+    t0 = t0 * t0;
+    let n0 = t0 * t0 * grad1(PERM[(i0 & 0xff) as usize], x0);
+
+    let mut t1 = 1.0 - x1 * x1;
+    t1 = t1 * t1;
+    let n1 = t1 * t1 * grad1(PERM[(i1 & 0xff) as usize], x1);
+
+    n0 + n1
+}
+
+/// Get a single value of 1d fractal brownian motion.
+pub fn fbm_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+    let mut xf = x * freq;
+    let mut result = simplex_1d(xf);
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        amp = amp * gain;
+        result = result + (simplex_1d(xf) * amp);
+    }
+    result
+}
+
+/// Get a single value of 1d turbulence.
+pub fn turbulence_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+    let mut xf = x * freq;
+    let mut result = simplex_1d(xf).abs();
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        amp = amp * gain;
+        result = result + (simplex_1d(xf) * amp).abs();
+    }
+    result
+}
+
+/// Get a single value of 1d ridge noise..
+pub fn ridge_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+    let mut xf = x * freq;
+    let mut result = 1.0 - simplex_1d(xf).abs();
+    let mut amp = 1.0;
+
+    for _ in 1..octaves {
+        xf = xf * lacunarity;
+        amp = amp * gain;
+        result = result + (1.0 - (simplex_1d(xf) * amp).abs());
+    }
+    result
+}
+
+fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
+    match noise_type {
+        NoiseType::Fbm {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => fbm_1d(x, freq, lacunarity, gain, octaves),
+        NoiseType::Turbulence {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => turbulence_1d(x, freq, lacunarity, gain, octaves),
+        NoiseType::Ridge {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => ridge_1d(x, freq, lacunarity, gain, octaves),
+        NoiseType::Normal { freq } => simplex_1d(x * freq),
+    }
+}
+
+/// Gets a width sized block of 1d noise, unscaled.
+/// `start_x` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let mut result = Vec::with_capacity(width);
+    unsafe {
+        result.set_len(width);
+    }
+    let mut i = 0;
+    let mut x = start_x;
+    for _ in 0..width {
+        let f = get_1d_noise_helper(x, noise_type);
+        if f < min {
+            min = f;
+        }
+        if f > max {
+            max = f;
+        }
+        unsafe {
+            *result.get_unchecked_mut(i) = f;
+        }
+        i += 1;
+        x += 1.0;
+    }
+    (result, min, max)
+}
+
+/// Gets a width sized block of scaled 1d noise
+/// `start_x` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
+pub fn get_1d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    noise_type: NoiseType,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    let (mut noise, min, max) = get_1d_noise(start_x, width, noise_type);
+    let scale_range = scale_max - scale_min;
+    let range = max - min;
+    let multiplier = scale_range / range;
+    let offset = scale_min - min * multiplier;
+    for f in &mut noise {
+        *f = *f * multiplier + offset;
+    }
+    noise
+}
+
 fn grad2(hash: i32, x: f32, y: f32) -> f32 {
     let h = hash & 7;
     let (u, v) = if h < 4 { (x, y) } else { (y, x) };

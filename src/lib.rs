@@ -9,11 +9,17 @@
 //!* AVX2 version also leverages FMA3
 //!* Runtime detection picks the best available instruction set
 //!* Simplex noise, fractal brownian motion, turbulence, and ridge
-//!* 2D, 3D, and 4D
+//!* 1D, 2D, 3D, and 4D
 //!
 //!## Benchmarks
 //!*Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
 //!*Single Threaded*
+//!### 1D 100,000 points of FBM Noise, 3 Octaves
+//!
+//!* scalar ... bench:   2,196,367 ns/iter (+/- 221,950)
+//!* sse2   ... bench:     896,895 ns/iter (+/- 83,875)
+//!* sse41  ... bench:     711,599 ns/iter (+/- 108,219)
+//!* avx2   ... bench:     321,843 ns/iter (+/- 13,347)
 //!
 //!### 2D 1000x1000 FBM Noise, 3 Octaves
 //!
@@ -41,7 +47,6 @@
 //!* AVX512 support
 //!* ARM NEON support
 //!* Voroni, Cell, and other noise types
-//!* 1D Noise?
 //!
 //!# Examples
 //!
@@ -160,6 +165,49 @@ pub enum NoiseType {
         /// starting value for experimentation is around 0.05
         freq: f32,
     },
+}
+
+/// Gets a width X height sized block of 2d noise, unscaled,
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
+    if is_x86_feature_detected!("avx2") {
+        unsafe { avx2::get_1d_noise(start_x, width, noise_type) }
+    } else if is_x86_feature_detected!("sse4.1") {
+        unsafe { sse41::get_1d_noise(start_x, width, noise_type) }
+    } else if is_x86_feature_detected!("sse2") {
+        unsafe { sse2::get_1d_noise(start_x, width, noise_type) }
+    } else {
+        scalar::get_1d_noise(start_x, width, noise_type)
+    }
+}
+
+/// Gets a width X height sized block of scaled 2d noise
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
+pub fn get_1d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    noise_type: NoiseType,
+    scaled_min: f32,
+    scaled_max: f32,
+) -> Vec<f32> {
+    if is_x86_feature_detected!("avx2") {
+        unsafe { avx2::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max) }
+    } else if is_x86_feature_detected!("sse4.1") {
+        unsafe { sse41::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max) }
+    } else if is_x86_feature_detected!("sse2") {
+        unsafe { sse2::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max) }
+    } else {
+        scalar::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max)
+    }
 }
 
 /// Gets a width X height sized block of 2d noise, unscaled,
@@ -401,6 +449,28 @@ mod benchmarks {
         gain: 2.0,
         octaves: 3,
     };
+    #[bench]
+    fn b1d_1_scalar(b: &mut Bencher) {
+        b.iter(|| black_box(scalar::get_1d_noise(0.0, 100000, NOISE_TYPE)));
+    }
+    #[bench]
+    fn b1d_2_sse2(b: &mut Bencher) {
+        unsafe {
+            b.iter(|| black_box(sse2::get_1d_noise(0.0, 100000, NOISE_TYPE)));
+        }
+    }
+    #[bench]
+    fn b1d_3_sse41(b: &mut Bencher) {
+        unsafe {
+            b.iter(|| black_box(sse41::get_1d_noise(0.0, 100000, NOISE_TYPE)));
+        }
+    }
+    #[bench]
+    fn b1d_4_avx2(b: &mut Bencher) {
+        unsafe {
+            b.iter(|| black_box(avx2::get_1d_noise(0.0, 100000, NOISE_TYPE)));
+        }
+    }
 
     #[bench]
     fn b2d_1_scalar(b: &mut Bencher) {

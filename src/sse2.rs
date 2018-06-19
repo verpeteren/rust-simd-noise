@@ -27,6 +27,261 @@ unsafe fn floor_sse2(f: __m128) -> __m128 {
 }
 
 #[target_feature(enable = "sse2")]
+unsafe fn grad1_simd(hash: __m128i, x: __m128) -> __m128 {
+    let h = _mm_and_si128(hash, _mm_set1_epi32(15));
+    let v = _mm_cvtepi32_ps(_mm_and_si128(h, _mm_set1_epi32(7)));
+
+    let h_and_8 = _mm_castsi128_ps(_mm_cmpeq_epi32(
+        _mm_setzero_si128(),
+        _mm_and_si128(h, _mm_set1_epi32(8)),
+    ));
+    let grad = blendv_sse2(_mm_sub_ps(_mm_setzero_ps(), v), v, h_and_8);
+    _mm_mul_ps(grad, x)
+}
+
+/// Get a single value of 1d simplex noise, results
+/// are not scaled.
+#[target_feature(enable = "sse2")]
+unsafe fn simplex_1d(x: __m128) -> __m128 {
+    let ips = floor_sse2(x);
+    let mut i0 = M128iArray {
+        simd: _mm_cvtps_epi32(ips),
+    };
+    let i1 = M128iArray {
+        simd: _mm_and_si128(
+            _mm_add_epi32(i0.simd, _mm_set1_epi32(1)),
+            _mm_set1_epi32(0xff),
+        ),
+    };
+    let x0 = _mm_sub_ps(x, ips);
+    let x1 = _mm_sub_ps(x0, _mm_set1_ps(1.0));
+
+    i0.simd = _mm_and_si128(i0.simd, _mm_set1_epi32(0xff));
+
+    let gi0 = M128iArray {
+        array: [
+            PERM[i0.array[0] as usize],
+            PERM[i0.array[1] as usize],
+            PERM[i0.array[2] as usize],
+            PERM[i0.array[3] as usize],
+        ],
+    };
+
+    let gi1 = M128iArray {
+        array: [
+            PERM[i1.array[0] as usize],
+            PERM[i1.array[1] as usize],
+            PERM[i1.array[2] as usize],
+            PERM[i1.array[3] as usize],
+        ],
+    };
+
+    let mut t0 = _mm_sub_ps(_mm_set1_ps(1.0), _mm_mul_ps(x0, x0));
+    t0 = _mm_mul_ps(t0, t0);
+    t0 = _mm_mul_ps(t0, t0);
+    let n0 = _mm_mul_ps(t0, grad1_simd(gi0.simd, x0));
+
+    let mut t1 = _mm_sub_ps(_mm_set1_ps(1.0), _mm_mul_ps(x1, x1));
+    t1 = _mm_mul_ps(t1, t1);
+    t1 = _mm_mul_ps(t1, t1);
+    let n1 = _mm_mul_ps(t1, grad1_simd(gi1.simd, x1));
+
+    _mm_add_ps(n0, n1)
+}
+/// Get a single value of 1d fractal brownian motion.
+#[target_feature(enable = "sse2")]
+pub unsafe fn fbm_1d(
+    x: __m128,
+    freq: __m128,
+    lacunarity: __m128,
+    gain: __m128,
+    octaves: u8,
+) -> __m128 {
+    let mut xf = _mm_mul_ps(x, freq);
+    let mut result = simplex_1d(xf);
+    let mut amp = _mm_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm_mul_ps(xf, lacunarity);
+        amp = _mm_mul_ps(amp, gain);
+        result = _mm_add_ps(result, _mm_mul_ps(simplex_1d(xf), amp));
+    }
+
+    result
+}
+
+/// Get a single value of 2d ridge noise.
+#[target_feature(enable = "sse2")]
+pub unsafe fn ridge_1d(
+    x: __m128,
+    freq: __m128,
+    lacunarity: __m128,
+    gain: __m128,
+    octaves: u8,
+) -> __m128 {
+    let mut xf = _mm_mul_ps(x, freq);
+    let mut result = _mm_sub_ps(_mm_set1_ps(1.0), _mm_abs_ps(simplex_1d(xf)));
+    let mut amp = _mm_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm_mul_ps(xf, lacunarity);
+        amp = _mm_mul_ps(amp, gain);
+        result = _mm_add_ps(
+            result,
+            _mm_sub_ps(
+                _mm_set1_ps(1.0),
+                _mm_abs_ps(_mm_mul_ps(simplex_1d(xf), amp)),
+            ),
+        );
+    }
+
+    result
+}
+
+/// Get a single value of 2d turbulence.
+#[target_feature(enable = "sse2")]
+pub unsafe fn turbulence_1d(
+    x: __m128,
+    freq: __m128,
+    lacunarity: __m128,
+    gain: __m128,
+    octaves: u8,
+) -> __m128 {
+    let mut xf = _mm_mul_ps(x, freq);
+    let mut result = _mm_abs_ps(simplex_1d(xf));
+    let mut amp = _mm_set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = _mm_mul_ps(xf, lacunarity);
+        amp = _mm_mul_ps(amp, gain);
+        result = _mm_add_ps(result, _mm_abs_ps(_mm_mul_ps(simplex_1d(xf), amp)));
+    }
+
+    result
+}
+
+#[target_feature(enable = "sse2")]
+unsafe fn get_1d_noise_helper(x: __m128, noise_type: NoiseType) -> M128Array {
+    M128Array {
+        simd: match noise_type {
+            NoiseType::Fbm {
+                freq,
+                lacunarity,
+                gain,
+                octaves,
+            } => fbm_1d(
+                x,
+                _mm_set1_ps(freq),
+                _mm_set1_ps(lacunarity),
+                _mm_set1_ps(gain),
+                octaves,
+            ),
+            NoiseType::Ridge {
+                freq,
+                lacunarity,
+                gain,
+                octaves,
+            } => ridge_1d(
+                x,
+                _mm_set1_ps(freq),
+                _mm_set1_ps(lacunarity),
+                _mm_set1_ps(gain),
+                octaves,
+            ),
+            NoiseType::Turbulence {
+                freq,
+                lacunarity,
+                gain,
+                octaves,
+            } => turbulence_1d(
+                x,
+                _mm_set1_ps(freq),
+                _mm_set1_ps(lacunarity),
+                _mm_set1_ps(gain),
+                octaves,
+            ),
+            NoiseType::Normal { freq } => simplex_1d(_mm_mul_ps(x, _mm_set1_ps(freq))),
+        },
+    }
+}
+
+/// Gets a width sized block of 1d noise, unscaled.
+/// `start_x` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+#[target_feature(enable = "sse2")]
+pub unsafe fn get_1d_noise(
+    start_x: f32,
+    width: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    let mut min_s = M128Array {
+        simd: _mm_set1_ps(f32::MAX),
+    };
+    let mut max_s = M128Array {
+        simd: _mm_set1_ps(f32::MIN),
+    };
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let mut result = Vec::with_capacity(width);
+    result.set_len(width);
+    let mut i = 0;
+    let remainder = width % 4;
+    let mut x = _mm_set_ps(start_x + 3.0, start_x + 2.0, start_x + 1.0, start_x);
+    for _ in 0..width / 4 {
+        let f = get_1d_noise_helper(x, noise_type).simd;
+        max_s.simd = _mm_max_ps(max_s.simd, f);
+        min_s.simd = _mm_min_ps(min_s.simd, f);
+        _mm_storeu_ps(result.get_unchecked_mut(i), f);
+        i += 4;
+        x = _mm_add_ps(x, _mm_set1_ps(4.0));
+    }
+    if remainder != 0 {
+        let f = get_1d_noise_helper(x, noise_type);
+        for j in 0..remainder {
+            let n = f.array[j];
+            *result.get_unchecked_mut(i) = n;
+            // Note: This is unecessary for large images
+            if n < min {
+                min = n;
+            }
+            if n > max {
+                max = n;
+            }
+            i += 1;
+        }
+    }
+    for i in 0..4 {
+        if *min_s.array.get_unchecked(i) < min {
+            min = *min_s.array.get_unchecked(i);
+        }
+        if *max_s.array.get_unchecked(i) > max {
+            max = *max_s.array.get_unchecked(i);
+        }
+    }
+    (result, min, max)
+}
+
+/// Gets a width sized block of scaled 2d noise
+/// `start_x` can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
+#[target_feature(enable = "sse2")]
+pub unsafe fn get_1d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    noise_type: NoiseType,
+    scale_min: f32,
+    scale_max: f32,
+) -> Vec<f32> {
+    let (mut noise, min, max) = get_1d_noise(start_x, width, noise_type);
+    scale_array_sse(scale_min, scale_max, min, max, &mut noise);
+    noise
+}
+
+#[target_feature(enable = "sse2")]
 unsafe fn grad2_simd(hash: __m128i, x: __m128, y: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(7));
     let mask = _mm_castsi128_ps(_mm_cmplt_epi32(h, _mm_set1_epi32(4)));
