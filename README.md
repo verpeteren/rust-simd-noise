@@ -12,7 +12,7 @@ Requires nightly until 1.27 drops
 * AVX2 version also leverages FMA3
 * Runtime detection picks the best available instruction set
 * Simplex noise, fractal brownian motion, turbulence, and ridge
-* 2d and 3d
+* 2D, 3D, and 4D
 
 ## Benchmarks
 *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
@@ -37,7 +37,7 @@ Requires nightly until 1.27 drops
 * AVX512 support
 * ARM NEON support
 * Voroni, Cell, and other noise types
-* 1D? 4D (in progress) Noise.
+* 1D Noise?
 
 ## Get a block of noise with runtime SIMD detection
 
