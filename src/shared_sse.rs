@@ -100,4 +100,3 @@ pub unsafe fn scale_array_sse(
         i += 1;
     }
 }
-

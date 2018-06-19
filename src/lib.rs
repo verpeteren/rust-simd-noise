@@ -282,6 +282,96 @@ pub fn get_3d_scaled_noise(
         )
     }
 }
+/// Gets a width X height X depth X time sized block of rd noise, unscaled,
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_*` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_4d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    start_w: f32,
+    time: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    if is_x86_feature_detected!("avx2") {
+        unsafe {
+            avx2::get_4d_noise(
+                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+            )
+        }
+    } else if is_x86_feature_detected!("sse4.1") {
+        unsafe {
+            sse41::get_4d_noise(
+                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+            )
+        }
+    } else if is_x86_feature_detected!("sse2") {
+        unsafe {
+            sse2::get_4d_noise(
+                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+            )
+        }
+    } else {
+        scalar::get_4d_noise(
+            start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+        )
+    }
+}
+
+/// Gets a width X height X depth X time sized block of scaled 4d noise
+/// using runtime CPU feature detection to pick the fastest method
+/// between scalar, SSE2, SSE41, and AVX2
+/// `start_*`can be used to provide an offset in the
+/// coordinates.
+/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
+pub fn get_4d_scaled_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    start_w: f32,
+    time: usize,
+    noise_type: NoiseType,
+    scaled_min: f32,
+    scaled_max: f32,
+) -> Vec<f32> {
+    if is_x86_feature_detected!("avx2") {
+        unsafe {
+            avx2::get_4d_scaled_noise(
+                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+                scaled_min, scaled_max,
+            )
+        }
+    } else if is_x86_feature_detected!("sse4.1") {
+        unsafe {
+            sse41::get_4d_scaled_noise(
+                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+                scaled_min, scaled_max,
+            )
+        }
+    } else if is_x86_feature_detected!("sse2") {
+        unsafe {
+            sse2::get_4d_scaled_noise(
+                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
+                scaled_min, scaled_max,
+            )
+        }
+    } else {
+        scalar::get_4d_scaled_noise(
+            start_x, width, start_y, height, start_z, depth, start_w, time, noise_type, scaled_min,
+            scaled_max,
+        )
+    }
+}
 
 #[cfg(test)]
 mod benchmarks {
@@ -320,11 +410,7 @@ mod benchmarks {
     }
     #[bench]
     fn b3d_1_scalar(b: &mut Bencher) {
-        b.iter(|| {
-            black_box(scalar::get_3d_noise(
-                0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE,
-            ))
-        });
+        b.iter(|| black_box(scalar::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
     }
     #[bench]
     fn b3d_2_sse2(b: &mut Bencher) {
@@ -335,11 +421,7 @@ mod benchmarks {
     #[bench]
     fn b3d_3_sse41(b: &mut Bencher) {
         unsafe {
-            b.iter(|| {
-                black_box(sse41::get_3d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE,
-                ))
-            });
+            b.iter(|| black_box(sse41::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE)));
         }
     }
     #[bench]
@@ -350,11 +432,11 @@ mod benchmarks {
     }
     #[bench]
     fn b4d1_scalar(b: &mut Bencher) {
-            b.iter(|| {
-                black_box(scalar::get_4d_noise(
-                    0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
-                ))
-            });
+        b.iter(|| {
+            black_box(scalar::get_4d_noise(
+                0.0, 32, 0.0, 32, 0.0, 32, 0.0, 1, NOISE_TYPE,
+            ))
+        });
     }
     #[bench]
     fn b4d1_sse2(b: &mut Bencher) {
@@ -376,7 +458,7 @@ mod benchmarks {
             });
         }
     }
-#[bench]
+    #[bench]
     fn b4d3_avx2(b: &mut Bencher) {
         unsafe {
             b.iter(|| {

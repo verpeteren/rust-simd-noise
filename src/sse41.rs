@@ -1064,10 +1064,7 @@ pub unsafe fn simplex_4d(x: __m128, y: __m128, z: __m128, w: __m128) -> __m128 {
     let c = M128iArray {
         simd: _mm_or_si128(
             c1,
-            _mm_or_si128(
-                c2,
-                _mm_or_si128(c3, _mm_or_si128(c4, _mm_or_si128(c5, c6))),
-            ),
+            _mm_or_si128(c2, _mm_or_si128(c3, _mm_or_si128(c4, _mm_or_si128(c5, c6)))),
         ),
     };
 

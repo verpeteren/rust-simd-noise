@@ -823,5 +823,3 @@ pub fn get_4d_scaled_noise(
     }
     noise
 }
-
-
