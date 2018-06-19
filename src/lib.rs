@@ -14,6 +14,14 @@
 //!## Benchmarks
 //!*Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
 //!*Single Threaded*
+//!
+//!## 1D 100,000 points of FBM Noise, 3 Octaves
+//!
+//!* scalar ... bench:   2,022,968 ns/iter (+/- 68,981)
+//!* sse2   ... bench:     847,764 ns/iter (+/- 43,875)
+//!* sse41  ... bench:     666,731 ns/iter (+/- 10,219)
+//!* avx2   ... bench:     306,011 ns/iter (+/- 14,347)
+//! 
 //!### 1D 100,000 points of FBM Noise, 3 Octaves
 //!
 //!* scalar ... bench:   2,196,367 ns/iter (+/- 221,950)

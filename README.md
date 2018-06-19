@@ -20,10 +20,10 @@ Requires nightly until 1.27 drops
 
 ### 1D 100,000 points of FBM Noise, 3 Octaves
 
-* scalar ... bench:   2,196,367 ns/iter (+/- 221,950)
-* sse2   ... bench:     896,895 ns/iter (+/- 83,875)
-* sse41  ... bench:     711,599 ns/iter (+/- 108,219)
-* avx2   ... bench:     321,843 ns/iter (+/- 13,347)
+* scalar ... bench:   2,022,968 ns/iter (+/- 68,981)
+* sse2   ... bench:     847,764 ns/iter (+/- 43,875)
+* sse41  ... bench:     666,731 ns/iter (+/- 10,219)
+* avx2   ... bench:     306,011 ns/iter (+/- 14,347)
  
 ### 2D 1000x1000 FBM Noise, 3 Octaves
 
