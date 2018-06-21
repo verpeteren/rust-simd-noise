@@ -11,8 +11,11 @@
 use super::*;
 use shared::*;
 use shared_sse::*;
-use std::arch::x86_64::*;
 use std::f32;
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::*;
+#[cfg(target_arch = "x86")]
+use std::arch::x86::*;
 
 #[target_feature(enable = "sse4.1")]
 unsafe fn grad1_simd(hash: __m128i, x: __m128) -> __m128 {

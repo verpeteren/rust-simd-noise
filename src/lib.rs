@@ -476,7 +476,7 @@ mod benchmarks {
     #[bench]
     fn b1d_4_avx2(b: &mut Bencher) {
         unsafe {
-            b.iter(|| black_box(avx2::get_1d_noise(0.0, 100000, NOISE_TYPE)));
+            b.iter(|| black_box(avx2::get_1d_noise(0.0, 1000000, NOISE_TYPE)));
         }
     }
 

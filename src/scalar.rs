@@ -73,7 +73,6 @@ pub fn ridge_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f
     let mut xf = x * freq;
     let mut result = 1.0 - simplex_1d(xf).abs();
     let mut amp = 1.0;
-
     for _ in 1..octaves {
         xf = xf * lacunarity;
         amp = amp * gain;

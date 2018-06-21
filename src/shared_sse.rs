@@ -1,4 +1,7 @@
+#[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
+#[cfg(target_arch = "x86")]
+use std::arch::x86::*;
 pub union M128Array {
     pub simd: __m128,
     pub array: [f32; 4],
