@@ -91,7 +91,7 @@ unsafe fn grad1_simd(hash: __m256i, x: __m256) -> __m256 {
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "avx2")]
-unsafe fn simplex_1d(x: __m256) -> __m256 {
+pub unsafe fn simplex_1d(x: __m256) -> __m256 {
     let ips = _mm256_floor_ps(x);
     let mut i0 = _mm256_cvtps_epi32(ips);
     let i1 = _mm256_and_si256(

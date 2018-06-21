@@ -33,7 +33,7 @@ unsafe fn grad1_simd(hash: __m128i, x: __m128) -> __m128 {
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse4.1")]
-unsafe fn simplex_1d(x: __m128) -> __m128 {
+pub unsafe fn simplex_1d(x: __m128) -> __m128 {
     let ips = _mm_floor_ps(x);
     let mut i0 = M128iArray {
         simd: _mm_cvtps_epi32(ips),
