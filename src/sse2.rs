@@ -12,10 +12,10 @@ use super::*;
 use shared::*;
 use shared_sse::*;
 
-#[cfg(target_arch = "x86_64")]
-use std::arch::x86_64::*;
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::*;
 use std::f32;
 
 // SSE2 has no blendv_sse2 instruction, so we do it by hand

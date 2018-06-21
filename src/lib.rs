@@ -112,8 +112,6 @@
 //!     
 //! }
 //! ```
-#![feature(test)]
-extern crate test;
 
 pub mod avx2;
 pub mod scalar;
@@ -447,7 +445,7 @@ pub fn get_4d_scaled_noise(
 
 #[cfg(test)]
 mod benchmarks {
-
+    extern crate test;
     use super::*;
     use test::{black_box, Bencher};
 

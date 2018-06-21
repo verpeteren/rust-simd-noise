@@ -9,10 +9,10 @@
 //! is evenly divisble by 8, and when it is not small relative height and depth.
 use super::*;
 use shared::*;
-#[cfg(target_arch = "x86_64")]
-use std::arch::x86_64::*;
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::*;
 use std::f32;
 
 union M256Array {
