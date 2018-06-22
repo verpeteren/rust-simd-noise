@@ -471,9 +471,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
         } else {
             let gi3 = *PERM.get_unchecked(
                 (ii + 1
-                    + *PERM.get_unchecked(
-                        (jj + 1 + *PERM.get_unchecked((kk + 1) as usize)) as usize,
-                    )) as usize,
+                    + *PERM
+                        .get_unchecked((jj + 1 + *PERM.get_unchecked((kk + 1) as usize)) as usize))
+                    as usize,
             );
 
             t3 * t3 * t3 * t3 * grad3(gi3, x3, y3, z3)
