@@ -13,6 +13,51 @@ const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
 const G4: f32 = 0.138196601;
 
+#[inline(always)]
+fn fast_round(f: f32) -> i32 {
+    if f >= 0.0 {
+        (f + 0.5) as i32
+    } else {
+        (f - 0.5) as i32
+    }
+}
+fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
+    let mut hash = seed ^ (X_PRIME * x);
+    hash ^= Y_PRIME * y;
+
+    hash = hash.wrapping_mul(hash.wrapping_mul(hash.wrapping_mul(60493)));
+    (hash >> 13) ^ hash
+}
+
+pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction, jitter: f32) -> f32 {
+    let xr = fast_round(x);
+    let yr = fast_round(x);
+
+    let mut distance = f32::MAX;
+    let mut xc = 0;
+    let mut yc = 0;
+    match distance_function {
+        CellDistanceFunction::Euclidean => {
+            for xi in xr - 1..xr + 2 {
+                for yi in yr - 1..yr + 2 {
+                    let hi = hash_2d(1337, xi, yi) & 0xff;
+                    let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
+                    let vy = yi as f32 - y + CELL_2D_Y[hi as usize] as f32 * jitter;
+                    let new_dist = vx * vx + vy * vy;
+                    if new_dist < distance {
+                        distance = new_dist;
+                        xc = xi;
+                        yc = yi;
+                    }
+                }
+            }
+            distance
+        }
+        CellDistanceFunction::Manhattan => distance,
+        CellDistanceFunction::Natural => distance,
+    }
+}
+
 fn grad1(hash: i32, x: f32) -> f32 {
     let h = hash & 15;
     let grad = if h & 8 != 0 {
@@ -102,6 +147,7 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
             octaves,
         } => ridge_1d(x, freq, lacunarity, gain, octaves),
         NoiseType::Normal { freq } => simplex_1d(x * freq),
+        NoiseType::Cellular { .. } => panic!("There is no 1d noise"),
     }
 }
 
@@ -298,6 +344,11 @@ fn get_2d_noise_helper(x: f32, y: f32, noise_type: NoiseType) -> f32 {
             octaves,
         } => ridge_2d(x, y, freq, lacunarity, gain, octaves),
         NoiseType::Normal { freq } => simplex_2d(x * freq, y * freq),
+        NoiseType::Cellular {
+            freq,
+            distance_function,
+            jitter,
+        } => cellular_2d(x * freq, y * freq, distance_function, jitter),
     }
 }
 
@@ -566,6 +617,11 @@ fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
             octaves,
         } => turbulence_3d(x, y, z, freq, lacunarity, gain, octaves),
         NoiseType::Normal { freq } => simplex_3d(x * freq, y * freq, z * freq),
+        NoiseType::Cellular {
+            freq,
+            distance_function,
+            jitter,
+        } => panic!("not yet implemented"),
     }
 }
 
@@ -884,6 +940,11 @@ fn get_4d_noise_helper(x: f32, y: f32, z: f32, w: f32, noise_type: NoiseType) ->
             octaves,
         } => turbulence_4d(x, y, z, w, freq, lacunarity, gain, octaves),
         NoiseType::Normal { freq } => simplex_4d(x * freq, y * freq, z * freq, w * freq),
+        NoiseType::Cellular {
+            freq,
+            distance_function,
+            jitter,
+        } => panic!("not yet implemented"),
     }
 }
 

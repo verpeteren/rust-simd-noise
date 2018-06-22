@@ -205,6 +205,11 @@ unsafe fn get_1d_noise_helper(x: __m128, noise_type: NoiseType) -> M128Array {
                 octaves,
             ),
             NoiseType::Normal { freq } => simplex_1d(_mm_mul_ps(x, _mm_set1_ps(freq))),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => panic!("There is no 1d cell noise"),
         },
     }
 }
@@ -1032,6 +1037,11 @@ unsafe fn get_2d_noise_helper(x: __m128, y: __m128, noise_type: NoiseType) -> M1
                 _mm_mul_ps(x, _mm_set1_ps(freq)),
                 _mm_mul_ps(y, _mm_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => panic!("not yet implemented"),
         },
     }
 }
@@ -1171,6 +1181,11 @@ unsafe fn get_3d_noise_helper(x: __m128, y: __m128, z: __m128, noise_type: Noise
                 _mm_mul_ps(y, _mm_set1_ps(freq)),
                 _mm_mul_ps(z, _mm_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => panic!("not yet implemented"),
         },
     }
 }
@@ -2051,6 +2066,11 @@ unsafe fn get_4d_noise_helper(
                 _mm_mul_ps(z, _mm_set1_ps(freq)),
                 _mm_mul_ps(w, _mm_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => panic!("not yet implemented"),
         },
     }
 }
