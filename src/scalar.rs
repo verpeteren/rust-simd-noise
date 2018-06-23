@@ -12,15 +12,12 @@ const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
 const G4: f32 = 0.138196601;
+pub const X_PRIME: i32 = 1619;
+pub const Y_PRIME: i32 = 31337;
+pub const Z_PRIME: i32 = 6971;
+pub const W_PRIME: i32 = 1013;
 
-#[inline(always)]
-fn fast_round(f: f32) -> i32 {
-    if f >= 0.0 {
-        (f + 0.5) as i32
-    } else {
-        (f - 0.5) as i32
-    }
-}
+
 fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
     let mut hash = seed ^ (X_PRIME * x);
     hash ^= Y_PRIME * y;
@@ -30,8 +27,8 @@ fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
 }
 
 pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction, jitter: f32) -> f32 {
-    let xr = fast_round(x);
-    let yr = fast_round(x);
+    let xr = x.round() as i32;
+    let yr = y.round() as i32;
 
     let mut distance = f32::MAX;
     let mut xc = 0;
@@ -39,9 +36,10 @@ pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction, jitt
     match distance_function {
         CellDistanceFunction::Euclidean => {
             for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
                 for yi in yr - 1..yr + 2 {
                     let hi = hash_2d(1337, xi, yi) & 0xff;
-                    let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
+                    let vx = xisubx + CELL_2D_X[hi as usize] as f32 * jitter;
                     let vy = yi as f32 - y + CELL_2D_Y[hi as usize] as f32 * jitter;
                     let new_dist = vx * vx + vy * vy;
                     if new_dist < distance {
