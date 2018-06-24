@@ -104,6 +104,7 @@ pub unsafe fn cellular_2d(
     x: __m256,
     y: __m256,
     distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
     jitter: __m256,
 ) -> __m256 {
     let xr = _mm256_cvtps_epi32(_mm256_round_ps(
@@ -308,9 +309,7 @@ unsafe fn get_1d_noise_helper(x: __m256, noise_type: NoiseType) -> M256Array {
             ),
             NoiseType::Normal { freq } => simplex_1d(_mm256_mul_ps(x, _mm256_set1_ps(freq))),
             NoiseType::Cellular {
-                freq,
-                distance_function,
-                jitter,
+                ..
             } => panic!("There is no 1d cell noise"),
         },
     }
@@ -667,11 +666,13 @@ unsafe fn get_2d_noise_helper(x: __m256, y: __m256, noise_type: NoiseType) -> M2
             NoiseType::Cellular {
                 freq,
                 distance_function,
+                return_type,
                 jitter,
             } => cellular_2d(
                 _mm256_mul_ps(x, _mm256_set1_ps(freq)),
                 _mm256_mul_ps(y, _mm256_set1_ps(freq)),
                 distance_function,
+                return_type,
                 _mm256_set1_ps(jitter),
             ),
         },
@@ -1149,6 +1150,7 @@ unsafe fn get_3d_noise_helper(x: __m256, y: __m256, z: __m256, noise_type: Noise
             NoiseType::Cellular {
                 freq,
                 distance_function,
+                return_type,
                 jitter,
             } => panic!("not yet implemented"),
         },
@@ -1718,6 +1720,7 @@ unsafe fn get_4d_noise_helper(
             NoiseType::Cellular {
                 freq,
                 distance_function,
+                return_type,
                 jitter,
             } => panic!("not yet implemented"),
         },

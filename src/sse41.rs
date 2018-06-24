@@ -33,6 +33,7 @@ pub unsafe fn cellular_2d(
     x: __m128,
     y: __m128,
     distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
     jitter: __m128,
 ) -> __m128 {
     let xr = _mm_cvtps_epi32(_mm_round_ps(
@@ -1105,11 +1106,13 @@ unsafe fn get_2d_noise_helper(x: __m128, y: __m128, noise_type: NoiseType) -> M1
             NoiseType::Cellular {
                 freq,
                 distance_function,
+                return_type,
                 jitter,
             } => cellular_2d(
                 _mm_mul_ps(x, _mm_set1_ps(freq)),
                 _mm_mul_ps(y, _mm_set1_ps(freq)),
                 distance_function,
+                return_type,
                 _mm_set1_ps(jitter),
             ),
         },
