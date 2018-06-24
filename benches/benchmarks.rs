@@ -79,5 +79,5 @@ fn d1(c: &mut Criterion) {
     c.bench_functions("1D", functions, 0);
 }
 
-criterion_group!(benches, d4, d3, d2);
+criterion_group!(benches, d4, d3, d2,d1);
 criterion_main!(benches);
