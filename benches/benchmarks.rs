@@ -12,11 +12,13 @@ const NOISE_TYPE: NoiseType = NoiseType::Fbm {
 };
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("2d sse2-1", |b| {
-        b.iter(|| unsafe {sse2::get_2d_noise(0.0, 500,0.0,500, NOISE_TYPE)})
+    c.bench_function("4d sse2", |b| {
+        b.iter(|| unsafe {sse2::get_4d_noise(0.0, 16,0.0,16,0.0,16,0.0,16, NOISE_TYPE)})
     });
 
-
+    c.bench_function("4d scalar", |b| {
+        b.iter(|| scalar::get_4d_noise(0.0, 16,0.0,16,0.0,16,0.0,16, NOISE_TYPE))
+    });
 }
 
 

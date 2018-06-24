@@ -1324,219 +1324,59 @@ pub unsafe fn simplex_4d(x: __m128, y: __m128, z: __m128, w: __m128) -> __m128 {
     let z0 = _mm_sub_ps(z, _mm_sub_ps(kps, t));
     let w0 = _mm_sub_ps(w, _mm_sub_ps(lps, t));
 
-    let mut cond = _mm_castps_si128(_mm_cmpgt_ps(x0, y0));
-    let c1 = _mm_and_si128(cond, _mm_set1_epi32(32));
-    cond = _mm_castps_si128(_mm_cmpgt_ps(x0, z0));
-    let c2 = _mm_and_si128(cond, _mm_set1_epi32(16));
-    cond = _mm_castps_si128(_mm_cmpgt_ps(y0, z0));
-    let c3 = _mm_and_si128(cond, _mm_set1_epi32(8));
-    cond = _mm_castps_si128(_mm_cmpgt_ps(x0, w0));
-    let c4 = _mm_and_si128(cond, _mm_set1_epi32(4));
-    cond = _mm_castps_si128(_mm_cmpgt_ps(y0, z0));
-    let c5 = _mm_and_si128(cond, _mm_set1_epi32(2));
-    cond = _mm_castps_si128(_mm_cmpgt_ps(z0, z0));
-    let c6 = _mm_and_si128(cond, _mm_set1_epi32(1));
-    let c = M128iArray {
-        simd: _mm_or_si128(
-            c1,
-            _mm_or_si128(c2, _mm_or_si128(c3, _mm_or_si128(c4, _mm_or_si128(c5, c6)))),
-        ),
-    };
-    //TODO for this and SSE41 see if using the broken up SIMPLEX arrays is faster ala avx2
-    let i1 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(0) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(0) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(0) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(0) >= 3) as i32,
-        ],
-    };
-    let j1 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(1) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(1) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(1) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(1) >= 3) as i32,
-        ],
-    };
-    let k1 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(2) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(2) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(2) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(2) >= 3) as i32,
-        ],
-    };
-    let l1 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(3) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(3) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(3) >= 3) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(3) >= 3) as i32,
-        ],
-    };
-    //---------------
-    let i2 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(0) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(0) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(0) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(0) >= 2) as i32,
-        ],
-    };
-    let j2 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(1) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(1) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(1) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(1) >= 2) as i32,
-        ],
-    };
-    let k2 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(2) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(2) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(2) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(2) >= 2) as i32,
-        ],
-    };
-    let l2 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(3) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(3) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(3) >= 2) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(3) >= 2) as i32,
-        ],
-    };
-    //--------------------
-    let i3 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(0) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(0) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(0) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(0) >= 1) as i32,
-        ],
-    };
-    let j3 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(1) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(1) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(1) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(1) >= 1) as i32,
-        ],
-    };
-    let k3 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(2) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(2) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(2) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(2) >= 1) as i32,
-        ],
-    };
-    let l3 = M128iArray {
-        array: [
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(0) as usize)
-                .get_unchecked(3) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(1) as usize)
-                .get_unchecked(3) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(2) as usize)
-                .get_unchecked(3) >= 1) as i32,
-            (*SIMPLEX
-                .get_unchecked(*c.array.get_unchecked(3) as usize)
-                .get_unchecked(3) >= 1) as i32,
-        ],
-    };
+    let mut rank_x = _mm_setzero_si128();
+    let mut rank_y = _mm_setzero_si128();
+    let mut rank_z = _mm_setzero_si128();
+    let mut rank_w = _mm_setzero_si128();
+
+    let cond = _mm_castps_si128(_mm_cmpgt_ps(x0, y0));
+    rank_x = _mm_add_epi32(rank_x, _mm_and_si128(cond, _mm_set1_epi32(1)));
+    rank_y = _mm_add_epi32(rank_y, _mm_andnot_si128(cond, _mm_set1_epi32(1)));
+    let cond = _mm_castps_si128(_mm_cmpgt_ps(x0, z0));
+    rank_x = _mm_add_epi32(rank_x, _mm_and_si128(cond, _mm_set1_epi32(1)));
+    rank_z = _mm_add_epi32(rank_z, _mm_andnot_si128(cond, _mm_set1_epi32(1)));
+    let cond = _mm_castps_si128(_mm_cmpgt_ps(x0, w0));
+    rank_x = _mm_add_epi32(rank_x, _mm_and_si128(cond, _mm_set1_epi32(1)));
+    rank_w = _mm_add_epi32(rank_w, _mm_andnot_si128(cond, _mm_set1_epi32(1)));
+    let cond = _mm_castps_si128(_mm_cmpgt_ps(y0, z0));
+    rank_y = _mm_add_epi32(rank_y, _mm_and_si128(cond, _mm_set1_epi32(1)));
+    rank_z = _mm_add_epi32(rank_z, _mm_andnot_si128(cond, _mm_set1_epi32(1)));
+    let cond = _mm_castps_si128(_mm_cmpgt_ps(y0, w0));
+    rank_y = _mm_add_epi32(rank_y, _mm_and_si128(cond, _mm_set1_epi32(1)));
+    rank_w = _mm_add_epi32(rank_w, _mm_andnot_si128(cond, _mm_set1_epi32(1)));
+    let cond = _mm_castps_si128(_mm_cmpgt_ps(z0, w0));
+    rank_z = _mm_add_epi32(rank_z, _mm_and_si128(cond, _mm_set1_epi32(1)));
+    rank_w = _mm_add_epi32(rank_w, _mm_andnot_si128(cond, _mm_set1_epi32(1)));
+
+     let cond = _mm_cmpgt_epi32(rank_x,_mm_set1_epi32(2));
+    let i1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond) };
+let cond = _mm_cmpgt_epi32(rank_y,_mm_set1_epi32(2));
+    let j1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_z,_mm_set1_epi32(2));
+    let k1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_w,_mm_set1_epi32(2));
+    let l1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+
+let cond = _mm_cmpgt_epi32(rank_x,_mm_set1_epi32(1));
+    let i2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_y,_mm_set1_epi32(1));
+    let j2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_z,_mm_set1_epi32(1));
+    let k2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_w,_mm_set1_epi32(1));
+    let l2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+
+let cond = _mm_cmpgt_epi32(rank_x,_mm_setzero_si128());
+    let i3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_y,_mm_setzero_si128());
+    let j3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_z,_mm_setzero_si128());
+    let k3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+let cond = _mm_cmpgt_epi32(rank_w,_mm_setzero_si128());
+    let l3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+
+
+
 
     let x1 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i1.simd)), G4);
     let y1 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j1.simd)), G4);
