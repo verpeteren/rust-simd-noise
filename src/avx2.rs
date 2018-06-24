@@ -1218,73 +1218,56 @@ pub unsafe fn simplex_4d(x: __m256, y: __m256, z: __m256, w: __m256) -> __m256 {
     let z0 = _mm256_sub_ps(z, _mm256_sub_ps(kps, t));
     let w0 = _mm256_sub_ps(w, _mm256_sub_ps(lps, t));
 
+    let mut rank_x = _mm256_setzero_si256();
+    let mut rank_y = _mm256_setzero_si256();
+    let mut rank_z = _mm256_setzero_si256();
+    let mut rank_w = _mm256_setzero_si256();
+
     let cond = _mm256_castps_si256(_mm256_cmp_ps(x0, y0, _CMP_GT_OQ));
-    let c1 = _mm256_and_si256(cond, _mm256_set1_epi32(32));
+    rank_x = _mm256_add_epi32(rank_x, _mm256_and_si256(cond, _mm256_set1_epi32(1)));
+    rank_y = _mm256_add_epi32(rank_y, _mm256_andnot_si256(cond, _mm256_set1_epi32(1)));
     let cond = _mm256_castps_si256(_mm256_cmp_ps(x0, z0, _CMP_GT_OQ));
-    let c2 = _mm256_and_si256(cond, _mm256_set1_epi32(16));
-    let cond = _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GT_OQ));
-    let c3 = _mm256_and_si256(cond, _mm256_set1_epi32(8));
+    rank_x = _mm256_add_epi32(rank_x, _mm256_and_si256(cond, _mm256_set1_epi32(1)));
+    rank_z = _mm256_add_epi32(rank_z, _mm256_andnot_si256(cond, _mm256_set1_epi32(1)));
     let cond = _mm256_castps_si256(_mm256_cmp_ps(x0, w0, _CMP_GT_OQ));
-    let c4 = _mm256_and_si256(cond, _mm256_set1_epi32(4));
+    rank_x = _mm256_add_epi32(rank_x, _mm256_and_si256(cond, _mm256_set1_epi32(1)));
+    rank_w = _mm256_add_epi32(rank_w, _mm256_andnot_si256(cond, _mm256_set1_epi32(1)));
     let cond = _mm256_castps_si256(_mm256_cmp_ps(y0, z0, _CMP_GT_OQ));
-    let c5 = _mm256_and_si256(cond, _mm256_set1_epi32(2));
-    let cond = _mm256_castps_si256(_mm256_cmp_ps(z0, z0, _CMP_GT_OQ));
-    let c6 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-    let c = _mm256_or_si256(
-        c1,
-        _mm256_or_si256(
-            c2,
-            _mm256_or_si256(c3, _mm256_or_si256(c4, _mm256_or_si256(c5, c6))),
-        ),
-    );
+    rank_y = _mm256_add_epi32(rank_y, _mm256_and_si256(cond, _mm256_set1_epi32(1)));
+    rank_z = _mm256_add_epi32(rank_z, _mm256_andnot_si256(cond, _mm256_set1_epi32(1)));
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(y0, w0, _CMP_GT_OQ));
+    rank_y = _mm256_add_epi32(rank_y, _mm256_and_si256(cond, _mm256_set1_epi32(1)));
+    rank_w = _mm256_add_epi32(rank_w, _mm256_andnot_si256(cond, _mm256_set1_epi32(1)));
+    let cond = _mm256_castps_si256(_mm256_cmp_ps(z0, w0, _CMP_GT_OQ));
+    rank_z = _mm256_add_epi32(rank_z, _mm256_and_si256(cond, _mm256_set1_epi32(1)));
+    rank_w = _mm256_add_epi32(rank_w, _mm256_andnot_si256(cond, _mm256_set1_epi32(1)));
 
-    let sc = _mm256_i32gather_epi32(&SIMPLEX0 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
-    let i1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+    let cond = _mm256_cmpgt_epi32(rank_x, _mm256_set1_epi32(2));
+    let i1 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_y, _mm256_set1_epi32(2));
+    let j1 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_z, _mm256_set1_epi32(2));
+    let k1 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_w, _mm256_set1_epi32(2));
+    let l1 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
 
-    let sc = _mm256_i32gather_epi32(&SIMPLEX1 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
-    let j1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+    let cond = _mm256_cmpgt_epi32(rank_x, _mm256_set1_epi32(1));
+    let i2 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_y, _mm256_set1_epi32(1));
+    let j2 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_z, _mm256_set1_epi32(1));
+    let k2 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_w, _mm256_set1_epi32(1));
+    let l2 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
 
-    let sc = _mm256_i32gather_epi32(&SIMPLEX2 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
-    let k1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-
-    let sc = _mm256_i32gather_epi32(&SIMPLEX3 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(2));
-    let l1 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-    //---
-    let sc = _mm256_i32gather_epi32(&SIMPLEX0 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
-    let i2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-
-    let sc = _mm256_i32gather_epi32(&SIMPLEX1 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
-    let j2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-
-    let sc = _mm256_i32gather_epi32(&SIMPLEX2 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
-    let k2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-
-    let sc = _mm256_i32gather_epi32(&SIMPLEX3 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(1));
-    let l2 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-    //--
-    let sc = _mm256_i32gather_epi32(&SIMPLEX0 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
-    let i3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-
-    let sc = _mm256_i32gather_epi32(&SIMPLEX1 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
-    let j3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-
-    let sc = _mm256_i32gather_epi32(&SIMPLEX2 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
-    let k3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
-
-    let sc = _mm256_i32gather_epi32(&SIMPLEX3 as *const i32, c, 4);
-    let cond = _mm256_cmpgt_epi32(sc, _mm256_set1_epi32(0));
-    let l3 = _mm256_and_si256(cond, _mm256_set1_epi32(1));
+    let cond = _mm256_cmpgt_epi32(rank_x, _mm256_setzero_si256());
+    let i3 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_y, _mm256_setzero_si256());
+    let j3 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_z, _mm256_setzero_si256());
+    let k3 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
+    let cond = _mm256_cmpgt_epi32(rank_w, _mm256_setzero_si256());
+    let l3 = _mm256_and_si256(_mm256_set1_epi32(1), cond);
 
     let x1 = _mm256_add_ps(_mm256_sub_ps(x0, _mm256_cvtepi32_ps(i1)), G4);
     let y1 = _mm256_add_ps(_mm256_sub_ps(y0, _mm256_cvtepi32_ps(j1)), G4);

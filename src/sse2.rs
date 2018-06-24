@@ -1348,35 +1348,56 @@ pub unsafe fn simplex_4d(x: __m128, y: __m128, z: __m128, w: __m128) -> __m128 {
     rank_z = _mm_add_epi32(rank_z, _mm_and_si128(cond, _mm_set1_epi32(1)));
     rank_w = _mm_add_epi32(rank_w, _mm_andnot_si128(cond, _mm_set1_epi32(1)));
 
-     let cond = _mm_cmpgt_epi32(rank_x,_mm_set1_epi32(2));
-    let i1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond) };
-let cond = _mm_cmpgt_epi32(rank_y,_mm_set1_epi32(2));
-    let j1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_z,_mm_set1_epi32(2));
-    let k1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_w,_mm_set1_epi32(2));
-    let l1 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+    let cond = _mm_cmpgt_epi32(rank_x, _mm_set1_epi32(2));
+    let i1 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_y, _mm_set1_epi32(2));
+    let j1 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_z, _mm_set1_epi32(2));
+    let k1 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_w, _mm_set1_epi32(2));
+    let l1 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
 
-let cond = _mm_cmpgt_epi32(rank_x,_mm_set1_epi32(1));
-    let i2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_y,_mm_set1_epi32(1));
-    let j2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_z,_mm_set1_epi32(1));
-    let k2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_w,_mm_set1_epi32(1));
-    let l2 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
+    let cond = _mm_cmpgt_epi32(rank_x, _mm_set1_epi32(1));
+    let i2 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_y, _mm_set1_epi32(1));
+    let j2 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_z, _mm_set1_epi32(1));
+    let k2 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_w, _mm_set1_epi32(1));
+    let l2 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
 
-let cond = _mm_cmpgt_epi32(rank_x,_mm_setzero_si128());
-    let i3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_y,_mm_setzero_si128());
-    let j3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_z,_mm_setzero_si128());
-    let k3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-let cond = _mm_cmpgt_epi32(rank_w,_mm_setzero_si128());
-    let l3 = M128iArray { simd:_mm_and_si128(_mm_set1_epi32(1),cond)};
-
-
-
+    let cond = _mm_cmpgt_epi32(rank_x, _mm_setzero_si128());
+    let i3 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_y, _mm_setzero_si128());
+    let j3 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_z, _mm_setzero_si128());
+    let k3 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
+    let cond = _mm_cmpgt_epi32(rank_w, _mm_setzero_si128());
+    let l3 = M128iArray {
+        simd: _mm_and_si128(_mm_set1_epi32(1), cond),
+    };
 
     let x1 = _mm_add_ps(_mm_sub_ps(x0, _mm_cvtepi32_ps(i1.simd)), G4);
     let y1 = _mm_add_ps(_mm_sub_ps(y0, _mm_cvtepi32_ps(j1.simd)), G4);

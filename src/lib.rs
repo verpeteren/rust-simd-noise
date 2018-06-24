@@ -73,16 +73,16 @@
 //!       octaves: 3,
 //! };
 //!
-//! // Get a block of 2d 800x600 noise, with no scaling of resulting values
+//! // Get a block of 2d 100x100 noise, with no scaling of resulting values
 //! // min and max values are returned so you can apply your own scaling
-//! let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, noise_type);
+//! let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 100, 0.0, 100, noise_type);
 //!
-//! // Get a block of 200x200x200 3d noise
-//! let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200,noise_type);
+//! // Get a block of 20x20x20 3d noise
+//! let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 20, 0.0, 20,0.0, 20,noise_type);
 //!
 //!
 //! // Get a block of noise scaled between -1 and 1
-//! let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, noise_type,-1.0,1.0);
+//! let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 100, 0.0, 100, noise_type,-1.0,1.0);
 //! ```
 //!
 //! ## Call noise functions directly
@@ -90,21 +90,31 @@
 //! Sometimes you may want to use SSE41 even with AVX2 is available
 //!
 //! ```rust
+//! use simdnoise::*;
+//! use std::arch::x86_64::*;
+//!
+//! //  Set your noise type
+//! let noise_type = simdnoise::NoiseType::Fbm {
+//!       freq: 0.04,
+//!       lacunarity: 0.5,
+//!       gain: 2.0,
+//!       octaves: 3,
+//! };
 //!
 //! // get a block of 100x100 sse41 noise, skip runtime detection
-//! let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,noise_type);
+//! let (noise,min,max) = unsafe {simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,noise_type)};
 //!
 //! // send your own SIMD x,y values to the noise functions directly
 //! unsafe {
 //!   // sse2 simplex noise
 //!   let x = _mm_set1_ps(5.0);
 //!   let y = _mm_set1_ps(10.0);
-//!   let f : __m32 = simdnoise::sse2::simplex_2d(x,y);
+//!   let f = simdnoise::sse2::simplex_2d(x,y);
 //!   
 //!   // avx2 turbulence
 //!   let x = _mm256_set1_ps(5.0);
 //!   let y = _mm256_set1_ps(10.0);
-//!   let freq = _mm_256_set1_ps(1.0);
+//!   let freq = _mm256_set1_ps(1.0);
 //!   let lacunarity = _mm256_set1_ps(0.5);
 //!   let gain = _mm256_set1_ps(2.0);
 //!   let octaves = 3;
@@ -442,4 +452,88 @@ pub fn get_4d_scaled_noise(
         )
     }
 }
-    
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const NOISE_TYPE: NoiseType = NoiseType::Fbm {
+        freq: 0.04,
+        lacunarity: 0.5,
+        gain: 2.0,
+        octaves: 3,
+    };
+    macro_rules! assert_delta {
+        ($x:expr, $y:expr, $d:expr) => {
+            assert!(($x - $y).abs() < $d);
+        };
+    }
+    #[test]
+    fn consistency_4d() {
+        let scalar_noise =
+            scalar::get_4d_scaled_noise(0.0, 10, 0.0, 10, 0.0, 10, 0.0, 10, NOISE_TYPE, 0.0, 1.0);
+        let sse2_noise = unsafe {
+            sse2::get_4d_scaled_noise(0.0, 10, 0.0, 10, 0.0, 10, 0.0, 10, NOISE_TYPE, 0.0, 1.0)
+        };
+        let sse41_noise = unsafe {
+            sse41::get_4d_scaled_noise(0.0, 10, 0.0, 10, 0.0, 10, 0.0, 10, NOISE_TYPE, 0.0, 1.0)
+        };
+        let avx2_noise = unsafe {
+            avx2::get_4d_scaled_noise(0.0, 10, 0.0, 10, 0.0, 10, 0.0, 10, NOISE_TYPE, 0.0, 1.0)
+        };
+
+        for i in 0..scalar_noise.len() {
+            //assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
+            assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
+            assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
+        }
+    }
+
+    #[test]
+    fn consistency_3d() {
+        let scalar_noise =
+            scalar::get_3d_scaled_noise(0.0, 23, 0.0, 23, 0.0, 23, NOISE_TYPE, 0.0, 1.0);
+        let sse2_noise =
+            unsafe { sse2::get_3d_scaled_noise(0.0, 23, 0.0, 23, 0.0, 23, NOISE_TYPE, 0.0, 1.0) };
+        let sse41_noise =
+            unsafe { sse41::get_3d_scaled_noise(0.0, 23, 0.0, 23, 0.0, 23, NOISE_TYPE, 0.0, 1.0) };
+        let avx2_noise =
+            unsafe { avx2::get_3d_scaled_noise(0.0, 23, 0.0, 23, 0.0, 23, NOISE_TYPE, 0.0, 1.0) };
+
+        for i in 0..scalar_noise.len() {
+            //assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
+            assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
+            assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
+        }
+    }
+
+    #[test]
+    fn consistency_2d() {
+        let scalar_noise = scalar::get_2d_scaled_noise(0.0, 233, 0.0, 233, NOISE_TYPE, 0.0, 1.0);
+        let sse2_noise =
+            unsafe { sse2::get_2d_scaled_noise(0.0, 233, 0.0, 233, NOISE_TYPE, 0.0, 1.0) };
+        let sse41_noise =
+            unsafe { sse41::get_2d_scaled_noise(0.0, 233, 0.0, 233, NOISE_TYPE, 0.0, 1.0) };
+        let avx2_noise =
+            unsafe { avx2::get_2d_scaled_noise(0.0, 233, 0.0, 233, NOISE_TYPE, 0.0, 1.0) };
+
+        for i in 0..scalar_noise.len() {
+            assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
+            assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
+            assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
+        }
+    }
+
+    #[test]
+    fn consistency_1d() {
+        let scalar_noise = scalar::get_1d_scaled_noise(0.0, 2333, NOISE_TYPE, 0.0, 1.0);
+        let sse2_noise = unsafe { sse2::get_1d_scaled_noise(0.0, 2333, NOISE_TYPE, 0.0, 1.0) };
+        let sse41_noise = unsafe { sse41::get_1d_scaled_noise(0.0, 2333, NOISE_TYPE, 0.0, 1.0) };
+        let avx2_noise = unsafe { avx2::get_1d_scaled_noise(0.0, 2333, NOISE_TYPE, 0.0, 1.0) };
+
+        for i in 0..scalar_noise.len() {
+            assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
+            assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
+            assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
+        }
+    }
+}

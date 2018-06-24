@@ -672,28 +672,56 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     let z0 = z - (k as f32 - t);
     let w0 = w - (l as f32 - t);
 
-    let c1 = if x0 > y0 { 32 } else { 0 };
-    let c2 = if x0 > z0 { 16 } else { 0 };
-    let c3 = if y0 > z0 { 8 } else { 0 };
-    let c4 = if x0 > w0 { 4 } else { 0 };
-    let c5 = if y0 > w0 { 2 } else { 0 };
-    let c6 = if z0 > w0 { 1 } else { 0 };
-    let c = c1 + c2 + c3 + c4 + c5 + c6;
+    let mut rankx: i32 = 0;
+    let mut ranky: i32 = 0;
+    let mut rankz: i32 = 0;
+    let mut rankw: i32 = 0;
 
-    let i1 = if SIMPLEX[c as usize][0] >= 3 { 1 } else { 0 };
-    let j1 = if SIMPLEX[c as usize][1] >= 3 { 1 } else { 0 };
-    let k1 = if SIMPLEX[c as usize][2] >= 3 { 1 } else { 0 };
-    let l1 = if SIMPLEX[c as usize][3] >= 3 { 1 } else { 0 };
+    if x0 > y0 {
+        rankx += 1;
+    } else {
+        ranky += 1;
+    }
+    if x0 > z0 {
+        rankx += 1;
+    } else {
+        rankz += 1;
+    }
+    if x0 > w0 {
+        rankx += 1;
+    } else {
+        rankw += 1;
+    }
+    if y0 > z0 {
+        ranky += 1;
+    } else {
+        rankz += 1;
+    }
+    if y0 > w0 {
+        ranky += 1;
+    } else {
+        rankw += 1;
+    }
+    if z0 > w0 {
+        rankz += 1;
+    } else {
+        rankw += 1;
+    }
 
-    let i2 = if SIMPLEX[c as usize][0] >= 2 { 1 } else { 0 };
-    let j2 = if SIMPLEX[c as usize][1] >= 2 { 1 } else { 0 };
-    let k2 = if SIMPLEX[c as usize][2] >= 2 { 1 } else { 0 };
-    let l2 = if SIMPLEX[c as usize][3] >= 2 { 1 } else { 0 };
+    let i1 = if rankx >= 3 { 1 } else { 0 };
+    let j1 = if ranky >= 3 { 1 } else { 0 };
+    let k1 = if rankz >= 3 { 1 } else { 0 };
+    let l1 = if rankw >= 3 { 1 } else { 0 };
 
-    let i3 = if SIMPLEX[c as usize][0] >= 1 { 1 } else { 0 };
-    let j3 = if SIMPLEX[c as usize][1] >= 1 { 1 } else { 0 };
-    let k3 = if SIMPLEX[c as usize][2] >= 1 { 1 } else { 0 };
-    let l3 = if SIMPLEX[c as usize][3] >= 1 { 1 } else { 0 };
+    let i2 = if rankx >= 2 { 1 } else { 0 };
+    let j2 = if ranky >= 2 { 1 } else { 0 };
+    let k2 = if rankz >= 2 { 1 } else { 0 };
+    let l2 = if rankw >= 2 { 1 } else { 0 };
+
+    let i3 = if rankx >= 1 { 1 } else { 0 };
+    let j3 = if ranky >= 1 { 1 } else { 0 };
+    let k3 = if rankz >= 1 { 1 } else { 0 };
+    let l3 = if rankw >= 1 { 1 } else { 0 };
 
     let x1 = x0 - i1 as f32 + G4; // Offsets for second corner in (x,y,z,w) coords
     let y1 = y0 - j1 as f32 + G4;
