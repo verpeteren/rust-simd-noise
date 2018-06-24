@@ -25,6 +25,12 @@ fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
     hash = hash.wrapping_mul(hash.wrapping_mul(hash.wrapping_mul(60493)));
     (hash >> 13) ^ hash
 }
+fn val_coord_2d(seed: i32, x:i32, y:i32) -> f32
+	{
+		let mut n = seed ^ (X_PRIME * x);
+		n ^= Y_PRIME * y;
+		return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
+	}
 
 pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction,return_type:CellReturnType, jitter: f32) -> f32 {
     let xr = x.round() as i32;
@@ -50,16 +56,45 @@ pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction,retur
                 }
             }
         }
-        CellDistanceFunction::Manhattan => (),
-        CellDistanceFunction::Natural => (),
+        CellDistanceFunction::Manhattan => {
+             for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    let hi = hash_2d(1337, xi, yi) & 0xff;
+                    let vx = xisubx + CELL_2D_X[hi as usize] as f32 * jitter;
+                    let vy = yi as f32 - y + CELL_2D_Y[hi as usize] as f32 * jitter;
+                    let new_dist = vx.abs()+vy.abs();
+                    if new_dist < distance {
+                        distance = new_dist;
+                        xc = xi;
+                        yc = yi;
+                    }
+                }
+            }
+        },
+        CellDistanceFunction::Natural => {
+            for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    let hi = hash_2d(1337, xi, yi) & 0xff;
+                    let vx = xisubx + CELL_2D_X[hi as usize] as f32 * jitter;
+                    let vy = yi as f32 - y + CELL_2D_Y[hi as usize] as f32 * jitter;
+                    let new_dist = vx.abs()+vy.abs() + (vx*vx+vy*vy);
+                    if new_dist < distance {
+                        distance = new_dist;
+                        xc = xi;
+                        yc = yi;
+                    }
+                }
+            }
+        },
     }
 
     match return_type {
         CellReturnType::Distance => distance,
-        CellReturnType::CellValue => distance,
-        CellReturnType::NoiseLookup => distance
+        CellReturnType::CellValue => val_coord_2d(1337,xc,yc)
     }
-    
+
 }
 
 fn grad1(hash: i32, x: f32) -> f32 {

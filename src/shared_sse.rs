@@ -69,6 +69,7 @@ pub const Y_PRIME: __m128i = unsafe { M128iArray { array:[31337;4] }.simd};
 pub const Z_PRIME: __m128i = unsafe { M128iArray { array:[6971;4] }.simd};
 pub const W_PRIME: __m128i = unsafe { M128iArray { array:[1013;4] }.simd};
 
+pub const CELL_DIVISOR: __m128 = unsafe { M128Array { array:[2147483648.0;4]}.simd};
 pub const POINT_FIVE: __m128 = unsafe { M128Array { array: [0.5; 4] }.simd };
 
 #[target_feature(enable = "sse2")]
