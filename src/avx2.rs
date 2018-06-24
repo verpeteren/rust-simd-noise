@@ -72,8 +72,84 @@ pub const G44: __m256 = unsafe {
         array: [4.0 * 0.138196601; 8],
     }.simd
 };
+pub union M256iArray {
+    pub simd: __m256i,
+    pub array: [i32; 8],
+}
+
+pub const X_PRIME: __m256i = unsafe { M256iArray { array: [1619; 8] }.simd };
+pub const Y_PRIME: __m256i = unsafe { M256iArray { array: [31337; 8] }.simd };
+pub const Z_PRIME: __m256i = unsafe { M256iArray { array: [6971; 8] }.simd };
+pub const W_PRIME: __m256i = unsafe { M256iArray { array: [1013; 8] }.simd };
 
 const POINT_FIVE: __m256 = unsafe { M256Array { array: [0.5; 8] }.simd };
+#[target_feature(enable = "avx2")]
+pub unsafe fn blendvi_avx2(a: __m256i, b: __m256i, mask: __m256i) -> __m256i {
+    _mm256_or_si256(_mm256_andnot_si256(mask, a), _mm256_and_si256(mask, b))
+}
+
+#[target_feature(enable = "avx2")]
+unsafe fn hash_2d(seed: __m256i, x: __m256i, y: __m256i) -> __m256i {
+    let mut hash = _mm256_xor_si256(seed, _mm256_mullo_epi32(X_PRIME, x));
+    hash = _mm256_xor_si256(hash, _mm256_mullo_epi32(Y_PRIME, y));
+    hash = _mm256_mullo_epi32(
+        hash,
+        _mm256_mullo_epi32(hash, _mm256_mullo_epi32(hash, _mm256_set1_epi32(60493))),
+    );
+    _mm256_xor_si256(_mm256_srai_epi32(hash, 13), hash)
+}
+
+#[target_feature(enable = "avx2")]
+pub unsafe fn cellular_2d(
+    x: __m256,
+    y: __m256,
+    distance_function: CellDistanceFunction,
+    jitter: __m256,
+) -> __m256 {
+    let xr = _mm256_cvtps_epi32(_mm256_round_ps(
+        x,
+        _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+    ));
+    let yr = _mm256_cvtps_epi32(_mm256_round_ps(
+        y,
+        _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+    ));
+    let mut distance = _mm256_set1_ps(f32::MAX);
+    let mut xc = _mm256_set1_epi32(0);
+    let mut yc = _mm256_set1_epi32(0);
+    match distance_function {
+        CellDistanceFunction::Euclidean => {
+            for xmod in -1..2 {
+                let xi = _mm256_add_epi32(xr, _mm256_set1_epi32(xmod));
+                let xisubx = _mm256_sub_ps(_mm256_cvtepi32_ps(xi), x);
+                for ymod in -1..2 {
+                    let yi = _mm256_add_epi32(yr, _mm256_set1_epi32(ymod));
+                    let hi = _mm256_and_si256(
+                        hash_2d(_mm256_set1_epi32(1337), xi, yi),
+                        _mm256_set1_epi32(0xff),
+                    );
+                    let cellx = _mm256_i32gather_ps(&CELL_2D_X as *const f32, hi, 4);
+                    let celly = _mm256_i32gather_ps(&CELL_2D_Y as *const f32, hi, 4);
+
+                    let vx = _mm256_add_ps(xisubx, _mm256_mul_ps(cellx, jitter));
+
+                    let vy = _mm256_add_ps(
+                        _mm256_sub_ps(_mm256_cvtepi32_ps(yi), y),
+                        _mm256_mul_ps(celly, jitter),
+                    );
+                    let new_dist = _mm256_add_ps(_mm256_mul_ps(vx, vx), _mm256_mul_ps(vy, vy));
+                    let cond = _mm256_cmp_ps(new_dist, distance, _CMP_LT_OQ);
+                    distance = _mm256_blendv_ps(distance, new_dist, cond);
+                    xc = blendvi_avx2(xc, xi, _mm256_castps_si256(cond));
+                    yc = blendvi_avx2(yc, yi, _mm256_castps_si256(cond));
+                }
+            }
+            distance
+        }
+        CellDistanceFunction::Manhattan => distance,
+        CellDistanceFunction::Natural => distance,
+    }
+}
 
 #[target_feature(enable = "avx2")]
 unsafe fn grad1_simd(hash: __m256i, x: __m256) -> __m256 {
@@ -231,6 +307,11 @@ unsafe fn get_1d_noise_helper(x: __m256, noise_type: NoiseType) -> M256Array {
                 octaves,
             ),
             NoiseType::Normal { freq } => simplex_1d(_mm256_mul_ps(x, _mm256_set1_ps(freq))),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => panic!("There is no 1d cell noise"),
         },
     }
 }
@@ -582,6 +663,16 @@ unsafe fn get_2d_noise_helper(x: __m256, y: __m256, noise_type: NoiseType) -> M2
             NoiseType::Normal { freq } => simplex_2d(
                 _mm256_mul_ps(x, _mm256_set1_ps(freq)),
                 _mm256_mul_ps(y, _mm256_set1_ps(freq)),
+            ),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => cellular_2d(
+                _mm256_mul_ps(x, _mm256_set1_ps(freq)),
+                _mm256_mul_ps(y, _mm256_set1_ps(freq)),
+                distance_function,
+                _mm256_set1_ps(jitter),
             ),
         },
     }
@@ -1055,6 +1146,11 @@ unsafe fn get_3d_noise_helper(x: __m256, y: __m256, z: __m256, noise_type: Noise
                 _mm256_mul_ps(y, _mm256_set1_ps(freq)),
                 _mm256_mul_ps(z, _mm256_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => panic!("not yet implemented"),
         },
     }
 }
@@ -1619,6 +1715,11 @@ unsafe fn get_4d_noise_helper(
                 _mm256_mul_ps(z, _mm256_set1_ps(freq)),
                 _mm256_mul_ps(w, _mm256_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => panic!("not yet implemented"),
         },
     }
 }

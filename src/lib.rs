@@ -130,9 +130,29 @@ mod shared_sse;
 pub mod sse2;
 pub mod sse41;
 
+#[derive(Copy, Clone)]
+pub enum CellDistanceFunction {
+    Euclidean,
+    Manhattan,
+    Natural
+}
+
+#[derive(Copy,Clone)]
+pub enum CellReturnType {
+    CellValue,
+    NoiseLookup,
+    Distance
+}
+
 /// Specifies what type of noise to generate and contains any relevant settings.
 #[derive(Copy, Clone)]
 pub enum NoiseType {
+    Cellular {
+        freq:f32,
+        distance_function: CellDistanceFunction,
+        return_type: CellReturnType,
+        jitter:f32
+    },
     /// Fractal Brownian Motion
     Fbm {
         /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good

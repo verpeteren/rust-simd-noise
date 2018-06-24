@@ -30,6 +30,109 @@ unsafe fn floor_sse2(f: __m128) -> __m128 {
     _mm_sub_ps(t, _mm_and_ps(_mm_cmplt_ps(f, t), _mm_set1_ps(1.0)))
 }
 
+macro_rules! mm_shuffle {
+    ($z:expr, $y:expr, $x:expr, $w:expr) => {
+        ($z << 6) | ($y << 4) | ($x << 2) | $w
+    };
+}
+
+#[target_feature(enable = "sse2")]
+unsafe fn muli_sse2(a: __m128i, b: __m128i) -> __m128i {
+    let tmp1 = _mm_mul_epu32(a, b); /* mul 2,0*/
+    let tmp2 = _mm_mul_epu32(_mm_srli_si128(a, 4), _mm_srli_si128(b, 4)); /* mul 3,1 */
+    _mm_unpacklo_epi32(
+        _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0) as i32),
+        _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0) as i32),
+    ) /* shuffle results to [63..0] and pack */
+}
+unsafe fn round_sse2(a: __m128) -> __m128 {
+    let v0 = _mm_setzero_ps(); //generate the highest value &lt; 2
+    let v1 = _mm_cmpeq_ps(v0, v0);
+    let v_nearest2 = _mm_castsi128_ps(_mm_srli_epi32(_mm_castps_si128(v1), 2));
+    let i = _mm_cvttps_epi32(a);
+    let a_trunc = _mm_cvtepi32_ps(i); // truncate a
+    let rmd = _mm_sub_ps(a, a_trunc); // get remainder
+    let rmd2 = _mm_mul_ps(rmd, v_nearest2); // mul remainder by near 2 will yield the needed offset
+    let rmd2i = _mm_cvttps_epi32(rmd2); // after being truncated of course
+    let rmd2_trunc = _mm_cvtepi32_ps(rmd2i);
+    _mm_add_ps(a_trunc, rmd2_trunc)
+}
+
+#[target_feature(enable = "sse2")]
+unsafe fn hash_2d(seed: __m128i, x: __m128i, y: __m128i) -> __m128i {
+    let mut hash = _mm_xor_si128(seed, muli_sse2(X_PRIME, x));
+    hash = _mm_xor_si128(hash, muli_sse2(Y_PRIME, y));
+    hash = muli_sse2(
+        hash,
+        muli_sse2(hash, muli_sse2(hash, _mm_set1_epi32(60493))),
+    );
+    _mm_xor_si128(_mm_srai_epi32(hash, 13), hash)
+}
+
+#[target_feature(enable = "sse2")]
+pub unsafe fn cellular_2d(
+    x: __m128,
+    y: __m128,
+    distance_function: CellDistanceFunction,
+    jitter: __m128,
+) -> __m128 {
+    let xr = _mm_cvtps_epi32(round_sse2(x));
+    let yr = _mm_cvtps_epi32(round_sse2(y));
+    let mut distance = _mm_set1_ps(f32::MAX);
+    let mut xc = _mm_set1_epi32(0);
+    let mut yc = _mm_set1_epi32(0);
+    match distance_function {
+        CellDistanceFunction::Euclidean => {
+            for xmod in -1..2 {
+                let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
+                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi),x);
+                for ymod in -1..2 {
+                    let yi = _mm_add_epi32(yr, _mm_set1_epi32(ymod));
+                    let hi = M128iArray {
+                        simd: _mm_and_si128(
+                            hash_2d(_mm_set1_epi32(1337), xi, yi),
+                            _mm_set1_epi32(0xff),
+                        ),
+                    };
+                    let cellx = M128Array {
+                        array: [
+                            CELL_2D_X[hi.array[0] as usize],
+                            CELL_2D_X[hi.array[1] as usize],
+                            CELL_2D_X[hi.array[2] as usize],
+                            CELL_2D_X[hi.array[3] as usize],
+                        ],
+                    };
+                    let celly = M128Array {
+                        array: [
+                            CELL_2D_Y[hi.array[0] as usize],
+                            CELL_2D_Y[hi.array[1] as usize],
+                            CELL_2D_Y[hi.array[2] as usize],
+                            CELL_2D_Y[hi.array[3] as usize],
+                        ],
+                    };
+
+                    let vx = _mm_add_ps(
+                        xisubx,
+                        _mm_mul_ps(cellx.simd, jitter),
+                    );
+
+                    let vy = _mm_add_ps(
+                        _mm_sub_ps(_mm_cvtepi32_ps(yi), y),
+                        _mm_mul_ps(celly.simd, jitter),
+                    );
+                    let new_dist = _mm_add_ps(_mm_mul_ps(vx, vx), _mm_mul_ps(vy, vy));
+                    let cond = _mm_cmplt_ps(new_dist, distance);
+                    distance = blendv_sse2(distance, new_dist, cond);
+                    xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
+                    yc = blendvi_sse2(yc, yi, _mm_castps_si128(cond));
+                }
+            }
+            distance
+        }
+        CellDistanceFunction::Manhattan => distance,
+        CellDistanceFunction::Natural => distance,
+    }
+}
 #[target_feature(enable = "sse2")]
 unsafe fn grad1_simd(hash: __m128i, x: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(15));
@@ -205,6 +308,9 @@ unsafe fn get_1d_noise_helper(x: __m128, noise_type: NoiseType) -> M128Array {
                 octaves,
             ),
             NoiseType::Normal { freq } => simplex_1d(_mm_mul_ps(x, _mm_set1_ps(freq))),
+            NoiseType::Cellular {
+                ..
+            } => panic!("There is no 1d cell noise"),
         },
     }
 }
@@ -1032,6 +1138,16 @@ unsafe fn get_2d_noise_helper(x: __m128, y: __m128, noise_type: NoiseType) -> M1
                 _mm_mul_ps(x, _mm_set1_ps(freq)),
                 _mm_mul_ps(y, _mm_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                jitter,
+            } => cellular_2d(
+                _mm_mul_ps(x, _mm_set1_ps(freq)),
+                _mm_mul_ps(y, _mm_set1_ps(freq)),
+                distance_function,
+                _mm_set1_ps(jitter),
+            ),
         },
     }
 }
@@ -1171,6 +1287,9 @@ unsafe fn get_3d_noise_helper(x: __m128, y: __m128, z: __m128, noise_type: Noise
                 _mm_mul_ps(y, _mm_set1_ps(freq)),
                 _mm_mul_ps(z, _mm_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+               ..
+            } => panic!("not yet implemented"),
         },
     }
 }
@@ -1912,6 +2031,9 @@ unsafe fn get_4d_noise_helper(
                 _mm_mul_ps(z, _mm_set1_ps(freq)),
                 _mm_mul_ps(w, _mm_set1_ps(freq)),
             ),
+            NoiseType::Cellular {
+                ..
+            } => panic!("not yet implemented"),
         },
     }
 }

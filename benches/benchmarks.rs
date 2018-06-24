@@ -12,6 +12,7 @@ const NOISE_TYPE: NoiseType = NoiseType::Fbm {
     octaves: 3,
 };
 
+
 fn d4(c: &mut Criterion) {
     let scalar = Fun::new("Scalar 4D", |b, _i| {
         b.iter(|| scalar::get_4d_noise(0.0, 16, 0.0, 16, 0.0, 16, 0.0, 16, NOISE_TYPE))
