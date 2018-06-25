@@ -8,11 +8,12 @@ Available on [crates.io](https://crates.io/crates/simdnoise).
 
 ## Features
 
+* Gradient Noise (Simplex aka Perlin) 1D,2D,3D,4D
+* Cellular Noise (aka Voroni) 2D, 3D (not yet in the crate)
 * SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
 * AVX2 version also leverages FMA3
 * Runtime detection picks the best available instruction set
 * Simplex noise, fractal brownian motion, turbulence, and ridge
-* 1D, 2D, 3D, and 4D
 
 ## Benchmarks
 *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
