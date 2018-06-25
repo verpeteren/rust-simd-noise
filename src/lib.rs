@@ -134,23 +134,23 @@ pub mod sse41;
 pub enum CellDistanceFunction {
     Euclidean,
     Manhattan,
-    Natural
+    Natural,
 }
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub enum CellReturnType {
     CellValue,
-    Distance
+    Distance,
 }
 
 /// Specifies what type of noise to generate and contains any relevant settings.
 #[derive(Copy, Clone)]
 pub enum NoiseType {
     Cellular {
-        freq:f32,
+        freq: f32,
         distance_function: CellDistanceFunction,
         return_type: CellReturnType,
-        jitter:f32
+        jitter: f32,
     },
     /// Fractal Brownian Motion
     Fbm {
@@ -481,6 +481,12 @@ mod tests {
         gain: 2.0,
         octaves: 3,
     };
+    const CELL_NOISE_TYPE: NoiseType = NoiseType::Cellular {
+        freq: 0.02,
+        distance_function: CellDistanceFunction::Euclidean,
+        return_type: CellReturnType::Distance,
+        jitter: 0.25,
+    };
     macro_rules! assert_delta {
         ($x:expr, $y:expr, $d:expr) => {
             assert!(($x - $y).abs() < $d);
@@ -501,7 +507,7 @@ mod tests {
         };
 
         for i in 0..scalar_noise.len() {
-            //assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
+            //TODO why isnt this passing? assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
             assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
             assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
         }
@@ -519,7 +525,7 @@ mod tests {
             unsafe { avx2::get_3d_scaled_noise(0.0, 23, 0.0, 23, 0.0, 23, NOISE_TYPE, 0.0, 1.0) };
 
         for i in 0..scalar_noise.len() {
-            //assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
+            //TODO why isn't this passing? assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
             assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
             assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
         }
@@ -553,6 +559,41 @@ mod tests {
             assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
             assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
             assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
+        }
+    }
+
+    #[test]
+    fn cell_consistency_2d() {
+        let scalar = scalar::get_2d_scaled_noise(0.0, 233, 0.0, 233, CELL_NOISE_TYPE, 0.0, 1.0);
+        let sse2 =
+            unsafe { sse2::get_2d_scaled_noise(0.0, 233, 0.0, 233, CELL_NOISE_TYPE, 0.0, 1.0) };
+        let sse41 =
+            unsafe { sse41::get_2d_scaled_noise(0.0, 233, 0.0, 233, CELL_NOISE_TYPE, 0.0, 1.0) };
+        let avx2 =
+            unsafe { avx2::get_2d_scaled_noise(0.0, 233, 0.0, 233, CELL_NOISE_TYPE, 0.0, 1.0) };
+        for i in 0..scalar.len() {
+            assert_delta!(scalar[i], sse2[i], 0.1);
+            assert_delta!(sse2[i], sse41[i], 0.1);
+            assert_delta!(sse41[i], avx2[i], 0.1);
+        }
+    }
+    #[test]
+    fn cell_consistency_3d() {
+        let scalar =
+            scalar::get_3d_scaled_noise(0.0, 65, 0.0, 65, 0.0, 65, CELL_NOISE_TYPE, 0.0, 1.0);
+        let sse2 = unsafe {
+            sse2::get_3d_scaled_noise(0.0, 65, 0.0, 65, 0.0, 65, CELL_NOISE_TYPE, 0.0, 1.0)
+        };
+        let sse41 = unsafe {
+            sse41::get_3d_scaled_noise(0.0, 65, 0.0, 65, 0.0, 65, CELL_NOISE_TYPE, 0.0, 1.0)
+        };
+        let avx2 = unsafe {
+            avx2::get_3d_scaled_noise(0.0, 65, 0.0, 65, 0.0, 65, CELL_NOISE_TYPE, 0.0, 1.0)
+        };
+        for i in 0..scalar.len() {
+            assert_delta!(scalar[i], sse2[i], 0.1);
+            assert_delta!(sse2[i], sse41[i], 0.1);
+            assert_delta!(sse41[i], avx2[i], 0.1);
         }
     }
 }

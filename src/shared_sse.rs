@@ -64,12 +64,16 @@ pub const G44: __m128 = unsafe {
         array: [4.0 * 0.138196601; 4],
     }.simd
 };
-pub const X_PRIME: __m128i = unsafe { M128iArray { array:[1619;4] }.simd};
-pub const Y_PRIME: __m128i = unsafe { M128iArray { array:[31337;4] }.simd};
-pub const Z_PRIME: __m128i = unsafe { M128iArray { array:[6971;4] }.simd};
-pub const W_PRIME: __m128i = unsafe { M128iArray { array:[1013;4] }.simd};
+pub const X_PRIME: __m128i = unsafe { M128iArray { array: [1619; 4] }.simd };
+pub const Y_PRIME: __m128i = unsafe { M128iArray { array: [31337; 4] }.simd };
+pub const Z_PRIME: __m128i = unsafe { M128iArray { array: [6971; 4] }.simd };
+//pub const W_PRIME: __m128i = unsafe { M128iArray { array: [1013; 4] }.simd };
 
-pub const CELL_DIVISOR: __m128 = unsafe { M128Array { array:[2147483648.0;4]}.simd};
+pub const CELL_DIVISOR: __m128 = unsafe {
+    M128Array {
+        array: [2147483648.0; 4],
+    }.simd
+};
 pub const POINT_FIVE: __m128 = unsafe { M128Array { array: [0.5; 4] }.simd };
 
 #[target_feature(enable = "sse2")]
@@ -81,7 +85,6 @@ pub unsafe fn _mm_abs_ps(a: __m128) -> __m128 {
 pub unsafe fn blendvi_sse2(a: __m128i, b: __m128i, mask: __m128i) -> __m128i {
     _mm_or_si128(_mm_andnot_si128(mask, a), _mm_and_si128(mask, b))
 }
-
 
 #[target_feature(enable = "sse2")]
 pub unsafe fn scale_array_sse(

@@ -17,7 +17,6 @@ pub const Y_PRIME: i32 = 31337;
 pub const Z_PRIME: i32 = 6971;
 pub const W_PRIME: i32 = 1013;
 
-
 fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
     let mut hash = seed ^ (X_PRIME * x);
     hash ^= Y_PRIME * y;
@@ -25,14 +24,19 @@ fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
     hash = hash.wrapping_mul(hash.wrapping_mul(hash.wrapping_mul(60493)));
     (hash >> 13) ^ hash
 }
-fn val_coord_2d(seed: i32, x:i32, y:i32) -> f32
-	{
-		let mut n = seed ^ (X_PRIME * x);
-		n ^= Y_PRIME * y;
-		return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
-	}
+fn val_coord_2d(seed: i32, x: i32, y: i32) -> f32 {
+    let mut n = seed ^ (X_PRIME * x);
+    n ^= Y_PRIME * y;
+    return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
+}
 
-pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction,return_type:CellReturnType, jitter: f32) -> f32 {
+pub fn cellular_2d(
+    x: f32,
+    y: f32,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: f32,
+) -> f32 {
     let xr = x.round() as i32;
     let yr = y.round() as i32;
 
@@ -57,13 +61,13 @@ pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction,retur
             }
         }
         CellDistanceFunction::Manhattan => {
-             for xi in xr - 1..xr + 2 {
+            for xi in xr - 1..xr + 2 {
                 let xisubx = xi as f32 - x;
                 for yi in yr - 1..yr + 2 {
                     let hi = hash_2d(1337, xi, yi) & 0xff;
                     let vx = xisubx + CELL_2D_X[hi as usize] as f32 * jitter;
                     let vy = yi as f32 - y + CELL_2D_Y[hi as usize] as f32 * jitter;
-                    let new_dist = vx.abs()+vy.abs();
+                    let new_dist = vx.abs() + vy.abs();
                     if new_dist < distance {
                         distance = new_dist;
                         xc = xi;
@@ -71,7 +75,7 @@ pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction,retur
                     }
                 }
             }
-        },
+        }
         CellDistanceFunction::Natural => {
             for xi in xr - 1..xr + 2 {
                 let xisubx = xi as f32 - x;
@@ -79,7 +83,7 @@ pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction,retur
                     let hi = hash_2d(1337, xi, yi) & 0xff;
                     let vx = xisubx + CELL_2D_X[hi as usize] as f32 * jitter;
                     let vy = yi as f32 - y + CELL_2D_Y[hi as usize] as f32 * jitter;
-                    let new_dist = vx.abs()+vy.abs() + (vx*vx+vy*vy);
+                    let new_dist = vx.abs() + vy.abs() + (vx * vx + vy * vy);
                     if new_dist < distance {
                         distance = new_dist;
                         xc = xi;
@@ -87,14 +91,114 @@ pub fn cellular_2d(x: f32, y: f32, distance_function: CellDistanceFunction,retur
                     }
                 }
             }
-        },
+        }
     }
 
     match return_type {
         CellReturnType::Distance => distance,
-        CellReturnType::CellValue => val_coord_2d(1337,xc,yc)
+        CellReturnType::CellValue => val_coord_2d(1337, xc, yc),
+    }
+}
+
+fn hash_3d(seed: i32, x: i32, y: i32, z: i32) -> i32 {
+    let mut hash = seed ^ (X_PRIME * x);
+    hash ^= Y_PRIME * y;
+    hash ^= Z_PRIME * z;
+
+    hash = hash.wrapping_mul(hash.wrapping_mul(hash.wrapping_mul(60493)));
+    (hash >> 13) ^ hash
+}
+
+fn val_coord_3d(seed: i32, x: i32, y: i32, z: i32) -> f32 {
+    let mut n = seed ^ (X_PRIME * x);
+    n ^= Y_PRIME * y;
+    n ^= Z_PRIME * z;
+    return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
+}
+
+pub fn cellular_3d(
+    x: f32,
+    y: f32,
+    z: f32,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: f32,
+) -> f32 {
+    let xr = x.round() as i32;
+    let yr = y.round() as i32;
+    let zr = z.round() as i32;
+    let mut distance = f32::MAX;
+    let mut xc = 0;
+    let mut yc = 0;
+    let mut zc = 0;
+    match distance_function {
+        CellDistanceFunction::Euclidean => {
+            for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    for zi in zr - 1..zr + 2 {
+                        let hi = hash_3d(1337, xi, yi, zi) & 0xff;
+                        let vx = xisubx + CELL_3D_X[hi as usize] as f32 * jitter;
+                        let vy = yi as f32 - y + CELL_3D_Y[hi as usize] as f32 * jitter;
+                        let vz = zi as f32 - z + CELL_3D_Z[hi as usize] as f32 * jitter;
+                        let new_dist = vx * vx + vy * vy + vz * vz;
+                        if new_dist < distance {
+                            distance = new_dist;
+                            xc = xi;
+                            yc = yi;
+                            zc = zi;
+                        }
+                    }
+                }
+            }
+        }
+        CellDistanceFunction::Manhattan => {
+            for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    for zi in zr - 1..zr + 2 {
+                        let hi = hash_3d(1337, xi, yi, zi) & 0xff;
+                        let vx = xisubx + CELL_3D_X[hi as usize] as f32 * jitter;
+                        let vy = yi as f32 - y + CELL_3D_Y[hi as usize] as f32 * jitter;
+                        let vz = zi as f32 - z + CELL_3D_Z[hi as usize] as f32 * jitter;
+                        let new_dist = vx.abs() + vy.abs() + vz.abs();
+                        if new_dist < distance {
+                            distance = new_dist;
+                            xc = xi;
+                            yc = yi;
+                            zc = zi;
+                        }
+                    }
+                }
+            }
+        }
+        CellDistanceFunction::Natural => {
+            for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    for zi in zr - 1..zr + 2 {
+                        let hi = hash_3d(1337, xi, yi, zi) & 0xff;
+                        let vx = xisubx + CELL_3D_X[hi as usize] as f32 * jitter;
+                        let vy = yi as f32 - y + CELL_3D_Y[hi as usize] as f32 * jitter;
+                        let vz = zi as f32 - z + CELL_3D_Z[hi as usize] as f32 * jitter;
+                        let new_dist =
+                            (vx.abs() + vy.abs() + vz.abs()) + (vx * vx + vy * vy + vz * vz);
+                        if new_dist < distance {
+                            distance = new_dist;
+                            xc = xi;
+                            yc = yi;
+                            zc = zi;
+                        }
+                    }
+                }
+            }
+        }
     }
 
+    match return_type {
+        CellReturnType::Distance => distance,
+        CellReturnType::CellValue => val_coord_3d(1337, xc, yc, zc),
+    }
 }
 
 fn grad1(hash: i32, x: f32) -> f32 {
@@ -388,7 +492,7 @@ fn get_2d_noise_helper(x: f32, y: f32, noise_type: NoiseType) -> f32 {
             distance_function,
             return_type,
             jitter,
-        } => cellular_2d(x * freq, y * freq, distance_function,return_type, jitter),
+        } => cellular_2d(x * freq, y * freq, distance_function, return_type, jitter),
     }
 }
 
@@ -662,7 +766,14 @@ fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
             distance_function,
             return_type,
             jitter,
-        } => panic!("not yet implemented"),
+        } => cellular_3d(
+            x * freq,
+            y * freq,
+            z * freq,
+            distance_function,
+            return_type,
+            jitter,
+        ),
     }
 }
 
@@ -1009,12 +1120,7 @@ fn get_4d_noise_helper(x: f32, y: f32, z: f32, w: f32, noise_type: NoiseType) ->
             octaves,
         } => turbulence_4d(x, y, z, w, freq, lacunarity, gain, octaves),
         NoiseType::Normal { freq } => simplex_4d(x * freq, y * freq, z * freq, w * freq),
-        NoiseType::Cellular {
-            freq,
-            distance_function,
-            return_type,
-            jitter,
-        } => panic!("not yet implemented"),
+        NoiseType::Cellular { .. } => panic!("not yet implemented"),
     }
 }
 

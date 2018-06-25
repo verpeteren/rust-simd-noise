@@ -28,14 +28,14 @@ unsafe fn hash_2d(seed: __m128i, x: __m128i, y: __m128i) -> __m128i {
     _mm_xor_si128(_mm_srai_epi32(hash, 13), hash)
 }
 #[target_feature(enable = "sse4.1")]
-unsafe fn val_coord_2d(seed: __m128i, x: __m128i, y:__m128i) -> __m128 {
-   let mut hash = _mm_xor_si128(seed, _mm_mullo_epi32(X_PRIME, x));
+unsafe fn val_coord_2d(seed: __m128i, x: __m128i, y: __m128i) -> __m128 {
+    let mut hash = _mm_xor_si128(seed, _mm_mullo_epi32(X_PRIME, x));
     hash = _mm_xor_si128(hash, _mm_mullo_epi32(Y_PRIME, y));
     hash = _mm_mullo_epi32(
         hash,
         _mm_mullo_epi32(hash, _mm_mullo_epi32(hash, _mm_set1_epi32(60493))),
     );
-    _mm_div_ps(_mm_cvtepi32_ps(hash),CELL_DIVISOR)
+    _mm_div_ps(_mm_cvtepi32_ps(hash), CELL_DIVISOR)
 }
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn cellular_2d(
@@ -60,7 +60,7 @@ pub unsafe fn cellular_2d(
         CellDistanceFunction::Euclidean => {
             for xmod in -1..2 {
                 let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
-                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi),x);
+                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi), x);
                 for ymod in -1..2 {
                     let yi = _mm_add_epi32(yr, _mm_set1_epi32(ymod));
                     let hi = M128iArray {
@@ -86,10 +86,7 @@ pub unsafe fn cellular_2d(
                         ],
                     };
 
-                    let vx = _mm_add_ps(
-                        xisubx,
-                        _mm_mul_ps(cellx.simd, jitter),
-                    );
+                    let vx = _mm_add_ps(xisubx, _mm_mul_ps(cellx.simd, jitter));
 
                     let vy = _mm_add_ps(
                         _mm_sub_ps(_mm_cvtepi32_ps(yi), y),
@@ -102,11 +99,11 @@ pub unsafe fn cellular_2d(
                     yc = blendvi_sse2(yc, yi, _mm_castps_si128(cond));
                 }
             }
-        },
+        }
         CellDistanceFunction::Manhattan => {
             for xmod in -1..2 {
                 let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
-                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi),x);
+                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi), x);
                 for ymod in -1..2 {
                     let yi = _mm_add_epi32(yr, _mm_set1_epi32(ymod));
                     let hi = M128iArray {
@@ -132,10 +129,7 @@ pub unsafe fn cellular_2d(
                         ],
                     };
 
-                    let vx = _mm_add_ps(
-                        xisubx,
-                        _mm_mul_ps(cellx.simd, jitter),
-                    );
+                    let vx = _mm_add_ps(xisubx, _mm_mul_ps(cellx.simd, jitter));
 
                     let vy = _mm_add_ps(
                         _mm_sub_ps(_mm_cvtepi32_ps(yi), y),
@@ -148,11 +142,11 @@ pub unsafe fn cellular_2d(
                     yc = blendvi_sse2(yc, yi, _mm_castps_si128(cond));
                 }
             }
-        },
+        }
         CellDistanceFunction::Natural => {
-                for xmod in -1..2 {
+            for xmod in -1..2 {
                 let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
-                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi),x);
+                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi), x);
                 for ymod in -1..2 {
                     let yi = _mm_add_epi32(yr, _mm_set1_epi32(ymod));
                     let hi = M128iArray {
@@ -178,30 +172,272 @@ pub unsafe fn cellular_2d(
                         ],
                     };
 
-                    let vx = _mm_add_ps(
-                        xisubx,
-                        _mm_mul_ps(cellx.simd, jitter),
-                    );
+                    let vx = _mm_add_ps(xisubx, _mm_mul_ps(cellx.simd, jitter));
 
                     let vy = _mm_add_ps(
                         _mm_sub_ps(_mm_cvtepi32_ps(yi), y),
                         _mm_mul_ps(celly.simd, jitter),
                     );
-                    let new_dist = _mm_add_ps(_mm_add_ps(_mm_abs_ps(vx), _mm_abs_ps(vy)),_mm_add_ps(_mm_mul_ps(vx, vx), _mm_mul_ps(vy, vy)));
+                    let new_dist = _mm_add_ps(
+                        _mm_add_ps(_mm_abs_ps(vx), _mm_abs_ps(vy)),
+                        _mm_add_ps(_mm_mul_ps(vx, vx), _mm_mul_ps(vy, vy)),
+                    );
                     let cond = _mm_cmplt_ps(new_dist, distance);
                     distance = _mm_blendv_ps(distance, new_dist, cond);
                     xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
                     yc = blendvi_sse2(yc, yi, _mm_castps_si128(cond));
                 }
             }
-          }
         }
-        match return_type{
-            CellReturnType::Distance => distance,
-            CellReturnType::CellValue => val_coord_2d(_mm_set1_epi32(1337),xc,yc)
-        }
+    }
+    match return_type {
+        CellReturnType::Distance => distance,
+        CellReturnType::CellValue => val_coord_2d(_mm_set1_epi32(1337), xc, yc),
+    }
 }
+#[target_feature(enable = "sse4.1")]
+unsafe fn hash_3d(seed: __m128i, x: __m128i, y: __m128i, z: __m128i) -> __m128i {
+    let mut hash = _mm_xor_si128(seed, _mm_mullo_epi32(X_PRIME, x));
+    hash = _mm_xor_si128(hash, _mm_mullo_epi32(Y_PRIME, y));
+    hash = _mm_xor_si128(hash, _mm_mullo_epi32(Z_PRIME, z));
+    hash = _mm_mullo_epi32(
+        hash,
+        _mm_mullo_epi32(hash, _mm_mullo_epi32(hash, _mm_set1_epi32(60493))),
+    );
+    _mm_xor_si128(_mm_srai_epi32(hash, 13), hash)
+}
+#[target_feature(enable = "sse4.1")]
+unsafe fn val_coord_3d(seed: __m128i, x: __m128i, y: __m128i, z: __m128i) -> __m128 {
+    let mut hash = _mm_xor_si128(seed, _mm_mullo_epi32(X_PRIME, x));
+    hash = _mm_xor_si128(hash, _mm_mullo_epi32(Y_PRIME, y));
+    hash = _mm_xor_si128(hash, _mm_mullo_epi32(Z_PRIME, z));
+    hash = _mm_mullo_epi32(
+        hash,
+        _mm_mullo_epi32(hash, _mm_mullo_epi32(hash, _mm_set1_epi32(60493))),
+    );
+    _mm_div_ps(_mm_cvtepi32_ps(hash), CELL_DIVISOR)
+}
+#[target_feature(enable = "sse4.1")]
+pub unsafe fn cellular_3d(
+    x: __m128,
+    y: __m128,
+    z: __m128,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: __m128,
+) -> __m128 {
+    let xr = _mm_cvtps_epi32(_mm_round_ps(
+        x,
+        _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+    ));
+    let yr = _mm_cvtps_epi32(_mm_round_ps(
+        y,
+        _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+    ));
+    let zr = _mm_cvtps_epi32(_mm_round_ps(
+        z,
+        _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+    ));
+    let mut distance = _mm_set1_ps(f32::MAX);
+    let mut xc = _mm_setzero_si128();
+    let mut yc = _mm_setzero_si128();
+    let mut zc = _mm_setzero_si128();
+    match distance_function {
+        CellDistanceFunction::Euclidean => {
+            for xmod in -1..2 {
+                let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
+                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi), x);
+                for ymod in -1..2 {
+                    let yi = _mm_add_epi32(yr, _mm_set1_epi32(ymod));
+                    for zmod in -1..2 {
+                        let zi = _mm_add_epi32(zr, _mm_set1_epi32(zmod));
+                        let hi = M128iArray {
+                            simd: _mm_and_si128(
+                                hash_3d(_mm_set1_epi32(1337), xi, yi, zi),
+                                _mm_set1_epi32(0xff),
+                            ),
+                        };
+                        let cellx = M128Array {
+                            array: [
+                                CELL_3D_X[hi.array[0] as usize],
+                                CELL_3D_X[hi.array[1] as usize],
+                                CELL_3D_X[hi.array[2] as usize],
+                                CELL_3D_X[hi.array[3] as usize],
+                            ],
+                        };
+                        let celly = M128Array {
+                            array: [
+                                CELL_3D_Y[hi.array[0] as usize],
+                                CELL_3D_Y[hi.array[1] as usize],
+                                CELL_3D_Y[hi.array[2] as usize],
+                                CELL_3D_Y[hi.array[3] as usize],
+                            ],
+                        };
+                        let cellz = M128Array {
+                            array: [
+                                CELL_3D_Z[hi.array[0] as usize],
+                                CELL_3D_Z[hi.array[1] as usize],
+                                CELL_3D_Z[hi.array[2] as usize],
+                                CELL_3D_Z[hi.array[3] as usize],
+                            ],
+                        };
 
+                        let vx = _mm_add_ps(xisubx, _mm_mul_ps(cellx.simd, jitter));
+
+                        let vy = _mm_add_ps(
+                            _mm_sub_ps(_mm_cvtepi32_ps(yi), y),
+                            _mm_mul_ps(celly.simd, jitter),
+                        );
+
+                        let vz = _mm_add_ps(
+                            _mm_sub_ps(_mm_cvtepi32_ps(zi), z),
+                            _mm_mul_ps(cellz.simd, jitter),
+                        );
+
+                        let new_dist = _mm_add_ps(
+                            _mm_add_ps(_mm_mul_ps(vx, vx), _mm_mul_ps(vy, vy)),
+                            _mm_mul_ps(vz, vz),
+                        );
+                        let cond = _mm_cmplt_ps(new_dist, distance);
+                        distance = _mm_blendv_ps(distance, new_dist, cond);
+                        xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
+                        yc = blendvi_sse2(yc, yi, _mm_castps_si128(cond));
+                        zc = blendvi_sse2(zc, zi, _mm_castps_si128(cond));
+                    }
+                }
+            }
+        }
+        CellDistanceFunction::Manhattan => {
+            for xmod in -1..2 {
+                let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
+                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi), x);
+                for ymod in -1..2 {
+                    let yi = _mm_add_epi32(yr, _mm_set1_epi32(ymod));
+                    for zmod in -1..2 {
+                        let zi = _mm_add_epi32(zr, _mm_set1_epi32(zmod));
+                        let hi = M128iArray {
+                            simd: _mm_and_si128(
+                                hash_3d(_mm_set1_epi32(1337), xi, yi, zi),
+                                _mm_set1_epi32(0xff),
+                            ),
+                        };
+                        let cellx = M128Array {
+                            array: [
+                                CELL_3D_X[hi.array[0] as usize],
+                                CELL_3D_X[hi.array[1] as usize],
+                                CELL_3D_X[hi.array[2] as usize],
+                                CELL_3D_X[hi.array[3] as usize],
+                            ],
+                        };
+                        let celly = M128Array {
+                            array: [
+                                CELL_3D_Y[hi.array[0] as usize],
+                                CELL_3D_Y[hi.array[1] as usize],
+                                CELL_3D_Y[hi.array[2] as usize],
+                                CELL_3D_Y[hi.array[3] as usize],
+                            ],
+                        };
+                        let cellz = M128Array {
+                            array: [
+                                CELL_3D_Z[hi.array[0] as usize],
+                                CELL_3D_Z[hi.array[1] as usize],
+                                CELL_3D_Z[hi.array[2] as usize],
+                                CELL_3D_Z[hi.array[3] as usize],
+                            ],
+                        };
+                        let vx = _mm_add_ps(xisubx, _mm_mul_ps(cellx.simd, jitter));
+
+                        let vy = _mm_add_ps(
+                            _mm_sub_ps(_mm_cvtepi32_ps(yi), y),
+                            _mm_mul_ps(celly.simd, jitter),
+                        );
+
+                        let vz = _mm_add_ps(
+                            _mm_sub_ps(_mm_cvtepi32_ps(zi), z),
+                            _mm_mul_ps(cellz.simd, jitter),
+                        );
+                        let new_dist =
+                            _mm_add_ps(_mm_add_ps(_mm_abs_ps(vx), _mm_abs_ps(vy)), _mm_abs_ps(vz));
+                        let cond = _mm_cmplt_ps(new_dist, distance);
+                        distance = _mm_blendv_ps(distance, new_dist, cond);
+                        xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
+                        yc = blendvi_sse2(yc, yi, _mm_castps_si128(cond));
+                        zc = blendvi_sse2(zc, zi, _mm_castps_si128(cond));
+                    }
+                }
+            }
+        }
+        CellDistanceFunction::Natural => {
+            for xmod in -1..2 {
+                let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
+                let xisubx = _mm_sub_ps(_mm_cvtepi32_ps(xi), x);
+                for ymod in -1..2 {
+                    let yi = _mm_add_epi32(yr, _mm_set1_epi32(ymod));
+                    for zmod in -1..2 {
+                        let zi = _mm_add_epi32(zr, _mm_set1_epi32(zmod));
+                        let hi = M128iArray {
+                            simd: _mm_and_si128(
+                                hash_3d(_mm_set1_epi32(1337), xi, yi, zi),
+                                _mm_set1_epi32(0xff),
+                            ),
+                        };
+                        let cellx = M128Array {
+                            array: [
+                                CELL_3D_X[hi.array[0] as usize],
+                                CELL_3D_X[hi.array[1] as usize],
+                                CELL_3D_X[hi.array[2] as usize],
+                                CELL_3D_X[hi.array[3] as usize],
+                            ],
+                        };
+                        let celly = M128Array {
+                            array: [
+                                CELL_3D_Y[hi.array[0] as usize],
+                                CELL_3D_Y[hi.array[1] as usize],
+                                CELL_3D_Y[hi.array[2] as usize],
+                                CELL_3D_Y[hi.array[3] as usize],
+                            ],
+                        };
+                        let cellz = M128Array {
+                            array: [
+                                CELL_3D_Z[hi.array[0] as usize],
+                                CELL_3D_Z[hi.array[1] as usize],
+                                CELL_3D_Z[hi.array[2] as usize],
+                                CELL_3D_Z[hi.array[3] as usize],
+                            ],
+                        };
+                        let vx = _mm_add_ps(xisubx, _mm_mul_ps(cellx.simd, jitter));
+
+                        let vy = _mm_add_ps(
+                            _mm_sub_ps(_mm_cvtepi32_ps(yi), y),
+                            _mm_mul_ps(celly.simd, jitter),
+                        );
+
+                        let vz = _mm_add_ps(
+                            _mm_sub_ps(_mm_cvtepi32_ps(zi), z),
+                            _mm_mul_ps(cellz.simd, jitter),
+                        );
+                        let new_dist = _mm_add_ps(
+                            _mm_add_ps(_mm_abs_ps(vz), _mm_add_ps(_mm_abs_ps(vx), _mm_abs_ps(vy))),
+                            _mm_add_ps(
+                                _mm_add_ps(_mm_mul_ps(vz, vz), _mm_mul_ps(vx, vx)),
+                                _mm_mul_ps(vy, vy),
+                            ),
+                        );
+                        let cond = _mm_cmplt_ps(new_dist, distance);
+                        distance = _mm_blendv_ps(distance, new_dist, cond);
+                        xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
+                        yc = blendvi_sse2(yc, yi, _mm_castps_si128(cond));
+                        zc = blendvi_sse2(zc, zi, _mm_castps_si128(cond));
+                    }
+                }
+            }
+        }
+    }
+    match return_type {
+        CellReturnType::Distance => distance,
+        CellReturnType::CellValue => val_coord_3d(_mm_set1_epi32(1337), xc, yc, zc),
+    }
+}
 #[target_feature(enable = "sse4.1")]
 unsafe fn grad1_simd(hash: __m128i, x: __m128) -> __m128 {
     let h = _mm_and_si128(hash, _mm_set1_epi32(15));
@@ -378,9 +614,7 @@ unsafe fn get_1d_noise_helper(x: __m128, noise_type: NoiseType) -> M128Array {
             ),
             NoiseType::Normal { freq } => simplex_1d(_mm_mul_ps(x, _mm_set1_ps(freq))),
 
-            NoiseType::Cellular {
-                ..
-            } => panic!("There is no 1d cell noise"),
+            NoiseType::Cellular { .. } => panic!("There is no 1d cell noise"),
         },
     }
 }
@@ -1357,8 +1591,18 @@ unsafe fn get_3d_noise_helper(x: __m128, y: __m128, z: __m128, noise_type: Noise
                 _mm_mul_ps(z, _mm_set1_ps(freq)),
             ),
             NoiseType::Cellular {
-                ..
-            } => panic!("not yet implemented"),
+                freq,
+                distance_function,
+                return_type,
+                jitter,
+            } => cellular_3d(
+                _mm_mul_ps(x, _mm_set1_ps(freq)),
+                _mm_mul_ps(y, _mm_set1_ps(freq)),
+                _mm_mul_ps(z, _mm_set1_ps(freq)),
+                distance_function,
+                return_type,
+                _mm_set1_ps(jitter),
+            ),
         },
     }
 }
@@ -2099,9 +2343,7 @@ unsafe fn get_4d_noise_helper(
                 _mm_mul_ps(z, _mm_set1_ps(freq)),
                 _mm_mul_ps(w, _mm_set1_ps(freq)),
             ),
-            NoiseType::Cellular {
-                ..
-            } => panic!("not yet implemented"),
+            NoiseType::Cellular { .. } => panic!("not yet implemented"),
         },
     }
 }
