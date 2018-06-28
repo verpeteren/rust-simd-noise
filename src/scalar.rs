@@ -39,44 +39,45 @@ pub fn cellular_1d(
     match distance_function {
         CellDistanceFunction::Euclidean => {
             for xi in xr - 1..xr + 2 {
-                    let hi = hash_1d(1337, xi) & 0xff;
-                    let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
-                    let new_dist = vx * vx;
-                    if new_dist < distance {
-                        distance = new_dist;
-                        xc = xi;
-                    }
+                let hi = hash_1d(1337, xi) & 0xff;
+                let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
+                let new_dist = vx * vx;
+                if new_dist < distance {
+                    distance = new_dist;
+                    xc = xi;
                 }
+            }
         }
         CellDistanceFunction::Manhattan => {
             for xi in xr - 1..xr + 2 {
-                    let hi = hash_1d(1337, xi) & 0xff;
-                    let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
-                    let new_dist = vx.abs();
-                    if new_dist < distance {
-                        distance = new_dist;
-                        xc = xi;
-                    }
+                let hi = hash_1d(1337, xi) & 0xff;
+                let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
+                let new_dist = vx.abs();
+                if new_dist < distance {
+                    distance = new_dist;
+                    xc = xi;
                 }
+            }
         }
         CellDistanceFunction::Natural => {
             for xi in xr - 1..xr + 2 {
-                    let hi = hash_1d(1337, xi) & 0xff;
-                    let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
-                    let new_dist = vx.abs() +  (vx * vx );
-                    if new_dist < distance {
-                        distance = new_dist;
-                        xc = xi;
-                    }
+                let hi = hash_1d(1337, xi) & 0xff;
+                let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
+                let new_dist = vx.abs() + (vx * vx);
+                if new_dist < distance {
+                    distance = new_dist;
+                    xc = xi;
                 }
             }
+        }
     }
 
     match return_type {
         CellReturnType::Distance => distance,
-        CellReturnType::CellValue => val_coord_1d(1337, xc)
+        CellReturnType::CellValue => val_coord_1d(1337, xc),
     }
-}fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
+}
+fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
     let mut hash = seed ^ (X_PRIME * x);
     hash ^= Y_PRIME * y;
 
@@ -259,7 +260,113 @@ pub fn cellular_3d(
         CellReturnType::CellValue => val_coord_3d(1337, xc, yc, zc),
     }
 }
+fn hash_4d(seed: i32, x: i32, y: i32, z: i32,w:i32) -> i32 {
+    let mut hash = seed ^ (X_PRIME * x);
+    hash ^= Y_PRIME * y;
+    hash ^= Z_PRIME * z;
+    hash ^= W_PRIME * w;
+    hash = hash.wrapping_mul(hash.wrapping_mul(hash.wrapping_mul(60493)));
+    (hash >> 13) ^ hash
+}
 
+fn val_coord_4d(seed: i32, x: i32, y: i32, z: i32,w:i32) -> f32 {
+    let mut n = seed ^ (X_PRIME * x);
+    n ^= Y_PRIME * y;
+    n ^= Z_PRIME * z;
+    n ^= W_PRIME * w;
+    return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
+}
+
+pub fn cellular_4d(
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: f32,
+) -> f32 {
+    let xr = x.round() as i32;
+    let yr = y.round() as i32;
+    let zr = z.round() as i32;
+    let wr = w.round() as i32;
+    let mut distance = f32::MAX;
+    let mut xc = 0;
+    let mut yc = 0;
+    let mut zc = 0;
+    let mut wz = 0;
+    match distance_function {
+        CellDistanceFunction::Euclidean => {
+            for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    for zi in zr - 1..zr + 2 {
+                        for wi in wr - 1 .. wr + 2 {
+                        let hi = hash_4d(1337, xi, yi, zi,wi) & 0xff;
+                        let vx = xisubx + CELL_3D_X[hi as usize] as f32 * jitter;
+                        let vy = yi as f32 - y + CELL_4D_Y[hi as usize] as f32 * jitter;
+                        let vz = zi as f32 - z + CELL_4D_Z[hi as usize] as f32 * jitter;
+                        let vw = wi as f32 - w + CELL_4D_W[hi as usize] as f32 * jitter;
+                        let new_dist = vx * vx + vy * vy + vz * vz;
+                        if new_dist < distance {
+                            distance = new_dist;
+                            xc = xi;
+                            yc = yi;
+                            zc = zi;
+                        }
+                        }
+                    }
+                }
+            }
+        }
+        CellDistanceFunction::Manhattan => {
+            for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    for zi in zr - 1..zr + 2 {
+                        let hi = hash_3d(1337, xi, yi, zi) & 0xff;
+                        let vx = xisubx + CELL_3D_X[hi as usize] as f32 * jitter;
+                        let vy = yi as f32 - y + CELL_3D_Y[hi as usize] as f32 * jitter;
+                        let vz = zi as f32 - z + CELL_3D_Z[hi as usize] as f32 * jitter;
+                        let new_dist = vx.abs() + vy.abs() + vz.abs();
+                        if new_dist < distance {
+                            distance = new_dist;
+                            xc = xi;
+                            yc = yi;
+                            zc = zi;
+                        }
+                    }
+                }
+            }
+        }
+        CellDistanceFunction::Natural => {
+            for xi in xr - 1..xr + 2 {
+                let xisubx = xi as f32 - x;
+                for yi in yr - 1..yr + 2 {
+                    for zi in zr - 1..zr + 2 {
+                        let hi = hash_3d(1337, xi, yi, zi) & 0xff;
+                        let vx = xisubx + CELL_3D_X[hi as usize] as f32 * jitter;
+                        let vy = yi as f32 - y + CELL_3D_Y[hi as usize] as f32 * jitter;
+                        let vz = zi as f32 - z + CELL_3D_Z[hi as usize] as f32 * jitter;
+                        let new_dist =
+                            (vx.abs() + vy.abs() + vz.abs()) + (vx * vx + vy * vy + vz * vz);
+                        if new_dist < distance {
+                            distance = new_dist;
+                            xc = xi;
+                            yc = yi;
+                            zc = zi;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    match return_type {
+        CellReturnType::Distance => distance,
+        CellReturnType::CellValue => val_coord_3d(1337, xc, yc, zc),
+    }
+}
 fn grad1(hash: i32, x: f32) -> f32 {
     let h = hash & 15;
     let grad = if h & 8 != 0 {
@@ -349,7 +456,12 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
             octaves,
         } => ridge_1d(x, freq, lacunarity, gain, octaves),
         NoiseType::Normal { freq } => simplex_1d(x * freq),
-        NoiseType::Cellular { freq,distance_function,return_type,jitter } => cellular_1d(x*freq,distance_function,return_type,jitter),
+        NoiseType::Cellular {
+            freq,
+            distance_function,
+            return_type,
+            jitter,
+        } => cellular_1d(x * freq, distance_function, return_type, jitter),
     }
 }
 
@@ -358,7 +470,7 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
+ fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 

@@ -90,87 +90,76 @@ pub unsafe fn cellular_1d(
         CellDistanceFunction::Euclidean => {
             for xmod in -1..2 {
                 let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
-                    let hi = M128iArray {
-                        simd: _mm_and_si128(
-                            hash_1d(_mm_set1_epi32(1337), xi),
-                            _mm_set1_epi32(0xff),
-                        ),
-                    };
-                    let cellx = M128Array {
-                        array: [
-                            CELL_2D_X[hi.array[0] as usize],
-                            CELL_2D_X[hi.array[1] as usize],
-                            CELL_2D_X[hi.array[2] as usize],
-                            CELL_2D_X[hi.array[3] as usize],
-                        ],
-                    };
-                    let vx = _mm_add_ps(
-                        _mm_sub_ps(_mm_cvtepi32_ps(xi), x),
-                        _mm_mul_ps(cellx.simd, jitter),
-                    );
- 
-                    let new_dist = _mm_mul_ps(vx, vx);
-                    let cond = _mm_cmplt_ps(new_dist, distance);
-                    distance = blendv_sse2(distance, new_dist, cond);
-                    xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
-                }
+                let hi = M128iArray {
+                    simd: _mm_and_si128(hash_1d(_mm_set1_epi32(1337), xi), _mm_set1_epi32(0xff)),
+                };
+                let cellx = M128Array {
+                    array: [
+                        CELL_2D_X[hi.array[0] as usize],
+                        CELL_2D_X[hi.array[1] as usize],
+                        CELL_2D_X[hi.array[2] as usize],
+                        CELL_2D_X[hi.array[3] as usize],
+                    ],
+                };
+                let vx = _mm_add_ps(
+                    _mm_sub_ps(_mm_cvtepi32_ps(xi), x),
+                    _mm_mul_ps(cellx.simd, jitter),
+                );
+
+                let new_dist = _mm_mul_ps(vx, vx);
+                let cond = _mm_cmplt_ps(new_dist, distance);
+                distance = blendv_sse2(distance, new_dist, cond);
+                xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
+            }
         }
         CellDistanceFunction::Manhattan => {
             for xmod in -1..2 {
                 let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
-                    let hi = M128iArray {
-                        simd: _mm_and_si128(
-                            hash_1d(_mm_set1_epi32(1337), xi),
-                            _mm_set1_epi32(0xff),
-                        ),
-                    };
-                    let cellx = M128Array {
-                        array: [
-                            CELL_2D_X[hi.array[0] as usize],
-                            CELL_2D_X[hi.array[1] as usize],
-                            CELL_2D_X[hi.array[2] as usize],
-                            CELL_2D_X[hi.array[3] as usize],
-                        ],
-                    };
-                    let vx = _mm_add_ps(
-                        _mm_sub_ps(_mm_cvtepi32_ps(xi), x),
-                        _mm_mul_ps(cellx.simd, jitter),
-                    );
-                     let new_dist = _mm_abs_ps(vx);
-                    let cond = _mm_cmplt_ps(new_dist, distance);
-                    distance = blendv_sse2(distance, new_dist, cond);
-                    xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
-                }
+                let hi = M128iArray {
+                    simd: _mm_and_si128(hash_1d(_mm_set1_epi32(1337), xi), _mm_set1_epi32(0xff)),
+                };
+                let cellx = M128Array {
+                    array: [
+                        CELL_2D_X[hi.array[0] as usize],
+                        CELL_2D_X[hi.array[1] as usize],
+                        CELL_2D_X[hi.array[2] as usize],
+                        CELL_2D_X[hi.array[3] as usize],
+                    ],
+                };
+                let vx = _mm_add_ps(
+                    _mm_sub_ps(_mm_cvtepi32_ps(xi), x),
+                    _mm_mul_ps(cellx.simd, jitter),
+                );
+                let new_dist = _mm_abs_ps(vx);
+                let cond = _mm_cmplt_ps(new_dist, distance);
+                distance = blendv_sse2(distance, new_dist, cond);
+                xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
+            }
         }
         CellDistanceFunction::Natural => {
             for xmod in -1..2 {
                 let xi = _mm_add_epi32(xr, _mm_set1_epi32(xmod));
-                    let hi = M128iArray {
-                        simd: _mm_and_si128(
-                            hash_1d(_mm_set1_epi32(1337), xi),
-                            _mm_set1_epi32(0xff),
-                        ),
-                    };
-                    let cellx = M128Array {
-                        array: [
-                            CELL_2D_X[hi.array[0] as usize],
-                            CELL_2D_X[hi.array[1] as usize],
-                            CELL_2D_X[hi.array[2] as usize],
-                            CELL_2D_X[hi.array[3] as usize],
-                        ],
-                    };
-                    let vx = _mm_add_ps(
-                        _mm_sub_ps(_mm_cvtepi32_ps(xi), x),
-                        _mm_mul_ps(cellx.simd, jitter),
-                    );
-                     let new_dist = _mm_add_ps(
-                        _mm_abs_ps(vx),
-                        _mm_mul_ps(vx, vx));
-                    let cond = _mm_cmplt_ps(new_dist, distance);
-                    distance = blendv_sse2(distance, new_dist, cond);
-                    xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
-                }
+                let hi = M128iArray {
+                    simd: _mm_and_si128(hash_1d(_mm_set1_epi32(1337), xi), _mm_set1_epi32(0xff)),
+                };
+                let cellx = M128Array {
+                    array: [
+                        CELL_2D_X[hi.array[0] as usize],
+                        CELL_2D_X[hi.array[1] as usize],
+                        CELL_2D_X[hi.array[2] as usize],
+                        CELL_2D_X[hi.array[3] as usize],
+                    ],
+                };
+                let vx = _mm_add_ps(
+                    _mm_sub_ps(_mm_cvtepi32_ps(xi), x),
+                    _mm_mul_ps(cellx.simd, jitter),
+                );
+                let new_dist = _mm_add_ps(_mm_abs_ps(vx), _mm_mul_ps(vx, vx));
+                let cond = _mm_cmplt_ps(new_dist, distance);
+                distance = blendv_sse2(distance, new_dist, cond);
+                xc = blendvi_sse2(xc, xi, _mm_castps_si128(cond));
             }
+        }
     }
     match return_type {
         CellReturnType::Distance => distance,
@@ -758,7 +747,17 @@ unsafe fn get_1d_noise_helper(x: __m128, noise_type: NoiseType) -> M128Array {
                 octaves,
             ),
             NoiseType::Normal { freq } => simplex_1d(_mm_mul_ps(x, _mm_set1_ps(freq))),
-            NoiseType::Cellular { .. } => panic!("There is no 1d cell noise"),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                return_type,
+                jitter,
+            } => cellular_1d(
+                _mm_mul_ps(x, _mm_set1_ps(freq)),
+                distance_function,
+                return_type,
+                _mm_set1_ps(jitter),
+            ),
         },
     }
 }

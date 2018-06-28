@@ -91,6 +91,103 @@ const POINT_FIVE: __m256 = unsafe { M256Array { array: [0.5; 8] }.simd };
 pub unsafe fn blendvi_avx2(a: __m256i, b: __m256i, mask: __m256i) -> __m256i {
     _mm256_or_si256(_mm256_andnot_si256(mask, a), _mm256_and_si256(mask, b))
 }
+#[target_feature(enable = "avx2")]
+unsafe fn hash_1d(seed: __m256i, x: __m256i) -> __m256i {
+    let mut hash = _mm256_xor_si256(seed, _mm256_mullo_epi32(X_PRIME, x));
+    hash = _mm256_mullo_epi32(
+        hash,
+        _mm256_mullo_epi32(hash, _mm256_mullo_epi32(hash, _mm256_set1_epi32(60493))),
+    );
+    _mm256_xor_si256(_mm256_srai_epi32(hash, 13), hash)
+}
+#[target_feature(enable = "avx2")]
+unsafe fn val_coord_1d(seed: __m256i, x: __m256i) -> __m256 {
+    let mut hash = _mm256_xor_si256(seed, _mm256_mullo_epi32(X_PRIME, x));
+    hash = _mm256_mullo_epi32(
+        hash,
+        _mm256_mullo_epi32(hash, _mm256_mullo_epi32(hash, _mm256_set1_epi32(60493))),
+    );
+    _mm256_div_ps(_mm256_cvtepi32_ps(hash), CELL_DIVISOR)
+}
+#[target_feature(enable = "avx2")]
+pub unsafe fn cellular_1d(
+    x: __m256,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: __m256,
+) -> __m256 {
+    let xr = _mm256_cvtps_epi32(_mm256_round_ps(
+        x,
+        _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+    ));
+    let mut distance = _mm256_set1_ps(f32::MAX);
+    let mut xc = _mm256_set1_epi32(0);
+    match distance_function {
+        CellDistanceFunction::Euclidean => {
+            for xmod in -1..2 {
+                let xi = _mm256_add_epi32(xr, _mm256_set1_epi32(xmod));
+                let hi = _mm256_and_si256(
+                    hash_1d(_mm256_set1_epi32(1337), xi),
+                    _mm256_set1_epi32(0xff),
+                );
+                let cellx = _mm256_i32gather_ps(&CELL_2D_X as *const f32, hi, 4);
+
+                let vx = _mm256_add_ps(
+                    _mm256_sub_ps(_mm256_cvtepi32_ps(xi), x),
+                    _mm256_mul_ps(cellx, jitter),
+                );
+                let new_dist = _mm256_mul_ps(vx, vx);
+                let cond = _mm256_cmp_ps(new_dist, distance, _CMP_LT_OQ);
+                distance = _mm256_blendv_ps(distance, new_dist, cond);
+                xc = blendvi_avx2(xc, xi, _mm256_castps_si256(cond));
+            }
+        }
+        CellDistanceFunction::Manhattan => {
+            for xmod in -1..2 {
+                let xi = _mm256_add_epi32(xr, _mm256_set1_epi32(xmod));
+                let hi = _mm256_and_si256(
+                    hash_1d(_mm256_set1_epi32(1337), xi),
+                    _mm256_set1_epi32(0xff),
+                );
+
+                let cellx = _mm256_i32gather_ps(&CELL_2D_X as *const f32, hi, 4);
+
+                let vx = _mm256_add_ps(
+                    _mm256_sub_ps(_mm256_cvtepi32_ps(xi), x),
+                    _mm256_mul_ps(cellx, jitter),
+                );
+                let new_dist = _mm256_abs_ps(vx);
+                let cond = _mm256_cmp_ps(new_dist, distance, _CMP_LT_OQ);
+                distance = _mm256_blendv_ps(distance, new_dist, cond);
+                xc = blendvi_avx2(xc, xi, _mm256_castps_si256(cond));
+            }
+        }
+        CellDistanceFunction::Natural => {
+            for xmod in -1..2 {
+                let xi = _mm256_add_epi32(xr, _mm256_set1_epi32(xmod));
+                let hi = _mm256_and_si256(
+                    hash_1d(_mm256_set1_epi32(1337), xi),
+                    _mm256_set1_epi32(0xff),
+                );
+                let cellx = _mm256_i32gather_ps(&CELL_2D_X as *const f32, hi, 4);
+
+                let vx = _mm256_add_ps(
+                    _mm256_sub_ps(_mm256_cvtepi32_ps(xi), x),
+                    _mm256_mul_ps(cellx, jitter),
+                );
+                let new_dist = _mm256_add_ps(_mm256_abs_ps(vx), _mm256_mul_ps(vx, vx));
+                let cond = _mm256_cmp_ps(new_dist, distance, _CMP_LT_OQ);
+                distance = _mm256_blendv_ps(distance, new_dist, cond);
+                xc = blendvi_avx2(xc, xi, _mm256_castps_si256(cond));
+            }
+        }
+    }
+
+    match return_type {
+        CellReturnType::Distance => distance,
+        CellReturnType::CellValue => val_coord_1d(_mm256_set1_epi32(1337), xc),
+    }
+}
 
 #[target_feature(enable = "avx2")]
 unsafe fn hash_2d(seed: __m256i, x: __m256i, y: __m256i) -> __m256i {
@@ -561,7 +658,17 @@ unsafe fn get_1d_noise_helper(x: __m256, noise_type: NoiseType) -> M256Array {
                 octaves,
             ),
             NoiseType::Normal { freq } => simplex_1d(_mm256_mul_ps(x, _mm256_set1_ps(freq))),
-            NoiseType::Cellular { .. } => panic!("There is no 1d cell noise"),
+            NoiseType::Cellular {
+                freq,
+                distance_function,
+                return_type,
+                jitter,
+            } => cellular_1d(
+                _mm256_mul_ps(x, _mm256_set1_ps(freq)),
+                distance_function,
+                return_type,
+                _mm256_set1_ps(jitter),
+            ),
         },
     }
 }
