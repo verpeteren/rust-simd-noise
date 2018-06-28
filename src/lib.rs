@@ -122,11 +122,12 @@
 //!     
 //! }
 //! ```
-
+extern crate simdeez;
 pub mod avx2;
 pub mod scalar;
 mod shared;
 mod shared_sse;
+pub mod simplex;
 pub mod sse2;
 pub mod sse41;
 
@@ -201,7 +202,10 @@ pub enum NoiseType {
         freq: f32,
     },
 }
-
+#[target_feature(enable = "avx2")]
+pub unsafe fn testnew(startx: f32, w: usize, nt: NoiseType, min:f32,max:f32) -> Vec<f32> {
+    simplex::get_1d_scaled_noise::<simdeez::avx2::Avx2>(startx, w, nt,min,max)
+}
 /// Gets a width X height sized block of 2d noise, unscaled,
 /// using runtime CPU feature detection to pick the fastest method
 /// between scalar, SSE2, SSE41, and AVX2
