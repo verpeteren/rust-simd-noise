@@ -260,22 +260,6 @@ pub fn cellular_3d(
         CellReturnType::CellValue => val_coord_3d(1337, xc, yc, zc),
     }
 }
-fn hash_4d(seed: i32, x: i32, y: i32, z: i32, w: i32) -> i32 {
-    let mut hash = seed ^ (X_PRIME * x);
-    hash ^= Y_PRIME * y;
-    hash ^= Z_PRIME * z;
-    hash ^= W_PRIME * w;
-    hash = hash.wrapping_mul(hash.wrapping_mul(hash.wrapping_mul(60493)));
-    (hash >> 13) ^ hash
-}
-
-fn val_coord_4d(seed: i32, x: i32, y: i32, z: i32, w: i32) -> f32 {
-    let mut n = seed ^ (X_PRIME * x);
-    n ^= Y_PRIME * y;
-    n ^= Z_PRIME * z;
-    n ^= W_PRIME * w;
-    return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
-}
 
 fn grad1(hash: i32, x: f32) -> f32 {
     let h = hash & 15;
@@ -747,9 +731,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
         } else {
             let gi3 = *PERM.get_unchecked(
                 (ii + 1
-                    + *PERM
-                        .get_unchecked((jj + 1 + *PERM.get_unchecked((kk + 1) as usize)) as usize))
-                    as usize,
+                    + *PERM.get_unchecked(
+                        (jj + 1 + *PERM.get_unchecked((kk + 1) as usize)) as usize,
+                    )) as usize,
             );
 
             t3 * t3 * t3 * t3 * grad3(gi3, x3, y3, z3)

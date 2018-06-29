@@ -2,7 +2,6 @@ extern crate simdeez;
 use self::simdeez::*;
 use super::*;
 use shared::*;
-use shared_sse::*;
 use std::f32;
 
 pub const X_PRIME: i32 = 1619;

@@ -1,3 +1,4 @@
+use simdeez::*;
 pub const PERM: [i32; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
     142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219,
@@ -125,3 +126,32 @@ pub const CELL_3D_Z: [f32;256]  =
 	-0.05843650473, -0.3674922622, -0.5256624401, 0.7861039337, 0.3287714416, 0.5910593099, -0.3896960134, 0.6864605361, 0.7164918431, -0.290014277, -0.6796169617, 0.1632515592, 0.04485347486, 0.8320545697, 0.01339408056, -0.2874989857,
 	0.615630723, 0.3430367014, 0.8193658136, -0.5829600957, 0.07911697781, 0.7854296063, -0.4107442306, 0.4766964066, -0.9045999527, -0.1673856787, 0.2828077348, -0.5902737632, -0.321506229, -0.5224513133, -0.4090169985, -0.3599685311,
 ];
+
+#[inline(always)]
+pub unsafe fn scale_noise<S: Simd>(
+    scale_min: f32,
+    scale_max: f32,
+    min: f32,
+    max: f32,
+    data: &mut Vec<f32>,
+) {
+    let scale_range = scale_max - scale_min;
+    let range = max - min;
+    let multiplier = scale_range / range;
+    let offset = scale_min - min * multiplier;
+    let vector_width = S::WIDTH_BYTES / 4;
+    let mut i = 0;
+    while i <= data.len() - vector_width {
+        let value = S::add_ps(
+            S::mul_ps(S::set1_ps(multiplier), S::loadu_ps(&data[i])),
+            S::set1_ps(offset),
+        );
+        S::storeu_ps(data.get_unchecked_mut(i), value);
+        i += vector_width;
+    }
+    i = data.len() - (data.len() % vector_width);
+    while i < data.len() {
+        *data.get_unchecked_mut(i) = data.get_unchecked(i) * multiplier + offset;
+        i += 1;
+    }
+}
