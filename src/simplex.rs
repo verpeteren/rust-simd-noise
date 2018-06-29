@@ -5,6 +5,14 @@ use shared::*;
 use shared_sse::*;
 use std::f32;
 
+const F2: f32 = 0.36602540378;
+const F3: f32 = 1.0 / 3.0;
+const F4: f32 = 0.309016994;
+const G2: f32 = 0.2113248654;
+const G22: f32 = G2 * 2.0;
+const G3: f32 = 1.0 / 6.0;
+const G4: f32 = 0.138196601;
+
 #[inline(always)]
 pub unsafe fn grad1_simd<S: Simd>(hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
     let h = S::and_si(hash, S::set1_epi32(15));
@@ -221,20 +229,99 @@ pub unsafe fn get_1d_noise<S: Simd>(
 }
 
 #[inline(always)]
-pub unsafe fn get_1d_scaled_noise<S: Simd>(
-    start_x: f32,
-    width: usize,
-    noise_type: NoiseType,
-    scale_min: f32,
-    scale_max: f32,
-) -> Vec<f32> {
-    let (mut noise, min, max) = get_1d_noise::<S>(start_x, width, noise_type);
-    scale_array::<S>(scale_min, scale_max, min, max, &mut noise);
-    noise
+unsafe fn grad2<S: Simd>(hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+    let h = S::and_si(hash, S::set1_epi32(7));
+    let mask = S::castsi_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
+    let u = S::blendv_ps(y, x, mask);
+    let v = S::mul_ps(S::set1_ps(2.0), S::blendv_ps(x, y, mask));
+
+    let h_and_1 = S::castsi_ps(S::cmpeq_epi32(
+        S::setzero_si(),
+        S::and_si(h, S::set1_epi32(1)),
+    ));
+    let h_and_2 = S::castsi_ps(S::cmpeq_epi32(
+        S::setzero_si(),
+        S::and_si(h, S::set1_epi32(2)),
+    ));
+
+    S::add_ps(
+        S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
+        S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
+    )
 }
 
 #[inline(always)]
-pub unsafe fn scale_array<S: Simd>(
+pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+    let s = S::mul_ps(S::set1_ps(F2), S::add_ps(x, y));
+    let ips = S::floor_ps(S::add_ps(x, s));
+    let jps = S::floor_ps(S::add_ps(y, s));
+
+    let i = S::cvtps_epi32(ips);
+    let j = S::cvtps_epi32(jps);
+
+    let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::set1_ps(G2));
+
+    let x0 = S::sub_ps(x, S::sub_ps(ips, t));
+    let y0 = S::sub_ps(y, S::sub_ps(jps, t));
+
+    let i1 = S::castps_si(S::cmpge_ps(x0, y0));
+
+    let j1 = S::castps_si(S::cmpgt_ps(y0, x0));
+
+    let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G2));
+    let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G2));
+    let x2 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(G22));
+    let y2 = S::add_ps(S::add_ps(y0, S::set1_ps(-1.0)), S::set1_ps(G22));
+
+    let ii = S::and_si(i, S::set1_epi32(0xff));
+    let jj = S::and_si(j, S::set1_epi32(0xff));
+
+    let gi0 = S::i32gather_epi32(&PERM, S::add_epi32(ii, S::i32gather_epi32(&PERM, jj)));
+
+    let gi1 = S::i32gather_epi32(
+        &PERM,
+        S::add_epi32(
+            S::sub_epi32(ii, i1),
+            S::i32gather_epi32(&PERM, S::sub_epi32(jj, j1)),
+        ),
+    );
+
+    let gi2 = S::i32gather_epi32(
+        &PERM,
+        S::add_epi32(
+            S::sub_epi32(ii, S::set1_epi32(-1)),
+            S::i32gather_epi32(&PERM, S::sub_epi32(jj, S::set1_epi32(-1))),
+        ),
+    );
+
+    // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
+    let t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5)));
+    let t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5)));
+    let t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::set1_ps(0.5)));
+
+    let mut t0q = S::mul_ps(t0, t0);
+    t0q = S::mul_ps(t0q, t0q);
+    let mut t1q = S::mul_ps(t1, t1);
+    t1q = S::mul_ps(t1q, t1q);
+    let mut t2q = S::mul_ps(t2, t2);
+    t2q = S::mul_ps(t2q, t2q);
+
+    let mut n0 = S::mul_ps(t0q, grad2::<S>(gi0, x0, y0));
+    let mut n1 = S::mul_ps(t1q, grad2::<S>(gi1, x1, y1));
+    let mut n2 = S::mul_ps(t2q, grad2::<S>(gi2, x2, y2));
+
+    let mut cond = S::cmplt_ps(t0, S::setzero_ps());
+    n0 = S::andnot_ps(cond, n0);
+    cond = S::cmplt_ps(t1, S::setzero_ps());
+    n1 = S::andnot_ps(cond, n1);
+    cond = S::cmplt_ps(t2, S::setzero_ps());
+    n2 = S::andnot_ps(cond, n2);
+
+    S::add_ps(n0, S::add_ps(n1, n2))
+}
+
+#[inline(always)]
+pub unsafe fn scale_noise<S: Simd>(
     scale_min: f32,
     scale_max: f32,
     min: f32,
