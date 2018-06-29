@@ -47,7 +47,7 @@ fn d3(c: &mut Criterion) {
 }
 
 fn d2(c: &mut Criterion) {
-    let scalar = Fun::new("Scalar 2D", |b, _i| {
+/*    let scalar = Fun::new("Scalar 2D", |b, _i| {
         b.iter(|| scalar::get_2d_noise(0.0, 1024, 0.0, 1024, NOISE_TYPE))
     });
     let sse2 = Fun::new("SSE2 2D", |b, _i| {
@@ -55,16 +55,19 @@ fn d2(c: &mut Criterion) {
     });
     let sse41 = Fun::new("SSE41 2D", |b, _i| {
         b.iter(|| unsafe { sse41::get_2d_noise(0.0, 1024, 0.0, 1024, NOISE_TYPE) })
-    });
+    });*/
     let avx2 = Fun::new("AVX2 2D", |b, _i| {
-        b.iter(|| unsafe { avx2::get_2d_noise(0.0, 1024, 0.0, 1024, NOISE_TYPE) })
+        b.iter(|| unsafe { avx2::get_2d_noise(0.0, 512, 0.0, 512, NOISE_TYPE) })
     });
-    let functions = vec![scalar, sse2, sse41, avx2];
+   let avx2new = Fun::new("AVX2 1D new", |b, _i| {
+        b.iter(|| unsafe { testsimd(0.0, 512,0.0,512, NOISE_TYPE) })
+    });
+      let functions = vec![avx2,avx2new];
     c.bench_functions("2D", functions, 0);
 }
 #[target_feature(enable = "avx2")]
-pub unsafe fn testsimd(startx: f32, w: usize, nt: NoiseType) -> (Vec<f32>,f32,f32) {
-    simplex::get_1d_noise::<simdeez::avx2::Avx2>(startx, w, nt)
+pub unsafe fn testsimd(startx: f32, w: usize,starty:f32,h:usize, nt: NoiseType) -> (Vec<f32>,f32,f32) {
+    simplex::get_2d_noise::<simdeez::avx2::Avx2>(startx, w,starty,h, nt)
 }
 
 
@@ -81,10 +84,7 @@ fn d1(c: &mut Criterion) {
     let avx2 = Fun::new("AVX2 1D", |b, _i| {
         b.iter(|| unsafe { avx2::get_1d_noise(0.0, 4096, NOISE_TYPE) })
     });
-    let avx2new = Fun::new("AVX2 1D new", |b, _i| {
-        b.iter(|| unsafe { testsimd(0.0, 4096, NOISE_TYPE) })
-    });
-    let functions = vec![scalar, sse2, sse41, avx2, avx2new];
+   let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("1D", functions, 0);
 }
 const CELL_NOISE_TYPE: NoiseType = NoiseType::Cellular {
