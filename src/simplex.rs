@@ -319,6 +319,203 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32) -> S::Vf32 {
 
     S::add_ps(n0, S::add_ps(n1, n2))
 }
+/// Get a single value of 2d fractal brownian motion.
+#[inline(always)]
+pub unsafe fn fbm_2d<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    freq: S::Vf32,
+    lac: S::Vf32,
+    gain: S::Vf32,
+    octaves: u8,
+) -> S::Vf32 {
+    let mut xf = S::mul_ps(x, freq);
+    let mut yf = S::mul_ps(y, freq);
+    let mut result = simplex_2d::<S>(xf, yf);
+    let mut amp = S::set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = S::mul_ps(xf, lac);
+        yf = S::mul_ps(yf, lac);
+        amp = S::mul_ps(amp, gain);
+        result = S::fmadd_ps(simplex_2d::<S>(xf, yf), amp, result);
+    }
+
+    result
+}
+
+/// Get a single value of 2d ridge noise.
+#[inline(always)]
+pub unsafe fn ridge_2d<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    freq: S::Vf32,
+    lac: S::Vf32,
+    gain: S::Vf32,
+    octaves: u8,
+) -> S::Vf32 {
+    let mut xf = S::mul_ps(x, freq);
+    let mut yf = S::mul_ps(y, freq);
+    let mut result = S::sub_ps(S::set1_ps(1.0), S::abs_ps(simplex_2d::<S>(xf, yf)));
+    let mut amp = S::set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = S::mul_ps(xf, lac);
+        yf = S::mul_ps(yf, lac);
+        amp = S::mul_ps(amp, gain);
+        result = S::add_ps(
+            result,
+            S::fnmadd_ps(S::abs_ps(simplex_2d::<S>(xf, yf)), amp, S::set1_ps(1.0)),
+        );
+    }
+
+    result
+}
+/// Get a single value of 2d turbulence.
+#[inline(always)]
+pub unsafe fn turbulence_2d<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    freq: S::Vf32,
+    lac: S::Vf32,
+    gain: S::Vf32,
+    octaves: u8,
+) -> S::Vf32 {
+    let mut xf = S::mul_ps(x, freq);
+    let mut yf = S::mul_ps(y, freq);
+    let mut result = S::abs_ps(simplex_2d::<S>(xf, yf));
+    let mut amp = S::set1_ps(1.0);
+
+    for _ in 1..octaves {
+        xf = S::mul_ps(xf, lac);
+        yf = S::mul_ps(yf, lac);
+        amp = S::mul_ps(amp, gain);
+        result = S::add_ps(result, S::abs_ps(S::mul_ps(simplex_2d::<S>(xf, yf), amp)));
+    }
+
+    result
+}
+
+#[inline(always)]
+unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: NoiseType) -> S::Vf32 {
+    match noise_type {
+        NoiseType::Fbm {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => fbm_2d::<S>(
+            x,
+            y,
+            S::set1_ps(freq),
+            S::set1_ps(lacunarity),
+            S::set1_ps(gain),
+            octaves,
+        ),
+        NoiseType::Ridge {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => ridge_2d::<S>(
+            x,
+            y,
+            S::set1_ps(freq),
+            S::set1_ps(lacunarity),
+            S::set1_ps(gain),
+            octaves,
+        ),
+        NoiseType::Turbulence {
+            freq,
+            lacunarity,
+            gain,
+            octaves,
+        } => turbulence_2d::<S>(
+            x,
+            y,
+            S::set1_ps(freq),
+            S::set1_ps(lacunarity),
+            S::set1_ps(gain),
+            octaves,
+        ),
+        NoiseType::Normal { freq } => simplex_2d::<S>(
+            S::mul_ps(x, S::set1_ps(freq)),
+            S::mul_ps(y, S::set1_ps(freq)),
+        ),
+        NoiseType::Cellular {
+            freq,
+            distance_function,
+            return_type,
+            jitter,
+        } => panic!("ASD"),
+    }
+}
+
+/// Gets a width X height sized block of 2d noise, unscaled.
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+#[inline(always)]
+pub unsafe fn get_2d_noise<S: Simd>(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    let mut min_s = S::set1_ps(f32::MAX);
+    let mut max_s = S::set1_ps(f32::MIN);
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let mut result = Vec::with_capacity(width * height);
+    result.set_len(width * height);
+    let mut y = S::set1_ps(start_y);
+    let mut i = 0;
+    let vector_width = S::WIDTH_BYTES / 4;
+    let remainder = width % vector_width;
+    let mut x_arr = Vec::with_capacity(vector_width);
+    x_arr.set_len(vector_width);
+    for i in (0..vector_width).rev() {
+        x_arr[i] = start_x + i as f32;
+    }
+    for _ in 0..height {
+        let mut x = S::loadu_ps(&x_arr[0]);
+        for _ in 0..width / vector_width {
+            let f = get_2d_noise_helper::<S>(x, y, noise_type);
+            max_s = S::max_ps(max_s, f);
+            min_s = S::min_ps(min_s, f);
+            S::storeu_ps(result.get_unchecked_mut(i), f);
+            i += vector_width;
+            x = S::add_ps(x, S::set1_ps(vector_width as f32));
+        }
+        if remainder != 0 {
+            let f = get_2d_noise_helper::<S>(x, y, noise_type);
+            for j in 0..remainder {
+                let n = S::get_lane_ps(f, i);
+                *result.get_unchecked_mut(i) = n;
+                if n < min {
+                    min = n;
+                }
+                if n > max {
+                    max = n;
+                }
+                i += 1;
+            }
+        }
+        y = S::add_ps(y, S::set1_ps(1.0));
+    }
+    for i in 0..vector_width {
+        if S::get_lane_ps(min_s, i) < min {
+            min = S::get_lane_ps(min_s, i);
+        }
+        if S::get_lane_ps(max_s, i) > max {
+            max = S::get_lane_ps(max_s, i);
+        }
+    }
+    (result, min, max)
+}
 
 #[inline(always)]
 pub unsafe fn scale_noise<S: Simd>(
