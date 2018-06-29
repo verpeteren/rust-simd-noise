@@ -128,6 +128,7 @@ pub mod scalar;
 mod shared;
 mod shared_sse;
 pub mod simplex;
+pub mod cellular;
 pub mod sse2;
 pub mod sse41;
 
