@@ -18,34 +18,50 @@ Available on [crates.io](https://crates.io/crates/simdnoise).
 ## Benchmarks
 *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
 *Single Threaded*
+*using Criterion.rs*
 
 ### 1D 100,000 points of FBM Noise, 3 Octaves
 
-* scalar ... bench:   1,694,281 ns/iter (+/- 51,360)
-* sse2   ... bench:     829,633 ns/iter (+/- 41,989)
-* sse41  ... bench:     657,276 ns/iter (+/- 14,358)
-* avx2   ... bench:     294,431 ns/iter (+/- 10,268)
+* scalar 21.289 us
+* sse2   8.203  us
+* sse41  6.598  us
+* avx2   3.174  us
 
 ### 2D 1000x1000 FBM Noise, 3 Octaves
 
-* scalar ... bench:  74,686,044 ns/iter (+/- 3,053,838)
-* sse2   ... bench:  23,619,783 ns/iter (+/- 1,008,879)
-* sse41  ... bench:  21,847,769 ns/iter (+/- 914,364)
-* avx2   ... bench:  11,791,738 ns/iter (+/- 446,718)
+* scalar  5.351 ms
+* sse2    1.766 ms
+* sse41   1.562 ms
+* avx2    0.880 ms
 
 ### 3D 64x64x64 FBM Noise, 3 Octaves
 
-* scalar ... bench:  22,219,344 ns/iter (+/- 817,769)
-* sse2   ... bench:  10,331,856 ns/iter (+/- 450,920)
-* sse41  ... bench:   9,766,523 ns/iter (+/- 604,034)
-* avx2   ... bench:   5,566,535 ns/iter (+/- 181,791)
+* scalar  3.173 ms
+* sse2    1.631 ms
+* sse41   1.440 ms
+* avx2    0.882 ms 
 
 ### 4D 24x24x24x24 FBM Noise, 3 Octaves
 
-* scalar  ... bench:  48,324,536 ns/iter (+/- 1,813,984)
-* sse2    ... bench:  26,955,224 ns/iter (+/- 1,253,751)
-* sse41   ... bench:  25,792,680 ns/iter (+/- 749,234)
-* avx2    ... bench:  13,080,348 ns/iter (+/- 491,006)
+* scalar 534 us
+* sse2   345 us
+* sse41  305 us
+* avx2   144 us
+
+### 2D Cell Noise 
+
+* scalar 37.220 ms 
+* sse2   30.780 ms
+* sse41  20.492 ms
+* avx2   8.697  ms
+
+### 3D Cell Noise
+
+* scalar 2.897 ms
+* sse2   3.348 ms
+* sse41  2.314 ms 
+* avx2   1.182 ms
+
 
 ## Todo
 
