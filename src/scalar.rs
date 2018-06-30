@@ -3,8 +3,8 @@
 
 use super::*;
 use shared::*;
+use simdeez::scalar::*;
 use std::f32;
-
 const F2: f32 = 0.36602540378;
 const F3: f32 = 1.0 / 3.0;
 const F4: f32 = 0.309016994;
@@ -358,6 +358,17 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
         } => cellular_1d(x * freq, distance_function, return_type, jitter),
     }
 }
+//TODO this is to test the simdeez scalar code, probably don't want to use it
+//because it is probably slow
+pub unsafe fn get_2d_noisetest(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    noise_helpers::get_2d_noise::<Scalar>(start_x, width, start_y, height, noise_type)
+}
 
 /// Gets a width sized block of 1d noise, unscaled.
 /// `start_x` can be used to provide an offset in the
@@ -616,7 +627,8 @@ pub fn get_2d_scaled_noise(
     scale_min: f32,
     scale_max: f32,
 ) -> Vec<f32> {
-    let (mut noise, min, max) = get_2d_noise(start_x, width, start_y, height, noise_type);
+    let (mut noise, min, max) =
+        unsafe { get_2d_noise(start_x, width, start_y, height, noise_type) };
     let scale_range = scale_max - scale_min;
     let range = max - min;
     let multiplier = scale_range / range;
@@ -679,9 +691,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
     let x2 = x0 - i2 as f32 + F3;
     let y2 = y0 - j2 as f32 + F3;
     let z2 = z0 - k2 as f32 + F3;
-    let x3 = x0 - 1.5;
-    let y3 = y0 - 1.5;
-    let z3 = z0 - 1.5;
+    let x3 = x0 - 0.5;
+    let y3 = y0 - 0.5;
+    let z3 = z0 - 0.5;
 
     let ii = i & 255;
     let jj = j & 255;

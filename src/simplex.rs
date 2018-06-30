@@ -398,9 +398,9 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32
     let x2 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i2)), S::set1_ps(F3));
     let y2 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j2)), S::set1_ps(F3));
     let z2 = S::add_ps(S::add_ps(z0, S::cvtepi32_ps(k2)), S::set1_ps(F3));
-    let x3 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(0.5));
-    let y3 = S::add_ps(S::add_ps(y0, S::set1_ps(-1.0)), S::set1_ps(0.5));
-    let z3 = S::add_ps(S::add_ps(z0, S::set1_ps(-1.0)), S::set1_ps(0.5));
+    let x3 = S::add_ps(x0, S::set1_ps(-0.5));
+    let y3 = S::add_ps(y0, S::set1_ps(-0.5));
+    let z3 = S::add_ps(z0, S::set1_ps(-0.5));
 
     // Wrap indices at 256 so it will fit in the PERM array
     let ii = S::and_si(i, S::set1_epi32(0xff));
