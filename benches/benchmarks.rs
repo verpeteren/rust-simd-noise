@@ -50,6 +50,10 @@ fn d2(c: &mut Criterion) {
     let scalar = Fun::new("Scalar 2D", |b, _i| {
         b.iter(|| scalar::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE))
     });
+    let scalartest = Fun::new("Scalar 2Dtest", |b, _i| {
+        b.iter(|| unsafe {scalar::get_2d_noisetest(0.0, 256, 0.0, 256, NOISE_TYPE)})
+    });
+/*
     let sse2 = Fun::new("SSE2 2D", |b, _i| {
         b.iter(|| unsafe { sse2::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE) })
     });
@@ -58,8 +62,8 @@ fn d2(c: &mut Criterion) {
     });
     let avx2 = Fun::new("AVX2 2D", |b, _i| {
         b.iter(|| unsafe { avx2::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE) })
-    });
-     let functions = vec![scalar,sse2,sse41,avx2];
+    });*/
+    let functions = vec![scalar, scalartest];
     c.bench_functions("2D", functions, 0);
 }
 
@@ -76,7 +80,7 @@ fn d1(c: &mut Criterion) {
     let avx2 = Fun::new("AVX2 1D", |b, _i| {
         b.iter(|| unsafe { avx2::get_1d_noise(0.0, 1024, NOISE_TYPE) })
     });
-   let functions = vec![scalar, sse2, sse41, avx2];
+    let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("1D", functions, 0);
 }
 const CELL_NOISE_TYPE: NoiseType = NoiseType::Cellular {
@@ -89,7 +93,7 @@ fn d2_cell(c: &mut Criterion) {
     let scalar = Fun::new("Scalar", |b, _i| {
         b.iter(|| scalar::get_2d_noise(0.0, 1024, 0.0, 1024, CELL_NOISE_TYPE))
     });
-    let sse2 = Fun::new("SSE2" , |b, _i| {
+    let sse2 = Fun::new("SSE2", |b, _i| {
         b.iter(|| unsafe { sse2::get_2d_noise(0.0, 1024, 0.0, 1024, CELL_NOISE_TYPE) })
     });
     let sse41 = Fun::new("SSE41", |b, _i| {

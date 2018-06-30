@@ -124,34 +124,46 @@
 //! ```
 extern crate simdeez;
 pub mod avx2;
-pub mod cellular;
+mod cellular;
 mod noise_helpers;
 pub mod scalar;
 mod shared;
-pub mod simplex;
+mod simplex;
 pub mod sse2;
 pub mod sse41;
 
 #[derive(Copy, Clone)]
+/// The function to use to compute distance between cells
 pub enum CellDistanceFunction {
+    /// The actual straight line distance
     Euclidean,
+    /// Sum of the X and Y distances
     Manhattan,
+    /// Combines Manhattan and Euclidean
     Natural,
 }
 
 #[derive(Copy, Clone)]
+/// Determines what final value is returned for the cell noise
 pub enum CellReturnType {
-    CellValue,
+    /// Will return solid colors in each cell
+    CellValue,    
+    /// Color will be a gradient as you approach edge of cell
     Distance,
 }
 
 /// Specifies what type of noise to generate and contains any relevant settings.
 #[derive(Copy, Clone)]
 pub enum NoiseType {
+    /// Ceullar Noise
     Cellular {
+        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+        /// starting value for experimentation is around 0.02
         freq: f32,
-        distance_function: CellDistanceFunction,
+        distance_function: CellDistanceFunction,    
         return_type: CellReturnType,
+        /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
+        /// will put cells in a perfect grid
         jitter: f32,
     },
     /// Fractal Brownian Motion

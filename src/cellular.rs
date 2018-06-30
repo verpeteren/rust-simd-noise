@@ -4,10 +4,10 @@ use super::*;
 use shared::*;
 use std::f32;
 
-pub const X_PRIME: i32 = 1619;
-pub const Y_PRIME: i32 = 31337;
-pub const Z_PRIME: i32 = 6971;
-pub const CELL_DIVISOR: f32 = 2147483648.0;
+const X_PRIME: i32 = 1619;
+const Y_PRIME: i32 = 31337;
+const Z_PRIME: i32 = 6971;
+const CELL_DIVISOR: f32 = 2147483648.0;
 
 #[inline(always)]
 unsafe fn hash_2d<S: Simd>(seed: S::Vi32, x: S::Vi32, y: S::Vi32) -> S::Vi32 {

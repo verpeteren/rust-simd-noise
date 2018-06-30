@@ -212,7 +212,6 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32) -> S::Vf32 {
 
     S::add_ps(n0, S::add_ps(n1, n2))
 }
-/// Get a single value of 2d fractal brownian motion.
 #[inline(always)]
 pub unsafe fn fbm_2d<S: Simd>(
     x: S::Vf32,
@@ -237,7 +236,6 @@ pub unsafe fn fbm_2d<S: Simd>(
     result
 }
 
-/// Get a single value of 2d ridge noise.
 #[inline(always)]
 pub unsafe fn ridge_2d<S: Simd>(
     x: S::Vf32,
@@ -264,7 +262,6 @@ pub unsafe fn ridge_2d<S: Simd>(
 
     result
 }
-/// Get a single value of 2d turbulence.
 #[inline(always)]
 pub unsafe fn turbulence_2d<S: Simd>(
     x: S::Vf32,
@@ -322,8 +319,6 @@ unsafe fn grad3d<S: Simd>(hash: S::Vi32, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> 
     )
 }
 
-/// Get a single value of 3d simplex noise, results
-/// are not scaled.
 #[inline(always)]
 pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
     let s = S::mul_ps(S::set1_ps(F3), S::add_ps(x, S::add_ps(y, z)));
@@ -504,7 +499,6 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32
     S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, n3)))
 }
 
-/// Get a single value of 3d fractal brownian motion.
 #[inline(always)]
 pub unsafe fn fbm_3d<S: Simd>(
     x: S::Vf32,
@@ -532,7 +526,6 @@ pub unsafe fn fbm_3d<S: Simd>(
     result
 }
 
-/// Get a single value of 3d ridge noise.
 #[inline(always)]
 pub unsafe fn ridge_3d<S: Simd>(
     x: S::Vf32,
@@ -563,7 +556,6 @@ pub unsafe fn ridge_3d<S: Simd>(
     result
 }
 
-/// Get a single value of 3d turbulence.
 #[inline(always)]
 pub unsafe fn turbulence_3d<S: Simd>(
     x: S::Vf32,
@@ -625,8 +617,6 @@ unsafe fn grad4<S: Simd>(hash: S::Vi32, x: S::Vf32, y: S::Vf32, z: S::Vf32, t: S
         ),
     )
 }
-/// Get a single value of 4d simplex noise, results
-/// are not scaled.
 #[inline(always)]
 pub unsafe fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32 {
     let s = S::mul_ps(S::set1_ps(F4), S::add_ps(x, S::add_ps(y, S::add_ps(z, w))));
@@ -830,7 +820,6 @@ pub unsafe fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32
 
     S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, S::add_ps(n3, n4))))
 }
-/// Get a single value of 4d fractal brownian motion.
 #[inline(always)]
 pub unsafe fn fbm_4d<S: Simd>(
     x: S::Vf32,
@@ -861,7 +850,6 @@ pub unsafe fn fbm_4d<S: Simd>(
     result
 }
 
-/// Get a single value of 4d ridge noise.
 #[inline(always)]
 pub unsafe fn ridge_4d<S: Simd>(
     x: S::Vf32,
@@ -898,7 +886,6 @@ pub unsafe fn ridge_4d<S: Simd>(
     result
 }
 
-/// Get a single value of 4d turbulence.
 #[inline(always)]
 pub unsafe fn turbulence_4d<S: Simd>(
     x: S::Vf32,

@@ -17,6 +17,7 @@ use std::arch::x86::*;
 use std::arch::x86_64::*;
 use std::f32;
 
+/// Get a single value of 2d cellular/voroni noise
 #[target_feature(enable = "sse2")]
 pub unsafe fn cellular_2d(
     x: __m128,
@@ -28,6 +29,7 @@ pub unsafe fn cellular_2d(
     cellular::cellular_2d::<Sse2>(x, y, distance_function, return_type, jitter)
 }
 
+/// Get a single value of 3d cellular/voroni noise
 #[target_feature(enable = "sse2")]
 pub unsafe fn cellular_3d(
     x: __m128,

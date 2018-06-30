@@ -12,71 +12,10 @@ const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
 const G4: f32 = 0.138196601;
-pub const X_PRIME: i32 = 1619;
-pub const Y_PRIME: i32 = 31337;
-pub const Z_PRIME: i32 = 6971;
-pub const W_PRIME: i32 = 1013;
+const X_PRIME: i32 = 1619;
+const Y_PRIME: i32 = 31337;
+const Z_PRIME: i32 = 6971;
 
-fn hash_1d(seed: i32, x: i32) -> i32 {
-    let mut hash = seed ^ (X_PRIME * x);
-    hash = hash.wrapping_mul(hash.wrapping_mul(hash.wrapping_mul(60493)));
-    (hash >> 13) ^ hash
-}
-fn val_coord_1d(seed: i32, x: i32) -> f32 {
-    let n = seed ^ (X_PRIME * x);
-    return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
-}
-
-pub fn cellular_1d(
-    x: f32,
-    distance_function: CellDistanceFunction,
-    return_type: CellReturnType,
-    jitter: f32,
-) -> f32 {
-    let xr = x.round() as i32;
-    let mut distance = f32::MAX;
-    let mut xc = 0;
-    match distance_function {
-        CellDistanceFunction::Euclidean => {
-            for xi in xr - 1..xr + 2 {
-                let hi = hash_1d(1337, xi) & 0xff;
-                let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
-                let new_dist = vx * vx;
-                if new_dist < distance {
-                    distance = new_dist;
-                    xc = xi;
-                }
-            }
-        }
-        CellDistanceFunction::Manhattan => {
-            for xi in xr - 1..xr + 2 {
-                let hi = hash_1d(1337, xi) & 0xff;
-                let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
-                let new_dist = vx.abs();
-                if new_dist < distance {
-                    distance = new_dist;
-                    xc = xi;
-                }
-            }
-        }
-        CellDistanceFunction::Natural => {
-            for xi in xr - 1..xr + 2 {
-                let hi = hash_1d(1337, xi) & 0xff;
-                let vx = xi as f32 - x + CELL_2D_X[hi as usize] as f32 * jitter;
-                let new_dist = vx.abs() + (vx * vx);
-                if new_dist < distance {
-                    distance = new_dist;
-                    xc = xi;
-                }
-            }
-        }
-    }
-
-    match return_type {
-        CellReturnType::Distance => distance,
-        CellReturnType::CellValue => val_coord_1d(1337, xc),
-    }
-}
 fn hash_2d(seed: i32, x: i32, y: i32) -> i32 {
     let mut hash = seed ^ (X_PRIME * x);
     hash ^= Y_PRIME * y;
@@ -90,6 +29,7 @@ fn val_coord_2d(seed: i32, x: i32, y: i32) -> f32 {
     return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
 }
 
+/// Get a single value of 2d cellular/voroni noise
 pub fn cellular_2d(
     x: f32,
     y: f32,
@@ -176,6 +116,7 @@ fn val_coord_3d(seed: i32, x: i32, y: i32, z: i32) -> f32 {
     return n.wrapping_mul(n.wrapping_mul(n.wrapping_mul(60493))) as f32 / 2147483648.0;
 }
 
+/// Get a single value of 2d cellular/voroni noise
 pub fn cellular_3d(
     x: f32,
     y: f32,
@@ -351,11 +292,11 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
         } => ridge_1d(x, freq, lacunarity, gain, octaves),
         NoiseType::Normal { freq } => simplex_1d(x * freq),
         NoiseType::Cellular {
-            freq,
-            distance_function,
-            return_type,
-            jitter,
-        } => cellular_1d(x * freq, distance_function, return_type, jitter),
+            freq: _,
+            distance_function: _,
+            return_type: _,
+            jitter: _,
+        } => panic!("1D cell noise not implemented"),
     }
 }
 //TODO this is to test the simdeez scalar code, probably don't want to use it
@@ -628,7 +569,7 @@ pub fn get_2d_scaled_noise(
     scale_max: f32,
 ) -> Vec<f32> {
     let (mut noise, min, max) =
-        unsafe { get_2d_noise(start_x, width, start_y, height, noise_type) };
+        unsafe { get_2d_noisetest(start_x, width, start_y, height, noise_type) };
     let scale_range = scale_max - scale_min;
     let range = max - min;
     let multiplier = scale_range / range;
