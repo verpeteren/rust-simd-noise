@@ -21,7 +21,7 @@ See above crates.io link for Docs.
 
 ### 1D 1024 points of FBM Noise, 3 Octaves
 | SIMD Set | Time |
---------------------
+|----------|------|
 | scalar| 21.289 us|
 | sse2  | 8.203  us|
 | sse41 | 6.598  us|
