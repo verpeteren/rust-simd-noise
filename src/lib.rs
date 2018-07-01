@@ -10,6 +10,7 @@
 //!* Runtime detection picks the best available instruction set
 //!* Simplex noise, fractal brownian motion, turbulence, and ridge
 //!* 1D, 2D, 3D, and 4D
+//!* Cellular / Voroni Noise  2D and 3D
 //!
 //!## Benchmarks
 //!*Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
@@ -54,7 +55,7 @@
 //!
 //!* AVX512 support
 //!* ARM NEON support
-//!* Voroni, Cell, and other noise types
+//!* Other noise types
 //!
 //!# Examples
 //!

@@ -9,11 +9,11 @@ Available on [crates.io](https://crates.io/crates/simdnoise).
 ## Features
 
 * Gradient Noise (Simplex aka Perlin) 1D,2D,3D,4D
-* Cellular Noise (aka Voroni) 2D, 3D (not yet in the crate)
+* Fractal Brownian Motion, Ridge, and Turbulence 
+* Cellular Noise (aka Voroni) 2D, 3D 
 * SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
 * AVX2 version also leverages FMA3
 * Runtime detection picks the best available instruction set
-* Simplex noise, fractal brownian motion, turbulence, and ridge
 
 ## Benchmarks
 *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
@@ -57,9 +57,9 @@ Available on [crates.io](https://crates.io/crates/simdnoise).
 
 ### 3D Cell Noise
 
-* scalar 2.897 ms
-* sse2   3.348 ms
-* sse41  2.314 ms 
+* scalar 3.964 ms
+* sse2   3.660 ms
+* sse41  2.251 ms 
 * avx2   1.182 ms
 
 
@@ -67,7 +67,7 @@ Available on [crates.io](https://crates.io/crates/simdnoise).
 
 * AVX512 support
 * ARM NEON support
-* Voroni, Cell, and other noise types
+* Other noise types
 
 ## Get a block of noise with runtime SIMD detection
 
