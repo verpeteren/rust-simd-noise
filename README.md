@@ -20,46 +20,47 @@ See above crates.io link for Docs.
 *using Criterion.rs*
 
 ### 1D 1024 points of FBM Noise, 3 Octaves
-
-v scalar 21.289 us
-* sse2   8.203  us
-* sse41  6.598  us
-* avx2   3.174  us
+| SIMD Set | Time |
+--------------------
+| scalar| 21.289 us|
+| sse2  | 8.203  us|
+| sse41 | 6.598  us|
+| avx2  | 3.174  us|
 
 ### 2D 256x256 FBM Noise, 3 Octaves
 
-* scalar  5.351 ms
-* sse2    1.766 ms
-* sse41   1.562 ms
-* avx2    0.880 ms
-
+| scalar|  5.351 ms|
+| sse2  |  1.766 ms|
+| sse41 |  1.562 ms|
+| avx2  |  0.880 ms|
+|
 ### 3D 32x32x32 FBM Noise, 3 Octaves
 
-* scalar  3.173 ms
-* sse2    1.631 ms
-* sse41   1.440 ms
-* avx2    0.882 ms 
+| scalar|  3.173 ms|
+| sse2  |  1.631 ms|
+| sse41 |  1.440 ms|
+| avx2  |  0.882 ms|
 
 ### 4D 8x8x8x8 FBM Noise, 3 Octaves
 
-* scalar 534 us
-* sse2   345 us
-* sse41  305 us
-* avx2   144 us
+| scalar| 534 us|
+| sse2  | 345 us|
+| sse41 | 305 us|
+| avx2  | 144 us|
 
 ### 2D 1024x1024 Cell Noise 
 
-* scalar 37.220 ms 
-* sse2   30.780 ms
-* sse41  20.492 ms
-* avx2   8.697  ms
+| scalar| 37.220 ms|
+| sse2  | 30.780 ms|
+| sse41 | 20.492 ms|
+| avx2  | 8.697  ms|
 
 ### 3D 32x32x32 Cell Noise
 
-* scalar 3.964 ms
-* sse2   3.660 ms
-* sse41  2.251 ms 
-* avx2   1.182 ms
+| scalar| 3.964 ms|
+| sse2  | 3.660 ms|
+| sse41 | 2.251 ms|
+| avx2  | 1.182 ms|
 
 
 ## Todo
