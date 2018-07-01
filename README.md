@@ -29,6 +29,8 @@ See above crates.io link for Docs.
 
 ### 2D 256x256 FBM Noise, 3 Octaves
 
+| SIMD Set | Time |
+|----------|------|
 | scalar|  5.351 ms|
 | sse2  |  1.766 ms|
 | sse41 |  1.562 ms|
@@ -36,6 +38,8 @@ See above crates.io link for Docs.
 |
 ### 3D 32x32x32 FBM Noise, 3 Octaves
 
+| SIMD Set | Time |
+|----------|------|
 | scalar|  3.173 ms|
 | sse2  |  1.631 ms|
 | sse41 |  1.440 ms|
@@ -43,6 +47,8 @@ See above crates.io link for Docs.
 
 ### 4D 8x8x8x8 FBM Noise, 3 Octaves
 
+| SIMD Set | Time |
+|----------|------|
 | scalar| 534 us|
 | sse2  | 345 us|
 | sse41 | 305 us|
@@ -50,6 +56,8 @@ See above crates.io link for Docs.
 
 ### 2D 1024x1024 Cell Noise 
 
+| SIMD Set | Time |
+|----------|------|
 | scalar| 37.220 ms|
 | sse2  | 30.780 ms|
 | sse41 | 20.492 ms|
@@ -57,6 +65,8 @@ See above crates.io link for Docs.
 
 ### 3D 32x32x32 Cell Noise
 
+| SIMD Set | Time |
+|----------|------|
 | scalar| 3.964 ms|
 | sse2  | 3.660 ms|
 | sse41 | 2.251 ms|
