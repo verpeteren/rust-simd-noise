@@ -35,7 +35,7 @@ See above crates.io link for Docs.
 | sse2  |  1.766 ms|
 | sse41 |  1.562 ms|
 | avx2  |  0.880 ms|
-|
+
 ### 3D 32x32x32 FBM Noise, 3 Octaves
 
 | SIMD Set | Time |
