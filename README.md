@@ -19,7 +19,7 @@ See above crates.io link for Docs.
 *Single Threaded*
 *using Criterion.rs*
 
-### 1D 1024 points of FBM Noise, 3 Octaves
+### 1D 1024 points of Fbm Noise, 3 Octaves
 | SIMD Set | Time |
 |----------|------|
 | scalar| 21.289 us|
@@ -27,7 +27,7 @@ See above crates.io link for Docs.
 | sse41 | 6.598  us|
 | avx2  | 3.174  us|
 
-### 2D 256x256 FBM Noise, 3 Octaves
+### 2D 256x256 Fbm Noise, 3 Octaves
 
 | SIMD Set | Time |
 |----------|------|
@@ -36,7 +36,7 @@ See above crates.io link for Docs.
 | sse41 |  1.562 ms|
 | avx2  |  0.880 ms|
 
-### 3D 32x32x32 FBM Noise, 3 Octaves
+### 3D 32x32x32 Fbm Noise, 3 Octaves
 
 | SIMD Set | Time |
 |----------|------|
@@ -45,7 +45,7 @@ See above crates.io link for Docs.
 | sse41 |  1.440 ms|
 | avx2  |  0.882 ms|
 
-### 4D 8x8x8x8 FBM Noise, 3 Octaves
+### 4D 8x8x8x8 Fbm Noise, 3 Octaves
 
 | SIMD Set | Time |
 |----------|------|
@@ -87,7 +87,7 @@ The library will, at runtime, pick the fastest available options between SSE2, S
 use simdnoise::*;
 
 // Set up noise type and parameters
-let noise_type = simdnoise::NoiseType::FBM {
+let noise_type = simdnoise::NoiseType::Fbm {
       freq: 0.04,
       lacunarity: 0.5,
       gain: 2.0,
