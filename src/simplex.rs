@@ -918,5 +918,3 @@ pub unsafe fn turbulence_4d<S: Simd>(
 
     result
 }
-
-

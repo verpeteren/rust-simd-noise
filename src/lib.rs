@@ -111,7 +111,7 @@ pub enum CellDistanceFunction {
 /// Determines what final value is returned for the cell noise
 pub enum CellReturnType {
     /// Will return solid colors in each cell
-    CellValue,    
+    CellValue,
     /// Color will be a gradient as you approach edge of cell
     Distance,
 }
@@ -124,7 +124,7 @@ pub enum NoiseType {
         /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
         /// starting value for experimentation is around 0.02
         freq: f32,
-        distance_function: CellDistanceFunction,    
+        distance_function: CellDistanceFunction,
         return_type: CellReturnType,
         /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
         /// will put cells in a perfect grid
@@ -469,6 +469,20 @@ mod tests {
             assert!(($x - $y).abs() < $d);
         };
     }
+
+    #[test]
+    fn small_dimensions() {
+        let _  = get_2d_scaled_noise(
+            0.0,
+            3,
+            0.0,
+            2,
+            NoiseType::Normal { freq: 0.05 },
+            0.0,
+            1.0,
+        );
+    }
+
     #[test]
     fn consistency_4d() {
         let scalar_noise =
