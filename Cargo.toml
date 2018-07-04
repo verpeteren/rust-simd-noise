@@ -11,8 +11,8 @@ keywords = ["SIMD", "noise", "simplex", "perlin","performance"]
 repository = "https://github.com/jackmott/rust-simd-noise"
 categories = ["game-engines","multimedia::images"]
 
-[dependencies]
-simdeez = "0.2.3"
+[dependencies.simdeez]
+path="../simdeez"
 
 [dev-dependencies]
 criterion = "0.2"

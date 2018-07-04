@@ -69,7 +69,7 @@ pub unsafe fn get_1d_noise<S: Simd>(
     let mut result: Vec<f32> = Vec::with_capacity(width);
     result.set_len(width);
     let mut i = 0;
-    let vector_width = S::WIDTH_BYTES / 4;
+    let vector_width = S::VF32_WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -89,7 +89,7 @@ pub unsafe fn get_1d_noise<S: Simd>(
     if remainder != 0 {
         let f = get_1d_noise_helper::<S>(x, noise_type);
         for j in 0..remainder {
-            let n = S::get_lane_ps(f, j);
+            let n = f[j];
             *result.get_unchecked_mut(i) = n;
             // Note: This is unecessary for large images
             if n < min {
@@ -102,11 +102,11 @@ pub unsafe fn get_1d_noise<S: Simd>(
         }
     }
     for i in 0..vector_width {
-        if S::get_lane_ps(min_s, i) < min {
-            min = S::get_lane_ps(min_s, i);
+        if min_s[i] < min {
+            min = min_s[i];
         }
-        if S::get_lane_ps(max_s, i) > max {
-            max = S::get_lane_ps(max_s, i);
+        if max_s[i] > max {
+            max = max_s[i];
         }
     }
     (result, min, max)
@@ -195,7 +195,7 @@ pub unsafe fn get_2d_noise<S: Simd>(
     result.set_len(width * height);
     let mut y = S::set1_ps(start_y);
     let mut i = 0;
-    let vector_width = S::WIDTH_BYTES / 4;
+    let vector_width = S::VF32_WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -215,7 +215,7 @@ pub unsafe fn get_2d_noise<S: Simd>(
         if remainder != 0 {
             let f = get_2d_noise_helper::<S>(x, y, noise_type);
             for j in 0..remainder {
-                let n = S::get_lane_ps(f, j);
+                let n = f[j];
                 *result.get_unchecked_mut(i) = n;
                 if n < min {
                     min = n;
@@ -229,11 +229,11 @@ pub unsafe fn get_2d_noise<S: Simd>(
         y = S::add_ps(y, S::set1_ps(1.0));
     }
     for i in 0..vector_width {
-        if S::get_lane_ps(min_s, i) < min {
-            min = S::get_lane_ps(min_s, i);
+        if min_s[i] < min {
+            min = min_s[i];
         }
-        if S::get_lane_ps(max_s, i) > max {
-            max = S::get_lane_ps(max_s, i);
+        if max_s[i] > max {
+            max = max_s[i];
         }
     }
     (result, min, max)
@@ -332,7 +332,7 @@ pub unsafe fn get_3d_noise<S: Simd>(
     let mut result = Vec::with_capacity(width * height * depth);
     result.set_len(width * height * depth);
     let mut i = 0;
-    let vector_width = S::WIDTH_BYTES / 4;
+    let vector_width = S::VF32_WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -356,7 +356,7 @@ pub unsafe fn get_3d_noise<S: Simd>(
             if remainder != 0 {
                 let f = get_3d_noise_helper::<S>(x, y, z, noise_type);
                 for j in 0..remainder {
-                    let n = S::get_lane_ps(f, j);
+                    let n = f[j];
                     *result.get_unchecked_mut(i) = n;
                     if n < min {
                         min = n;
@@ -372,11 +372,11 @@ pub unsafe fn get_3d_noise<S: Simd>(
         z = S::add_ps(z, S::set1_ps(1.0));
     }
     for i in 0..vector_width {
-        if S::get_lane_ps(min_s, i) < min {
-            min = S::get_lane_ps(min_s, i);
+        if min_s[i] < min {
+            min = min_s[i];
         }
-        if S::get_lane_ps(max_s, i) > max {
-            max = S::get_lane_ps(max_s, i);
+        if max_s[i] > max {
+            max = max_s[i];
         }
     }
     (result, min, max)
@@ -464,7 +464,7 @@ pub unsafe fn get_4d_noise<S: Simd>(
     let mut result = Vec::with_capacity(width * height * depth * time);
     result.set_len(width * height * depth * time);
     let mut i = 0;
-    let vector_width = S::WIDTH_BYTES / 4;
+    let vector_width = S::VF32_WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -489,7 +489,7 @@ pub unsafe fn get_4d_noise<S: Simd>(
                 if remainder != 0 {
                     let f = get_4d_noise_helper::<S>(x, y, z, w, noise_type);
                     for j in 0..remainder {
-                        let n = S::get_lane_ps(f, j);
+                        let n = f[j];
                         *result.get_unchecked_mut(i) = n;
                         // Note: This is unecessary for large images
                         if n < min {
@@ -508,13 +508,12 @@ pub unsafe fn get_4d_noise<S: Simd>(
         w = S::add_ps(w, S::set1_ps(1.0));
     }
     for i in 0..vector_width {
-        if S::get_lane_ps(min_s, i) < min {
-            min = S::get_lane_ps(min_s, i);
+        if min_s[i] < min {
+            min = min_s[i];
         }
-        if S::get_lane_ps(max_s, i) > max {
-            max = S::get_lane_ps(max_s, i);
+        if max_s[i] > max {
+            max = max_s[i];
         }
     }
-
     (result, min, max)
 }
