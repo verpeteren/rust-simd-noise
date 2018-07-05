@@ -11,18 +11,18 @@ const CELL_DIVISOR: f32 = 2147483648.0;
 
 #[inline(always)]
 unsafe fn hash_2d<S: Simd>(seed: S::Vi32, x: S::Vi32, y: S::Vi32) -> S::Vi32 {
-    let mut hash = S::xor_si(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
-    hash = S::xor_si(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
+    let mut hash = S::xor_epi32(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
+    hash = S::xor_epi32(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
     hash = S::mullo_epi32(
         hash,
         S::mullo_epi32(hash, S::mullo_epi32(hash, S::set1_epi32(60493))),
     );
-    S::xor_si(S::srai_epi32(hash, 13), hash)
+    S::xor_epi32(S::srai_epi32(hash, 13), hash)
 }
 #[inline(always)]
 unsafe fn val_coord_2d<S: Simd>(seed: S::Vi32, x: S::Vi32, y: S::Vi32) -> S::Vf32 {
-    let mut hash = S::xor_si(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
-    hash = S::xor_si(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
+    let mut hash = S::xor_epi32(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
+    hash = S::xor_epi32(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
     hash = S::mullo_epi32(
         hash,
         S::mullo_epi32(hash, S::mullo_epi32(hash, S::set1_epi32(60493))),
@@ -49,7 +49,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                 let xisubx = S::sub_ps(S::cvtepi32_ps(xi), x);
                 for ymod in -1..2 {
                     let yi = S::add_epi32(yr, S::set1_epi32(ymod));
-                    let hi = S::and_si(
+                    let hi = S::and_epi32(
                         hash_2d::<S>(S::set1_epi32(1337), xi, yi),
                         S::set1_epi32(0xff),
                     );
@@ -62,8 +62,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                     let new_dist = S::add_ps(S::mul_ps(vx, vx), S::mul_ps(vy, vy));
                     let cond = S::cmplt_ps(new_dist, distance);
                     distance = S::blendv_ps(distance, new_dist, cond);
-                    xc = S::blendv_epi32(xc, xi, S::castps_si(cond));
-                    yc = S::blendv_epi32(yc, yi, S::castps_si(cond));
+                    xc = S::blendv_epi32(xc, xi, S::castps_epi32(cond));
+                    yc = S::blendv_epi32(yc, yi, S::castps_epi32(cond));
                 }
             }
         }
@@ -73,7 +73,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                 let xisubx = S::sub_ps(S::cvtepi32_ps(xi), x);
                 for ymod in -1..2 {
                     let yi = S::add_epi32(yr, S::set1_epi32(ymod));
-                    let hi = S::and_si(
+                    let hi = S::and_epi32(
                         hash_2d::<S>(S::set1_epi32(1337), xi, yi),
                         S::set1_epi32(0xff),
                     );
@@ -86,8 +86,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                     let new_dist = S::add_ps(S::abs_ps(vx), S::abs_ps(vy));
                     let cond = S::cmplt_ps(new_dist, distance);
                     distance = S::blendv_ps(distance, new_dist, cond);
-                    xc = S::blendv_epi32(xc, xi, S::castps_si(cond));
-                    yc = S::blendv_epi32(yc, yi, S::castps_si(cond));
+                    xc = S::blendv_epi32(xc, xi, S::castps_epi32(cond));
+                    yc = S::blendv_epi32(yc, yi, S::castps_epi32(cond));
                 }
             }
         }
@@ -97,7 +97,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                 let xisubx = S::sub_ps(S::cvtepi32_ps(xi), x);
                 for ymod in -1..2 {
                     let yi = S::add_epi32(yr, S::set1_epi32(ymod));
-                    let hi = S::and_si(
+                    let hi = S::and_epi32(
                         hash_2d::<S>(S::set1_epi32(1337), xi, yi),
                         S::set1_epi32(0xff),
                     );
@@ -113,8 +113,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                     );
                     let cond = S::cmplt_ps(new_dist, distance);
                     distance = S::blendv_ps(distance, new_dist, cond);
-                    xc = S::blendv_epi32(xc, xi, S::castps_si(cond));
-                    yc = S::blendv_epi32(yc, yi, S::castps_si(cond));
+                    xc = S::blendv_epi32(xc, xi, S::castps_epi32(cond));
+                    yc = S::blendv_epi32(yc, yi, S::castps_epi32(cond));
                 }
             }
         }
@@ -128,20 +128,20 @@ pub unsafe fn cellular_2d<S: Simd>(
 
 #[inline(always)]
 unsafe fn hash_3d<S: Simd>(seed: S::Vi32, x: S::Vi32, y: S::Vi32, z: S::Vi32) -> S::Vi32 {
-    let mut hash = S::xor_si(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
-    hash = S::xor_si(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
-    hash = S::xor_si(hash, S::mullo_epi32(S::set1_epi32(Z_PRIME), z));
+    let mut hash = S::xor_epi32(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
+    hash = S::xor_epi32(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
+    hash = S::xor_epi32(hash, S::mullo_epi32(S::set1_epi32(Z_PRIME), z));
     hash = S::mullo_epi32(
         hash,
         S::mullo_epi32(hash, S::mullo_epi32(hash, S::set1_epi32(60493))),
     );
-    S::xor_si(S::srai_epi32(hash, 13), hash)
+    S::xor_epi32(S::srai_epi32(hash, 13), hash)
 }
 #[inline(always)]
 unsafe fn val_coord_3d<S: Simd>(seed: S::Vi32, x: S::Vi32, y: S::Vi32, z: S::Vi32) -> S::Vf32 {
-    let mut hash = S::xor_si(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
-    hash = S::xor_si(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
-    hash = S::xor_si(hash, S::mullo_epi32(S::set1_epi32(Z_PRIME), z));
+    let mut hash = S::xor_epi32(seed, S::mullo_epi32(S::set1_epi32(X_PRIME), x));
+    hash = S::xor_epi32(hash, S::mullo_epi32(S::set1_epi32(Y_PRIME), y));
+    hash = S::xor_epi32(hash, S::mullo_epi32(S::set1_epi32(Z_PRIME), z));
     hash = S::mullo_epi32(
         hash,
         S::mullo_epi32(hash, S::mullo_epi32(hash, S::set1_epi32(60493))),
@@ -174,7 +174,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                     let yi = S::add_epi32(yr, S::set1_epi32(ymod));
                     for zmod in -1..2 {
                         let zi = S::add_epi32(zr, S::set1_epi32(zmod));
-                        let hi = S::and_si(
+                        let hi = S::and_epi32(
                             hash_3d::<S>(S::set1_epi32(1337), xi, yi, zi),
                             S::set1_epi32(0xff),
                         );
@@ -195,9 +195,9 @@ pub unsafe fn cellular_3d<S: Simd>(
                         );
                         let cond = S::cmplt_ps(new_dist, distance);
                         distance = S::blendv_ps(distance, new_dist, cond);
-                        xc = S::blendv_epi32(xc, xi, S::castps_si(cond));
-                        yc = S::blendv_epi32(yc, yi, S::castps_si(cond));
-                        zc = S::blendv_epi32(zc, zi, S::castps_si(cond));
+                        xc = S::blendv_epi32(xc, xi, S::castps_epi32(cond));
+                        yc = S::blendv_epi32(yc, yi, S::castps_epi32(cond));
+                        zc = S::blendv_epi32(zc, zi, S::castps_epi32(cond));
                     }
                 }
             }
@@ -210,7 +210,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                     let yi = S::add_epi32(yr, S::set1_epi32(ymod));
                     for zmod in -1..2 {
                         let zi = S::add_epi32(zr, S::set1_epi32(zmod));
-                        let hi = S::and_si(
+                        let hi = S::and_epi32(
                             hash_3d::<S>(S::set1_epi32(1337), xi, yi, zi),
                             S::set1_epi32(0xff),
                         );
@@ -228,9 +228,9 @@ pub unsafe fn cellular_3d<S: Simd>(
                             S::add_ps(S::abs_ps(vz), S::add_ps(S::abs_ps(vx), S::abs_ps(vy)));
                         let cond = S::cmplt_ps(new_dist, distance);
                         distance = S::blendv_ps(distance, new_dist, cond);
-                        xc = S::blendv_epi32(xc, xi, S::castps_si(cond));
-                        yc = S::blendv_epi32(yc, yi, S::castps_si(cond));
-                        zc = S::blendv_epi32(zc, zi, S::castps_si(cond));
+                        xc = S::blendv_epi32(xc, xi, S::castps_epi32(cond));
+                        yc = S::blendv_epi32(yc, yi, S::castps_epi32(cond));
+                        zc = S::blendv_epi32(zc, zi, S::castps_epi32(cond));
                     }
                 }
             }
@@ -244,7 +244,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                     for zmod in -1..2 {
                         let zi = S::add_epi32(zr, S::set1_epi32(zmod));
 
-                        let hi = S::and_si(
+                        let hi = S::and_epi32(
                             hash_3d::<S>(S::set1_epi32(1337), xi, yi, zi),
                             S::set1_epi32(0xff),
                         );
@@ -267,9 +267,9 @@ pub unsafe fn cellular_3d<S: Simd>(
                         );
                         let cond = S::cmplt_ps(new_dist, distance);
                         distance = S::blendv_ps(distance, new_dist, cond);
-                        xc = S::blendv_epi32(xc, xi, S::castps_si(cond));
-                        yc = S::blendv_epi32(yc, yi, S::castps_si(cond));
-                        zc = S::blendv_epi32(zc, zi, S::castps_si(cond));
+                        xc = S::blendv_epi32(xc, xi, S::castps_epi32(cond));
+                        yc = S::blendv_epi32(yc, yi, S::castps_epi32(cond));
+                        zc = S::blendv_epi32(zc, zi, S::castps_epi32(cond));
                     }
                 }
             }
