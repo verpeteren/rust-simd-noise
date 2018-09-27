@@ -300,22 +300,18 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
         } => panic!("1D cell noise not implemented"),
     }
 }
-/// Gets a width sized block of 1d noise, unscaled.
+/// Fills the slice `dest` with 1d noise, unscaled.
 /// `start_x` can be used to provide an offset in the
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
+pub fn set_1d_noise(dest: &mut [f32], start_x: f32, noise_type: NoiseType) -> (f32, f32) {
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::with_capacity(width);
-    unsafe {
-        result.set_len(width);
-    }
     let mut i = 0;
     let mut x = start_x;
-    for _ in 0..width {
+    for _ in 0..dest.len() {
         let f = get_1d_noise_helper(x, noise_type);
         if f < min {
             min = f;
@@ -324,11 +320,25 @@ pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f
             max = f;
         }
         unsafe {
-            *result.get_unchecked_mut(i) = f;
+            *dest.get_unchecked_mut(i) = f;
         }
         i += 1;
         x += 1.0;
     }
+    (min, max)
+}
+
+/// Gets a width sized block of 1d noise, unscaled.
+/// `start_x` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
+    let mut result = Vec::with_capacity(width);
+    unsafe {
+        result.set_len(width);
+    }
+    let (min, max) = set_1d_noise(&mut result, start_x, noise_type);
     (result, min, max)
 }
 
@@ -388,36 +398,31 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
         let n0 = if t0 < 0.0 {
             0.0
         } else {
-            t0 * t0 * t0 * t0
-                * grad2(
-                    *PERM.get_unchecked((ii + *PERM.get_unchecked(jj as usize)) as usize),
-                    x0,
-                    y0,
-                )
+            t0 * t0 * t0 * t0 * grad2(
+                *PERM.get_unchecked((ii + *PERM.get_unchecked(jj as usize)) as usize),
+                x0,
+                y0,
+            )
         };
         let t1 = 0.5 - x1 * x1 - y1 * y1;
         let n1 = if t1 < 0.0 {
             0.0
         } else {
-            t1 * t1 * t1 * t1
-                * grad2(
-                    *PERM.get_unchecked(
-                        (ii + i1 + *PERM.get_unchecked((jj + j1) as usize)) as usize,
-                    ),
-                    x1,
-                    y1,
-                )
+            t1 * t1 * t1 * t1 * grad2(
+                *PERM.get_unchecked((ii + i1 + *PERM.get_unchecked((jj + j1) as usize)) as usize),
+                x1,
+                y1,
+            )
         };
         let t2 = 0.5 - x2 * x2 - y2 * y2;
         let n2 = if t2 < 0.0 {
             0.0
         } else {
-            t2 * t2 * t2 * t2
-                * grad2(
-                    *PERM.get_unchecked((ii + 1 + *PERM.get_unchecked((jj + 1) as usize)) as usize),
-                    x2,
-                    y2,
-                )
+            t2 * t2 * t2 * t2 * grad2(
+                *PERM.get_unchecked((ii + 1 + *PERM.get_unchecked((jj + 1) as usize)) as usize),
+                x2,
+                y2,
+            )
         };
 
         n0 + n1 + n2
@@ -502,25 +507,31 @@ fn get_2d_noise_helper(x: f32, y: f32, noise_type: NoiseType) -> f32 {
     }
 }
 
-/// Gets a width X height sized block of 2d noise, unscaled.
+/// Generates a width X height sized block of 2d noise in the slice `dest`,
+/// unscaled.  Panics if `width * height != dest.len()`.
 /// `start_x` and `start_y` can be used to provide an offset in the
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-pub fn get_2d_noise(
+pub fn set_2d_noise(
+    dest: &mut [f32],
     start_x: f32,
     width: usize,
     start_y: f32,
     height: usize,
     noise_type: NoiseType,
-) -> (Vec<f32>, f32, f32) {
+) -> (f32, f32) {
+    if dest.len() != width * height {
+        panic!(
+            "invalid noise parameters: {} * {} != slice length {}",
+            width,
+            height,
+            dest.len()
+        );
+    }
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::with_capacity(width * height);
-    unsafe {
-        result.set_len(width * height);
-    }
     let mut i = 0;
     let mut y = start_y;
     for _ in 0..height {
@@ -534,13 +545,33 @@ pub fn get_2d_noise(
                 max = f;
             }
             unsafe {
-                *result.get_unchecked_mut(i) = f;
+                *dest.get_unchecked_mut(i) = f;
             }
             i += 1;
             x += 1.0;
         }
         y += 1.0;
     }
+    (min, max)
+}
+
+/// Gets a width X height sized block of 2d noise, unscaled.
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_2d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    let mut result = Vec::with_capacity(width * height);
+    unsafe {
+        result.set_len(width * height);
+    }
+    let (min, max) = set_2d_noise(&mut result, start_x, width, start_y, height, noise_type);
     (result, min, max)
 }
 
@@ -645,10 +676,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
             0.0
         } else {
             let gi1 = *PERM.get_unchecked(
-                (ii + i1
-                    + *PERM.get_unchecked(
-                        (jj + j1 + *PERM.get_unchecked((kk + k1) as usize)) as usize,
-                    )) as usize,
+                (ii + i1 + *PERM
+                    .get_unchecked((jj + j1 + *PERM.get_unchecked((kk + k1) as usize)) as usize))
+                    as usize,
             );
 
             t1 * t1 * t1 * t1 * grad3(gi1, x1, y1, z1)
@@ -658,10 +688,9 @@ pub fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
             0.0
         } else {
             let gi2 = *PERM.get_unchecked(
-                (ii + i2
-                    + *PERM.get_unchecked(
-                        (jj + j2 + *PERM.get_unchecked((kk + k2) as usize)) as usize,
-                    )) as usize,
+                (ii + i2 + *PERM
+                    .get_unchecked((jj + j2 + *PERM.get_unchecked((kk + k2) as usize)) as usize))
+                    as usize,
             );
 
             t2 * t2 * t2 * t2 * grad3(gi2, x2, y2, z2)
@@ -783,12 +812,14 @@ fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
     }
 }
 
-/// Gets a width X height X depth sized block of 3d noise, unscaled,
+/// Generates a width X height X depth sized block of 3d noise into `dest`,
+/// unscaled,
 /// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-pub fn get_3d_noise(
+pub fn set_3d_noise(
+    dest: &mut [f32],
     start_x: f32,
     width: usize,
     start_y: f32,
@@ -796,13 +827,18 @@ pub fn get_3d_noise(
     start_z: f32,
     depth: usize,
     noise_type: NoiseType,
-) -> (Vec<f32>, f32, f32) {
+) -> (f32, f32) {
+    if dest.len() != width * height * depth {
+        panic!(
+            "invalid noise parameters: {} * {} * {} != slice length {}",
+            width,
+            height,
+            depth,
+            dest.len()
+        );
+    }
     let mut min = f32::MAX;
     let mut max = f32::MIN;
-    let mut result = Vec::with_capacity(width * height * depth);
-    unsafe {
-        result.set_len(width * height * depth);
-    }
     let mut i = 0;
     let mut z = start_z;
     for _ in 0..depth {
@@ -818,7 +854,7 @@ pub fn get_3d_noise(
                     max = f;
                 }
                 unsafe {
-                    *result.get_unchecked_mut(i) = f;
+                    *dest.get_unchecked_mut(i) = f;
                 }
                 i += 1;
                 x += 1.0;
@@ -827,6 +863,37 @@ pub fn get_3d_noise(
         }
         z += 1.0;
     }
+    (min, max)
+}
+
+/// Gets a width X height X depth sized block of 3d noise, unscaled,
+/// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_3d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    let mut result = Vec::with_capacity(width * height * depth);
+    unsafe {
+        result.set_len(width * height * depth);
+    }
+    let (min, max) = set_3d_noise(
+        &mut result,
+        start_x,
+        width,
+        start_y,
+        height,
+        start_z,
+        depth,
+        noise_type,
+    );
     (result, min, max)
 }
 
@@ -975,9 +1042,9 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     } else {
         t1 = t1 * t1;
         t1 = t1 * t1;
-        let h = PERM[(ii + i1
-                         + PERM[(jj + j1 + PERM[(kk + k1 + PERM[(ll + l1) as usize]) as usize])
-                                    as usize]) as usize];
+        let h = PERM[(ii + i1 + PERM
+            [(jj + j1 + PERM[(kk + k1 + PERM[(ll + l1) as usize]) as usize]) as usize])
+                         as usize];
         t1 * grad4(h, x1, y1, z1, w1)
     };
 
@@ -987,9 +1054,9 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     } else {
         t2 = t2 * t2;
         t2 = t2 * t2;
-        let h = PERM[(ii + i2
-                         + PERM[(jj + j2 + PERM[(kk + k2 + PERM[(ll + l2) as usize]) as usize])
-                                    as usize]) as usize];
+        let h = PERM[(ii + i2 + PERM
+            [(jj + j2 + PERM[(kk + k2 + PERM[(ll + l2) as usize]) as usize]) as usize])
+                         as usize];
         t2 * grad4(h, x2, y2, z2, w2)
     };
 
@@ -999,9 +1066,10 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     } else {
         t3 = t3 * t3;
         t3 = t3 * t3;
-        let h = PERM[(ii + i3
-                         + PERM[(jj + j3 + PERM[(kk + k3 + PERM[(ll + l3) as usize]) as usize])
-                                    as usize]) as usize] & 31;
+        let h = PERM[(ii + i3 + PERM
+            [(jj + j3 + PERM[(kk + k3 + PERM[(ll + l3) as usize]) as usize]) as usize])
+                         as usize]
+            & 31;
         t3 * grad4(h, x3, y3, z3, w3)
     };
 
@@ -1013,7 +1081,8 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
         t4 = t4 * t4;
         let h = PERM[(ii + 1
                          + PERM[(jj + 1 + PERM[(kk + 1 + PERM[(ll + 1) as usize]) as usize])
-                                    as usize]) as usize] & 31;
+                                    as usize]) as usize]
+            & 31;
         t4 * grad4(h, x4, y4, z4, w4)
     };
     n0 + n1 + n2 + n3 + n4
@@ -1130,12 +1199,14 @@ fn get_4d_noise_helper(x: f32, y: f32, z: f32, w: f32, noise_type: NoiseType) ->
     }
 }
 
-/// Gets a width X height X depth x time sized block of 3d noise, unscaled,
+/// Generates a width X height X depth x time sized block of 3d noise, unscaled,
+/// in the slice `dest`.
 /// `start_*` can be used to provide an offset in the
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-pub fn get_4d_noise(
+pub fn set_4d_noise(
+    dest: &mut [f32],
     start_x: f32,
     width: usize,
     start_y: f32,
@@ -1145,13 +1216,19 @@ pub fn get_4d_noise(
     start_w: f32,
     time: usize,
     noise_type: NoiseType,
-) -> (Vec<f32>, f32, f32) {
+) -> (f32, f32) {
+    if dest.len() != width * height * depth * time {
+        panic!(
+            "invalid noise parameters: {} * {} * {} * {} != slice length {}",
+            width,
+            height,
+            depth,
+            time,
+            dest.len()
+        );
+    }
     let mut min = f32::MAX;
     let mut max = f32::MIN;
-    let mut result = Vec::with_capacity(width * height * depth * time);
-    unsafe {
-        result.set_len(width * height * depth * time);
-    }
     let mut i = 0;
     let mut w = start_w;
     for _ in 0..time {
@@ -1169,7 +1246,7 @@ pub fn get_4d_noise(
                         max = f;
                     }
                     unsafe {
-                        *result.get_unchecked_mut(i) = f;
+                        *dest.get_unchecked_mut(i) = f;
                     }
                     i += 1;
                     x += 1.0;
@@ -1180,6 +1257,40 @@ pub fn get_4d_noise(
         }
         w += 1.0;
     }
+    (min, max)
+}
+/// Gets a width X height X depth x time sized block of 3d noise, unscaled,
+/// `start_*` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+pub fn get_4d_noise(
+    start_x: f32,
+    width: usize,
+    start_y: f32,
+    height: usize,
+    start_z: f32,
+    depth: usize,
+    start_w: f32,
+    time: usize,
+    noise_type: NoiseType,
+) -> (Vec<f32>, f32, f32) {
+    let mut result = Vec::with_capacity(width * height * depth * time);
+    unsafe {
+        result.set_len(width * height * depth * time);
+    }
+    let (min, max) = set_4d_noise(
+        &mut result,
+        start_x,
+        width,
+        start_y,
+        height,
+        start_z,
+        depth,
+        start_w,
+        time,
+        noise_type,
+    );
     (result, min, max)
 }
 
