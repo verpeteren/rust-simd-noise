@@ -10,6 +10,7 @@ readme = "README.md"
 keywords = ["SIMD", "noise", "simplex", "perlin","performance"]
 repository = "https://github.com/jackmott/rust-simd-noise"
 categories = ["game-engines","multimedia::images"]
+edition="2018"
 
 [dependencies]
 simdeez = "0.4.0"
