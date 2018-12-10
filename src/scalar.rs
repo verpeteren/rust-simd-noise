@@ -4,7 +4,7 @@
 //! https://github.com/stegu/perlin-noise
 
 use super::*;
-use shared::*;
+use crate::shared::*;
 use std::f32;
 const F2: f32 = 0.36602540378;
 const F3: f32 = 1.0 / 3.0;

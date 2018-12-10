@@ -9,7 +9,7 @@
 //! is evenly divisble by 4, and when it is not small relative height and depth.
 
 use super::*;
-use shared::*;
+use crate::shared::*;
 use simdeez::sse2::*;
 use simdeez::overloads::*;
 #[cfg(target_arch = "x86")]

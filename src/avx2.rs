@@ -8,7 +8,7 @@
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 8, and when it is not small relative height and depth.
 use super::*;
-use shared::*;
+use crate::shared::*;
 use simdeez::avx2::*;
 use simdeez::overloads::*;
 #[cfg(target_arch = "x86")]

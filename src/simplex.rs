@@ -1,6 +1,6 @@
 use self::simdeez::*;
 use super::*;
-use shared::*;
+use crate::shared::*;
 use std::f32;
 
 const F2: f32 = 0.36602540378;

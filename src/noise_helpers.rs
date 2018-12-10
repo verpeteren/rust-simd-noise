@@ -1,7 +1,7 @@
 use self::simdeez::*;
 use super::*;
-use cellular::*;
-use simplex::*;
+use crate::cellular::*;
+use crate::simplex::*;
 use std::f32;
 
 #[inline(always)]
