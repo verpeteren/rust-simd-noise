@@ -71,7 +71,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                         S::add_ps(S::abs_ps(xd),S::abs_ps(yd))                        
                     }
                     CellDistanceFunction::Natural => {
-                        let euc = S::add_ps(S::abs_ps(xd),S::abs_ps(yd));
+                        let euc = S::fmadd_ps(xd,xd,S::mul_ps(yd,yd));
                         let man = S::add_ps(S::abs_ps(xd),S::abs_ps(yd));
                         S::add_ps(euc,man)
                     }
