@@ -14,7 +14,7 @@ edition="2018"
 
 
 [dependencies]
-simdeez = "0.5.0"
+simdeez = "0.5.1"
 
 [dev-dependencies]
 criterion = "0.2"
