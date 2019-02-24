@@ -1,4 +1,13 @@
 use simdeez::*;
+
+pub const X_PRIME  : i32 =  1619;
+pub const Y_PRIME : i32 = 31337;
+pub const Z_PRIME : i32 = 6971;
+pub const BIT_5_MASK : i32 = 31;
+pub const BIT_10_MASK : i32 = 1023;
+pub const HASH_2_FLOAT: f32 = 1.0 / 2147483648.0;
+
+
 pub const PERM: [i32; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
     142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219,

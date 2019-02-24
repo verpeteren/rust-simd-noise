@@ -29,8 +29,69 @@ unsafe fn val_coord_2d<S: Simd>(seed: S::Vi32, x: S::Vi32, y: S::Vi32) -> S::Vf3
     );
     S::div_ps(S::cvtepi32_ps(hash), S::set1_ps(CELL_DIVISOR))
 }
+
 #[inline(always)]
 pub unsafe fn cellular_2d<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: S::Vf32,
+) -> S::Vf32 {
+    let mut distance = S::set1_ps(999999.0);
+    let mut cellValue = S::setzero_ps();
+
+    let mut xc = S::sub_epi32(S::cvtps_epi32(x),S::set1_epi32(1));
+    let mut ycBase = S::sub_epi32(S::cvtps_epi32(y),S::set1_epi32(1));
+
+    let mut xcf = S::sub_ps(S::cvtepi32_ps(xc),x);
+    let mut ycfBase = S::sub_ps(S::cvtepi32_ps(ycBase),y);
+
+    xc = S::mullo_epi32(xc,S::set1_epi32(X_PRIME));
+    ycBase = S::mullo_epi32(ycBase,S::set1_epi32(Y_PRIME));
+
+    for xi in 0 .. 3 {
+        let mut ycf = ycfBase;
+        let mut yc = ycBase;
+        for yi in 0 .. 3 {
+            let hash = hash_2d::<S>(S::set1_epi32(1337), xc, yc);
+            let mut xd = S::sub_ps(S::cvtepi32_ps(S::and_epi32(hash,S::set1_epi32(BIT_10_MASK))),S::set1_ps(511.5));
+            let mut yd = S::sub_ps(S::cvtepi32_ps(S::and_epi32(S::srai_epi32(hash,10),S::set1_epi32(BIT_10_MASK))),S::set1_ps(511.5));
+            let invMag = S::mul_ps(jitter,S::rsqrt_ps(S::fmadd_ps(xd,xd,S::mul_ps(yd,yd))));
+            xd = S::fmadd_ps(xd,invMag,xcf);
+            yd = S::fmadd_ps(yd,invMag,ycf);
+
+            let newCellValue = S::mul_ps(S::set1_ps(HASH_2_FLOAT), S::cvtepi32_ps(hash));         
+            let newDistance = 
+                match distance_function {
+                    CellDistanceFunction::Euclidean => {
+                        S::fmadd_ps(xd,xd,S::mul_ps(yd,yd))
+                    }
+                    CellDistanceFunction::Manhattan => {
+                        S::add_ps(S::abs_ps(xd),S::abs_ps(yd))                        
+                    }
+                    CellDistanceFunction::Natural => {
+                        let euc = S::add_ps(S::abs_ps(xd),S::abs_ps(yd));
+                        let man = S::add_ps(S::abs_ps(xd),S::abs_ps(yd));
+                        S::add_ps(euc,man)
+                    }
+                };
+            let closer = S::cmplt_ps(newDistance, distance);
+            distance = S::min_ps(newDistance,distance);
+            cellValue = S::blendv_ps(cellValue, newCellValue, closer);			
+
+            ycf = S::add_ps(ycf,S::set1_ps(1.0));
+            yc = S::add_epi32(yc,S::set1_epi32(Y_PRIME));
+        } 
+        xcf = S::add_ps(xcf,S::set1_ps(1.0));
+        xc = S::add_epi32(xc,S::set1_epi32(X_PRIME));
+    }
+    cellValue
+}
+
+
+#[inline(always)]
+pub unsafe fn new_cellular_2d<S: Simd>(
     x: S::Vf32,
     y: S::Vf32,
     distance_function: CellDistanceFunction,
