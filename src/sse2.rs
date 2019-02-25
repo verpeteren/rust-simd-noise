@@ -18,7 +18,7 @@ use std::arch::x86::*;
 use std::arch::x86_64::*;
 use std::f32;
 
-/// Get a single value of 2d cellular/voroni noise
+/// Get a single SIMD lane of 2d cellular/voroni noise
 #[target_feature(enable = "sse2")]
 pub unsafe fn cellular_2d(
     x: __m128,
@@ -36,7 +36,7 @@ pub unsafe fn cellular_2d(
     ).0
 }
 
-/// Get a single value of 3d cellular/voroni noise
+/// Get a single SIMD lane of 3d cellular/voroni noise
 #[target_feature(enable = "sse2")]
 pub unsafe fn cellular_3d(
     x: __m128,
@@ -56,14 +56,14 @@ pub unsafe fn cellular_3d(
     ).0
 }
 
-/// Get a single value of 1d simplex noise, results
+/// Get a single SIMD lane of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse2")]
 pub unsafe fn simplex_1d(x: __m128) -> __m128 {
     simplex::simplex_1d::<Sse2>(F32x4(x)).0
 }
 
-/// Get a single value of 1d fractal brownian motion.
+/// Get a single SIMD lane of 1d fractal brownian motion.
 #[target_feature(enable = "sse2")]
 pub unsafe fn fbm_1d(
     x: __m128,
@@ -81,7 +81,7 @@ pub unsafe fn fbm_1d(
     ).0
 }
 
-/// Get a single value of 2d ridge noise.
+/// Get a single SIMD lane of 2d ridge noise.
 #[target_feature(enable = "sse2")]
 pub unsafe fn ridge_1d(
     x: __m128,
@@ -93,7 +93,7 @@ pub unsafe fn ridge_1d(
     simplex::ridge_1d::<Sse2>(F32x4(x), F32x4(freq), F32x4(lacunarity), F32x4(gain), octaves).0
 }
 
-/// Get a single value of 2d turbulence.
+/// Get a single SIMD lane of 2d turbulence.
 #[target_feature(enable = "sse2")]
 pub unsafe fn turbulence_1d(
     x: __m128,

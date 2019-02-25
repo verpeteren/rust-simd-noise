@@ -43,14 +43,9 @@ unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: NoiseType) -> S::
             S::set1_ps(gain),
             octaves,
         ),
-        NoiseType::Normal { freq } => simplex_1d::<S>(S::mul_ps(x, S::set1_ps(freq))),
-
-        NoiseType::Cellular {
-            freq: _,
-            distance_function: _,
-            return_type: _,
-            jitter: _,
-        } => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Gradient { freq } => simplex_1d::<S>(S::mul_ps(x, S::set1_ps(freq))),
+        NoiseType::Cellular {..} => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -154,7 +149,7 @@ unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: Noise
             S::set1_ps(gain),
             octaves,
         ),
-        NoiseType::Normal { freq } => simplex_2d::<S>(
+        NoiseType::Gradient { freq } => simplex_2d::<S>(
             S::mul_ps(x, S::set1_ps(freq)),
             S::mul_ps(y, S::set1_ps(freq)),
         ),
@@ -170,6 +165,7 @@ unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: Noise
             return_type,
             S::set1_ps(jitter),
         ),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -288,7 +284,7 @@ unsafe fn get_3d_noise_helper<S: Simd>(
             S::set1_ps(gain),
             octaves,
         ),
-        NoiseType::Normal { freq } => simplex_3d::<S>(
+        NoiseType::Gradient { freq } => simplex_3d::<S>(
             S::mul_ps(x, S::set1_ps(freq)),
             S::mul_ps(y, S::set1_ps(freq)),
             S::mul_ps(z, S::set1_ps(freq)),
@@ -306,6 +302,7 @@ unsafe fn get_3d_noise_helper<S: Simd>(
             return_type,
             S::set1_ps(jitter),
         ),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -435,13 +432,14 @@ unsafe fn get_4d_noise_helper<S: Simd>(
             S::set1_ps(gain),
             octaves,
         ),
-        NoiseType::Normal { freq } => simplex_4d::<S>(
+        NoiseType::Gradient { freq } => simplex_4d::<S>(
             S::mul_ps(x, S::set1_ps(freq)),
             S::mul_ps(y, S::set1_ps(freq)),
             S::mul_ps(z, S::set1_ps(freq)),
             S::mul_ps(w, S::set1_ps(freq)),
         ),
         NoiseType::Cellular { .. } => panic!("not yet implemented"),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 #[inline(always)]

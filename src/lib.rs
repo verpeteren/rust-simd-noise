@@ -126,11 +126,7 @@ pub enum Cell2ReturnType {
     Distance2Div
 }
 
-/// Specifies what type of noise to generate and contains any relevant settings.
-#[derive(Copy, Clone)]
-pub enum NoiseType {
-    /// Ceullar Noise
-    Cellular {
+struct CellularSettings {
         /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
         /// starting value for experimentation is around 0.02
         freq: f32,
@@ -138,57 +134,114 @@ pub enum NoiseType {
         return_type: CellReturnType,
         /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
         /// will put cells in a perfect grid
-        jitter: f32,
-    },
-    /// Fractal Brownian Motion
-    Fbm {
-        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
-        /// starting value for experimentation is around 0.05
-        freq: f32,
-        /// Lacunarity affects how the octaves are layered together. A good starting value to
-        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
-        lacunarity: f32,
-        /// Gain affects how the octaves are layered together. A good starting value is 2.0
-        gain: f32,
-        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
-        /// and will increase runtime linearlly.
-        octaves: u8,
-    },
-    /// Turbulence aka Billow
-    Turbulence {
-        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
-        /// starting value for experimentation is around 0.05
-        freq: f32,
-        /// Lacunarity affects how the octaves are layered together. A good starting value to
-        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
-        lacunarity: f32,
-        /// Gain affects how the octaves are layered together. A good starting value is 2.0
-        gain: f32,
-        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
-        /// and will increase runtime linearlly.
-        octaves: u8,
-    },
-    /// Ridge Noise
-    Ridge {
-        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
-        /// starting value for experimentation is around 0.05
-        freq: f32,
-        /// Lacunarity affects how the octaves are layered together. A good starting value to
-        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
-        lacunarity: f32,
-        /// Gain affects how the octaves are layered together. A good starting value is 2.0
-        gain: f32,
-        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
-        /// and will increase runtime linearlly.
-        octaves: u8,
-    },
-    /// Simplex Noise
-    Normal {
-        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
-        /// starting value for experimentation is around 0.05
-        freq: f32,
-    },
+        jitter: f32,        
 }
+
+struct Cellular2Settings {
+    freq: f32,
+    distance_function: CellDistanceFunction,
+    return_type: Cell2ReturnType,
+    /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
+    /// will put cells in a perfect grid
+    jitter: f32,  
+    index0: usize,
+    index1: usize      
+}
+
+enum FractalType {Fbm,Turbulence,Ridge}
+struct FractalSettings {
+        fractal_type : FractalType,
+        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+        /// starting value for experimentation is around 0.05
+        freq: f32,
+        /// Lacunarity affects how the octaves are layered together. A good starting value to
+        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
+        lacunarity: f32,
+        /// Gain affects how the octaves are layered together. A good starting value is 2.0
+        gain: f32,
+        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+        /// and will increase runtime linearlly.
+        octaves: u8,
+}
+
+struct GradientSettings {
+    freq: f32
+}
+
+struct NoiseBuilder{}
+impl NoiseBuilder {
+     pub fn Cellular() -> CellularSettings {
+         CellularSettings {
+             freq: 0.02,
+             distance_function: CellDistanceFunction::Euclidean,
+             return_type: CellReturnType::Distance,
+             jitter:0.25
+         }
+     }
+
+     pub fn Cellular2() -> Cellular2Settings {
+          Cellular2Settings {
+             freq: 0.02,
+             distance_function: CellDistanceFunction::Euclidean,
+             return_type: Cell2ReturnType::Distance2,
+             jitter:0.25,
+             index0:0,
+             index1:1,
+         }
+     }
+
+     pub fn Gradient() -> GradientSettings {
+        GradientSettings{ freq:0.25 }
+     }
+
+     pub fn Turbulence() -> FractalSettings {
+         FractalSettings {
+             fractal_type: FractalType::Turbulence,
+             freq: 0.05,
+             lacunarity: 0.5,
+             gain: 2.0,
+             octaves: 3
+         }
+     }
+
+      pub fn Ridge() -> FractalSettings {
+         FractalSettings {
+             fractal_type: FractalType::Ridge,
+             freq: 0.05,
+             lacunarity: 0.5,
+             gain: 2.0,
+             octaves: 3
+         }
+     }
+
+      pub fn Fbm() -> FractalSettings {
+         FractalSettings {
+             fractal_type: FractalType::Fbm,
+             freq: 0.05,
+             lacunarity: 0.5,
+             gain: 2.0,
+             octaves: 3
+         }
+     }
+}
+
+/// Specifies what type of noise to generate and contains any relevant settings.
+#[derive(Copy, Clone)]
+pub enum NoiseType {
+    /// Ceullar Noise
+    Cellular,
+    Cellular2,
+    /// Fractal Brownian Motion
+    Fbm,
+    /// Turbulence aka Billow
+    Turbulence,
+    /// Ridge Noise
+    Ridge,
+    /// Simplex Noise
+    Gradient,
+}
+
+
 /// Gets a width X height sized block of 2d noise, unscaled,
 /// using runtime CPU feature detection to pick the fastest method
 /// between scalar, SSE2, SSE41, and AVX2
@@ -197,6 +250,8 @@ pub enum NoiseType {
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
+    
+
     if is_x86_feature_detected!("avx2") {
         unsafe { avx2::get_1d_noise(start_x, width, noise_type) }
     } else if is_x86_feature_detected!("sse4.1") {
@@ -487,7 +542,7 @@ mod tests {
             3,
             0.0,
             2,
-            NoiseType::Normal { freq: 0.05 },
+            NoiseType::Gradient { freq: 0.05 },
             0.0,
             1.0,
         );

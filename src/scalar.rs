@@ -291,13 +291,9 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
             gain,
             octaves,
         } => ridge_1d(x, freq, lacunarity, gain, octaves),
-        NoiseType::Normal { freq } => simplex_1d(x * freq),
-        NoiseType::Cellular {
-            freq: _,
-            distance_function: _,
-            return_type: _,
-            jitter: _,
-        } => panic!("1D cell noise not implemented"),
+        NoiseType::Gradient { freq } => simplex_1d(x * freq),
+        NoiseType::Cellular {..} => panic!("1D cell noise not implemented"),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 /// Gets a width sized block of 1d noise, unscaled.
@@ -492,13 +488,14 @@ fn get_2d_noise_helper(x: f32, y: f32, noise_type: NoiseType) -> f32 {
             gain,
             octaves,
         } => ridge_2d(x, y, freq, lacunarity, gain, octaves),
-        NoiseType::Normal { freq } => simplex_2d(x * freq, y * freq),
+        NoiseType::Gradient { freq } => simplex_2d(x * freq, y * freq),
         NoiseType::Cellular {
             freq,
             distance_function,
             return_type,
             jitter,
         } => cellular_2d(x * freq, y * freq, distance_function, return_type, jitter),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -766,7 +763,7 @@ fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
             gain,
             octaves,
         } => turbulence_3d(x, y, z, freq, lacunarity, gain, octaves),
-        NoiseType::Normal { freq } => simplex_3d(x * freq, y * freq, z * freq),
+        NoiseType::Gradient { freq } => simplex_3d(x * freq, y * freq, z * freq),
         NoiseType::Cellular {
             freq,
             distance_function,
@@ -780,6 +777,7 @@ fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
             return_type,
             jitter,
         ),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -1125,8 +1123,9 @@ fn get_4d_noise_helper(x: f32, y: f32, z: f32, w: f32, noise_type: NoiseType) ->
             gain,
             octaves,
         } => turbulence_4d(x, y, z, w, freq, lacunarity, gain, octaves),
-        NoiseType::Normal { freq } => simplex_4d(x * freq, y * freq, z * freq, w * freq),
+        NoiseType::Gradient { freq } => simplex_4d(x * freq, y * freq, z * freq, w * freq),
         NoiseType::Cellular { .. } => panic!("not yet implemented"),
+        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 

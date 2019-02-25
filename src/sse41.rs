@@ -136,14 +136,14 @@ pub unsafe fn get_1d_scaled_noise(
     noise
 }
 
-/// Get a single value of 2d simplex noise, results
+/// Get a single SIMD lane of 2d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     simplex::simplex_2d::<Sse41>(F32x4(x), F32x4(y)).0
 }
 
-/// Get a single value of 2d fractal brownian motion.
+/// Get a single SIMD lane of 2d fractal brownian motion.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_2d(
     x: __m128,
@@ -156,7 +156,7 @@ pub unsafe fn fbm_2d(
     simplex::fbm_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(freq), F32x4(lac), F32x4(gain), octaves).0
 }
 
-/// Get a single value of 2d ridge noise.
+/// Get a single SIMD lane of 2d ridge noise.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_2d(
     x: __m128,
@@ -168,7 +168,7 @@ pub unsafe fn ridge_2d(
 ) -> __m128 {
     simplex::ridge_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(freq), F32x4(lac), F32x4(gain), octaves).0
 }
-/// Get a single value of 2d turbulence.
+/// Get a single SIMD lane of 2d turbulence.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_2d(
     x: __m128,
