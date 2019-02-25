@@ -17,7 +17,7 @@ edition="2018"
 simdeez = "0.5.1"
 
 [dev-dependencies]
-criterion = "0.2"
+criterion = "0.2.10"
 
 [[bench]]
 name = "benchmarks"
