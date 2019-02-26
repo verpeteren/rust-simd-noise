@@ -10,8 +10,8 @@
 
 use super::*;
 use crate::shared::*;
-use simdeez::sse41::*;
 use simdeez::overloads::*;
+use simdeez::sse41::*;
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
@@ -33,7 +33,8 @@ pub unsafe fn cellular_2d(
         distance_function,
         return_type,
         F32x4(jitter),
-    ).0
+    )
+    .0
 }
 
 /// Get a single value of 3d cellular/voroni noise
@@ -53,7 +54,8 @@ pub unsafe fn cellular_3d(
         distance_function,
         return_type,
         F32x4(jitter),
-    ).0
+    )
+    .0
 }
 
 /// Get a single value of 1d simplex noise, results
@@ -78,7 +80,8 @@ pub unsafe fn fbm_1d(
         F32x4(lacunarity),
         F32x4(gain),
         octaves,
-    ).0
+    )
+    .0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -90,7 +93,14 @@ pub unsafe fn ridge_1d(
     gain: __m128,
     octaves: u8,
 ) -> __m128 {
-    simplex::ridge_1d::<Sse41>(F32x4(x), F32x4(freq), F32x4(lacunarity), F32x4(gain), octaves).0
+    simplex::ridge_1d::<Sse41>(
+        F32x4(x),
+        F32x4(freq),
+        F32x4(lacunarity),
+        F32x4(gain),
+        octaves,
+    )
+    .0
 }
 
 /// Get a single value of 2d turbulence.
@@ -102,7 +112,14 @@ pub unsafe fn turbulence_1d(
     gain: __m128,
     octaves: u8,
 ) -> __m128 {
-    simplex::turbulence_1d::<Sse41>(F32x4(x), F32x4(freq), F32x4(lacunarity), F32x4(gain), octaves).0
+    simplex::turbulence_1d::<Sse41>(
+        F32x4(x),
+        F32x4(freq),
+        F32x4(lacunarity),
+        F32x4(gain),
+        octaves,
+    )
+    .0
 }
 
 /// Gets a width sized block of 1d noise, unscaled.
@@ -136,14 +153,14 @@ pub unsafe fn get_1d_scaled_noise(
     noise
 }
 
-/// Get a single SIMD lane of 2d simplex noise, results
+/// Get a single value of 2d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
     simplex::simplex_2d::<Sse41>(F32x4(x), F32x4(y)).0
 }
 
-/// Get a single SIMD lane of 2d fractal brownian motion.
+/// Get a single value of 2d fractal brownian motion.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_2d(
     x: __m128,
@@ -153,10 +170,18 @@ pub unsafe fn fbm_2d(
     gain: __m128,
     octaves: u8,
 ) -> __m128 {
-    simplex::fbm_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(freq), F32x4(lac), F32x4(gain), octaves).0
+    simplex::fbm_2d::<Sse41>(
+        F32x4(x),
+        F32x4(y),
+        F32x4(freq),
+        F32x4(lac),
+        F32x4(gain),
+        octaves,
+    )
+    .0
 }
 
-/// Get a single SIMD lane of 2d ridge noise.
+/// Get a single value of 2d ridge noise.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_2d(
     x: __m128,
@@ -166,9 +191,17 @@ pub unsafe fn ridge_2d(
     gain: __m128,
     octaves: u8,
 ) -> __m128 {
-    simplex::ridge_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(freq), F32x4(lac), F32x4(gain), octaves).0
+    simplex::ridge_2d::<Sse41>(
+        F32x4(x),
+        F32x4(y),
+        F32x4(freq),
+        F32x4(lac),
+        F32x4(gain),
+        octaves,
+    )
+    .0
 }
-/// Get a single SIMD lane of 2d turbulence.
+/// Get a single value of 2d turbulence.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_2d(
     x: __m128,
@@ -178,7 +211,15 @@ pub unsafe fn turbulence_2d(
     gain: __m128,
     octaves: u8,
 ) -> __m128 {
-    simplex::turbulence_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(freq), F32x4(lac), F32x4(gain), octaves).0
+    simplex::turbulence_2d::<Sse41>(
+        F32x4(x),
+        F32x4(y),
+        F32x4(freq),
+        F32x4(lac),
+        F32x4(gain),
+        octaves,
+    )
+    .0
 }
 
 /// Gets a width X height sized block of 2d noise, unscaled.
@@ -242,7 +283,8 @@ pub unsafe fn fbm_3d(
         F32x4(lac),
         F32x4(gain),
         octaves,
-    ).0
+    )
+    .0
 }
 
 /// Get a single value of 3d ridge noise.
@@ -264,7 +306,8 @@ pub unsafe fn ridge_3d(
         F32x4(lac),
         F32x4(gain),
         octaves,
-    ).0
+    )
+    .0
 }
 
 /// Get a single value of 3d turbulence.
@@ -286,7 +329,8 @@ pub unsafe fn turbulence_3d(
         F32x4(lac),
         F32x4(gain),
         octaves,
-    ).0
+    )
+    .0
 }
 
 /// Gets a width X height X depth sized block of 3d noise, unscaled,
@@ -358,7 +402,8 @@ pub unsafe fn fbm_4d(
         F32x4(lac),
         F32x4(gain),
         octaves,
-    ).0
+    )
+    .0
 }
 
 /// Get a single value of 4d ridge noise.
@@ -382,7 +427,8 @@ pub unsafe fn ridge_4d(
         F32x4(lac),
         F32x4(gain),
         octaves,
-    ).0
+    )
+    .0
 }
 
 /// Get a single value of 4d turbulence.
@@ -406,7 +452,8 @@ pub unsafe fn turbulence_4d(
         F32x4(lac),
         F32x4(gain),
         octaves,
-    ).0
+    )
+    .0
 }
 
 /// Gets a width X height X depth x time sized block of 4d noise, unscaled,

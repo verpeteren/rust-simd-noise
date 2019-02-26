@@ -292,8 +292,12 @@ fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
             octaves,
         } => ridge_1d(x, freq, lacunarity, gain, octaves),
         NoiseType::Gradient { freq } => simplex_1d(x * freq),
-        NoiseType::Cellular {..} => panic!("1D cell noise not implemented"),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular {
+            freq: _,
+            distance_function: _,
+            return_type: _,
+            jitter: _,
+        } => panic!("1D cell noise not implemented"),
     }
 }
 /// Gets a width sized block of 1d noise, unscaled.
@@ -384,7 +388,9 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
         let n0 = if t0 < 0.0 {
             0.0
         } else {
-            t0 * t0 * t0 * t0
+            t0 * t0
+                * t0
+                * t0
                 * grad2(
                     *PERM.get_unchecked((ii + *PERM.get_unchecked(jj as usize)) as usize),
                     x0,
@@ -395,7 +401,9 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
         let n1 = if t1 < 0.0 {
             0.0
         } else {
-            t1 * t1 * t1 * t1
+            t1 * t1
+                * t1
+                * t1
                 * grad2(
                     *PERM.get_unchecked(
                         (ii + i1 + *PERM.get_unchecked((jj + j1) as usize)) as usize,
@@ -408,7 +416,9 @@ pub fn simplex_2d(x: f32, y: f32) -> f32 {
         let n2 = if t2 < 0.0 {
             0.0
         } else {
-            t2 * t2 * t2 * t2
+            t2 * t2
+                * t2
+                * t2
                 * grad2(
                     *PERM.get_unchecked((ii + 1 + *PERM.get_unchecked((jj + 1) as usize)) as usize),
                     x2,
@@ -495,7 +505,6 @@ fn get_2d_noise_helper(x: f32, y: f32, noise_type: NoiseType) -> f32 {
             return_type,
             jitter,
         } => cellular_2d(x * freq, y * freq, distance_function, return_type, jitter),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -777,7 +786,6 @@ fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
             return_type,
             jitter,
         ),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -973,9 +981,10 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     } else {
         t1 = t1 * t1;
         t1 = t1 * t1;
-        let h = PERM[(ii + i1
-                         + PERM[(jj + j1 + PERM[(kk + k1 + PERM[(ll + l1) as usize]) as usize])
-                                    as usize]) as usize];
+        let h = PERM[(ii
+            + i1
+            + PERM[(jj + j1 + PERM[(kk + k1 + PERM[(ll + l1) as usize]) as usize]) as usize])
+            as usize];
         t1 * grad4(h, x1, y1, z1, w1)
     };
 
@@ -985,9 +994,10 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     } else {
         t2 = t2 * t2;
         t2 = t2 * t2;
-        let h = PERM[(ii + i2
-                         + PERM[(jj + j2 + PERM[(kk + k2 + PERM[(ll + l2) as usize]) as usize])
-                                    as usize]) as usize];
+        let h = PERM[(ii
+            + i2
+            + PERM[(jj + j2 + PERM[(kk + k2 + PERM[(ll + l2) as usize]) as usize]) as usize])
+            as usize];
         t2 * grad4(h, x2, y2, z2, w2)
     };
 
@@ -997,9 +1007,11 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     } else {
         t3 = t3 * t3;
         t3 = t3 * t3;
-        let h = PERM[(ii + i3
-                         + PERM[(jj + j3 + PERM[(kk + k3 + PERM[(ll + l3) as usize]) as usize])
-                                    as usize]) as usize] & 31;
+        let h = PERM[(ii
+            + i3
+            + PERM[(jj + j3 + PERM[(kk + k3 + PERM[(ll + l3) as usize]) as usize]) as usize])
+            as usize]
+            & 31;
         t3 * grad4(h, x3, y3, z3, w3)
     };
 
@@ -1009,9 +1021,11 @@ pub fn simplex_4d(x: f32, y: f32, z: f32, w: f32) -> f32 {
     } else {
         t4 = t4 * t4;
         t4 = t4 * t4;
-        let h = PERM[(ii + 1
-                         + PERM[(jj + 1 + PERM[(kk + 1 + PERM[(ll + 1) as usize]) as usize])
-                                    as usize]) as usize] & 31;
+        let h = PERM[(ii
+            + 1
+            + PERM[(jj + 1 + PERM[(kk + 1 + PERM[(ll + 1) as usize]) as usize]) as usize])
+            as usize]
+            & 31;
         t4 * grad4(h, x4, y4, z4, w4)
     };
     n0 + n1 + n2 + n3 + n4
@@ -1125,7 +1139,6 @@ fn get_4d_noise_helper(x: f32, y: f32, z: f32, w: f32, noise_type: NoiseType) ->
         } => turbulence_4d(x, y, z, w, freq, lacunarity, gain, octaves),
         NoiseType::Gradient { freq } => simplex_4d(x * freq, y * freq, z * freq, w * freq),
         NoiseType::Cellular { .. } => panic!("not yet implemented"),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
     }
 }
 

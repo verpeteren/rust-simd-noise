@@ -26,66 +26,14 @@
 //!
 //! The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2
 //!
-//! ```rust
-//! use simdnoise::*;
 //!
-//! //  Set your noise type
-//! let noise_type = simdnoise::NoiseType::Fbm {
-//!       freq: 0.04,
-//!       lacunarity: 0.5,
-//!       gain: 2.0,
-//!       octaves: 3,
-//! };
-//!
-//! // Get a block of 2d 100x100 noise, with no scaling of resulting values
-//! // min and max values are returned so you can apply your own scaling
-//! let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 100, 0.0, 100, noise_type);
-//!
-//! // Get a block of 20x20x20 3d noise
-//! let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 20, 0.0, 20,0.0, 20,noise_type);
-//!
-//!
-//! // Get a block of noise scaled between -1 and 1
-//! let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 100, 0.0, 100, noise_type,-1.0,1.0);
-//! ```
 //!
 //! ## Call noise functions directly
 //! Sometimes you need something other than a block, like the points on the surface of a sphere.
 //! Sometimes you may want to use SSE41 even with AVX2 is available
 //!
-//! ```rust
-//! use simdnoise::*;
-//! use std::arch::x86_64::*;
 //!
-//! //  Set your noise type
-//! let noise_type = simdnoise::NoiseType::Fbm {
-//!       freq: 0.04,
-//!       lacunarity: 0.5,
-//!       gain: 2.0,
-//!       octaves: 3,
-//! };
-//!
-//! // get a block of 100x100 sse41 noise, skip runtime detection
-//! let (noise,min,max) = unsafe {simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,noise_type)};
-//!
-//! // send your own SIMD x,y values to the noise functions directly
-//! unsafe {
-//!   // sse2 simplex noise
-//!   let x = _mm_set1_ps(5.0);
-//!   let y = _mm_set1_ps(10.0);
-//!   let f = simdnoise::sse2::simplex_2d(x,y);
-//!   
-//!   // avx2 turbulence
-//!   let x = _mm256_set1_ps(5.0);
-//!   let y = _mm256_set1_ps(10.0);
-//!   let freq = _mm256_set1_ps(1.0);
-//!   let lacunarity = _mm256_set1_ps(0.5);
-//!   let gain = _mm256_set1_ps(2.0);
-//!   let octaves = 3;
-//!   let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,freq,lacunarity,gain,octaves);
-//!     
-//! }
-//! ```
+#[macro_use]
 extern crate simdeez;
 pub mod avx2;
 mod cellular;
@@ -95,6 +43,20 @@ mod shared;
 mod simplex;
 pub mod sse2;
 pub mod sse41;
+
+macro_rules! get_1d_noise {
+    ($setting:expr,$start_x:expr,$width:expr) => {
+        if is_x86_feature_detected!("avx2") {
+            unsafe { avx2::get_1d_noise($start_x, $width, $setting) }
+        } else if is_x86_feature_detected!("sse4.1") {
+            unsafe { sse41::get_1d_noise($start_x, $width, $setting) }
+        } else if is_x86_feature_detected!("sse2") {
+            unsafe { sse2::get_1d_noise($start_x, $width, $setting) }
+        } else {
+            unsafe { scalar::get_1d_noise($start_x, $width, $setting) }
+        }
+    };
+}
 
 #[derive(Copy, Clone)]
 /// The function to use to compute distance between cells
@@ -118,417 +80,316 @@ pub enum CellReturnType {
 
 #[derive(Copy, Clone)]
 /// Determines what final value is returned for the cell2 noise
-pub enum Cell2ReturnType {    
-    Distance2,    
+pub enum Cell2ReturnType {
+    Distance2,
     Distance2Add,
     Distance2Sub,
     Distance2Mul,
-    Distance2Div
+    Distance2Div,
 }
 
-struct CellularSettings {
-        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
-        /// starting value for experimentation is around 0.02
-        freq: f32,
-        distance_function: CellDistanceFunction,
-        return_type: CellReturnType,
-        /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
-        /// will put cells in a perfect grid
-        jitter: f32,        
+pub struct CellularSettings {
+    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+    /// starting value for experimentation is around 0.02
+    freq: f32,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
+    /// will put cells in a perfect grid
+    jitter: f32,
+}
+impl CellularSettings {
+    pub fn with_freq(&mut self, freq: f32) -> &mut CellularSettings {
+        self.freq = freq;
+        self
+    }
+
+    pub fn with_distance_function(&mut self, dist: CellDistanceFunction) -> &mut CellularSettings {
+        self.distance_function = dist;
+        self
+    }
+
+    pub fn with_return_type(&mut self, return_type: CellReturnType) -> &mut CellularSettings {
+        self.return_type = return_type;
+        self
+    }
+
+    pub fn with_jitter(&mut self, jitter: f32) -> &mut CellularSettings {
+        self.jitter = jitter;
+        self
+    }
 }
 
-struct Cellular2Settings {
+pub struct Cellular2Settings {
     freq: f32,
     distance_function: CellDistanceFunction,
     return_type: Cell2ReturnType,
     /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
     /// will put cells in a perfect grid
-    jitter: f32,  
+    jitter: f32,
     index0: usize,
-    index1: usize      
+    index1: usize,
+}
+impl Cellular2Settings {
+    pub fn with_freq(&mut self, freq: f32) -> &mut Cellular2Settings {
+        self.freq = freq;
+        self
+    }
+
+    pub fn with_distance_function(&mut self, dist: CellDistanceFunction) -> &mut Cellular2Settings {
+        self.distance_function = dist;
+        self
+    }
+
+    pub fn with_return_type(&mut self, return_type: Cell2ReturnType) -> &mut Cellular2Settings {
+        self.return_type = return_type;
+        self
+    }
+
+    pub fn with_jitter(&mut self, jitter: f32) -> &mut Cellular2Settings {
+        self.jitter = jitter;
+        self
+    }
+
+    pub fn with_index0(&mut self, i: usize) -> &mut Cellular2Settings {
+        self.index0 = i;
+        self
+    }
+
+    pub fn with_index1(&mut self, i: usize) -> &mut Cellular2Settings {
+        self.index1 = i;
+        self
+    }
 }
 
-enum FractalType {Fbm,Turbulence,Ridge}
-struct FractalSettings {
-        fractal_type : FractalType,
-        /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
-        /// starting value for experimentation is around 0.05
-        freq: f32,
-        /// Lacunarity affects how the octaves are layered together. A good starting value to
-        /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
-        lacunarity: f32,
-        /// Gain affects how the octaves are layered together. A good starting value is 2.0
-        gain: f32,
-        /// Specifies how many layers of nose to combine. More octaves can yeild more detail
-        /// and will increase runtime linearlly.
-        octaves: u8,
+pub struct FbmSettings {
+    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+    /// starting value for experimentation is around 0.05
+    freq: f32,
+    /// Lacunarity affects how the octaves are layered together. A good starting value to
+    /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
+    lacunarity: f32,
+    /// Gain affects how the octaves are layered together. A good starting value is 2.0
+    gain: f32,
+    /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+    /// and will increase runtime linearlly.
+    octaves: u8,
+}
+impl FbmSettings {
+    pub fn with_freq(&mut self, freq: f32) -> &mut FbmSettings {
+        self.freq = freq;
+        self
+    }
+
+    pub fn with_lacunarity(&mut self, lacunarity: f32) -> &mut FbmSettings {
+        self.lacunarity = lacunarity;
+        self
+    }
+
+    pub fn with_gain(&mut self, gain: f32) -> &mut FbmSettings {
+        self.gain = gain;
+        self
+    }
+
+    pub fn with_octaves(&mut self, octaves: u8) -> &mut FbmSettings {
+        self.octaves = octaves;
+        self
+    }
+
+    /// Gets a width X height sized block of 2d noise, unscaled,
+    /// using runtime CPU feature detection to pick the fastest method
+    /// between scalar, SSE2, SSE41, and AVX2
+    /// `start_x` and `start_y` can be used to provide an offset in the
+    /// coordinates. Results are unscaled, 'min' and 'max' noise values
+    /// are returned so you can scale and transform the noise as you see fit
+    /// in a single pass.
+
+    pub fn get_1d_noise(self, start_x: f32, width: usize) -> (Vec<f32>, f32, f32) {
+        get_1d_noise!(NoiseType::Fbm(self), start_x, width)
+    }
 }
 
-struct GradientSettings {
-    freq: f32
+pub struct RidgeSettings {
+    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+    /// starting value for experimentation is around 0.05
+    freq: f32,
+    /// Lacunarity affects how the octaves are layered together. A good starting value to
+    /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
+    lacunarity: f32,
+    /// Gain affects how the octaves are layered together. A good starting value is 2.0
+    gain: f32,
+    /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+    /// and will increase runtime linearlly.
+    octaves: u8,
+}
+impl RidgeSettings {
+    pub fn with_freq(&mut self, freq: f32) -> &mut RidgeSettings {
+        self.freq = freq;
+        self
+    }
+
+    pub fn with_lacunarity(&mut self, lacunarity: f32) -> &mut RidgeSettings {
+        self.lacunarity = lacunarity;
+        self
+    }
+
+    pub fn with_gain(&mut self, gain: f32) -> &mut RidgeSettings {
+        self.gain = gain;
+        self
+    }
+
+    pub fn with_octaves(&mut self, octaves: u8) -> &mut RidgeSettings {
+        self.octaves = octaves;
+        self
+    }
+
+    /// Gets a width X height sized block of 2d noise, unscaled,
+    /// using runtime CPU feature detection to pick the fastest method
+    /// between scalar, SSE2, SSE41, and AVX2
+    /// `start_x` and `start_y` can be used to provide an offset in the
+    /// coordinates. Results are unscaled, 'min' and 'max' noise values
+    /// are returned so you can scale and transform the noise as you see fit
+    /// in a single pass.
+    pub fn get_1d_noise(self, start_x: f32, width: usize) -> (Vec<f32>, f32, f32) {
+        get_1d_noise!(NoiseType::Ridge(self), start_x, width)
+    }
 }
 
-struct NoiseBuilder{}
-impl NoiseBuilder {
-     pub fn Cellular() -> CellularSettings {
-         CellularSettings {
-             freq: 0.02,
-             distance_function: CellDistanceFunction::Euclidean,
-             return_type: CellReturnType::Distance,
-             jitter:0.25
-         }
-     }
+pub struct TurbulenceSettings {
+    /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
+    /// starting value for experimentation is around 0.05
+    freq: f32,
+    /// Lacunarity affects how the octaves are layered together. A good starting value to
+    /// experiment with is 0.5, change from there in 0.25 increments to see what it looks like.
+    lacunarity: f32,
+    /// Gain affects how the octaves are layered together. A good starting value is 2.0
+    gain: f32,
+    /// Specifies how many layers of nose to combine. More octaves can yeild more detail
+    /// and will increase runtime linearlly.
+    octaves: u8,
+}
+impl TurbulenceSettings {
+    pub fn with_freq(&mut self, freq: f32) -> &mut TurbulenceSettings {
+        self.freq = freq;
+        self
+    }
 
-     pub fn Cellular2() -> Cellular2Settings {
-          Cellular2Settings {
-             freq: 0.02,
-             distance_function: CellDistanceFunction::Euclidean,
-             return_type: Cell2ReturnType::Distance2,
-             jitter:0.25,
-             index0:0,
-             index1:1,
-         }
-     }
+    pub fn with_lacunarity(&mut self, lacunarity: f32) -> &mut TurbulenceSettings {
+        self.lacunarity = lacunarity;
+        self
+    }
 
-     pub fn Gradient() -> GradientSettings {
-        GradientSettings{ freq:0.25 }
-     }
+    pub fn with_gain(&mut self, gain: f32) -> &mut TurbulenceSettings {
+        self.gain = gain;
+        self
+    }
 
-     pub fn Turbulence() -> FractalSettings {
-         FractalSettings {
-             fractal_type: FractalType::Turbulence,
-             freq: 0.05,
-             lacunarity: 0.5,
-             gain: 2.0,
-             octaves: 3
-         }
-     }
+    pub fn with_octaves(&mut self, octaves: u8) -> &mut TurbulenceSettings {
+        self.octaves = octaves;
+        self
+    }
 
-      pub fn Ridge() -> FractalSettings {
-         FractalSettings {
-             fractal_type: FractalType::Ridge,
-             freq: 0.05,
-             lacunarity: 0.5,
-             gain: 2.0,
-             octaves: 3
-         }
-     }
+    /// Gets a width X height sized block of 2d noise, unscaled,
+    /// using runtime CPU feature detection to pick the fastest method
+    /// between scalar, SSE2, SSE41, and AVX2
+    /// `start_x` and `start_y` can be used to provide an offset in the
+    /// coordinates. Results are unscaled, 'min' and 'max' noise values
+    /// are returned so you can scale and transform the noise as you see fit
+    /// in a single pass.
+    pub fn get_1d_noise(self, start_x: f32, width: usize) -> (Vec<f32>, f32, f32) {
+        get_1d_noise!(NoiseType::Turbulence(self), start_x, width)
+    }
+}
 
-      pub fn Fbm() -> FractalSettings {
-         FractalSettings {
-             fractal_type: FractalType::Fbm,
-             freq: 0.05,
-             lacunarity: 0.5,
-             gain: 2.0,
-             octaves: 3
-         }
-     }
+pub struct GradientSettings {
+    freq: f32,
+}
+impl GradientSettings {
+    pub fn with_freq(&mut self, freq: f32) -> &mut GradientSettings {
+        self.freq = freq;
+        self
+    }
+
+    /// Gets a width X height sized block of 2d noise, unscaled,
+    /// using runtime CPU feature detection to pick the fastest method
+    /// between scalar, SSE2, SSE41, and AVX2
+    /// `start_x` and `start_y` can be used to provide an offset in the
+    /// coordinates. Results are unscaled, 'min' and 'max' noise values
+    /// are returned so you can scale and transform the noise as you see fit
+    /// in a single pass.
+    pub fn get_1d_noise(self, start_x: f32, width: usize) -> (Vec<f32>, f32, f32) {
+        get_1d_noise!(NoiseType::Gradient(self), start_x, width)
+    }
 }
 
 /// Specifies what type of noise to generate and contains any relevant settings.
-#[derive(Copy, Clone)]
-pub enum NoiseType {
-    /// Ceullar Noise
-    Cellular,
-    Cellular2,
-    /// Fractal Brownian Motion
-    Fbm,
-    /// Turbulence aka Billow
-    Turbulence,
-    /// Ridge Noise
-    Ridge,
-    /// Simplex Noise
-    Gradient,
+enum NoiseType {
+    Fbm(FbmSettings),
+    Ridge(RidgeSettings),
+    Turbulence(TurbulenceSettings),
+    Gradient(GradientSettings),
+    Cellular(CellularSettings),
+    Cellular2(Cellular2Settings),
 }
 
-
-/// Gets a width X height sized block of 2d noise, unscaled,
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_x` and `start_y` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-pub fn get_1d_noise(start_x: f32, width: usize, noise_type: NoiseType) -> (Vec<f32>, f32, f32) {
-    
-
-    if is_x86_feature_detected!("avx2") {
-        unsafe { avx2::get_1d_noise(start_x, width, noise_type) }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe { sse41::get_1d_noise(start_x, width, noise_type) }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe { sse2::get_1d_noise(start_x, width, noise_type) }
-    } else {
-        scalar::get_1d_noise(start_x, width, noise_type)
+pub struct NoiseBuilder {}
+impl NoiseBuilder {
+    pub fn cellular() -> CellularSettings {
+        CellularSettings {
+            freq: 0.02,
+            distance_function: CellDistanceFunction::Euclidean,
+            return_type: CellReturnType::Distance,
+            jitter: 0.25,
+        }
     }
-}
 
-/// Gets a width X height sized block of scaled 2d noise
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_x` and `start_y` can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-pub fn get_1d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    noise_type: NoiseType,
-    scaled_min: f32,
-    scaled_max: f32,
-) -> Vec<f32> {
-    if is_x86_feature_detected!("avx2") {
-        unsafe { avx2::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max) }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe { sse41::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max) }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe { sse2::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max) }
-    } else {
-        scalar::get_1d_scaled_noise(start_x, width, noise_type, scaled_min, scaled_max)
+    pub fn cellular2() -> Cellular2Settings {
+        Cellular2Settings {
+            freq: 0.02,
+            distance_function: CellDistanceFunction::Euclidean,
+            return_type: Cell2ReturnType::Distance2,
+            jitter: 0.25,
+            index0: 0,
+            index1: 1,
+        }
     }
-}
 
-/// Gets a width X height sized block of 2d noise, unscaled,
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_x` and `start_y` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-pub fn get_2d_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    noise_type: NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    if is_x86_feature_detected!("avx2") {
-        unsafe { avx2::get_2d_noise(start_x, width, start_y, height, noise_type) }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe { sse41::get_2d_noise(start_x, width, start_y, height, noise_type) }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe { sse2::get_2d_noise(start_x, width, start_y, height, noise_type) }
-    } else {
-        scalar::get_2d_noise(start_x, width, start_y, height, noise_type)
+    pub fn gradient() -> GradientSettings {
+        GradientSettings { freq: 0.25 }
     }
-}
 
-/// Gets a width X height sized block of scaled 2d noise
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_x` and `start_y` can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-pub fn get_2d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    noise_type: NoiseType,
-    scaled_min: f32,
-    scaled_max: f32,
-) -> Vec<f32> {
-    if is_x86_feature_detected!("avx2") {
-        unsafe {
-            avx2::get_2d_scaled_noise(
-                start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
-            )
+    pub fn turbulence() -> TurbulenceSettings {
+        TurbulenceSettings {
+            freq: 0.05,
+            lacunarity: 0.5,
+            gain: 2.0,
+            octaves: 3,
         }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe {
-            sse41::get_2d_scaled_noise(
-                start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
-            )
-        }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe {
-            sse2::get_2d_scaled_noise(
-                start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
-            )
-        }
-    } else {
-        scalar::get_2d_scaled_noise(
-            start_x, width, start_y, height, noise_type, scaled_min, scaled_max,
-        )
     }
-}
 
-/// Gets a width X height X depth sized block of 3d noise, unscaled,
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-pub fn get_3d_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    noise_type: NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    if is_x86_feature_detected!("avx2") {
-        unsafe { avx2::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type) }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe { sse41::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type) }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe { sse2::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type) }
-    } else {
-        scalar::get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type)
+    pub fn ridge() -> RidgeSettings {
+        RidgeSettings {
+            freq: 0.05,
+            lacunarity: 0.5,
+            gain: 2.0,
+            octaves: 3,
+        }
     }
-}
 
-/// Gets a width X height X depth sized block of scaled 3d noise
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-pub fn get_3d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    noise_type: NoiseType,
-    scaled_min: f32,
-    scaled_max: f32,
-) -> Vec<f32> {
-    if is_x86_feature_detected!("avx2") {
-        unsafe {
-            avx2::get_3d_scaled_noise(
-                start_x, width, start_y, height, start_z, depth, noise_type, scaled_min,
-                scaled_max,
-            )
+    pub fn fbm() -> FbmSettings {
+        FbmSettings {
+            freq: 0.05,
+            lacunarity: 0.5,
+            gain: 2.0,
+            octaves: 3,
         }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe {
-            sse41::get_3d_scaled_noise(
-                start_x, width, start_y, height, start_z, depth, noise_type, scaled_min,
-                scaled_max,
-            )
-        }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe {
-            sse2::get_3d_scaled_noise(
-                start_x, width, start_y, height, start_z, depth, noise_type, scaled_min,
-                scaled_max,
-            )
-        }
-    } else {
-        scalar::get_3d_scaled_noise(
-            start_x, width, start_y, height, start_z, depth, noise_type, scaled_min, scaled_max,
-        )
-    }
-}
-/// Gets a width X height X depth X time sized block of rd noise, unscaled,
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_*` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-pub fn get_4d_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    start_w: f32,
-    time: usize,
-    noise_type: NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    if is_x86_feature_detected!("avx2") {
-        unsafe {
-            avx2::get_4d_noise(
-                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-            )
-        }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe {
-            sse41::get_4d_noise(
-                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-            )
-        }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe {
-            sse2::get_4d_noise(
-                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-            )
-        }
-    } else {
-        scalar::get_4d_noise(
-            start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-        )
-    }
-}
-
-/// Gets a width X height X depth X time sized block of scaled 4d noise
-/// using runtime CPU feature detection to pick the fastest method
-/// between scalar, SSE2, SSE41, and AVX2
-/// `start_*`can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-pub fn get_4d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    start_w: f32,
-    time: usize,
-    noise_type: NoiseType,
-    scaled_min: f32,
-    scaled_max: f32,
-) -> Vec<f32> {
-    if is_x86_feature_detected!("avx2") {
-        unsafe {
-            avx2::get_4d_scaled_noise(
-                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-                scaled_min, scaled_max,
-            )
-        }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe {
-            sse41::get_4d_scaled_noise(
-                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-                scaled_min, scaled_max,
-            )
-        }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe {
-            sse2::get_4d_scaled_noise(
-                start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-                scaled_min, scaled_max,
-            )
-        }
-    } else {
-        scalar::get_4d_scaled_noise(
-            start_x, width, start_y, height, start_z, depth, start_w, time, noise_type, scaled_min,
-            scaled_max,
-        )
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    const NOISE_TYPE: NoiseType = NoiseType::Fbm {
-        freq: 0.04,
-        lacunarity: 0.5,
-        gain: 2.0,
-        octaves: 3,
-    };
-    const CELL_NOISE_TYPE: NoiseType = NoiseType::Cellular {
-        freq: 0.02,
-        distance_function: CellDistanceFunction::Euclidean,
-        return_type: CellReturnType::Distance,
-        jitter: 0.25,
-    };
+
     macro_rules! assert_delta {
         ($x:expr, $y:expr, $d:expr) => {
             assert!(($x - $y).abs() < $d);
@@ -537,16 +398,14 @@ mod tests {
 
     #[test]
     fn small_dimensions() {
-        let _  = get_2d_scaled_noise(
-            0.0,
-            3,
-            0.0,
-            2,
-            NoiseType::Gradient { freq: 0.05 },
-            0.0,
-            1.0,
-        );
+        let noise = NoiseBuilder::gradient()
+            .with_freq(0.5)
+            .get_1d_noise(0.0, 100);
+        let noise2 = NoiseBuilder::fbm().with_freq(0.5).get_1d_noise(0.0, 100);
+
+        //let _ = get_2d_scaled_noise(0.0, 3, 0.0, 2, NoiseType::Gradient { freq: 0.05 }, 0.0, 1.0);
     }
+    /*
 
     #[test]
     fn consistency_4d() {
@@ -651,5 +510,5 @@ mod tests {
             assert_delta!(sse2[i], sse41[i], 0.1);
             assert_delta!(sse41[i], avx2[i], 0.1);
         }
-    }
+    }*/
 }

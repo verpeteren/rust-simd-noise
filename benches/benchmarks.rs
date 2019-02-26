@@ -6,16 +6,10 @@ use criterion::Criterion;
 use criterion::Fun;
 use simdnoise::*;
 
-const NOISE_TYPE: NoiseType = NoiseType::Fbm {
-    freq: 0.04,
-    lacunarity: 0.5,
-    gain: 2.0,
-    octaves: 3,
-};
-
 fn d4(c: &mut Criterion) {
+    let noise = NoiseBuilder::fbm();
     let scalar = Fun::new("Scalar 4D", |b, _i| {
-        b.iter(|| scalar::get_4d_noise(0.0, 8, 0.0, 8, 0.0, 8, 0.0, 8, NOISE_TYPE))
+        b.iter(|| scalar::get_1d_noise(0.0, 8, &noise))
     });
     let sse2 = Fun::new("SSE2 4D", |b, _i| {
         b.iter(|| unsafe { sse2::get_4d_noise(0.0, 8, 0.0, 8, 0.0, 8, 0.0, 8, NOISE_TYPE) })
@@ -50,7 +44,7 @@ fn d2(c: &mut Criterion) {
     let scalar = Fun::new("Scalar 2D", |b, _i| {
         b.iter(|| scalar::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE))
     });
-   
+
     let sse2 = Fun::new("SSE2 2D", |b, _i| {
         b.iter(|| unsafe { sse2::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE) })
     });
@@ -60,7 +54,7 @@ fn d2(c: &mut Criterion) {
     let avx2 = Fun::new("AVX2 2D", |b, _i| {
         b.iter(|| unsafe { avx2::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE) })
     });
-    let functions = vec![scalar, sse2,sse41,avx2];
+    let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("2D", functions, 0);
 }
 

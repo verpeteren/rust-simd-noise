@@ -7,45 +7,30 @@ use std::f32;
 #[inline(always)]
 unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: NoiseType) -> S::Vf32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_1d::<S>(
+        NoiseType::Fbm(s) => fbm_1d::<S>(
             x,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_1d::<S>(
+        NoiseType::Ridge(s) => ridge_1d::<S>(
             x,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_1d::<S>(
+        NoiseType::Turbulence(s) => turbulence_1d::<S>(
             x,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Gradient { freq } => simplex_1d::<S>(S::mul_ps(x, S::set1_ps(freq))),
-        NoiseType::Cellular {..} => panic!("1D Cell Noise Not Implemented"),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Gradient(s) => simplex_1d::<S>(S::mul_ps(x, S::set1_ps(s.freq))),
+        NoiseType::Cellular(s) => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular2(s) => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -110,62 +95,50 @@ pub unsafe fn get_1d_noise<S: Simd>(
 #[inline(always)]
 unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: NoiseType) -> S::Vf32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_2d::<S>(
+        NoiseType::Fbm(s) => fbm_2d::<S>(
             x,
             y,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_2d::<S>(
+        NoiseType::Ridge(s) => ridge_2d::<S>(
             x,
             y,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_2d::<S>(
+        NoiseType::Turbulence(s) => turbulence_2d::<S>(
             x,
             y,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Gradient { freq } => simplex_2d::<S>(
-            S::mul_ps(x, S::set1_ps(freq)),
-            S::mul_ps(y, S::set1_ps(freq)),
+        NoiseType::Gradient(s) => simplex_2d::<S>(
+            S::mul_ps(x, S::set1_ps(s.freq)),
+            S::mul_ps(y, S::set1_ps(s.freq)),
         ),
-        NoiseType::Cellular {
-            freq,
-            distance_function,
-            return_type,
-            jitter,
-        } => cellular_2d::<S>(
-            S::mul_ps(x, S::set1_ps(freq)),
-            S::mul_ps(y, S::set1_ps(freq)),
-            distance_function,
-            return_type,
-            S::set1_ps(jitter),
+        NoiseType::Cellular(s) => cellular_2d::<S>(
+            S::mul_ps(x, S::set1_ps(s.freq)),
+            S::mul_ps(y, S::set1_ps(s.freq)),
+            s.distance_function,
+            s.return_type,
+            S::set1_ps(s.jitter),
         ),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular2(s) => cellular2_2d::<S>(
+            S::mul_ps(x, S::set1_ps(s.freq)),
+            S::mul_ps(y, S::set1_ps(s.freq)),
+            s.distance_function,
+            s.return_type,
+            S::set1_ps(s.jitter),
+            s.index0,
+            s.index1,
+        ),
     }
 }
 
@@ -242,67 +215,56 @@ unsafe fn get_3d_noise_helper<S: Simd>(
     noise_type: NoiseType,
 ) -> S::Vf32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_3d::<S>(
+        NoiseType::Fbm(s) => fbm_3d::<S>(
             x,
             y,
             z,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_3d::<S>(
+        NoiseType::Ridge(s) => ridge_3d::<S>(
             x,
             y,
             z,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_3d::<S>(
+        NoiseType::Turbulence(s) => turbulence_3d::<S>(
             x,
             y,
             z,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Gradient { freq } => simplex_3d::<S>(
-            S::mul_ps(x, S::set1_ps(freq)),
-            S::mul_ps(y, S::set1_ps(freq)),
-            S::mul_ps(z, S::set1_ps(freq)),
+        NoiseType::Gradient(s) => simplex_3d::<S>(
+            S::mul_ps(x, S::set1_ps(s.freq)),
+            S::mul_ps(y, S::set1_ps(s.freq)),
+            S::mul_ps(z, S::set1_ps(s.freq)),
         ),
-        NoiseType::Cellular {
-            freq,
-            distance_function,
-            return_type,
-            jitter,
-        } => cellular_3d::<S>(
-            S::mul_ps(x, S::set1_ps(freq)),
-            S::mul_ps(y, S::set1_ps(freq)),
-            S::mul_ps(z, S::set1_ps(freq)),
-            distance_function,
-            return_type,
-            S::set1_ps(jitter),
+        NoiseType::Cellular(s) => cellular_3d::<S>(
+            S::mul_ps(x, S::set1_ps(s.freq)),
+            S::mul_ps(y, S::set1_ps(s.freq)),
+            S::mul_ps(z, S::set1_ps(s.freq)),
+            s.distance_function,
+            s.return_type,
+            S::set1_ps(s.jitter),
         ),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular2(s) => cellular2_3d::<S>(
+            S::mul_ps(x, S::set1_ps(s.freq)),
+            S::mul_ps(y, S::set1_ps(s.freq)),
+            S::mul_ps(z, S::set1_ps(s.freq)),
+            s.distance_function,
+            s.return_type,
+            S::set1_ps(s.jitter),
+            s.index0,
+            s.index1,
+        ),
     }
 }
 
@@ -387,59 +349,44 @@ unsafe fn get_4d_noise_helper<S: Simd>(
     noise_type: NoiseType,
 ) -> S::Vf32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_4d::<S>(
+        NoiseType::Fbm(s) => fbm_4d::<S>(
             x,
             y,
             z,
             w,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_4d::<S>(
+        NoiseType::Ridge(s) => ridge_4d::<S>(
             x,
             y,
             z,
             w,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_4d::<S>(
+        NoiseType::Turbulence(s) => turbulence_4d::<S>(
             x,
             y,
             z,
             w,
-            S::set1_ps(freq),
-            S::set1_ps(lacunarity),
-            S::set1_ps(gain),
-            octaves,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves,
         ),
-        NoiseType::Gradient { freq } => simplex_4d::<S>(
-            S::mul_ps(x, S::set1_ps(freq)),
-            S::mul_ps(y, S::set1_ps(freq)),
-            S::mul_ps(z, S::set1_ps(freq)),
-            S::mul_ps(w, S::set1_ps(freq)),
+        NoiseType::Gradient(s) => simplex_4d::<S>(
+            S::mul_ps(x, S::set1_ps(s.freq)),
+            S::mul_ps(y, S::set1_ps(s.freq)),
+            S::mul_ps(z, S::set1_ps(s.freq)),
+            S::mul_ps(w, S::set1_ps(s.freq)),
         ),
-        NoiseType::Cellular { .. } => panic!("not yet implemented"),
-        NoiseType::Cellular2 {..} => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular(s) => panic!("not implemented"),
+        NoiseType::Cellular2(s) => panic!("not implemented"),
     }
 }
 #[inline(always)]
