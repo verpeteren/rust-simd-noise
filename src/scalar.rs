@@ -273,31 +273,15 @@ pub fn ridge_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f
 
 fn get_1d_noise_helper(x: f32, noise_type: NoiseType) -> f32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_1d(x, freq, lacunarity, gain, octaves),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_1d(x, freq, lacunarity, gain, octaves),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_1d(x, freq, lacunarity, gain, octaves),
-        NoiseType::Gradient { freq } => simplex_1d(x * freq),
-        NoiseType::Cellular {
-            freq: _,
-            distance_function: _,
-            return_type: _,
-            jitter: _,
-        } => panic!("1D cell noise not implemented"),
+        NoiseType::Fbm (s)            
+         => fbm_1d(x, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Turbulence (s)            
+         => turbulence_1d(x, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Ridge (s)
+         => ridge_1d(x, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Gradient (s) => simplex_1d(x * s.freq),
+        NoiseType::Cellular (s)
+         => panic!("1D cell noise not implemented"),
     }
 }
 /// Gets a width sized block of 1d noise, unscaled.
@@ -480,31 +464,15 @@ pub fn ridge_2d(x: f32, y: f32, freq: f32, lacunarity: f32, gain: f32, octaves: 
 
 fn get_2d_noise_helper(x: f32, y: f32, noise_type: NoiseType) -> f32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_2d(x, y, freq, lacunarity, gain, octaves),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_2d(x, y, freq, lacunarity, gain, octaves),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_2d(x, y, freq, lacunarity, gain, octaves),
-        NoiseType::Gradient { freq } => simplex_2d(x * freq, y * freq),
-        NoiseType::Cellular {
-            freq,
-            distance_function,
-            return_type,
-            jitter,
-        } => cellular_2d(x * freq, y * freq, distance_function, return_type, jitter),
+        NoiseType::Fbm (s)
+         => fbm_2d(x, y, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Turbulence (s)
+         => turbulence_2d(x, y, s.freq,s.lacunarity, s.gain, s.octaves),
+        NoiseType::Ridge (s)
+         => ridge_2d(x, y, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Gradient ( s ) => simplex_2d(x * s.freq, y * s.freq),
+        NoiseType::Cellular (s)            
+         => cellular_2d(x * s.freq, y * s.freq, s.distance_function, s.return_type, s.jitter),
     }
 }
 
@@ -754,37 +722,21 @@ pub fn turbulence_3d(
 
 fn get_3d_noise_helper(x: f32, y: f32, z: f32, noise_type: NoiseType) -> f32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_3d(x, y, z, freq, lacunarity, gain, octaves),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_3d(x, y, z, freq, lacunarity, gain, octaves),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_3d(x, y, z, freq, lacunarity, gain, octaves),
-        NoiseType::Gradient { freq } => simplex_3d(x * freq, y * freq, z * freq),
-        NoiseType::Cellular {
-            freq,
-            distance_function,
-            return_type,
-            jitter,
-        } => cellular_3d(
-            x * freq,
-            y * freq,
-            z * freq,
-            distance_function,
-            return_type,
-            jitter,
+        NoiseType::Fbm (s)
+        => fbm_3d(x, y, z, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Ridge (s)
+         => ridge_3d(x, y, z, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Turbulence (s)
+        => turbulence_3d(x, y, z, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Gradient (s) => simplex_3d(x * s.freq, y * s.freq, z * s.freq),
+        NoiseType::Cellular (s)
+        => cellular_3d(
+            x * s.freq,
+            y * s.freq,
+            z * s.freq,
+            s.distance_function,
+            s.return_type,
+            s.jitter,
         ),
     }
 }
@@ -1119,26 +1071,14 @@ pub fn turbulence_4d(
 
 fn get_4d_noise_helper(x: f32, y: f32, z: f32, w: f32, noise_type: NoiseType) -> f32 {
     match noise_type {
-        NoiseType::Fbm {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => fbm_4d(x, y, z, w, freq, lacunarity, gain, octaves),
-        NoiseType::Ridge {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => ridge_4d(x, y, z, w, freq, lacunarity, gain, octaves),
-        NoiseType::Turbulence {
-            freq,
-            lacunarity,
-            gain,
-            octaves,
-        } => turbulence_4d(x, y, z, w, freq, lacunarity, gain, octaves),
-        NoiseType::Gradient { freq } => simplex_4d(x * freq, y * freq, z * freq, w * freq),
-        NoiseType::Cellular { .. } => panic!("not yet implemented"),
+        NoiseType::Fbm (s)
+         => fbm_4d(x, y, z, w, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Ridge (s)
+         => ridge_4d(x, y, z, w, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Turbulence (s) 
+         => turbulence_4d(x, y, z, w, s.freq, s.lacunarity, s.gain, s.octaves),
+        NoiseType::Gradient (s) => simplex_4d(x * s.freq, y * s.freq, z * s.freq, w * s.freq),
+        NoiseType::Cellular (..) => panic!("not yet implemented"),
     }
 }
 

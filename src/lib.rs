@@ -33,7 +33,7 @@
 //! Sometimes you may want to use SSE41 even with AVX2 is available
 //!
 //!
-#[macro_use]
+
 extern crate simdeez;
 pub mod avx2;
 mod cellular;
