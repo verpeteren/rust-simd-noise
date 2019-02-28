@@ -36,10 +36,11 @@ unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: &NoiseType) -> S:
 
 #[inline(always)]
 pub unsafe fn get_1d_noise<S: Simd>(
-    start_x: f32,
-    width: usize,
     noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
+    let dim = noise_type.get_dimensions();
+    let start_x = dim.x;
+    let width = dim.width;
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
 
@@ -149,12 +150,14 @@ unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: &Nois
 /// in a single pass.
 #[inline(always)]
 pub unsafe fn get_2d_noise<S: Simd>(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
     noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
+    let dim = noise_type.get_dimensions();
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
     let mut min = f32::MAX;
@@ -275,14 +278,16 @@ unsafe fn get_3d_noise_helper<S: Simd>(
 /// in a single pass.
 #[inline(always)]
 pub unsafe fn get_3d_noise<S: Simd>(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
     noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
+    let dim = noise_type.get_dimensions();
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+    let start_z = dim.z;
+    let depth = dim.depth;
+
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
     let mut min = f32::MAX;
@@ -391,16 +396,18 @@ unsafe fn get_4d_noise_helper<S: Simd>(
 }
 #[inline(always)]
 pub unsafe fn get_4d_noise<S: Simd>(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    start_w: f32,
-    time: usize,
     noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
+    let dim = noise_type.get_dimensions();
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+    let start_z = dim.z;
+    let depth = dim.depth;
+    let start_w = dim.w;
+    let time = dim.time;
+
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
     let mut min = f32::MAX;

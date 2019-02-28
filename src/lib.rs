@@ -45,192 +45,112 @@ pub mod sse2;
 pub mod sse41;
 
 macro_rules! get_1d_noise {
-    ($setting:expr,$start_x:expr,$width:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_1d_noise($start_x, $width, $setting) }
+            unsafe { avx2::get_1d_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_1d_noise($start_x, $width, $setting) }
+            unsafe { sse41::get_1d_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_1d_noise($start_x, $width, $setting) }
+            unsafe { sse2::get_1d_noise($setting) }
         } else {
-            unsafe { scalar::get_1d_noise($start_x, $width, $setting) }
+            unsafe { scalar::get_1d_noise($setting) }
         }
     };
 }
 
 macro_rules! get_2d_noise {
-    ($setting:expr,$start_x:expr,$width:expr,$start_y:expr,$height:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_2d_noise($start_x, $width, $start_y, $height, $setting) }
+            unsafe { avx2::get_2d_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_2d_noise($start_x, $width, $start_y, $height, $setting) }
+            unsafe { sse41::get_2d_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_2d_noise($start_x, $width, $start_y, $height, $setting) }
+            unsafe { sse2::get_2d_noise($setting) }
         } else {
-            unsafe { scalar::get_2d_noise($start_x, $width, $start_y, $height, $setting) }
+            unsafe { scalar::get_2d_noise($setting) }
         }
     };
 }
 
 macro_rules! get_3d_noise {
-    ($setting:expr,$start_x:expr,$width:expr,$start_y:expr,$height:expr,$start_z:expr,$depth:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe {
-                avx2::get_3d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting,
-                )
-            }
+            unsafe { avx2::get_3d_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe {
-                sse41::get_3d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting,
-                )
-            }
+            unsafe { sse41::get_3d_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe {
-                sse2::get_3d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting,
-                )
-            }
+            unsafe { sse2::get_3d_noise($setting) }
         } else {
-            unsafe {
-                scalar::get_3d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting,
-                )
-            }
+            unsafe { scalar::get_3d_noise($setting) }
         }
     };
 }
 
 macro_rules! get_4d_noise {
-    ($setting:expr,$start_x:expr,$width:expr,$start_y:expr,$height:expr,$start_z:expr,$depth:expr,$start_w:expr,$time:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe {
-                avx2::get_4d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting,
-                )
-            }
+            unsafe { avx2::get_4d_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe {
-                sse41::get_4d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting,
-                )
-            }
+            unsafe { sse41::get_4d_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe {
-                sse2::get_4d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting,
-                )
-            }
+            unsafe { sse2::get_4d_noise($setting) }
         } else {
-            unsafe {
-                scalar::get_4d_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting,
-                )
-            }
+            unsafe { scalar::get_4d_noise($setting) }
         }
     };
 }
 macro_rules! get_1d_scaled_noise {
-    ($setting:expr,$start_x:expr,$width:expr,$min:expr,$max:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_1d_scaled_noise($start_x, $width, $setting, $min, $max) }
+            unsafe { avx2::get_1d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_1d_scaled_noise($start_x, $width, $setting, $min, $max) }
+            unsafe { sse41::get_1d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_1d_scaled_noise($start_x, $width, $setting, $min, $max) }
+            unsafe { sse2::get_1d_scaled_noise($setting) }
         } else {
-            unsafe { scalar::get_1d_scaled_noise($start_x, $width, $setting, $min, $max) }
+            unsafe { scalar::get_1d_scaled_noise($setting) }
         }
     };
 }
 
 macro_rules! get_2d_scaled_noise {
-    ($setting:expr,$start_x:expr,$width:expr,$start_y:expr,$height:expr,$min:expr,$max:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe {
-                avx2::get_2d_scaled_noise($start_x, $width, $start_y, $height, $setting, $min, $max)
-            }
+            unsafe { avx2::get_2d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe {
-                sse41::get_2d_scaled_noise($start_x, $width, $start_y, $height, $setting, $min, $max)
-            }
+            unsafe { sse41::get_2d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe {
-                sse2::get_2d_scaled_noise($start_x, $width, $start_y, $height, $setting, $min, $max)
-            }
+            unsafe { sse2::get_2d_scaled_noise($setting) }
         } else {
-            unsafe {
-                scalar::get_2d_scaled_noise($start_x, $width, $start_y, $height, $setting, $min, $max)
-            }
+            unsafe { scalar::get_2d_scaled_noise($setting) }
         }
     };
 }
 
 macro_rules! get_3d_scaled_noise {
-    ($setting:expr,$start_x:expr,$width:expr,$start_y:expr,$height:expr,$start_z:expr,$depth:expr,$min:expr,$max:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe {
-                avx2::get_3d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting, $min, $max,
-                )
-            }
+            unsafe { avx2::get_3d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe {
-                sse41::get_3d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting, $min, $max,
-                )
-            }
+            unsafe { sse41::get_3d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe {
-                sse2::get_3d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting, $min, $max,
-                )
-            }
+            unsafe { sse2::get_3d_scaled_noise($setting) }
         } else {
-            unsafe {
-                scalar::get_3d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $setting, $min, $max,
-                )
-            }
+            unsafe { scalar::get_3d_scaled_noise($setting) }
         }
     };
 }
 
 macro_rules! get_4d_scaled_noise {
-    ($setting:expr,$start_x:expr,$width:expr,$start_y:expr,$height:expr,$start_z:expr,$depth:expr,$start_w:expr,$time:expr,$min:expr,$max:expr) => {
+    ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe {
-                avx2::get_4d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting, $min, $max,
-                )
-            }
+            unsafe { avx2::get_4d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe {
-                sse41::get_4d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting, $min, $max,
-                )
-            }
+            unsafe { sse41::get_4d_scaled_noise($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe {
-                sse2::get_4d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting, $min, $max,
-                )
-            }
+            unsafe { sse2::get_4d_scaled_noise($setting) }
         } else {
-            unsafe {
-                scalar::get_4d_scaled_noise(
-                    $start_x, $width, $start_y, $height, $start_z, $depth, $start_w, $time,
-                    $setting, $min, $max,
-                )
-            }
+            unsafe { scalar::get_4d_scaled_noise($setting) }
         }
     };
 }
@@ -265,14 +185,44 @@ pub enum Cell2ReturnType {
     Distance2Div,
 }
 
-#[derive(Copy, Clone)]
-pub enum NoiseDimensions {
-    D1(f32, usize),
-    D2(f32, usize, f32, usize),
-    D3(f32, usize, f32, usize, f32, usize),
-    D4(f32, usize, f32, usize, f32, usize, f32, usize),
+pub trait DimensionalBeing {
+    fn get_dimensions(&self) -> NoiseDimensions;
 }
 
+#[derive(Copy, Clone)]
+pub struct NoiseDimensions {
+    dim:usize,
+    x:f32,
+    y:f32,
+    z:f32,
+    w:f32,
+    width:usize,
+    height:usize,
+    depth:usize,
+    time:usize,
+    min:f32,
+    max:f32
+}
+impl NoiseDimensions {
+    pub fn default(d:usize) -> NoiseDimensions {
+        if d < 1 || d > 4 {
+            panic!("dimension invalid");
+        }
+        NoiseDimensions {
+            dim:d,
+            x:0.0,
+            y:0.0,
+            z:0.0,
+            w:0.0,
+            width:0,
+            height:0,
+            depth:0,
+            time:0,
+            min:0.0,
+            max:1.0,        
+        }
+    }
+}
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
     dim: NoiseDimensions,
@@ -284,6 +234,11 @@ pub struct CellularSettings {
     /// The amount of random variation in cell positions. 0.25 is a good starting point. 0.0
     /// will put cells in a perfect grid
     jitter: f32,
+}
+impl DimensionalBeing for CellularSettings {
+    fn get_dimensions(&self) -> NoiseDimensions {
+        return self.dim;
+    }
 }
 impl CellularSettings {
     pub fn default(dim: NoiseDimensions) -> CellularSettings {
@@ -317,50 +272,20 @@ impl CellularSettings {
     }
 
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
-        match self.dim {
-            NoiseDimensions::D1(..) => panic!("not implemented"),
-            NoiseDimensions::D2(start_x, width, start_y, height) => {
-                get_2d_noise!(&NoiseType::Cellular(self), start_x, width, start_y, height)
-            }
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => get_3d_noise!(
-                &NoiseType::Cellular(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth
-            ),
-            NoiseDimensions::D4(..) => panic!("not implemented"),
+        let d = self.dim.dim;
+        match d {        
+            2 => get_2d_noise!(&NoiseType::Cellular(self)),
+            3 => get_3d_noise!(&NoiseType::Cellular(self)),
+            _ => panic!("not implemented"),
         }
     }
 
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
-        match self.dim {
-            NoiseDimensions::D1(..) => panic!("not implemented"),
-            NoiseDimensions::D2(start_x, width, start_y, height) => get_2d_scaled_noise!(
-                &NoiseType::Cellular(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                min,
-                max
-            ),
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => {
-                get_3d_scaled_noise!(
-                    &NoiseType::Cellular(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    min,
-                    max
-                )
-            }
-            NoiseDimensions::D4(..) => panic!("not implemented"),
+        let d = self.dim.dim;
+        match d {        
+            2 => get_2d_scaled_noise!(&NoiseType::Cellular(self)),
+            3 => get_3d_scaled_noise!(&NoiseType::Cellular(self)),
+            _ => panic!("not implemented"),
         }
     }
 }
@@ -375,6 +300,11 @@ pub struct Cellular2Settings {
     jitter: f32,
     index0: usize,
     index1: usize,
+}
+impl DimensionalBeing for Cellular2Settings {
+    fn get_dimensions(&self) -> NoiseDimensions {
+        return self.dim;
+    }
 }
 impl Cellular2Settings {
     pub fn default(dim: NoiseDimensions) -> Cellular2Settings {
@@ -419,50 +349,20 @@ impl Cellular2Settings {
         self
     }
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
-        match self.dim {
-            NoiseDimensions::D1(..) => panic!("not implemented"),
-            NoiseDimensions::D2(start_x, width, start_y, height) => {
-                get_2d_noise!(&NoiseType::Cellular2(self), start_x, width, start_y, height)
-            }
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => get_3d_noise!(
-                &NoiseType::Cellular2(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth
-            ),
-            NoiseDimensions::D4(..) => panic!("not implemented"),
+        let d = self.dim.dim;
+        match d {        
+            2 => get_2d_noise!(&NoiseType::Cellular2(self)),
+            3 => get_3d_noise!(&NoiseType::Cellular2(self)),
+            _ => panic!("not implemented"),
         }
     }
 
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
-        match self.dim {
-            NoiseDimensions::D1(..) => panic!("not implemented"),
-            NoiseDimensions::D2(start_x, width, start_y, height) => get_2d_scaled_noise!(
-                &NoiseType::Cellular2(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                min,
-                max
-            ),
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => {
-                get_3d_scaled_noise!(
-                    &NoiseType::Cellular2(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    min,
-                    max
-                )
-            }
-            NoiseDimensions::D4(..) => panic!("not implemented"),
+        let d = self.dim.dim;
+        match d {        
+            2 => get_2d_scaled_noise!(&NoiseType::Cellular2(self)),
+            3 => get_3d_scaled_noise!(&NoiseType::Cellular2(self)),
+            _ => panic!("not implemented"),
         }
     }
 }
@@ -480,6 +380,11 @@ pub struct FbmSettings {
     /// Specifies how many layers of nose to combine. More octaves can yeild more detail
     /// and will increase runtime linearlly.
     octaves: u8,
+}
+impl DimensionalBeing for FbmSettings {
+    fn get_dimensions(&self) -> NoiseDimensions {
+        return self.dim;
+    }
 }
 impl FbmSettings {
     pub fn default(dim: NoiseDimensions) -> FbmSettings {
@@ -512,83 +417,27 @@ impl FbmSettings {
         self
     }
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_noise!(&NoiseType::Fbm(self), start_x, width)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => {
-                get_2d_noise!(&NoiseType::Fbm(self), start_x, width, start_y, height)
-            }
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => get_3d_noise!(
-                &NoiseType::Fbm(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth
-            ),
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_noise!(
-                    &NoiseType::Fbm(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time
-                )
-            }
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_noise!(&NoiseType::Fbm(self)),
+            2 => get_2d_noise!(&NoiseType::Fbm(self)),
+            3 => get_3d_noise!(&NoiseType::Fbm(self)),
+            4 => get_4d_noise!(&NoiseType::Fbm(self)),
+            _ => panic!("not implemented"),
         }
     }
-
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_scaled_noise!(&NoiseType::Fbm(self), start_x, width, min, max)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => get_2d_scaled_noise!(
-                &NoiseType::Fbm(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                min,
-                max
-            ),
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => {
-                get_3d_scaled_noise!(
-                    &NoiseType::Fbm(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    min,
-                    max
-                )
-            }
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_scaled_noise!(
-                    &NoiseType::Fbm(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time,
-                    min,
-                    max
-                )
-            }
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_scaled_noise!(&NoiseType::Fbm(self)),
+            2 => get_2d_scaled_noise!(&NoiseType::Fbm(self)),
+            3 => get_3d_scaled_noise!(&NoiseType::Fbm(self)),
+            4 => get_4d_scaled_noise!(&NoiseType::Fbm(self)),
+            _ => panic!("not implemented"),
         }
     }
 }
+
 #[derive(Copy, Clone)]
 pub struct RidgeSettings {
     dim: NoiseDimensions,
@@ -603,6 +452,11 @@ pub struct RidgeSettings {
     /// Specifies how many layers of nose to combine. More octaves can yeild more detail
     /// and will increase runtime linearlly.
     octaves: u8,
+}
+impl DimensionalBeing for RidgeSettings {
+    fn get_dimensions(&self) -> NoiseDimensions {
+        return self.dim;
+    }
 }
 impl RidgeSettings {
     pub fn default(dim: NoiseDimensions) -> RidgeSettings {
@@ -635,82 +489,27 @@ impl RidgeSettings {
         self
     }
 
-    pub fn generate(self) -> (Vec<f32>, f32, f32) {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_noise!(&NoiseType::Ridge(self), start_x, width)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => {
-                get_2d_noise!(&NoiseType::Ridge(self), start_x, width, start_y, height)
-            }
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => get_3d_noise!(
-                &NoiseType::Ridge(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth
-            ),
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_noise!(
-                    &NoiseType::Ridge(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time
-                )
-            }
+   pub fn generate(self) -> (Vec<f32>, f32, f32) {
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_noise!(&NoiseType::Ridge(self)),
+            2 => get_2d_noise!(&NoiseType::Ridge(self)),
+            3 => get_3d_noise!(&NoiseType::Ridge(self)),
+            4 => get_4d_noise!(&NoiseType::Ridge(self)),
+            _ => panic!("not implemented"),
         }
     }
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_scaled_noise!(&NoiseType::Ridge(self), start_x, width, min, max)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => get_2d_scaled_noise!(
-                &NoiseType::Ridge(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                min,
-                max
-            ),
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => {
-                get_3d_scaled_noise!(
-                    &NoiseType::Ridge(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    min,
-                    max
-                )
-            }
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_scaled_noise!(
-                    &NoiseType::Ridge(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time,
-                    min,
-                    max
-                )
-            }
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_scaled_noise!(&NoiseType::Ridge(self)),
+            2 => get_2d_scaled_noise!(&NoiseType::Ridge(self)),
+            3 => get_3d_scaled_noise!(&NoiseType::Ridge(self)),
+            4 => get_4d_scaled_noise!(&NoiseType::Ridge(self)),
+            _ => panic!("not implemented"),
         }
     }
+ 
 }
 #[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
@@ -726,6 +525,11 @@ pub struct TurbulenceSettings {
     /// Specifies how many layers of nose to combine. More octaves can yeild more detail
     /// and will increase runtime linearlly.
     octaves: u8,
+}
+impl DimensionalBeing for TurbulenceSettings {
+    fn get_dimensions(&self) -> NoiseDimensions {
+        return self.dim;
+    }
 }
 impl TurbulenceSettings {
     pub fn default(dim: NoiseDimensions) -> TurbulenceSettings {
@@ -759,83 +563,23 @@ impl TurbulenceSettings {
     }
 
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_noise!(&NoiseType::Turbulence(self), start_x, width)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => get_2d_noise!(
-                &NoiseType::Turbulence(self),
-                start_x,
-                width,
-                start_y,
-                height
-            ),
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => get_3d_noise!(
-                &NoiseType::Turbulence(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth
-            ),
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_noise!(
-                    &NoiseType::Turbulence(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time
-                )
-            }
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_noise!(&NoiseType::Turbulence(self)),
+            2 => get_2d_noise!(&NoiseType::Turbulence(self)),
+            3 => get_3d_noise!(&NoiseType::Turbulence(self)),
+            4 => get_4d_noise!(&NoiseType::Turbulence(self)),
+            _ => panic!("not implemented"),
         }
     }
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_scaled_noise!(&NoiseType::Turbulence(self), start_x, width, min, max)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => get_2d_scaled_noise!(
-                &NoiseType::Turbulence(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                min,
-                max
-            ),
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => {
-                get_3d_scaled_noise!(
-                    &NoiseType::Turbulence(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    min,
-                    max
-                )
-            }
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_scaled_noise!(
-                    &NoiseType::Turbulence(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time,
-                    min,
-                    max
-                )
-            }
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_scaled_noise!(&NoiseType::Turbulence(self)),
+            2 => get_2d_scaled_noise!(&NoiseType::Turbulence(self)),
+            3 => get_3d_scaled_noise!(&NoiseType::Turbulence(self)),
+            4 => get_4d_scaled_noise!(&NoiseType::Turbulence(self)),
+            _ => panic!("not implemented"),
         }
     }
 }
@@ -843,6 +587,11 @@ impl TurbulenceSettings {
 pub struct GradientSettings {
     dim: NoiseDimensions,
     freq: f32,
+}
+impl DimensionalBeing for GradientSettings {
+    fn get_dimensions(&self) -> NoiseDimensions {
+        return self.dim;
+    }
 }
 impl GradientSettings {
     pub fn default(dim: NoiseDimensions) -> GradientSettings {
@@ -855,79 +604,23 @@ impl GradientSettings {
     }
 
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_noise!(&NoiseType::Gradient(self), start_x, width)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => {
-                get_2d_noise!(&NoiseType::Gradient(self), start_x, width, start_y, height)
-            }
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => get_3d_noise!(
-                &NoiseType::Gradient(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                start_z,
-                depth
-            ),
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_noise!(
-                    &NoiseType::Gradient(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time
-                )
-            }
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_noise!(&NoiseType::Gradient(self)),
+            2 => get_2d_noise!(&NoiseType::Gradient(self)),
+            3 => get_3d_noise!(&NoiseType::Gradient(self)),
+            4 => get_4d_noise!(&NoiseType::Gradient(self)),
+            _ => panic!("not implemented"),
         }
     }
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
-        match self.dim {
-            NoiseDimensions::D1(start_x, width) => {
-                get_1d_scaled_noise!(&NoiseType::Gradient(self), start_x, width, min, max)
-            }
-            NoiseDimensions::D2(start_x, width, start_y, height) => get_2d_scaled_noise!(
-                &NoiseType::Gradient(self),
-                start_x,
-                width,
-                start_y,
-                height,
-                min,
-                max
-            ),
-            NoiseDimensions::D3(start_x, width, start_y, height, start_z, depth) => {
-                get_3d_scaled_noise!(
-                    &NoiseType::Gradient(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    min,
-                    max
-                )
-            }
-            NoiseDimensions::D4(start_x, width, start_y, height, start_z, depth, start_w, time) => {
-                get_4d_scaled_noise!(
-                    &NoiseType::Gradient(self),
-                    start_x,
-                    width,
-                    start_y,
-                    height,
-                    start_z,
-                    depth,
-                    start_w,
-                    time,
-                    min,
-                    max
-                )
-            }
+        let d = self.dim.dim;
+        match d {        
+            1 => get_1d_scaled_noise!(&NoiseType::Gradient(self)),
+            2 => get_2d_scaled_noise!(&NoiseType::Gradient(self)),
+            3 => get_3d_scaled_noise!(&NoiseType::Gradient(self)),
+            4 => get_4d_scaled_noise!(&NoiseType::Gradient(self)),
+            _ => panic!("not implemented"),
         }
     }
 }
@@ -942,12 +635,26 @@ pub enum NoiseType {
     Cellular(CellularSettings),
     Cellular2(Cellular2Settings),
 }
-
+impl DimensionalBeing for NoiseType {
+     fn get_dimensions(&self) -> NoiseDimensions {
+       match self {
+           NoiseType::Fbm(s) => s.get_dimensions(),
+           NoiseType::Ridge(s) => s.get_dimensions(),
+           NoiseType::Turbulence(s) => s.get_dimensions(),
+           NoiseType::Gradient(s) => s.get_dimensions(),
+           NoiseType::Cellular(s) => s.get_dimensions(),
+           NoiseType::Cellular2(s) => s.get_dimensions()
+       }
+    }
+}
 pub struct NoiseBuilder {}
 impl NoiseBuilder {
     ///  Cellular Builders
     pub fn cellular_2d(width: usize, height: usize) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D2(0.0, width, 0.0, height))
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        CellularSettings::default(dim)
     }
 
     pub fn cellular_2d_offset(
@@ -956,11 +663,20 @@ impl NoiseBuilder {
         y_offset: f32,
         height: usize,
     ) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D2(x_offset, width, y_offset, height))
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        CellularSettings::default(dim)
     }
 
     pub fn cellular_3d(width: usize, height: usize, depth: usize) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D3(0.0, width, 0.0, height, 0.0, depth))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        CellularSettings::default(dim)
     }
 
     pub fn cellular_3d_offset(
@@ -971,28 +687,45 @@ impl NoiseBuilder {
         z_offset: f32,
         depth: usize,
     ) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D3(
-            x_offset, width, y_offset, height, z_offset, depth,
-        ))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        CellularSettings::default(dim)
     }
 
     /// Cellular2 Builders
-    pub fn cellular2_2d(width: usize, height: usize) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D2(0.0, width, 0.0, height))
-    }
+    pub fn cellular2_2d(width: usize, height: usize) -> Cellular2Settings {
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        Cellular2Settings::default(dim)
+     }
 
     pub fn cellular2_2d_offset(
         x_offset: f32,
         width: usize,
         y_offset: f32,
         height: usize,
-    ) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D2(x_offset, width, y_offset, height))
+    ) -> Cellular2Settings {
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        Cellular2Settings::default(dim)
     }
 
-    pub fn cellular2_3d(width: usize, height: usize, depth: usize) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D3(0.0, width, 0.0, height, 0.0, depth))
-    }
+    pub fn cellular2_3d(width: usize, height: usize, depth: usize) -> Cellular2Settings {
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        Cellular2Settings::default(dim)
+}
 
     pub fn cellular2_3d_offset(
         x_offset: f32,
@@ -1001,29 +734,56 @@ impl NoiseBuilder {
         height: usize,
         z_offset: f32,
         depth: usize,
-    ) -> CellularSettings {
-        CellularSettings::default(NoiseDimensions::D3(
-            x_offset, width, y_offset, height, z_offset, depth,
-        ))
-    }
+    ) -> Cellular2Settings {
+         let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        Cellular2Settings::default(dim)
+   }
 
     /// Fbm Builders
-    pub fn fbm_1d(width: usize) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D1(0.0, width))
+pub fn fbm_1d(width: usize) -> FbmSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          FbmSettings::default(dim)
     }
-    pub fn fbm_1d_offset(x_offset: f32, width: usize) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D1(x_offset, width))
+   pub fn fbm_1d_offset(x_offset: f32, width: usize) -> FbmSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          dim.x = x_offset;
+          FbmSettings::default(dim)
     }
-    pub fn fbm_2d(width: usize, height: usize) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D2(0.0, width, 0.0, height))
+  pub fn fbm_2d(width: usize, height: usize) -> FbmSettings {
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        FbmSettings::default(dim)
     }
 
-    pub fn fbm_2d_offset(x_offset: f32, width: usize, y_offset: f32, height: usize) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D2(x_offset, width, y_offset, height))
+    pub fn fbm_2d_offset(
+        x_offset: f32,
+        width: usize,
+        y_offset: f32,
+        height: usize,
+    ) -> FbmSettings {
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        FbmSettings::default(dim)
     }
 
     pub fn fbm_3d(width: usize, height: usize, depth: usize) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D3(0.0, width, 0.0, height, 0.0, depth))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        FbmSettings::default(dim)
     }
 
     pub fn fbm_3d_offset(
@@ -1034,16 +794,24 @@ impl NoiseBuilder {
         z_offset: f32,
         depth: usize,
     ) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D3(
-            x_offset, width, y_offset, height, z_offset, depth,
-        ))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        FbmSettings::default(dim)
     }
 
     pub fn fbm_4d(width: usize, height: usize, depth: usize, time: usize) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D4(
-            0.0, width, 0.0, height, 0.0, depth, 0.0, time,
-        ))
-    }
+      let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        FbmSettings::default(dim)
+}
 
     pub fn fbm_4d_offset(
         x_offset: f32,
@@ -1055,20 +823,35 @@ impl NoiseBuilder {
         w_offset: f32,
         time: usize,
     ) -> FbmSettings {
-        FbmSettings::default(NoiseDimensions::D4(
-            x_offset, width, y_offset, height, z_offset, depth, w_offset, time,
-        ))
+    let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        dim.w = w_offset;
+        FbmSettings::default(dim)
     }
 
     /// Ridge Builders
-    pub fn ridge_1d(width: usize) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D1(0.0, width))
+pub fn ridge_1d(width: usize) -> RidgeSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          RidgeSettings::default(dim)
     }
-    pub fn ridge_1d_offset(x_offset: f32, width: usize) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D1(x_offset, width))
+   pub fn ridge_1d_offset(x_offset: f32, width: usize) -> RidgeSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          dim.x = x_offset;
+          RidgeSettings::default(dim)
     }
-    pub fn ridge_2d(width: usize, height: usize) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D2(0.0, width, 0.0, height))
+   pub fn ridge_2d(width: usize, height: usize) -> RidgeSettings {
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        RidgeSettings::default(dim)
     }
 
     pub fn ridge_2d_offset(
@@ -1077,11 +860,20 @@ impl NoiseBuilder {
         y_offset: f32,
         height: usize,
     ) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D2(x_offset, width, y_offset, height))
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        RidgeSettings::default(dim)
     }
 
     pub fn ridge_3d(width: usize, height: usize, depth: usize) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D3(0.0, width, 0.0, height, 0.0, depth))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        RidgeSettings::default(dim)
     }
 
     pub fn ridge_3d_offset(
@@ -1092,16 +884,24 @@ impl NoiseBuilder {
         z_offset: f32,
         depth: usize,
     ) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D3(
-            x_offset, width, y_offset, height, z_offset, depth,
-        ))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        RidgeSettings::default(dim)
     }
 
     pub fn ridge_4d(width: usize, height: usize, depth: usize, time: usize) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D4(
-            0.0, width, 0.0, height, 0.0, depth, 0.0, time,
-        ))
-    }
+      let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        RidgeSettings::default(dim)
+}
 
     pub fn ridge_4d_offset(
         x_offset: f32,
@@ -1113,20 +913,37 @@ impl NoiseBuilder {
         w_offset: f32,
         time: usize,
     ) -> RidgeSettings {
-        RidgeSettings::default(NoiseDimensions::D4(
-            x_offset, width, y_offset, height, z_offset, depth, w_offset, time,
-        ))
+    let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        dim.w = w_offset;
+        RidgeSettings::default(dim)
     }
 
+ 
+
     /// Turbulence Builders
-    pub fn turbulence_1d(width: usize) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D1(0.0, width))
+      pub fn turbulence_1d(width: usize) -> TurbulenceSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          TurbulenceSettings::default(dim)
     }
-    pub fn turbulence_1d_offset(x_offset: f32, width: usize) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D1(x_offset, width))
+   pub fn turbulence_1d_offset(x_offset: f32, width: usize) -> TurbulenceSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          dim.x = x_offset;
+          TurbulenceSettings::default(dim)
     }
-    pub fn turbulence_2d(width: usize, height: usize) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D2(0.0, width, 0.0, height))
+  pub fn turbulence_2d(width: usize, height: usize) -> TurbulenceSettings {
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        TurbulenceSettings::default(dim)
     }
 
     pub fn turbulence_2d_offset(
@@ -1135,11 +952,20 @@ impl NoiseBuilder {
         y_offset: f32,
         height: usize,
     ) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D2(x_offset, width, y_offset, height))
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        TurbulenceSettings::default(dim)
     }
 
     pub fn turbulence_3d(width: usize, height: usize, depth: usize) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D3(0.0, width, 0.0, height, 0.0, depth))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        TurbulenceSettings::default(dim)
     }
 
     pub fn turbulence_3d_offset(
@@ -1150,21 +976,24 @@ impl NoiseBuilder {
         z_offset: f32,
         depth: usize,
     ) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D3(
-            x_offset, width, y_offset, height, z_offset, depth,
-        ))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        TurbulenceSettings::default(dim)
     }
 
-    pub fn turbulence_4d(
-        width: usize,
-        height: usize,
-        depth: usize,
-        time: usize,
-    ) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D4(
-            0.0, width, 0.0, height, 0.0, depth, 0.0, time,
-        ))
-    }
+    pub fn turbulence_4d(width: usize, height: usize, depth: usize, time: usize) -> TurbulenceSettings {
+      let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        TurbulenceSettings::default(dim)
+}
 
     pub fn turbulence_4d_offset(
         x_offset: f32,
@@ -1176,20 +1005,37 @@ impl NoiseBuilder {
         w_offset: f32,
         time: usize,
     ) -> TurbulenceSettings {
-        TurbulenceSettings::default(NoiseDimensions::D4(
-            x_offset, width, y_offset, height, z_offset, depth, w_offset, time,
-        ))
+    let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        dim.w = w_offset;
+        TurbulenceSettings::default(dim)
     }
 
+ 
+
     /// Gradient Builders
-    pub fn gradient_1d(width: usize) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D1(0.0, width))
+      pub fn gradient_1d(width: usize) -> GradientSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          GradientSettings::default(dim)
     }
-    pub fn gradient_1d_offset(x_offset: f32, width: usize) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D1(x_offset, width))
+   pub fn gradient_1d_offset(x_offset: f32, width: usize) -> GradientSettings {
+          let mut dim = NoiseDimensions::default(1);
+          dim.width = width;
+          dim.x = x_offset;
+          GradientSettings::default(dim)
     }
-    pub fn gradient_2d(width: usize, height: usize) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D2(0.0, width, 0.0, height))
+   pub fn gradient_2d(width: usize, height: usize) -> GradientSettings {
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        GradientSettings::default(dim)
     }
 
     pub fn gradient_2d_offset(
@@ -1198,11 +1044,20 @@ impl NoiseBuilder {
         y_offset: f32,
         height: usize,
     ) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D2(x_offset, width, y_offset, height))
+        let mut dim = NoiseDimensions::default(2);
+        dim.width = width;
+        dim.height = height;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        GradientSettings::default(dim)
     }
 
     pub fn gradient_3d(width: usize, height: usize, depth: usize) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D3(0.0, width, 0.0, height, 0.0, depth))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        GradientSettings::default(dim)
     }
 
     pub fn gradient_3d_offset(
@@ -1213,16 +1068,24 @@ impl NoiseBuilder {
         z_offset: f32,
         depth: usize,
     ) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D3(
-            x_offset, width, y_offset, height, z_offset, depth,
-        ))
+        let mut dim = NoiseDimensions::default(3);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        GradientSettings::default(dim)
     }
 
     pub fn gradient_4d(width: usize, height: usize, depth: usize, time: usize) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D4(
-            0.0, width, 0.0, height, 0.0, depth, 0.0, time,
-        ))
-    }
+      let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        GradientSettings::default(dim)
+}
 
     pub fn gradient_4d_offset(
         x_offset: f32,
@@ -1234,10 +1097,19 @@ impl NoiseBuilder {
         w_offset: f32,
         time: usize,
     ) -> GradientSettings {
-        GradientSettings::default(NoiseDimensions::D4(
-            x_offset, width, y_offset, height, z_offset, depth, w_offset, time,
-        ))
+    let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        dim.w = w_offset;
+        GradientSettings::default(dim)
     }
+
+ 
 }
 
 #[cfg(test)]
