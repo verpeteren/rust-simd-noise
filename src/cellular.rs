@@ -142,7 +142,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
             while i > 0 {
                 distance[i] = S::max_ps(S::min_ps(distance[i], new_distance), distance[i - 1]);
                 distance[0] = S::min_ps(distance[0], new_distance);
-                i = i - 1;
+                i -= 1;
             }
             ycf = S::add_ps(ycf, S::set1_ps(1.0));
             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
@@ -339,7 +339,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 while i > 0 {
                     distance[i] = S::max_ps(S::min_ps(distance[i], new_distance), distance[i - 1]);
                     distance[0] = S::min_ps(distance[0], new_distance);
-                    i = i - 1;
+                    i -= 1;
                 }
                 zcf = S::add_ps(ycf, S::set1_ps(1.0));
                 zc = S::add_epi32(yc, S::set1_epi32(Z_PRIME));

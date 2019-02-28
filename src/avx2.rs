@@ -130,7 +130,7 @@ pub unsafe fn turbulence_1d(
 pub unsafe fn get_1d_noise(
     start_x: f32,
     width: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_1d_noise::<Avx2>(start_x, width, noise_type)
 }
@@ -143,7 +143,7 @@ pub unsafe fn get_1d_noise(
 pub unsafe fn get_1d_scaled_noise(
     start_x: f32,
     width: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
     scale_min: f32,
     scale_max: f32,
 ) -> Vec<f32> {
@@ -232,7 +232,7 @@ pub unsafe fn get_2d_noise(
     width: usize,
     start_y: f32,
     height: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_2d_noise::<Avx2>(start_x, width, start_y, height, noise_type)
 }
@@ -247,7 +247,7 @@ pub unsafe fn get_2d_scaled_noise(
     width: usize,
     start_y: f32,
     height: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
     scale_min: f32,
     scale_max: f32,
 ) -> Vec<f32> {
@@ -345,7 +345,7 @@ pub unsafe fn get_3d_noise(
     height: usize,
     start_z: f32,
     depth: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_3d_noise::<Avx2>(start_x, width, start_y, height, start_z, depth, noise_type)
 }
@@ -362,7 +362,7 @@ pub unsafe fn get_3d_scaled_noise(
     height: usize,
     start_z: f32,
     depth: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
     scale_min: f32,
     scale_max: f32,
 ) -> Vec<f32> {
@@ -468,7 +468,7 @@ pub unsafe fn get_4d_noise(
     depth: usize,
     start_w: f32,
     time: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_4d_noise::<Avx2>(
         start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
@@ -489,7 +489,7 @@ pub unsafe fn get_4d_scaled_noise(
     depth: usize,
     start_w: f32,
     time: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
     scale_min: f32,
     scale_max: f32,
 ) -> Vec<f32> {

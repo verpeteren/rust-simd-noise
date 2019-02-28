@@ -130,6 +130,7 @@ pub enum Cell2ReturnType {
     Distance2Div,
 }
 
+#[derive(Copy, Clone)]
 pub enum NoiseDimensions {
     D1 (f32,usize),
     D2 (f32,usize,f32,usize),
@@ -137,7 +138,7 @@ pub enum NoiseDimensions {
     D4 (f32,usize,f32,usize,f32,usize,f32,usize),    
 }
 
-
+#[derive(Copy, Clone)]
 pub struct CellularSettings {
     dim:NoiseDimensions,
     /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
@@ -153,7 +154,7 @@ impl CellularSettings {
 
     pub fn default(dim:NoiseDimensions) -> CellularSettings { 
         CellularSettings {
-            dim:dim,
+            dim,
             freq: 0.02,
             distance_function: CellDistanceFunction::Euclidean,
             return_type: CellReturnType::Distance,
@@ -183,14 +184,14 @@ impl CellularSettings {
 
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
         match self.dim {
-            NoiseDimensions::D1(start_x,width) => panic!("not implemented"),
-            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(NoiseType::Cellular(self), start_x, width,start_y,height),
-            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(NoiseType::Cellular(self), start_x, width,start_y,height,start_z,depth),
-            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => panic!("not implemented")
+            NoiseDimensions::D1(..) => panic!("not implemented"),
+            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(&NoiseType::Cellular(self), start_x, width,start_y,height),
+            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(&NoiseType::Cellular(self), start_x, width,start_y,height,start_z,depth),
+            NoiseDimensions::D4(..) => panic!("not implemented")
         }
     }        
 }
-
+#[derive(Copy, Clone)]
 pub struct Cellular2Settings {
     dim:NoiseDimensions,
     freq: f32,
@@ -206,7 +207,7 @@ impl Cellular2Settings {
 
     pub fn default(dim:NoiseDimensions) -> Cellular2Settings {
          Cellular2Settings {
-            dim:dim,
+            dim,
             freq: 0.02,
             distance_function: CellDistanceFunction::Euclidean,
             return_type: Cell2ReturnType::Distance2,
@@ -246,21 +247,18 @@ impl Cellular2Settings {
         self
     }
 
-    pub fn get_1d_noise(self, start_x: f32, width: usize) -> (Vec<f32>, f32, f32) {
-        get_1d_noise!(NoiseType::Cellular2(self), start_x, width)
-    }
-
-        pub fn generate(self) -> (Vec<f32>, f32, f32) {
+    
+    pub fn generate(self) -> (Vec<f32>, f32, f32) {
         match self.dim {
-            NoiseDimensions::D1(start_x,width) => panic!("not implemented"),
-            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(NoiseType::Cellular2(self), start_x, width,start_y,height),
-            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(NoiseType::Cellular2(self), start_x, width,start_y,height,start_z,depth),
-            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => panic!("not implemented")
+            NoiseDimensions::D1(..) => panic!("not implemented"),
+            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(&NoiseType::Cellular2(self), start_x, width,start_y,height),
+            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(&NoiseType::Cellular2(self), start_x, width,start_y,height,start_z,depth),
+            NoiseDimensions::D4(..) => panic!("not implemented")
         }
     }
 
 }
-
+#[derive(Copy, Clone)]
 pub struct FbmSettings {
     dim:NoiseDimensions,
     /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
@@ -279,7 +277,7 @@ impl FbmSettings {
 
      pub fn default(dim:NoiseDimensions) -> FbmSettings {
          FbmSettings {
-            dim:dim,
+            dim,
             freq: 0.02,
             lacunarity:0.5,
             gain: 2.0,
@@ -309,14 +307,14 @@ impl FbmSettings {
 
      pub fn generate(self) -> (Vec<f32>, f32, f32) {
         match self.dim {
-            NoiseDimensions::D1(start_x,width) => get_1d_noise!(NoiseType::Fbm(self), start_x, width),
-            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(NoiseType::Fbm(self), start_x, width,start_y,height),
-            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(NoiseType::Fbm(self), start_x, width,start_y,height,start_z,depth),
-            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(NoiseType::Fbm(self), start_x, width,start_y,height,start_z,depth,start_w,time)
+            NoiseDimensions::D1(start_x,width) => get_1d_noise!(&NoiseType::Fbm(self), start_x, width),
+            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(&NoiseType::Fbm(self), start_x, width,start_y,height),
+            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(&NoiseType::Fbm(self), start_x, width,start_y,height,start_z,depth),
+            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(&NoiseType::Fbm(self), start_x, width,start_y,height,start_z,depth,start_w,time)
         }
     }
 }
-
+#[derive(Copy, Clone)]
 pub struct RidgeSettings {
     dim:NoiseDimensions,
     /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
@@ -335,7 +333,7 @@ impl RidgeSettings {
 
     pub fn default(dim:NoiseDimensions) -> RidgeSettings {
          RidgeSettings {
-            dim:dim,
+            dim,
             freq: 0.02,
             lacunarity:0.5,
             gain: 2.0,
@@ -365,14 +363,14 @@ impl RidgeSettings {
 
      pub fn generate(self) -> (Vec<f32>, f32, f32) {
         match self.dim {
-            NoiseDimensions::D1(start_x,width) => get_1d_noise!(NoiseType::Ridge(self), start_x, width),
-            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(NoiseType::Ridge(self), start_x, width,start_y,height),
-            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(NoiseType::Ridge(self), start_x, width,start_y,height,start_z,depth),
-            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(NoiseType::Ridge(self), start_x, width,start_y,height,start_z,depth,start_w,time)
+            NoiseDimensions::D1(start_x,width) => get_1d_noise!(&NoiseType::Ridge(self), start_x, width),
+            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(&NoiseType::Ridge(self), start_x, width,start_y,height),
+            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(&NoiseType::Ridge(self), start_x, width,start_y,height,start_z,depth),
+            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(&NoiseType::Ridge(self), start_x, width,start_y,height,start_z,depth,start_w,time)
         }
     }
 }
-
+#[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
     dim:NoiseDimensions,
     /// Higher frequency will appear to 'zoom' out, lower will appear to 'zoom' in. A good
@@ -391,7 +389,7 @@ impl TurbulenceSettings {
 
     pub fn default(dim:NoiseDimensions) -> TurbulenceSettings {
          TurbulenceSettings {
-            dim:dim,
+            dim,
             freq: 0.02,
             lacunarity:0.5,
             gain: 2.0,
@@ -421,14 +419,14 @@ impl TurbulenceSettings {
 
      pub fn generate(self) -> (Vec<f32>, f32, f32) {
         match self.dim {
-            NoiseDimensions::D1(start_x,width) => get_1d_noise!(NoiseType::Turbulence(self), start_x, width),
-            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(NoiseType::Turbulence(self), start_x, width,start_y,height),
-            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(NoiseType::Turbulence(self), start_x, width,start_y,height,start_z,depth),
-            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(NoiseType::Turbulence(self), start_x, width,start_y,height,start_z,depth,start_w,time)
+            NoiseDimensions::D1(start_x,width) => get_1d_noise!(&NoiseType::Turbulence(self), start_x, width),
+            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(&NoiseType::Turbulence(self), start_x, width,start_y,height),
+            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(&NoiseType::Turbulence(self), start_x, width,start_y,height,start_z,depth),
+            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(&NoiseType::Turbulence(self), start_x, width,start_y,height,start_z,depth,start_w,time)
         }
     }
 }
-
+#[derive(Copy, Clone)]
 pub struct GradientSettings {
     dim:NoiseDimensions,
     freq: f32,
@@ -437,7 +435,7 @@ impl GradientSettings {
 
      pub fn default(dim:NoiseDimensions) -> GradientSettings {
          GradientSettings {
-            dim:dim,
+            dim,
             freq: 0.02,            
         }
     }
@@ -449,16 +447,17 @@ impl GradientSettings {
 
      pub fn generate(self) -> (Vec<f32>, f32, f32) {
         match self.dim {
-            NoiseDimensions::D1(start_x,width) => get_1d_noise!(NoiseType::Gradient(self), start_x, width),
-            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(NoiseType::Gradient(self), start_x, width,start_y,height),
-            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(NoiseType::Gradient(self), start_x, width,start_y,height,start_z,depth),
-            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(NoiseType::Gradient(self), start_x, width,start_y,height,start_z,depth,start_w,time)
+            NoiseDimensions::D1(start_x,width) => get_1d_noise!(&NoiseType::Gradient(self), start_x, width),
+            NoiseDimensions::D2(start_x,width,start_y,height) => get_2d_noise!(&NoiseType::Gradient(self), start_x, width,start_y,height),
+            NoiseDimensions::D3(start_x,width,start_y,height,start_z,depth) => get_3d_noise!(&NoiseType::Gradient(self), start_x, width,start_y,height,start_z,depth),
+            NoiseDimensions::D4(start_x,width,start_y,height,start_z,depth,start_w,time) => get_4d_noise!(&NoiseType::Gradient(self), start_x, width,start_y,height,start_z,depth,start_w,time)
         }
     }
 }
 
 /// Specifies what type of noise to generate and contains any relevant settings.
-enum NoiseType {
+
+pub enum NoiseType {
     Fbm(FbmSettings),
     Ridge(RidgeSettings),
     Turbulence(TurbulenceSettings),
@@ -641,10 +640,7 @@ mod tests {
 
     #[test]
     fn small_dimensions() {
-        let noise = NoiseBuilder::gradient_1d(100)
-            .with_freq(0.5)            
-            .generate();
-        
+        let mut noise = NoiseBuilder::gradient_1d(100).with_freq(0.2).generate();                            
 
         //let _ = get_2d_scaled_noise(0.0, 3, 0.0, 2, NoiseType::Gradient { freq: 0.05 }, 0.0, 1.0);
     }

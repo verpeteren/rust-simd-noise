@@ -5,7 +5,7 @@ use crate::simplex::*;
 use std::f32;
 
 #[inline(always)]
-unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: NoiseType) -> S::Vf32 {
+unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: &NoiseType) -> S::Vf32 {
     match noise_type {
         NoiseType::Fbm(s) => fbm_1d::<S>(
             x,
@@ -29,8 +29,8 @@ unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: NoiseType) -> S::
             s.octaves,
         ),
         NoiseType::Gradient(s) => simplex_1d::<S>(S::mul_ps(x, S::set1_ps(s.freq))),
-        NoiseType::Cellular(s) => panic!("1D Cell Noise Not Implemented"),
-        NoiseType::Cellular2(s) => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular(_) => panic!("1D Cell Noise Not Implemented"),
+        NoiseType::Cellular2(_) => panic!("1D Cell Noise Not Implemented"),
     }
 }
 
@@ -38,7 +38,7 @@ unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: NoiseType) -> S::
 pub unsafe fn get_1d_noise<S: Simd>(
     start_x: f32,
     width: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
@@ -59,7 +59,7 @@ pub unsafe fn get_1d_noise<S: Simd>(
     let mut x = S::loadu_ps(&x_arr[0]);
 
     for _ in 0..width / vector_width {
-        let f = get_1d_noise_helper::<S>(x, noise_type);
+        let f = get_1d_noise_helper::<S>(x, &noise_type);
         max_s = S::max_ps(max_s, f);
         min_s = S::min_ps(min_s, f);
         S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -67,7 +67,7 @@ pub unsafe fn get_1d_noise<S: Simd>(
         x = S::add_ps(x, S::set1_ps(vector_width as f32));
     }
     if remainder != 0 {
-        let f = get_1d_noise_helper::<S>(x, noise_type);
+        let f = get_1d_noise_helper::<S>(x, &noise_type);
         for j in 0..remainder {
             let n = f[j];
             *result.get_unchecked_mut(i) = n;
@@ -93,7 +93,7 @@ pub unsafe fn get_1d_noise<S: Simd>(
 }
 
 #[inline(always)]
-unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: NoiseType) -> S::Vf32 {
+unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: &NoiseType) -> S::Vf32 {
     match noise_type {
         NoiseType::Fbm(s) => fbm_2d::<S>(
             x,
@@ -153,7 +153,7 @@ pub unsafe fn get_2d_noise<S: Simd>(
     width: usize,
     start_y: f32,
     height: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
@@ -174,7 +174,7 @@ pub unsafe fn get_2d_noise<S: Simd>(
     for _ in 0..height {
         let mut x = S::loadu_ps(&x_arr[0]);
         for _ in 0..width / vector_width {
-            let f = get_2d_noise_helper::<S>(x, y, noise_type);
+            let f = get_2d_noise_helper::<S>(x, y, &noise_type);
             max_s = S::max_ps(max_s, f);
             min_s = S::min_ps(min_s, f);
             S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -182,7 +182,7 @@ pub unsafe fn get_2d_noise<S: Simd>(
             x = S::add_ps(x, S::set1_ps(vector_width as f32));
         }
         if remainder != 0 {
-            let f = get_2d_noise_helper::<S>(x, y, noise_type);
+            let f = get_2d_noise_helper::<S>(x, y, &noise_type);
             for j in 0..remainder {
                 let n = f[j];
                 *result.get_unchecked_mut(i) = n;
@@ -212,7 +212,7 @@ unsafe fn get_3d_noise_helper<S: Simd>(
     x: S::Vf32,
     y: S::Vf32,
     z: S::Vf32,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> S::Vf32 {
     match noise_type {
         NoiseType::Fbm(s) => fbm_3d::<S>(
@@ -281,7 +281,7 @@ pub unsafe fn get_3d_noise<S: Simd>(
     height: usize,
     start_z: f32,
     depth: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
@@ -305,7 +305,7 @@ pub unsafe fn get_3d_noise<S: Simd>(
         for _ in 0..height {
             let mut x = S::loadu_ps(&x_arr[0]);
             for _ in 0..width / vector_width {
-                let f = get_3d_noise_helper::<S>(x, y, z, noise_type);
+                let f = get_3d_noise_helper::<S>(x, y, z, &noise_type);
                 max_s = S::max_ps(max_s, f);
                 min_s = S::min_ps(min_s, f);
                 S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -313,7 +313,7 @@ pub unsafe fn get_3d_noise<S: Simd>(
                 x = S::add_ps(x, S::set1_ps(vector_width as f32));
             }
             if remainder != 0 {
-                let f = get_3d_noise_helper::<S>(x, y, z, noise_type);
+                let f = get_3d_noise_helper::<S>(x, y, z, &noise_type);
                 for j in 0..remainder {
                     let n = f[j];
                     *result.get_unchecked_mut(i) = n;
@@ -346,7 +346,7 @@ unsafe fn get_4d_noise_helper<S: Simd>(
     y: S::Vf32,
     z: S::Vf32,
     w: S::Vf32,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> S::Vf32 {
     match noise_type {
         NoiseType::Fbm(s) => fbm_4d::<S>(
@@ -385,8 +385,8 @@ unsafe fn get_4d_noise_helper<S: Simd>(
             S::mul_ps(z, S::set1_ps(s.freq)),
             S::mul_ps(w, S::set1_ps(s.freq)),
         ),
-        NoiseType::Cellular(s) => panic!("not implemented"),
-        NoiseType::Cellular2(s) => panic!("not implemented"),
+        NoiseType::Cellular(_) => panic!("not implemented"),
+        NoiseType::Cellular2(_) => panic!("not implemented"),
     }
 }
 #[inline(always)]
@@ -399,7 +399,7 @@ pub unsafe fn get_4d_noise<S: Simd>(
     depth: usize,
     start_w: f32,
     time: usize,
-    noise_type: NoiseType,
+    noise_type: &NoiseType,
 ) -> (Vec<f32>, f32, f32) {
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
@@ -424,7 +424,7 @@ pub unsafe fn get_4d_noise<S: Simd>(
             for _ in 0..height {
                 let mut x = S::loadu_ps(&x_arr[0]);
                 for _ in 0..width / vector_width {
-                    let f = get_4d_noise_helper::<S>(x, y, z, w, noise_type);
+                    let f = get_4d_noise_helper::<S>(x, y, z, w, &noise_type);
                     max_s = S::max_ps(max_s, f);
                     min_s = S::min_ps(min_s, f);
                     S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -432,7 +432,7 @@ pub unsafe fn get_4d_noise<S: Simd>(
                     x = S::add_ps(x, S::set1_ps(vector_width as f32));
                 }
                 if remainder != 0 {
-                    let f = get_4d_noise_helper::<S>(x, y, z, w, noise_type);
+                    let f = get_4d_noise_helper::<S>(x, y, z, w, &noise_type);
                     for j in 0..remainder {
                         let n = f[j];
                         *result.get_unchecked_mut(i) = n;
