@@ -1,13 +1,10 @@
-//! SSE41 Accelerated noise functions.
-//! The vast majority of Intel/AMD cpus running support this.
-//! It is only a few % faster than SSE2 though.
+//! SSE41  Accelerated noise functions.
 //!
 //! Use `is_x86_feature_detected!("sse4.1")` provided
 //! by the Rust stanard library to detect at runtime.
 //!
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 4, and when it is not small relative height and depth.
-
 use super::*;
 use crate::shared::*;
 use simdeez::overloads::*;
@@ -128,12 +125,8 @@ pub unsafe fn turbulence_1d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_1d_noise(
-    start_x: f32,
-    width: usize,
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    noise_helpers::get_1d_noise::<Sse41>(start_x, width, noise_type)
+pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    noise_helpers::get_1d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width sized block of scaled 2d noise
@@ -141,15 +134,10 @@ pub unsafe fn get_1d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_1d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    noise_type: &NoiseType,
-    scale_min: f32,
-    scale_max: f32,
-) -> Vec<f32> {
-    let (mut noise, min, max) = get_1d_noise(start_x, width, noise_type);
-    scale_noise::<Sse41>(scale_min, scale_max, min, max, &mut noise);
+pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    let (mut noise, min, max) = get_1d_noise(noise_type);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse41>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
 
@@ -228,14 +216,8 @@ pub unsafe fn turbulence_2d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_2d_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    noise_helpers::get_2d_noise::<Sse41>(start_x, width, start_y, height, noise_type)
+pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    noise_helpers::get_2d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width X height sized block of scaled 2d noise
@@ -243,17 +225,10 @@ pub unsafe fn get_2d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_2d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    noise_type: &NoiseType,
-    scale_min: f32,
-    scale_max: f32,
-) -> Vec<f32> {
-    let (mut noise, min, max) = get_2d_noise(start_x, width, start_y, height, noise_type);
-    scale_noise::<Sse41>(scale_min, scale_max, min, max, &mut noise);
+pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    let (mut noise, min, max) = get_2d_noise(noise_type);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse41>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
 
@@ -339,18 +314,8 @@ pub unsafe fn turbulence_3d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_3d_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    noise_helpers::get_3d_noise::<Sse41>(
-        start_x, width, start_y, height, start_z, depth, noise_type,
-    )
+pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    noise_helpers::get_3d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width X height X depth sized block of scaled 3d noise
@@ -358,20 +323,10 @@ pub unsafe fn get_3d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_3d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    noise_type: &NoiseType,
-    scale_min: f32,
-    scale_max: f32,
-) -> Vec<f32> {
-    let (mut noise, min, max) =
-        get_3d_noise(start_x, width, start_y, height, start_z, depth, noise_type);
-    scale_noise::<Sse41>(scale_min, scale_max, min, max, &mut noise);
+pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    let (mut noise, min, max) = get_3d_noise(noise_type);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse41>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
 
@@ -462,20 +417,8 @@ pub unsafe fn turbulence_4d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_4d_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    start_w: f32,
-    time: usize,
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    noise_helpers::get_4d_noise::<Sse41>(
-        start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-    )
+pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    noise_helpers::get_4d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width X height X depth X time sized block of scaled 4d noise
@@ -483,22 +426,9 @@ pub unsafe fn get_4d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn get_4d_scaled_noise(
-    start_x: f32,
-    width: usize,
-    start_y: f32,
-    height: usize,
-    start_z: f32,
-    depth: usize,
-    start_w: f32,
-    time: usize,
-    noise_type: &NoiseType,
-    scale_min: f32,
-    scale_max: f32,
-) -> Vec<f32> {
-    let (mut noise, min, max) = get_4d_noise(
-        start_x, width, start_y, height, start_z, depth, start_w, time, noise_type,
-    );
-    scale_noise::<Sse41>(scale_min, scale_max, min, max, &mut noise);
+pub unsafe fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    let (mut noise, min, max) = get_4d_noise(noise_type);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse41>(dim.min, dim.max, min, max, &mut noise);
     noise
 }

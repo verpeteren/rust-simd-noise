@@ -270,12 +270,11 @@ pub unsafe fn turbulence_2d<S: Simd>(
     lac: S::Vf32,
     gain: S::Vf32,
     octaves: u8,
-) -> S::Vf32 {   
-
+) -> S::Vf32 {
     let mut xf = S::mul_ps(x, freq);
     let mut yf = S::mul_ps(y, freq);
     let mut result = S::abs_ps(simplex_2d::<S>(xf, yf));
-    
+
     let mut amp = S::set1_ps(1.0);
 
     for _ in 1..octaves {
@@ -285,7 +284,7 @@ pub unsafe fn turbulence_2d<S: Simd>(
         result = S::add_ps(result, S::abs_ps(S::mul_ps(simplex_2d::<S>(xf, yf), amp)));
     }
 
-    result 
+    result
 }
 
 #[inline(always)]

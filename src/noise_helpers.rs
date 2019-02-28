@@ -35,9 +35,7 @@ unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: &NoiseType) -> S:
 }
 
 #[inline(always)]
-pub unsafe fn get_1d_noise<S: Simd>(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     let dim = noise_type.get_dimensions();
     let start_x = dim.x;
     let width = dim.width;
@@ -149,9 +147,7 @@ unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: &Nois
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[inline(always)]
-pub unsafe fn get_2d_noise<S: Simd>(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     let dim = noise_type.get_dimensions();
     let start_x = dim.x;
     let width = dim.width;
@@ -277,9 +273,7 @@ unsafe fn get_3d_noise_helper<S: Simd>(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[inline(always)]
-pub unsafe fn get_3d_noise<S: Simd>(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     let dim = noise_type.get_dimensions();
     let start_x = dim.x;
     let width = dim.width;
@@ -395,9 +389,7 @@ unsafe fn get_4d_noise_helper<S: Simd>(
     }
 }
 #[inline(always)]
-pub unsafe fn get_4d_noise<S: Simd>(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     let dim = noise_type.get_dimensions();
     let start_x = dim.x;
     let width = dim.width;

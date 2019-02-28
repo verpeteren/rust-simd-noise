@@ -1,13 +1,10 @@
-//! SSE2 Accelerated noise functions.
-//! All 64bit intel/amd CPUs support this.
-//! *save for one obscure server cpu*
+//! SSE2  Accelerated noise functions.
 //!
 //! Use `is_x86_feature_detected!("sse2")` provided
 //! by the Rust stanard library to detect at runtime.
 //!
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 4, and when it is not small relative height and depth.
-
 use super::*;
 use crate::shared::*;
 use simdeez::overloads::*;
@@ -128,9 +125,7 @@ pub unsafe fn turbulence_1d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_1d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_1d_noise::<Sse2>(noise_type)
 }
 
@@ -139,11 +134,10 @@ pub unsafe fn get_1d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_1d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
+pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_1d_noise(noise_type);
-    scale_noise::<Sse2>(scale_min, scale_max, min, max, &mut noise);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse2>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
 
@@ -222,9 +216,7 @@ pub unsafe fn turbulence_2d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_2d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_2d_noise::<Sse2>(noise_type)
 }
 
@@ -233,11 +225,10 @@ pub unsafe fn get_2d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_2d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
+pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_2d_noise(noise_type);
-    scale_noise::<Sse2>(scale_min, scale_max, min, max, &mut noise);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse2>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
 
@@ -323,9 +314,7 @@ pub unsafe fn turbulence_3d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_3d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_3d_noise::<Sse2>(noise_type)
 }
 
@@ -334,12 +323,10 @@ pub unsafe fn get_3d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_3d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
-    let (mut noise, min, max) =
-        get_3d_noise(noise_type);
-    scale_noise::<Sse2>(scale_min, scale_max, min, max, &mut noise);
+pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    let (mut noise, min, max) = get_3d_noise(noise_type);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse2>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
 
@@ -430,12 +417,8 @@ pub unsafe fn turbulence_4d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_4d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
-    noise_helpers::get_4d_noise::<Sse2>(
-        noise_type,
-    )
+pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    noise_helpers::get_4d_noise::<Sse2>(noise_type)
 }
 
 /// Gets a width X height X depth X time sized block of scaled 4d noise
@@ -443,12 +426,9 @@ pub unsafe fn get_4d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "sse2")]
-pub unsafe fn get_4d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
-    let (mut noise, min, max) = get_4d_noise(
-        noise_type,
-    );
-    scale_noise::<Sse2>(scale_min, scale_max, min, max, &mut noise);
+pub unsafe fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    let (mut noise, min, max) = get_4d_noise(noise_type);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<Sse2>(dim.min, dim.max, min, max, &mut noise);
     noise
 }

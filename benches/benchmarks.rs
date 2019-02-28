@@ -7,107 +7,106 @@ use criterion::Fun;
 use simdnoise::*;
 
 fn d4(c: &mut Criterion) {
-    let noise = NoiseBuilder::fbm();
-    let scalar = Fun::new("Scalar 4D", |b, _i| {
-        b.iter(|| scalar::get_1d_noise(0.0, 8, &noise))
+    let setting = NoiseBuilder::fbm_4d(8,8,8,8).wrap();
+    let scalar = Fun::new("Scalar 4D", move |b, _i| {
+        b.iter(|| unsafe {scalar::get_1d_noise(&setting)})
     });
-    let sse2 = Fun::new("SSE2 4D", |b, _i| {
-        b.iter(|| unsafe { sse2::get_4d_noise(0.0, 8, 0.0, 8, 0.0, 8, 0.0, 8, NOISE_TYPE) })
+    let sse2 = Fun::new("SSE2 4D", move |b, _i| {
+        b.iter(|| unsafe { sse2::get_4d_noise(&setting) })
     });
-    let sse41 = Fun::new("SSE41 4D", |b, _i| {
-        b.iter(|| unsafe { sse41::get_4d_noise(0.0, 8, 0.0, 8, 0.0, 8, 0.0, 8, NOISE_TYPE) })
+    let sse41 = Fun::new("SSE41 4D", move |b, _i| {
+        b.iter(|| unsafe { sse41::get_4d_noise(&setting) })
     });
-    let avx2 = Fun::new("AVX2 4D", |b, _i| {
-        b.iter(|| unsafe { avx2::get_4d_noise(0.0, 8, 0.0, 8, 0.0, 8, 0.0, 8, NOISE_TYPE) })
+    let avx2 = Fun::new("AVX2 4D", move |b, _i| {
+        b.iter(|| unsafe { avx2::get_4d_noise(&setting) })
     });
     let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("4D", functions, 0);
 }
 fn d3(c: &mut Criterion) {
-    let scalar = Fun::new("Scalar 3D", |b, _i| {
-        b.iter(|| scalar::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE))
+    let setting = NoiseBuilder::fbm_3d(32,32,32).wrap();
+    let scalar = Fun::new("Scalar 3D", move |b, _i| {
+        b.iter(|| unsafe {scalar::get_3d_noise(&setting)})
     });
-    let sse2 = Fun::new("SSE2 3D", |b, _i| {
-        b.iter(|| unsafe { sse2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE) })
+    let sse2 = Fun::new("SSE2 3D", move |b, _i| {
+        b.iter(|| unsafe { sse2::get_3d_noise(&setting) })
     });
-    let sse41 = Fun::new("SSE41 3D", |b, _i| {
-        b.iter(|| unsafe { sse41::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE) })
+    let sse41 = Fun::new("SSE41 3D", move |b, _i| {
+        b.iter(|| unsafe { sse41::get_3d_noise(&setting) })
     });
-    let avx2 = Fun::new("AVX2 3D", |b, _i| {
-        b.iter(|| unsafe { avx2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, NOISE_TYPE) })
+    let avx2 = Fun::new("AVX2 3D", move |b, _i| {
+        b.iter(|| unsafe { avx2::get_3d_noise(&setting) })
     });
     let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("3D", functions, 0);
 }
 
 fn d2(c: &mut Criterion) {
-    let scalar = Fun::new("Scalar 2D", |b, _i| {
-        b.iter(|| scalar::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE))
+    let setting = NoiseBuilder::fbm_2d(256,256).wrap();
+    let scalar = Fun::new("Scalar 2D", move |b, _i| {
+        b.iter(|| unsafe { scalar::get_2d_noise(&setting)})
     });
 
-    let sse2 = Fun::new("SSE2 2D", |b, _i| {
-        b.iter(|| unsafe { sse2::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE) })
+    let sse2 = Fun::new("SSE2 2D", move |b, _i| {
+        b.iter(|| unsafe { sse2::get_2d_noise(&setting) })
     });
-    let sse41 = Fun::new("SSE41 2D", |b, _i| {
-        b.iter(|| unsafe { sse41::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE) })
+    let sse41 = Fun::new("SSE41 2D", move |b, _i| {
+        b.iter(|| unsafe { sse41::get_2d_noise(&setting) })
     });
-    let avx2 = Fun::new("AVX2 2D", |b, _i| {
-        b.iter(|| unsafe { avx2::get_2d_noise(0.0, 256, 0.0, 256, NOISE_TYPE) })
+    let avx2 = Fun::new("AVX2 2D", move |b, _i| {
+        b.iter(|| unsafe { avx2::get_2d_noise(&setting) })
     });
     let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("2D", functions, 0);
 }
 
 fn d1(c: &mut Criterion) {
-    let scalar = Fun::new("Scalar 1D", |b, _i| {
-        b.iter(|| scalar::get_1d_noise(0.0, 1024, NOISE_TYPE))
+    let setting = NoiseBuilder::fbm_1d(1024).wrap();
+    let scalar = Fun::new("Scalar 1D", move |b, _i| {
+        b.iter(|| unsafe {scalar::get_1d_noise(&setting)})
     });
-    let sse2 = Fun::new("SSE2 1D", |b, _i| {
-        b.iter(|| unsafe { sse2::get_1d_noise(0.0, 1024, NOISE_TYPE) })
+    let sse2 = Fun::new("SSE2 1D", move |b, _i| {
+        b.iter(|| unsafe { sse2::get_1d_noise(&setting) })
     });
-    let sse41 = Fun::new("SSE41 1D", |b, _i| {
-        b.iter(|| unsafe { sse41::get_1d_noise(0.0, 1024, NOISE_TYPE) })
+    let sse41 = Fun::new("SSE41 1D", move |b, _i| {
+        b.iter(|| unsafe { sse41::get_1d_noise(&setting) })
     });
-    let avx2 = Fun::new("AVX2 1D", |b, _i| {
-        b.iter(|| unsafe { avx2::get_1d_noise(0.0, 1024, NOISE_TYPE) })
+    let avx2 = Fun::new("AVX2 1D", move |b, _i| {
+        b.iter(|| unsafe { avx2::get_1d_noise(&setting) })
     });
     let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("1D", functions, 0);
 }
-const CELL_NOISE_TYPE: NoiseType = NoiseType::Cellular {
-    freq: 0.02,
-    distance_function: CellDistanceFunction::Natural,
-    return_type: CellReturnType::Distance,
-    jitter: 0.25,
-};
 fn d2_cell(c: &mut Criterion) {
-    let scalar = Fun::new("Scalar", |b, _i| {
-        b.iter(|| scalar::get_2d_noise(0.0, 512, 0.0, 512, CELL_NOISE_TYPE))
+    let setting = NoiseBuilder::cellular_2d(1024,1024).wrap();
+/*    let scalar = Fun::new("Scalar", move |b, _i| {
+        b.iter(|| unsafe {scalar::get_2d_noise(&setting)})
+    });*/
+    let sse2 = Fun::new("SSE2", move |b, _i| {
+        b.iter(|| unsafe { sse2::get_2d_noise(&setting) })
     });
-    let sse2 = Fun::new("SSE2", |b, _i| {
-        b.iter(|| unsafe { sse2::get_2d_noise(0.0, 512, 0.0, 512, CELL_NOISE_TYPE) })
+    let sse41 = Fun::new("SSE41", move |b, _i| {
+        b.iter(|| unsafe { sse41::get_2d_noise(&setting) })
     });
-    let sse41 = Fun::new("SSE41", |b, _i| {
-        b.iter(|| unsafe { sse41::get_2d_noise(0.0, 512, 0.0, 512, CELL_NOISE_TYPE) })
+    let avx2 = Fun::new("AVX2", move |b, _i| {
+        b.iter(|| unsafe { avx2::get_2d_noise(&setting) })
     });
-    let avx2 = Fun::new("AVX2", |b, _i| {
-        b.iter(|| unsafe { avx2::get_2d_noise(0.0, 512, 0.0, 512, CELL_NOISE_TYPE) })
-    });
-    let functions = vec![scalar, sse2, sse41, avx2];
-    c.bench_functions("CELL ", functions, 0);
+    let functions = vec![sse2, sse41, avx2];
+    c.bench_functions("CELL 2D", functions, 0);
 }
 fn d3_cell(c: &mut Criterion) {
-    let scalar = Fun::new("Scalar 3D", |b, _i| {
-        b.iter(|| scalar::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, CELL_NOISE_TYPE))
+    let setting = NoiseBuilder::cellular_3d(32,32,32).wrap();
+    let scalar = Fun::new("Scalar 3D", move |b, _i| {
+        b.iter(|| unsafe {scalar::get_3d_noise(&setting)})
     });
-    let sse2 = Fun::new("SSE2 3D", |b, _i| {
-        b.iter(|| unsafe { sse2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, CELL_NOISE_TYPE) })
+    let sse2 = Fun::new("SSE2 3D", move |b, _i| {
+        b.iter(|| unsafe { sse2::get_3d_noise(&setting) })
     });
-    let sse41 = Fun::new("SSE41 3D", |b, _i| {
-        b.iter(|| unsafe { sse41::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, CELL_NOISE_TYPE) })
+    let sse41 = Fun::new("SSE41 3D", move |b, _i| {
+        b.iter(|| unsafe { sse41::get_3d_noise(&setting) })
     });
-    let avx2 = Fun::new("AVX2 3D", |b, _i| {
-        b.iter(|| unsafe { avx2::get_3d_noise(0.0, 32, 0.0, 32, 0.0, 32, CELL_NOISE_TYPE) })
+    let avx2 = Fun::new("AVX2 3D", move |b, _i| {
+        b.iter(|| unsafe { avx2::get_3d_noise(&setting) })
     });
     let functions = vec![scalar, sse2, sse41, avx2];
     c.bench_functions("CELL 3D", functions, 0);

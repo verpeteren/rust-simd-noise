@@ -127,9 +127,7 @@ pub unsafe fn turbulence_1d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_1d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_1d_noise::<Avx2>(noise_type)
 }
 
@@ -138,11 +136,9 @@ pub unsafe fn get_1d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_1d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
+pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_1d_noise(noise_type);
-    let dim = noise_type.get_dimensions();    
+    let dim = noise_type.get_dimensions();
     scale_noise::<Avx2>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
@@ -222,9 +218,7 @@ pub unsafe fn turbulence_2d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_2d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_2d_noise::<Avx2>(noise_type)
 }
 
@@ -233,11 +227,9 @@ pub unsafe fn get_2d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_2d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
+pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_2d_noise(noise_type);
-    let dim = noise_type.get_dimensions();    
+    let dim = noise_type.get_dimensions();
     scale_noise::<Avx2>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
@@ -324,9 +316,7 @@ pub unsafe fn turbulence_3d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_3d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_3d_noise::<Avx2>(noise_type)
 }
 
@@ -335,12 +325,10 @@ pub unsafe fn get_3d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_3d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
+pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_3d_noise(noise_type);
     let dim = noise_type.get_dimensions();
-    scale_noise::<Avx2>(dim.min, dim.max, min, max, &mut noise);    
+    scale_noise::<Avx2>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
 
@@ -431,9 +419,7 @@ pub unsafe fn turbulence_4d(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_4d_noise(
-    noise_type: &NoiseType,
-) -> (Vec<f32>, f32, f32) {
+pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_4d_noise::<Avx2>(noise_type)
 }
 
@@ -442,9 +428,7 @@ pub unsafe fn get_4d_noise(
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 #[target_feature(enable = "avx2")]
-pub unsafe fn get_4d_scaled_noise(
-    noise_type: &NoiseType,
-) -> Vec<f32> {
+pub unsafe fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_4d_noise(noise_type);
     let dim = noise_type.get_dimensions();
     scale_noise::<Avx2>(dim.min, dim.max, min, max, &mut noise);
