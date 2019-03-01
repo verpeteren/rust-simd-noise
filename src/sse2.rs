@@ -20,6 +20,7 @@ use std::f32;
 pub unsafe fn cellular_2d(
     x: __m128,
     y: __m128,
+    freq: __m128,
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: __m128,
@@ -27,6 +28,7 @@ pub unsafe fn cellular_2d(
     cellular::cellular_2d::<Sse2>(
         F32x4(x),
         F32x4(y),
+        F32x4(freq),
         distance_function,
         return_type,
         F32x4(jitter),
@@ -58,10 +60,9 @@ pub unsafe fn cellular_3d(
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse2")]
-pub unsafe fn simplex_1d(x: __m128) -> __m128 {
-    simplex::simplex_1d::<Sse2>(F32x4(x)).0
+pub unsafe fn simplex_1d(x: __m128,freq:__m128) -> __m128 {
+    simplex::simplex_1d::<Sse2>(F32x4(x),F32x4(freq)).0
 }
-
 /// Get a single value of 1d fractal brownian motion.
 #[target_feature(enable = "sse2")]
 pub unsafe fn fbm_1d(
@@ -144,8 +145,8 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse2")]
-pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
-    simplex::simplex_2d::<Sse2>(F32x4(x), F32x4(y)).0
+pub unsafe fn simplex_2d(x: __m128, y: __m128, freq: __m128) -> __m128 {
+    simplex::simplex_2d::<Sse2>(F32x4(x), F32x4(y),F32x4(freq)).0
 }
 
 /// Get a single value of 2d fractal brownian motion.

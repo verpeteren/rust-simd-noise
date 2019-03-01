@@ -626,7 +626,7 @@ impl GradientSettings {
 
     pub fn with_freq(&mut self, freq: f32) -> &mut GradientSettings {
         self.freq = freq;
-        self        
+        self
     }
 
     pub fn wrap(self) -> NoiseType {
@@ -1151,28 +1151,19 @@ mod tests {
 
     #[test]
     fn small_dimensions() {
-        let _ = NoiseBuilder::gradient_2d(3,2).generate();
-
+        let _ = NoiseBuilder::gradient_2d(3, 2).generate();
     }
-    
 
     #[test]
     fn consistency_4d() {
-        let noise_setting = NoiseBuilder::fbm_4d(10,10,10,10).wrap();
-        let scalar_noise =
-            unsafe { scalar::get_4d_scaled_noise(&noise_setting) };
-        let sse2_noise = unsafe {
-            sse2::get_4d_scaled_noise(&noise_setting)
-        };
-        let sse41_noise = unsafe {
-            sse41::get_4d_scaled_noise(&noise_setting)
-        };
-        let avx2_noise = unsafe {
-            avx2::get_4d_scaled_noise(&noise_setting)
-        };
+        let noise_setting = NoiseBuilder::fbm_4d(10, 10, 10, 10).wrap();
+        let scalar_noise = unsafe { scalar::get_4d_scaled_noise(&noise_setting) };
+        let sse2_noise = unsafe { sse2::get_4d_scaled_noise(&noise_setting) };
+        let sse41_noise = unsafe { sse41::get_4d_scaled_noise(&noise_setting) };
+        let avx2_noise = unsafe { avx2::get_4d_scaled_noise(&noise_setting) };
 
         for i in 0..scalar_noise.len() {
-            assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
+            assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
             assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
             assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
         }
@@ -1180,18 +1171,14 @@ mod tests {
 
     #[test]
     fn consistency_3d() {
-        let noise_setting = NoiseBuilder::fbm_3d(23,23,23).wrap();
-        let scalar_noise =
-            unsafe {scalar::get_3d_scaled_noise(&noise_setting)};
-        let sse2_noise =
-            unsafe { sse2::get_3d_scaled_noise(&noise_setting) };
-        let sse41_noise =
-            unsafe { sse41::get_3d_scaled_noise(&noise_setting) };
-        let avx2_noise =
-            unsafe { avx2::get_3d_scaled_noise(&noise_setting) };
+        let noise_setting = NoiseBuilder::fbm_3d(23, 23, 23).wrap();
+        let scalar_noise = unsafe { scalar::get_3d_scaled_noise(&noise_setting) };
+        let sse2_noise = unsafe { sse2::get_3d_scaled_noise(&noise_setting) };
+        let sse41_noise = unsafe { sse41::get_3d_scaled_noise(&noise_setting) };
+        let avx2_noise = unsafe { avx2::get_3d_scaled_noise(&noise_setting) };
 
         for i in 0..scalar_noise.len() {
-            assert_delta!(scalar_noise[i],sse2_noise[i],0.1);
+            assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
             assert_delta!(sse2_noise[i], sse41_noise[i], 0.1);
             assert_delta!(sse41_noise[i], avx2_noise[i], 0.1);
         }
@@ -1199,14 +1186,11 @@ mod tests {
 
     #[test]
     fn consistency_2d() {
-        let noise_setting = NoiseBuilder::fbm_2d(233,233).wrap();
-        let scalar_noise = unsafe {scalar::get_2d_scaled_noise(&noise_setting)};
-        let sse2_noise =
-            unsafe { sse2::get_2d_scaled_noise(&noise_setting) };
-        let sse41_noise =
-            unsafe { sse41::get_2d_scaled_noise(&noise_setting) };
-        let avx2_noise =
-            unsafe { avx2::get_2d_scaled_noise(&noise_setting) };
+        let noise_setting = NoiseBuilder::fbm_2d(233, 233).wrap();
+        let scalar_noise = unsafe { scalar::get_2d_scaled_noise(&noise_setting) };
+        let sse2_noise = unsafe { sse2::get_2d_scaled_noise(&noise_setting) };
+        let sse41_noise = unsafe { sse41::get_2d_scaled_noise(&noise_setting) };
+        let avx2_noise = unsafe { avx2::get_2d_scaled_noise(&noise_setting) };
 
         for i in 0..scalar_noise.len() {
             assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
@@ -1218,7 +1202,7 @@ mod tests {
     #[test]
     fn consistency_1d() {
         let noise_setting = NoiseBuilder::fbm_1d(1000).wrap();
-        let scalar_noise = unsafe {scalar::get_1d_scaled_noise(&noise_setting)};
+        let scalar_noise = unsafe { scalar::get_1d_scaled_noise(&noise_setting) };
         let sse2_noise = unsafe { sse2::get_1d_scaled_noise(&noise_setting) };
         let sse41_noise = unsafe { sse41::get_1d_scaled_noise(&noise_setting) };
         let avx2_noise = unsafe { avx2::get_1d_scaled_noise(&noise_setting) };
@@ -1232,14 +1216,11 @@ mod tests {
 
     #[test]
     fn cell_consistency_2d() {
-        let noise_setting = NoiseBuilder::cellular_2d(100,100).wrap();
-        let scalar = unsafe {scalar::get_2d_scaled_noise(&noise_setting)};
-        let sse2 =
-            unsafe { sse2::get_2d_scaled_noise(&noise_setting) };
-        let sse41 =
-            unsafe { sse41::get_2d_scaled_noise(&noise_setting) };
-        let avx2 =
-            unsafe { avx2::get_2d_scaled_noise(&noise_setting) };
+        let noise_setting = NoiseBuilder::cellular_2d(100, 100).wrap();
+        let scalar = unsafe { scalar::get_2d_scaled_noise(&noise_setting) };
+        let sse2 = unsafe { sse2::get_2d_scaled_noise(&noise_setting) };
+        let sse41 = unsafe { sse41::get_2d_scaled_noise(&noise_setting) };
+        let avx2 = unsafe { avx2::get_2d_scaled_noise(&noise_setting) };
         for i in 0..scalar.len() {
             assert_delta!(scalar[i], sse2[i], 0.1);
             assert_delta!(sse2[i], sse41[i], 0.1);
@@ -1248,20 +1229,13 @@ mod tests {
     }
     #[test]
     fn cell_consistency_3d() {
-        let noise_setting = NoiseBuilder::cellular2_3d(32,32,32).wrap();
-        let scalar =
-unsafe {            scalar::get_3d_scaled_noise(&noise_setting)};
-        let sse2 = unsafe {
-            sse2::get_3d_scaled_noise(&noise_setting)
-        };
-        let sse41 = unsafe {
-            sse41::get_3d_scaled_noise(&noise_setting)
-        };
-        let avx2 = unsafe {
-            avx2::get_3d_scaled_noise(&noise_setting)
-        };
+        let noise_setting = NoiseBuilder::cellular2_3d(32, 32, 32).wrap();
+        let scalar = unsafe { scalar::get_3d_scaled_noise(&noise_setting) };
+        let sse2 = unsafe { sse2::get_3d_scaled_noise(&noise_setting) };
+        let sse41 = unsafe { sse41::get_3d_scaled_noise(&noise_setting) };
+        let avx2 = unsafe { avx2::get_3d_scaled_noise(&noise_setting) };
         for i in 0..scalar.len() {
-//            assert_delta!(scalar[i], sse2[i], 0.1);
+            //            assert_delta!(scalar[i], sse2[i], 0.1);
             assert_delta!(sse2[i], sse41[i], 0.1);
             assert_delta!(sse41[i], avx2[i], 0.1);
         }

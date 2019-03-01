@@ -9,6 +9,7 @@ use std::f32;
 pub unsafe fn cellular_2d(
     x: f32,
     y: f32,
+    freq: f32,
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: f32,
@@ -16,6 +17,7 @@ pub unsafe fn cellular_2d(
     cellular::cellular_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
+        F32x1(freq),
         distance_function,
         return_type,
         F32x1(jitter),
@@ -47,8 +49,8 @@ pub unsafe fn cellular_3d(
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 
-pub unsafe fn simplex_1d(x: f32) -> f32 {
-    simplex::simplex_1d::<Scalar>(F32x1(x)).0
+pub unsafe fn simplex_1d(x: f32, freq: f32) -> f32 {
+    simplex::simplex_1d::<Scalar>(F32x1(x), F32x1(freq)).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
@@ -115,8 +117,8 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 
-pub unsafe fn simplex_2d(x: f32, y: f32) -> f32 {
-    simplex::simplex_2d::<Scalar>(F32x1(x), F32x1(y)).0
+pub unsafe fn simplex_2d(x: f32, y: f32, freq:f32) -> f32 {
+    simplex::simplex_2d::<Scalar>(F32x1(x), F32x1(y),F32x1(freq)).0
 }
 
 /// Get a single value of 2d fractal brownian motion.

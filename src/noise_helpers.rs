@@ -4,43 +4,15 @@ use crate::cellular::*;
 use crate::simplex::*;
 use std::f32;
 
-#[inline(always)]
-unsafe fn get_1d_noise_helper<S: Simd>(x: S::Vf32, noise_type: &NoiseType) -> S::Vf32 {
-    match noise_type {
-        NoiseType::Fbm(s) => fbm_1d::<S>(
-            x,
-            S::set1_ps(s.freq),
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
-            s.octaves,
-        ),
-        NoiseType::Ridge(s) => ridge_1d::<S>(
-            x,
-            S::set1_ps(s.freq),
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
-            s.octaves,
-        ),
-        NoiseType::Turbulence(s) => turbulence_1d::<S>(
-            x,
-            S::set1_ps(s.freq),
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
-            s.octaves,
-        ),
-        NoiseType::Gradient(s) => simplex_1d::<S>(S::mul_ps(x, S::set1_ps(s.freq))),
-        NoiseType::Cellular(_) => panic!("1D Cell Noise Not Implemented"),
-        NoiseType::Cellular2(_) => panic!("1D Cell Noise Not Implemented"),
-    }
-}
-
-#[inline(always)]
-pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    let dim = noise_type.get_dimensions();
+macro_rules! get_1d_noise_helper  {
+    ($S:ident,$Setting:expr,$f:expr,$($arg:tt)*) => {
+ {
+    let dim = $Setting.dim;
     let start_x = dim.x;
     let width = dim.width;
-    let mut min_s = S::set1_ps(f32::MAX);
-    let mut max_s = S::set1_ps(f32::MIN);
+    let mut min_s = $S::set1_ps(f32::MAX);
+    let mut max_s = $S::set1_ps(f32::MIN);
+
 
     let mut min = f32::MAX;
     let mut max = f32::MIN;
@@ -56,9 +28,8 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         x_arr[i] = start_x + i as f32;
     }
     let mut x = S::loadu_ps(&x_arr[0]);
-
     for _ in 0..width / vector_width {
-        let f = get_1d_noise_helper::<S>(x, &noise_type);
+        let f = $f(x,$($arg)*);
         max_s = S::max_ps(max_s, f);
         min_s = S::min_ps(min_s, f);
         S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -66,7 +37,7 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         x = S::add_ps(x, S::set1_ps(vector_width as f32));
     }
     if remainder != 0 {
-        let f = get_1d_noise_helper::<S>(x, &noise_type);
+        let f = $f(x,$($arg)*);
         for j in 0..remainder {
             let n = f[j];
             *result.get_unchecked_mut(i) = n;
@@ -89,66 +60,13 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         }
     }
     (result, min, max)
-}
-
-#[inline(always)]
-unsafe fn get_2d_noise_helper<S: Simd>(x: S::Vf32, y: S::Vf32, noise_type: &NoiseType) -> S::Vf32 {
-    match noise_type {
-        NoiseType::Fbm(s) => fbm_2d::<S>(
-            x,
-            y,
-            S::set1_ps(s.freq),
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
-            s.octaves,
-        ),
-        NoiseType::Ridge(s) => ridge_2d::<S>(
-            x,
-            y,
-            S::set1_ps(s.freq),
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
-            s.octaves,
-        ),
-        NoiseType::Turbulence(s) => turbulence_2d::<S>(
-            x,
-            y,
-            S::set1_ps(s.freq),
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
-            s.octaves,
-        ),
-        NoiseType::Gradient(s) => simplex_2d::<S>(
-            S::mul_ps(x, S::set1_ps(s.freq)),
-            S::mul_ps(y, S::set1_ps(s.freq)),
-        ),
-        NoiseType::Cellular(s) => cellular_2d::<S>(
-            S::mul_ps(x, S::set1_ps(s.freq)),
-            S::mul_ps(y, S::set1_ps(s.freq)),
-            s.distance_function,
-            s.return_type,
-            S::set1_ps(s.jitter),
-        ),
-        NoiseType::Cellular2(s) => cellular2_2d::<S>(
-            S::mul_ps(x, S::set1_ps(s.freq)),
-            S::mul_ps(y, S::set1_ps(s.freq)),
-            s.distance_function,
-            s.return_type,
-            S::set1_ps(s.jitter),
-            s.index0,
-            s.index1,
-        ),
+ }
     }
 }
 
-/// Gets a width X height sized block of 2d noise, unscaled.
-/// `start_x` and `start_y` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-#[inline(always)]
-pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    let dim = noise_type.get_dimensions();
+macro_rules! get_2d_noise_helper {
+    ($S:ident,$Setting:expr,$f:expr,$($arg:tt)*) => {{
+    let dim = $Setting.dim;
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -173,7 +91,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
     for _ in 0..height {
         let mut x = S::loadu_ps(&x_arr[0]);
         for _ in 0..width / vector_width {
-            let f = get_2d_noise_helper::<S>(x, y, &noise_type);
+        let f = $f(x,y,$($arg)*);
             max_s = S::max_ps(max_s, f);
             min_s = S::min_ps(min_s, f);
             S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -181,7 +99,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             x = S::add_ps(x, S::set1_ps(vector_width as f32));
         }
         if remainder != 0 {
-            let f = get_2d_noise_helper::<S>(x, y, &noise_type);
+        let f = $f(x,y,$($arg)*);
             for j in 0..remainder {
                 let n = f[j];
                 *result.get_unchecked_mut(i) = n;
@@ -205,7 +123,115 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         }
     }
     (result, min, max)
+
+}};
 }
+macro_rules! get_3d_noise_helper {
+    ($S:ident,$Setting:expr,$f:expr,$($arg:tt)*) => {{}};
+}
+macro_rules! get_4d_noise_helper {
+    ($S:ident,$Setting:expr,$f:expr,$($arg:tt)*) => {{}};
+}
+
+#[inline(always)]
+pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_1d_noise_helper!(
+            S,
+            s,
+            fbm_1d::<S>,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves
+        ),
+        NoiseType::Ridge(s) => get_1d_noise_helper!(
+            S,
+            s,
+            ridge_1d::<S>,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves
+        ),
+        NoiseType::Turbulence(s) => get_1d_noise_helper!(
+            S,
+            s,
+            turbulence_1d::<S>,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves
+        ),
+        NoiseType::Gradient(s) => get_1d_noise_helper!(S, s, simplex_1d::<S>, S::set1_ps(s.freq)),
+        NoiseType::Cellular(_) => {
+            panic!("not implemented");
+        }
+        NoiseType::Cellular2(_) => {
+            panic!("not implemented");
+        }
+    }
+}
+
+/// Gets a width X height sized block of 2d noise, unscaled.
+/// `start_x` and `start_y` can be used to provide an offset in the
+/// coordinates. Results are unscaled, 'min' and 'max' noise values
+/// are returned so you can scale and transform the noise as you see fit
+/// in a single pass.
+#[inline(always)]
+pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_2d_noise_helper!(
+            S,
+            s,
+            fbm_2d::<S>,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves
+        ),
+        NoiseType::Ridge(s) => get_2d_noise_helper!(
+            S,
+            s,
+            ridge_2d::<S>,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves
+        ),
+        NoiseType::Turbulence(s) => get_2d_noise_helper!(
+            S,
+            s,
+            turbulence_2d::<S>,
+            S::set1_ps(s.freq),
+            S::set1_ps(s.lacunarity),
+            S::set1_ps(s.gain),
+            s.octaves
+        ),
+        NoiseType::Gradient(s) => get_2d_noise_helper!(S, s, simplex_2d::<S>, S::set1_ps(s.freq)),
+        NoiseType::Cellular(s) => get_2d_noise_helper!(
+            S,
+            s,
+            cellular_2d::<S>,
+            S::set1_ps(s.freq),
+            s.distance_function,
+            s.return_type,
+            S::set1_ps(s.jitter)
+        ),
+        NoiseType::Cellular2(s) => get_2d_noise_helper!(
+            S,
+            s,
+            cellular2_2d::<S>,
+            S::set1_ps(s.freq),
+            s.distance_function,
+            s.return_type,
+            S::set1_ps(s.jitter),
+            s.index0,
+            s.index1,
+        ),
+    }
+}
+
 #[inline(always)]
 unsafe fn get_3d_noise_helper<S: Simd>(
     x: S::Vf32,
