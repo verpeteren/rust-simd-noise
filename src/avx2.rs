@@ -22,7 +22,6 @@ use std::f32;
 pub unsafe fn cellular_2d(
     x: __m256,
     y: __m256,
-    freq: __m256,
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: __m256,
@@ -30,7 +29,6 @@ pub unsafe fn cellular_2d(
     cellular::cellular_2d::<Avx2>(
         F32x8(x),
         F32x8(y),
-        F32x8(freq),
         distance_function,
         return_type,
         F32x8(jitter),
@@ -62,22 +60,20 @@ pub unsafe fn cellular_3d(
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "avx2")]
-pub unsafe fn simplex_1d(x: __m256,freq:__m256) -> __m256 {
-    simplex::simplex_1d::<Avx2>(F32x8(x),F32x8(freq)).0
+pub unsafe fn simplex_1d(x: __m256) -> __m256 {
+    simplex::simplex_1d::<Avx2>(F32x8(x)).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
 #[target_feature(enable = "avx2")]
 pub unsafe fn fbm_1d(
     x: __m256,
-    freq: __m256,
     lacunarity: __m256,
     gain: __m256,
     octaves: u8,
 ) -> __m256 {
     simplex::fbm_1d::<Avx2>(
         F32x8(x),
-        F32x8(freq),
         F32x8(lacunarity),
         F32x8(gain),
         octaves,
@@ -89,14 +85,12 @@ pub unsafe fn fbm_1d(
 #[target_feature(enable = "avx2")]
 pub unsafe fn ridge_1d(
     x: __m256,
-    freq: __m256,
     lacunarity: __m256,
     gain: __m256,
     octaves: u8,
 ) -> __m256 {
     simplex::ridge_1d::<Avx2>(
         F32x8(x),
-        F32x8(freq),
         F32x8(lacunarity),
         F32x8(gain),
         octaves,
@@ -108,14 +102,12 @@ pub unsafe fn ridge_1d(
 #[target_feature(enable = "avx2")]
 pub unsafe fn turbulence_1d(
     x: __m256,
-    freq: __m256,
     lacunarity: __m256,
     gain: __m256,
     octaves: u8,
 ) -> __m256 {
     simplex::turbulence_1d::<Avx2>(
         F32x8(x),
-        F32x8(freq),
         F32x8(lacunarity),
         F32x8(gain),
         octaves,
@@ -148,8 +140,8 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "avx2")]
-pub unsafe fn simplex_2d(x: __m256, y: __m256, freq: __m256) -> __m256 {
-    simplex::simplex_2d::<Avx2>(F32x8(x), F32x8(y),F32x8(freq)).0
+pub unsafe fn simplex_2d(x: __m256, y: __m256, ) -> __m256 {
+    simplex::simplex_2d::<Avx2>(F32x8(x), F32x8(y)).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
@@ -157,7 +149,6 @@ pub unsafe fn simplex_2d(x: __m256, y: __m256, freq: __m256) -> __m256 {
 pub unsafe fn fbm_2d(
     x: __m256,
     y: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -165,7 +156,6 @@ pub unsafe fn fbm_2d(
     simplex::fbm_2d::<Avx2>(
         F32x8(x),
         F32x8(y),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -178,7 +168,6 @@ pub unsafe fn fbm_2d(
 pub unsafe fn ridge_2d(
     x: __m256,
     y: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -186,7 +175,6 @@ pub unsafe fn ridge_2d(
     simplex::ridge_2d::<Avx2>(
         F32x8(x),
         F32x8(y),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -198,7 +186,6 @@ pub unsafe fn ridge_2d(
 pub unsafe fn turbulence_2d(
     x: __m256,
     y: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -206,7 +193,6 @@ pub unsafe fn turbulence_2d(
     simplex::turbulence_2d::<Avx2>(
         F32x8(x),
         F32x8(y),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -249,7 +235,6 @@ pub unsafe fn fbm_3d(
     x: __m256,
     y: __m256,
     z: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -258,7 +243,6 @@ pub unsafe fn fbm_3d(
         F32x8(x),
         F32x8(y),
         F32x8(z),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -272,7 +256,6 @@ pub unsafe fn ridge_3d(
     x: __m256,
     y: __m256,
     z: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -281,7 +264,6 @@ pub unsafe fn ridge_3d(
         F32x8(x),
         F32x8(y),
         F32x8(z),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -295,7 +277,6 @@ pub unsafe fn turbulence_3d(
     x: __m256,
     y: __m256,
     z: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -304,7 +285,6 @@ pub unsafe fn turbulence_3d(
         F32x8(x),
         F32x8(y),
         F32x8(z),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -347,7 +327,6 @@ pub unsafe fn fbm_4d(
     y: __m256,
     z: __m256,
     w: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -357,7 +336,6 @@ pub unsafe fn fbm_4d(
         F32x8(y),
         F32x8(z),
         F32x8(w),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -372,7 +350,6 @@ pub unsafe fn ridge_4d(
     y: __m256,
     z: __m256,
     w: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -382,7 +359,6 @@ pub unsafe fn ridge_4d(
         F32x8(y),
         F32x8(z),
         F32x8(w),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,
@@ -397,7 +373,6 @@ pub unsafe fn turbulence_4d(
     y: __m256,
     z: __m256,
     w: __m256,
-    freq: __m256,
     lac: __m256,
     gain: __m256,
     octaves: u8,
@@ -407,7 +382,6 @@ pub unsafe fn turbulence_4d(
         F32x8(y),
         F32x8(z),
         F32x8(w),
-        F32x8(freq),
         F32x8(lac),
         F32x8(gain),
         octaves,

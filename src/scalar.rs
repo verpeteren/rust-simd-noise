@@ -9,7 +9,6 @@ use std::f32;
 pub unsafe fn cellular_2d(
     x: f32,
     y: f32,
-    freq: f32,
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: f32,
@@ -17,7 +16,6 @@ pub unsafe fn cellular_2d(
     cellular::cellular_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
-        F32x1(freq),
         distance_function,
         return_type,
         F32x1(jitter),
@@ -48,17 +46,15 @@ pub unsafe fn cellular_3d(
 
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
-
-pub unsafe fn simplex_1d(x: f32, freq: f32) -> f32 {
-    simplex::simplex_1d::<Scalar>(F32x1(x), F32x1(freq)).0
+pub unsafe fn simplex_1d(x: f32) -> f32 {
+    simplex::simplex_1d::<Scalar>(F32x1(x)).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
 
-pub unsafe fn fbm_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn fbm_1d(x: f32,lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     simplex::fbm_1d::<Scalar>(
         F32x1(x),
-        F32x1(freq),
         F32x1(lacunarity),
         F32x1(gain),
         octaves,
@@ -68,10 +64,9 @@ pub unsafe fn fbm_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8)
 
 /// Get a single value of 2d ridge noise.
 
-pub unsafe fn ridge_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn ridge_1d(x: f32,lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     simplex::ridge_1d::<Scalar>(
         F32x1(x),
-        F32x1(freq),
         F32x1(lacunarity),
         F32x1(gain),
         octaves,
@@ -81,10 +76,9 @@ pub unsafe fn ridge_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u
 
 /// Get a single value of 2d turbulence.
 
-pub unsafe fn turbulence_1d(x: f32, freq: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn turbulence_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8) -> f32 {
     simplex::turbulence_1d::<Scalar>(
         F32x1(x),
-        F32x1(freq),
         F32x1(lacunarity),
         F32x1(gain),
         octaves,
@@ -117,17 +111,16 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 
-pub unsafe fn simplex_2d(x: f32, y: f32, freq:f32) -> f32 {
-    simplex::simplex_2d::<Scalar>(F32x1(x), F32x1(y),F32x1(freq)).0
+pub unsafe fn simplex_2d(x: f32, y: f32 ) -> f32 {
+    simplex::simplex_2d::<Scalar>(F32x1(x), F32x1(y)).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
 
-pub unsafe fn fbm_2d(x: f32, y: f32, freq: f32, lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn fbm_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
     simplex::fbm_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -137,11 +130,10 @@ pub unsafe fn fbm_2d(x: f32, y: f32, freq: f32, lac: f32, gain: f32, octaves: u8
 
 /// Get a single value of 2d ridge noise.
 
-pub unsafe fn ridge_2d(x: f32, y: f32, freq: f32, lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn ridge_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
     simplex::ridge_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -150,11 +142,10 @@ pub unsafe fn ridge_2d(x: f32, y: f32, freq: f32, lac: f32, gain: f32, octaves: 
 }
 /// Get a single value of 2d turbulence.
 
-pub unsafe fn turbulence_2d(x: f32, y: f32, freq: f32, lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn turbulence_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
     simplex::turbulence_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -193,12 +184,11 @@ pub unsafe fn simplex_3d(x: f32, y: f32, z: f32) -> f32 {
 
 /// Get a single value of 3d fractal brownian motion.
 
-pub unsafe fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn fbm_3d(x: f32, y: f32, z: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
     simplex::fbm_3d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -208,12 +198,11 @@ pub unsafe fn fbm_3d(x: f32, y: f32, z: f32, freq: f32, lac: f32, gain: f32, oct
 
 /// Get a single value of 3d ridge noise.
 
-pub unsafe fn ridge_3d(x: f32, y: f32, z: f32, freq: f32, lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn ridge_3d(x: f32, y: f32, z: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
     simplex::ridge_3d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -222,12 +211,10 @@ pub unsafe fn ridge_3d(x: f32, y: f32, z: f32, freq: f32, lac: f32, gain: f32, o
 }
 
 /// Get a single value of 3d turbulence.
-
 pub unsafe fn turbulence_3d(
     x: f32,
     y: f32,
     z: f32,
-    freq: f32,
     lac: f32,
     gain: f32,
     octaves: u8,
@@ -236,7 +223,6 @@ pub unsafe fn turbulence_3d(
         F32x1(x),
         F32x1(y),
         F32x1(z),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -249,7 +235,6 @@ pub unsafe fn turbulence_3d(
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-
 pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     noise_helpers::get_3d_noise::<Scalar>(noise_type)
 }
@@ -258,7 +243,6 @@ pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
 /// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-
 pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_3d_noise(noise_type);
     let dim = noise_type.get_dimensions();
@@ -279,7 +263,6 @@ pub unsafe fn fbm_4d(
     y: f32,
     z: f32,
     w: f32,
-    freq: f32,
     lac: f32,
     gain: f32,
     octaves: u8,
@@ -289,7 +272,6 @@ pub unsafe fn fbm_4d(
         F32x1(y),
         F32x1(z),
         F32x1(w),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -304,7 +286,6 @@ pub unsafe fn ridge_4d(
     y: f32,
     z: f32,
     w: f32,
-    freq: f32,
     lac: f32,
     gain: f32,
     octaves: u8,
@@ -314,7 +295,6 @@ pub unsafe fn ridge_4d(
         F32x1(y),
         F32x1(z),
         F32x1(w),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
@@ -329,7 +309,6 @@ pub unsafe fn turbulence_4d(
     y: f32,
     z: f32,
     w: f32,
-    freq: f32,
     lac: f32,
     gain: f32,
     octaves: u8,
@@ -339,7 +318,6 @@ pub unsafe fn turbulence_4d(
         F32x1(y),
         F32x1(z),
         F32x1(w),
-        F32x1(freq),
         F32x1(lac),
         F32x1(gain),
         octaves,
