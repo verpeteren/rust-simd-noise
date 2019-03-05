@@ -218,7 +218,7 @@ pub unsafe fn fbm_2d<S: Simd>(
         x = S::mul_ps(x, lac);
         y = S::mul_ps(y, lac);
         amp = S::mul_ps(amp, gain);
-        result = S::fmadd_ps(simplex_2d::<S>(x, y), amp, result);
+        result = S::add_ps(S::mul_ps(simplex_2d::<S>(x, y), amp), result);
     }
 
     result
@@ -509,7 +509,7 @@ pub unsafe fn fbm_3d<S: Simd>(
         y = S::mul_ps(y, lac);
         z = S::mul_ps(z, lac);
         amp = S::mul_ps(amp, gain);
-        result = S::fmadd_ps(simplex_3d::<S>(x, y, z), amp, result);
+        result = S::add_ps(S::mul_ps(simplex_3d::<S>(x, y, z), amp), result);
     }
 
     result

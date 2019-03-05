@@ -11,7 +11,7 @@ fn d4(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_4d(8, 8, 8, 8).wrap();
    
     c.bench(
-        "fbm 4d",
+        "fbm4d",
         Benchmark::new(
             "scalar 4d", move |b| b.iter( || unsafe { scalar::get_4d_noise(&setting) }))
         .with_function(
@@ -28,7 +28,7 @@ fn d4(c: &mut Criterion) {
 fn d3(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_3d(32, 32, 32).wrap();
   c.bench(
-        "fbm 3d",
+        "fbm3d",
         Benchmark::new(
             "scalar 3d", move |b| b.iter( || unsafe { scalar::get_3d_noise(&setting) }))
         .with_function(
@@ -43,9 +43,9 @@ fn d3(c: &mut Criterion) {
 }
 
 fn d2(c: &mut Criterion) {
-    let setting = NoiseBuilder::fbm_2d(256, 256).wrap();
+    let setting = NoiseBuilder::fbm_2d(3840, 2160).wrap();
   c.bench(
-        "fbm 2d",
+        "fbm2d",
         Benchmark::new(
             "scalar 2d", move |b| b.iter( || unsafe { scalar::get_2d_noise(&setting) }))
         .with_function(
@@ -62,7 +62,7 @@ fn d2(c: &mut Criterion) {
 fn d1(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_1d(1024).wrap();
   c.bench(
-        "fbm 1d",
+        "fbm1d",
         Benchmark::new(
             "scalar 1d", move |b| b.iter( || unsafe { scalar::get_1d_noise(&setting) }))
         .with_function(
@@ -76,9 +76,9 @@ fn d1(c: &mut Criterion) {
        .measurement_time(Duration::from_secs(5)));
 }
 fn d2_cell(c: &mut Criterion) {
-    let setting = NoiseBuilder::cellular_2d(1024, 1024).wrap();
+    let setting = NoiseBuilder::cellular_2d(1024, 1024).with_return_type(CellReturnType::CellValue).wrap();
   c.bench(
-        "cellular 2d",
+        "cellular2d",
         Benchmark::new(
             "scalar 2d", move |b| b.iter( || unsafe { scalar::get_2d_noise(&setting) }))
         .with_function(
@@ -92,9 +92,9 @@ fn d2_cell(c: &mut Criterion) {
        .measurement_time(Duration::from_secs(5)));
 }
 fn d3_cell(c: &mut Criterion) {
-    let setting = NoiseBuilder::cellular_3d(32, 32, 32).wrap();
+    let setting = NoiseBuilder::cellular_3d(128,128, 128).wrap();
   c.bench(
-        "cellular 3d",
+        "cellular3d",
         Benchmark::new(
             "scalar 3d", move |b| b.iter( || unsafe { scalar::get_3d_noise(&setting) }))
         .with_function(

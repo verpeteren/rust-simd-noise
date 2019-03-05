@@ -19,58 +19,23 @@ See above crates.io link for Docs.
 *Single Threaded*
 *using Criterion.rs*
 
-### 1D 1024 points of Fbm Noise, 3 Octaves
-| SIMD Set | Time |
-|----------|------|
-| scalar| 21.289 us|
-| sse2  | 8.203  us|
-| sse41 | 6.598  us|
-| avx2  | 3.174  us|
-
-### 2D 256x256 Fbm Noise, 3 Octaves
+### 2D 4k (3840 × 2160)  Fbm Noise, 3 Octaves
 
 | SIMD Set | Time |
 |----------|------|
-| scalar|  5.351 ms|
-| sse2  |  1.766 ms|
-| sse41 |  1.562 ms|
-| avx2  |  0.880 ms|
+| scalar|  888 ms|
+| sse2  |  225 ms|
+| sse41 |  186 ms|
+| avx2  |  108 ms|
 
-### 3D 32x32x32 Fbm Noise, 3 Octaves
-
-| SIMD Set | Time |
-|----------|------|
-| scalar|  3.173 ms|
-| sse2  |  1.631 ms|
-| sse41 |  1.440 ms|
-| avx2  |  0.882 ms|
-
-### 4D 8x8x8x8 Fbm Noise, 3 Octaves
+### 3D 128 × 128 x 128  Cell Noise
 
 | SIMD Set | Time |
 |----------|------|
-| scalar| 534 us|
-| sse2  | 345 us|
-| sse41 | 305 us|
-| avx2  | 144 us|
-
-### 2D 1024x1024 Cell Noise 
-
-| SIMD Set | Time |
-|----------|------|
-| scalar| 37.220 ms|
-| sse2  | 30.780 ms|
-| sse41 | 20.492 ms|
-| avx2  | 8.697  ms|
-
-### 3D 32x32x32 Cell Noise
-
-| SIMD Set | Time |
-|----------|------|
-| scalar| 3.964 ms|
-| sse2  | 3.660 ms|
-| sse41 | 2.251 ms|
-| avx2  | 1.182 ms|
+| scalar|  1,400 ms|
+| sse2  |    128 ms|
+| sse41 |     94 ms|
+| avx2  |     47 ms|
 
 
 ## Todo
@@ -86,33 +51,33 @@ The library will, at runtime, pick the fastest available options between SSE2, S
 ```rust
 use simdnoise::*;
 
-// Set up noise type and parameters
-let noise_type = simdnoise::NoiseType::Fbm {
-      freq: 0.04,
-      lacunarity: 0.5,
-      gain: 2.0,
-      octaves: 3,
-}; 
+// Get a block of 2d fbm noise with default settings, 100 x 100, with values scaled to the range [0,1]
+let noise =  NoiseBuilder::fbm_2d(100, 100).generate_scaled(0.0,1.0);
 
-// Get a block of 2d 800x600 noise, with no scaling of resulting values
-// min and max values are returned so you can apply your own scaling
-let (an_f32_vec,min,max) = simdnoise::get_2d_noise(0.0, 800, 0.0, 600, noise_type);
+// Get a block of 3d ridge noise, custom settings, 32x32x32 unscaled
+let (noise,min,max) =  NoiseBuilder::ridge_3d(32,32,32) 
+        .with_freq(0.05)
+        .with_octaves(5)
+        .with_gain(2.0)
+        .with_lacunarity(0.5)
+        .generate();
 
-// Get a block of 200x200x200 3d noise
-let (an_f32_vec,min,max) = simdnoise::get_3d_noise(0.0, 200, 0.0, 200,0.0, 200, noise_type);
-
-// Get a block of noise scaled between -1 and 1
-let an_f32_vec = simdnoise::get_2d_scaled_noise(0.0, 800, 0.0, 600, noise_type,-1.0,1.0);
-```
+``
 
 ## Call noise functions directly
 Sometimes you need something other than a block, like the points on the surface of a sphere.
 Sometimes you may want to use SSE41 even with AVX2 is available
 
 ```rust
-
-// get a block of 100x100 sse41 noise, skip runtime detection
-let (noise,min,max) = simdnoise::sse41::get_2d_noise(0.0,100,0.0,100,noise_type);
+let noise_setting =  NoiseBuilder::ridge_3d(32,32,32) 
+        .with_freq(0.05)
+        .with_octaves(5)
+        .with_gain(2.0)
+        .with_lacunarity(0.5)
+        .wrap();
+ 
+// get a block of noise with the sse41 version, using the above settings
+let (noise,min,max) = unsafe { simdnoise::sse41::get_2d_noise(&noise_setting); }
 
 // send your own SIMD x,y values to the noise functions directly
 unsafe {
@@ -128,7 +93,7 @@ unsafe {
   let lacunarity = _mm256_set1_ps(0.5);
   let gain = _mm256_set1_ps(2.0);
   let octaves = 3;
-  let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,freq,lacunarity,gain,octaves);
+  let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,lacunarity,gain,octaves);
     
 }
 ```
