@@ -26,7 +26,7 @@ fn d4(c: &mut Criterion) {
 
 }
 fn d3(c: &mut Criterion) {
-    let setting = NoiseBuilder::fbm_3d(32, 32, 32).wrap();
+    let setting = NoiseBuilder::fbm_3d(64, 64, 64).wrap();
   c.bench(
         "fbm3d",
         Benchmark::new(
