@@ -111,44 +111,47 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 
-pub unsafe fn simplex_2d(x: f32, y: f32 ) -> f32 {
-    simplex::simplex_2d::<Scalar>(F32x1(x), F32x1(y)).0
+pub unsafe fn simplex_2d(x: f32, y: f32, seed:i32 ) -> f32 {
+    simplex::simplex_2d::<Scalar>(F32x1(x), F32x1(y),seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
 
-pub unsafe fn fbm_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn fbm_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8, seed:i32) -> f32 {
     simplex::fbm_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(lac),
         F32x1(gain),
         octaves,
+        seed
     )
     .0
 }
 
 /// Get a single value of 2d ridge noise.
 
-pub unsafe fn ridge_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn ridge_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8, seed:i32) -> f32 {
     simplex::ridge_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(lac),
         F32x1(gain),
         octaves,
+        seed
     )
     .0
 }
 /// Get a single value of 2d turbulence.
 
-pub unsafe fn turbulence_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8) -> f32 {
+pub unsafe fn turbulence_2d(x: f32, y: f32,  lac: f32, gain: f32, octaves: u8, seed:i32) -> f32 {
     simplex::turbulence_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(lac),
         F32x1(gain),
         octaves,
+        seed
     )
     .0
 }

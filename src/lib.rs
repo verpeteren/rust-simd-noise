@@ -247,6 +247,7 @@ pub struct NoiseDimensions {
     time: usize,
     min: f32,
     max: f32,
+    seed: i32
 }
 impl NoiseDimensions {
     pub fn default(d: usize) -> NoiseDimensions {
@@ -265,6 +266,7 @@ impl NoiseDimensions {
             time: 1,
             min: 0.0,
             max: 1.0,
+            seed: 1
         }
     }
 }
@@ -459,7 +461,10 @@ impl FbmSettings {
             octaves: 3,
         }
     }
-
+    pub fn with_seed(&mut self, seed:i32) -> &mut FbmSettings {
+        self.dim.seed = seed;
+        self
+    }
     pub fn with_freq(&mut self, freq: f32) -> &mut FbmSettings {
         self.freq = freq;
         self

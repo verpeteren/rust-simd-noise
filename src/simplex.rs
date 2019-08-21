@@ -113,8 +113,8 @@ pub unsafe fn turbulence_1d<S: Simd>(
 }
 
 #[inline(always)]
-unsafe fn grad2<S: Simd>(hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
-    let h = S::and_epi32(hash, S::set1_epi32(7));
+unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+    let h = S::and_epi32(S::xor_epi32(hash,S::set1_epi32(seed)), S::set1_epi32(7));
     let mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
     let u = S::blendv_ps(y, x, mask);
     let v = S::mul_ps(S::set1_ps(2.0), S::blendv_ps(x, y, mask));
@@ -135,7 +135,7 @@ unsafe fn grad2<S: Simd>(hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
 }
 
 #[inline(always)]
-pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 {
     let s = S::mul_ps(S::set1_ps(F2), S::add_ps(x, y));
     let ips = S::floor_ps(S::add_ps(x, s));
     let jps = S::floor_ps(S::add_ps(y, s));
@@ -190,9 +190,9 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32) -> S::Vf32 {
     let mut t2q = S::mul_ps(t2, t2);
     t2q = S::mul_ps(t2q, t2q);
 
-    let mut n0 = S::mul_ps(t0q, grad2::<S>(gi0, x0, y0));
-    let mut n1 = S::mul_ps(t1q, grad2::<S>(gi1, x1, y1));
-    let mut n2 = S::mul_ps(t2q, grad2::<S>(gi2, x2, y2));
+    let mut n0 = S::mul_ps(t0q, grad2::<S>(seed, gi0, x0, y0));
+    let mut n1 = S::mul_ps(t1q, grad2::<S>(seed, gi1, x1, y1));
+    let mut n2 = S::mul_ps(t2q, grad2::<S>(seed, gi2, x2, y2));
 
     let mut cond = S::cmplt_ps(t0, S::setzero_ps());
     n0 = S::andnot_ps(cond, n0);
@@ -210,15 +210,16 @@ pub unsafe fn fbm_2d<S: Simd>(
     lac: S::Vf32,
     gain: S::Vf32,
     octaves: u8,
+    seed: i32
 ) -> S::Vf32 {
-    let mut result = simplex_2d::<S>(x, y);
+    let mut result = simplex_2d::<S>(x, y,seed);
     let mut amp = S::set1_ps(1.0);
 
     for _ in 1..octaves {
         x = S::mul_ps(x, lac);
         y = S::mul_ps(y, lac);
         amp = S::mul_ps(amp, gain);
-        result = S::add_ps(S::mul_ps(simplex_2d::<S>(x, y), amp), result);
+        result = S::add_ps(S::mul_ps(simplex_2d::<S>(x, y,seed), amp), result);
     }
 
     result
@@ -231,10 +232,11 @@ pub unsafe fn ridge_2d<S: Simd>(
     lac: S::Vf32,
     gain: S::Vf32,
     octaves: u8,
+    seed: i32
 ) -> S::Vf32 {
     let mut result = S::sub_ps(
         S::set1_ps(1.0),
-        S::abs_ps(simplex_2d::<S>(x, y)),
+        S::abs_ps(simplex_2d::<S>(x, y,seed)),
     );
     let mut amp = S::set1_ps(1.0);
 
@@ -245,7 +247,7 @@ pub unsafe fn ridge_2d<S: Simd>(
         result = S::add_ps(
             result,
             S::fnmadd_ps(
-                S::abs_ps(simplex_2d::<S>(x, y)),
+                S::abs_ps(simplex_2d::<S>(x, y,seed)),
                 amp,
                 S::set1_ps(1.0),
             ),
@@ -261,8 +263,9 @@ pub unsafe fn turbulence_2d<S: Simd>(
     lac: S::Vf32,
     gain: S::Vf32,
     octaves: u8,
+    seed: i32
 ) -> S::Vf32 {
-    let mut result = S::abs_ps(simplex_2d::<S>(x, y));
+    let mut result = S::abs_ps(simplex_2d::<S>(x, y,seed));
 
     let mut amp = S::set1_ps(1.0);
 
@@ -272,7 +275,7 @@ pub unsafe fn turbulence_2d<S: Simd>(
         amp = S::mul_ps(amp, gain);
         result = S::add_ps(
             result,
-            S::abs_ps(S::mul_ps(simplex_2d::<S>(x, y ), amp)),
+            S::abs_ps(S::mul_ps(simplex_2d::<S>(x, y,seed ), amp)),
         );
     }
 

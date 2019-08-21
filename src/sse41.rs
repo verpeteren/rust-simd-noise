@@ -105,20 +105,20 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn simplex_2d(x: __m128, y: __m128) -> __m128 {
-    simplex::simplex_2d::<Sse41>(F32x4(x), F32x4(y)).0
+pub unsafe fn simplex_2d(x: __m128, y: __m128, seed:i32) -> __m128 {
+    simplex::simplex_2d::<Sse41>(F32x4(x), F32x4(y),seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn fbm_2d(x: __m128, y: __m128, lac: __m128, gain: __m128, octaves: u8) -> __m128 {
-    simplex::fbm_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves).0
+pub unsafe fn fbm_2d(x: __m128, y: __m128, lac: __m128, gain: __m128, octaves: u8, seed:i32)-> __m128 {
+    simplex::fbm_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves,seed).0
 }
 
 /// Get a single value of 2d ridge noise.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn ridge_2d(x: __m128, y: __m128, lac: __m128, gain: __m128, octaves: u8) -> __m128 {
-    simplex::ridge_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves).0
+pub unsafe fn ridge_2d(x: __m128, y: __m128, lac: __m128, gain: __m128, octaves: u8, seed:i32) -> __m128 {
+    simplex::ridge_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves,seed).0
 }
 /// Get a single value of 2d turbulence.
 #[target_feature(enable = "sse4.1")]
@@ -128,8 +128,9 @@ pub unsafe fn turbulence_2d(
     lac: __m128,
     gain: __m128,
     octaves: u8,
+    seed:i32
 ) -> __m128 {
-    simplex::turbulence_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves).0
+    simplex::turbulence_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves,seed).0
 }
 
 /// Gets a width X height sized block of 2d noise, unscaled.
