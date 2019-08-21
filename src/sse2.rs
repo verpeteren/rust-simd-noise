@@ -189,8 +189,8 @@ pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 3d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse2")]
-pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128) -> __m128 {
-    simplex::simplex_3d::<Sse2>(F32x4(x), F32x4(y), F32x4(z)).0
+pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128,seed:i32) -> __m128 {
+    simplex::simplex_3d::<Sse2>(F32x4(x), F32x4(y), F32x4(z),seed).0
 }
 
 /// Get a single value of 3d fractal brownian motion.
@@ -202,6 +202,7 @@ pub unsafe fn fbm_3d(
     lac: __m128,
     gain: __m128,
     octaves: u8,
+    seed:i32
 ) -> __m128 {
     simplex::fbm_3d::<Sse2>(
         F32x4(x),
@@ -210,6 +211,7 @@ pub unsafe fn fbm_3d(
         F32x4(lac),
         F32x4(gain),
         octaves,
+        seed
     )
     .0
 }
@@ -223,6 +225,7 @@ pub unsafe fn ridge_3d(
     lac: __m128,
     gain: __m128,
     octaves: u8,
+    seed:i32
 ) -> __m128 {
     simplex::ridge_3d::<Sse2>(
         F32x4(x),
@@ -231,6 +234,7 @@ pub unsafe fn ridge_3d(
         F32x4(lac),
         F32x4(gain),
         octaves,
+        seed
     )
     .0
 }
@@ -244,6 +248,7 @@ pub unsafe fn turbulence_3d(
     lac: __m128,
     gain: __m128,
     octaves: u8,
+    seed:i32
 ) -> __m128 {
     simplex::turbulence_3d::<Sse2>(
         F32x4(x),
@@ -252,6 +257,7 @@ pub unsafe fn turbulence_3d(
         F32x4(lac),
         F32x4(gain),
         octaves,
+        seed
     )
     .0
 }
