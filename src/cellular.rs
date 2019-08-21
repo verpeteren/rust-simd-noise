@@ -353,8 +353,8 @@ pub unsafe fn cellular2_2d<S: Simd>(
 }
 
 #[inline(always)]
-unsafe fn hash_3d<S: Simd>(x: S::Vi32, y: S::Vi32, z: S::Vi32) -> S::Vi32 {
-    let mut hash = S::xor_epi32(x, S::set1_epi32(1337));
+unsafe fn hash_3d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32, z: S::Vi32) -> S::Vi32 {
+    let mut hash = S::xor_epi32(x, S::set1_epi32(seed));
     hash = S::xor_epi32(y, hash);
     hash = S::xor_epi32(z, hash);
     S::mullo_epi32(
@@ -371,6 +371,7 @@ pub unsafe fn cellular_3d<S: Simd>(
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: S::Vf32,
+    seed: i32,
 ) -> S::Vf32 {
     let mut distance = S::set1_ps(999999.0);
     let mut cell_value = S::setzero_ps();
@@ -394,7 +395,7 @@ pub unsafe fn cellular_3d<S: Simd>(
             let mut zcf = zcf_base;
             let mut zc = zc_base;
             for _z in 0..3 {
-                let hash = hash_3d::<S>(xc, yc, zc);
+                let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                     S::set1_ps(511.5),
@@ -471,6 +472,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
     jitter: S::Vf32,
     index0: usize,
     index1: usize,
+    seed: i32,
 ) -> S::Vf32 {
     let mut distance: [S::Vf32; 4] = [S::set1_ps(999999.0); 4];
 
@@ -493,7 +495,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
             let mut zcf = zcf_base;
             let mut zc = zc_base;
             for _z in 0..3 {
-                let hash = hash_3d::<S>(xc, yc, zc);
+                let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                     S::set1_ps(511.5),

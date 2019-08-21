@@ -403,7 +403,8 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             cellular_3d::<S>,
             s.distance_function,
             s.return_type,
-            S::set1_ps(s.jitter)
+            S::set1_ps(s.jitter),
+            s.dim.seed
         ),
         NoiseType::Cellular2(s) => get_3d_noise_helper!(
             s,
@@ -412,7 +413,8 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             s.return_type,
             S::set1_ps(s.jitter),
             s.index0,
-            s.index1
+            s.index1,
+            s.dim.seed
         ),
     }
 }

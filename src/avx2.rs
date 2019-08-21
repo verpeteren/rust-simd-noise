@@ -47,6 +47,7 @@ pub unsafe fn cellular_3d(
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: __m256,
+    seed: i32,
 ) -> __m256 {
     cellular::cellular_3d::<Avx2>(
         F32x8(x),
@@ -55,6 +56,7 @@ pub unsafe fn cellular_3d(
         distance_function,
         return_type,
         F32x8(jitter),
+        seed,
     )
     .0
 }
