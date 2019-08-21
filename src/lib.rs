@@ -294,6 +294,10 @@ impl CellularSettings {
         }
     }
 
+    pub fn with_seed(&mut self, seed: i32) -> &mut CellularSettings {
+        self.dim.seed = seed;
+        self
+    }
     pub fn with_freq(&mut self, freq: f32) -> &mut CellularSettings {
         self.freq = freq;
         self
@@ -370,6 +374,11 @@ impl Cellular2Settings {
             index0: 0,
             index1: 1,
         }
+    }
+
+    pub fn with_seed(&mut self, seed: i32) -> &mut Cellular2Settings {
+        self.dim.seed = seed;
+        self
     }
 
     pub fn with_freq(&mut self, freq: f32) -> &mut Cellular2Settings {
@@ -543,6 +552,11 @@ impl RidgeSettings {
         }
     }
 
+    pub fn with_seed(&mut self, seed: i32) -> &mut RidgeSettings {
+        self.dim.seed = seed;
+        self
+    }
+
     pub fn with_freq(&mut self, freq: f32) -> &mut RidgeSettings {
         self.freq = freq;
         self
@@ -619,6 +633,10 @@ impl TurbulenceSettings {
             octaves: 3,
         }
     }
+    pub fn with_seed(&mut self, seed: i32) -> &mut TurbulenceSettings {
+        self.dim.seed = seed;
+        self
+    }
 
     pub fn with_freq(&mut self, freq: f32) -> &mut TurbulenceSettings {
         self.freq = freq;
@@ -684,6 +702,11 @@ impl DimensionalBeing for GradientSettings {
 impl GradientSettings {
     pub fn default(dim: NoiseDimensions) -> GradientSettings {
         GradientSettings { dim, freq: 0.02 }
+    }
+
+    pub fn with_seed(&mut self, seed: i32) -> &mut GradientSettings {
+        self.dim.seed = seed;
+        self
     }
 
     pub fn with_freq(&mut self, freq: f32) -> &mut GradientSettings {

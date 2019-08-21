@@ -11,8 +11,8 @@ const BIT_10_MASK: i32 = 1023;
 const HASH_2_FLOAT: f32 = 1.0 / 2147483648.0;
 
 #[inline(always)]
-unsafe fn hash_2d<S: Simd>(x: S::Vi32, y: S::Vi32) -> S::Vi32 {
-    let mut hash = S::xor_epi32(x, S::set1_epi32(1337));
+unsafe fn hash_2d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32) -> S::Vi32 {
+    let mut hash = S::xor_epi32(x, S::set1_epi32(seed));
     hash = S::xor_epi32(y, hash);
     S::mullo_epi32(
         S::mullo_epi32(S::mullo_epi32(hash, hash), S::set1_epi32(60493)),
@@ -27,6 +27,7 @@ pub unsafe fn cellular_2d<S: Simd>(
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: S::Vf32,
+    seed: i32,
 ) -> S::Vf32 {
     let mut distance = S::set1_ps(999999.0);
     let mut xc = S::sub_epi32(S::cvtps_epi32(x), S::set1_epi32(1));
@@ -45,7 +46,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut ycf = ycf_base;
                         let mut yc = yc_base;
                         for _y in 0..3 {
-                            let hash = hash_2d::<S>(xc, yc);
+                            let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                                 S::set1_ps(511.5),
@@ -78,7 +79,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut ycf = ycf_base;
                         let mut yc = yc_base;
                         for _y in 0..3 {
-                            let hash = hash_2d::<S>(xc, yc);
+                            let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                                 S::set1_ps(511.5),
@@ -112,7 +113,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut ycf = ycf_base;
                         let mut yc = yc_base;
                         for _y in 0..3 {
-                            let hash = hash_2d::<S>(xc, yc);
+                            let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                                 S::set1_ps(511.5),
@@ -156,7 +157,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut ycf = ycf_base;
                         let mut yc = yc_base;
                         for _y in 0..3 {
-                            let hash = hash_2d::<S>(xc, yc);
+                            let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                                 S::set1_ps(511.5),
@@ -194,7 +195,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut ycf = ycf_base;
                         let mut yc = yc_base;
                         for _y in 0..3 {
-                            let hash = hash_2d::<S>(xc, yc);
+                            let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                                 S::set1_ps(511.5),
@@ -232,7 +233,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut ycf = ycf_base;
                         let mut yc = yc_base;
                         for _y in 0..3 {
-                            let hash = hash_2d::<S>(xc, yc);
+                            let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                                 S::set1_ps(511.5),
@@ -284,6 +285,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
     jitter: S::Vf32,
     index0: usize,
     index1: usize,
+    seed: i32,
 ) -> S::Vf32 {
     let mut distance: [S::Vf32; 4] = [S::set1_ps(999999.0); 4];
 
@@ -300,7 +302,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
         let mut ycf = ycf_base;
         let mut yc = yc_base;
         for _y in 0..3 {
-            let hash = hash_2d::<S>(xc, yc);
+            let hash = hash_2d::<S>(seed, xc, yc);
             let mut xd = S::sub_ps(
                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
                 S::set1_ps(511.5),

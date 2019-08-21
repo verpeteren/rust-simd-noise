@@ -23,6 +23,7 @@ pub unsafe fn cellular_2d(
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: __m128,
+    seed: i32,
 ) -> __m128 {
     cellular::cellular_2d::<Sse2>(
         F32x4(x),
@@ -30,6 +31,7 @@ pub unsafe fn cellular_2d(
         distance_function,
         return_type,
         F32x4(jitter),
+        seed,
     )
     .0
 }
