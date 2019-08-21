@@ -32,7 +32,7 @@
 //! let noise =  NoiseBuilder::fbm_2d(100, 100).generate_scaled(0.0,1.0);
 //!
 //! // Get a block of 4d ridge noise, custom settings, 32x32x32x32 unscaled
-//! let (noise,min,max) =  NoiseBuilder::ridge_4d(32,32,32,32) 
+//! let (noise,min,max) =  NoiseBuilder::ridge_4d(32,32,32,32)
 //!        .with_freq(0.05)
 //!        .with_octaves(5)
 //!        .with_gain(2.0)
@@ -50,7 +50,7 @@
 //! use simdnoise::*;
 //! use core::arch::x86_64::*;
 //!
-//! let noise_setting =  NoiseBuilder::cellular2_3d(32,32,32) 
+//! let noise_setting =  NoiseBuilder::cellular2_3d(32,32,32)
 //!         .with_freq(0.05)
 //!         .with_return_type(Cell2ReturnType::Distance2Mul)
 //!         .with_jitter(0.5)
@@ -58,9 +58,9 @@
 //!  
 //! // get a block of noise with the sse41 version, using the above settings
 //! unsafe {
-//!     let (noise,min,max) = simdnoise::sse41::get_3d_noise(&noise_setting); 
+//!     let (noise,min,max) = simdnoise::sse41::get_3d_noise(&noise_setting);
 //! }
-//! 
+//!
 //! // send your own SIMD x,y values to the noise functions directly
 //! unsafe {
 //!   // sse2 simplex noise
@@ -247,7 +247,7 @@ pub struct NoiseDimensions {
     time: usize,
     min: f32,
     max: f32,
-    seed: i32
+    seed: i32,
 }
 impl NoiseDimensions {
     pub fn default(d: usize) -> NoiseDimensions {
@@ -266,7 +266,7 @@ impl NoiseDimensions {
             time: 1,
             min: 0.0,
             max: 1.0,
-            seed: 1
+            seed: 1,
         }
     }
 }
@@ -401,14 +401,14 @@ impl Cellular2Settings {
         self.index1 = i;
         self
     }
-    
+
     /// If you want to call noise functions by hand, call wrap on the settings
     /// to get back a NoiseType to call the noise functions with
     pub fn wrap(self) -> NoiseType {
         self.validate();
-        NoiseType::Cellular2(self)        
+        NoiseType::Cellular2(self)
     }
-    
+
     /// Generate a chunk of noise based on your settings, and the min and max value
     /// generated, so you can scale it as you wish
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
@@ -461,7 +461,7 @@ impl FbmSettings {
             octaves: 3,
         }
     }
-    pub fn with_seed(&mut self, seed:i32) -> &mut FbmSettings {
+    pub fn with_seed(&mut self, seed: i32) -> &mut FbmSettings {
         self.dim.seed = seed;
         self
     }
@@ -484,7 +484,7 @@ impl FbmSettings {
         self.octaves = octaves;
         self
     }
-    
+
     /// If you want to call noise functions by hand, call wrap on the settings
     /// to get back a NoiseType to call the noise functions with
     pub fn wrap(self) -> NoiseType {

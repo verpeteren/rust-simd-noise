@@ -282,23 +282,26 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             fbm_1d::<S>,
             S::set1_ps(s.lacunarity),
             S::set1_ps(s.gain),
-            s.octaves
+            s.octaves,
+            s.dim.seed
         ),
         NoiseType::Ridge(s) => get_1d_noise_helper!(
             s,
             ridge_1d::<S>,
             S::set1_ps(s.lacunarity),
             S::set1_ps(s.gain),
-            s.octaves
+            s.octaves,
+            s.dim.seed
         ),
         NoiseType::Turbulence(s) => get_1d_noise_helper!(
             s,
             turbulence_1d::<S>,
             S::set1_ps(s.lacunarity),
             S::set1_ps(s.gain),
-            s.octaves
+            s.octaves,
+            s.dim.seed
         ),
-        NoiseType::Gradient(s) => get_1d_noise_helper!(s, simplex_1d::<S>),
+        NoiseType::Gradient(s) => get_1d_noise_helper!(s, simplex_1d::<S>, s.dim.seed),
         NoiseType::Cellular(_) => {
             panic!("not implemented");
         }
@@ -340,7 +343,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             s.octaves,
             s.dim.seed
         ),
-        NoiseType::Gradient(s) => get_2d_noise_helper!(s, simplex_2d::<S>,s.dim.seed),
+        NoiseType::Gradient(s) => get_2d_noise_helper!(s, simplex_2d::<S>, s.dim.seed),
         NoiseType::Cellular(s) => get_2d_noise_helper!(
             s,
             cellular_2d::<S>,

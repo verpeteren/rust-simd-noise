@@ -60,8 +60,8 @@ pub unsafe fn cellular_3d(
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "avx2")]
-pub unsafe fn simplex_1d(x: __m256) -> __m256 {
-    simplex::simplex_1d::<Avx2>(F32x8(x)).0
+pub unsafe fn simplex_1d(x: __m256, seed: i32) -> __m256 {
+    simplex::simplex_1d::<Avx2>(F32x8(x), seed).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
@@ -71,14 +71,9 @@ pub unsafe fn fbm_1d(
     lacunarity: __m256,
     gain: __m256,
     octaves: u8,
+    seed: i32,
 ) -> __m256 {
-    simplex::fbm_1d::<Avx2>(
-        F32x8(x),
-        F32x8(lacunarity),
-        F32x8(gain),
-        octaves,
-    )
-    .0
+    simplex::fbm_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -88,14 +83,9 @@ pub unsafe fn ridge_1d(
     lacunarity: __m256,
     gain: __m256,
     octaves: u8,
+    seed: i32,
 ) -> __m256 {
-    simplex::ridge_1d::<Avx2>(
-        F32x8(x),
-        F32x8(lacunarity),
-        F32x8(gain),
-        octaves,
-    )
-    .0
+    simplex::ridge_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d turbulence.
@@ -105,14 +95,9 @@ pub unsafe fn turbulence_1d(
     lacunarity: __m256,
     gain: __m256,
     octaves: u8,
+    seed: i32,
 ) -> __m256 {
-    simplex::turbulence_1d::<Avx2>(
-        F32x8(x),
-        F32x8(lacunarity),
-        F32x8(gain),
-        octaves,
-    )
-    .0
+    simplex::turbulence_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
 }
 
 /// Gets a width sized block of 1d noise, unscaled.
@@ -140,8 +125,8 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "avx2")]
-pub unsafe fn simplex_2d(x: __m256, y: __m256,seed:i32 ) -> __m256 {
-    simplex::simplex_2d::<Avx2>(F32x8(x), F32x8(y),seed).0
+pub unsafe fn simplex_2d(x: __m256, y: __m256, seed: i32) -> __m256 {
+    simplex::simplex_2d::<Avx2>(F32x8(x), F32x8(y), seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
@@ -154,15 +139,7 @@ pub unsafe fn fbm_2d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    simplex::fbm_2d::<Avx2>(
-        F32x8(x),
-        F32x8(y),
-        F32x8(lac),
-        F32x8(gain),
-        octaves,
-        seed
-    )
-    .0
+    simplex::fbm_2d::<Avx2>(F32x8(x), F32x8(y), F32x8(lac), F32x8(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -173,17 +150,9 @@ pub unsafe fn ridge_2d(
     lac: __m256,
     gain: __m256,
     octaves: u8,
-    seed: i32
+    seed: i32,
 ) -> __m256 {
-    simplex::ridge_2d::<Avx2>(
-        F32x8(x),
-        F32x8(y),
-        F32x8(lac),
-        F32x8(gain),
-        octaves,
-        seed
-    )
-    .0
+    simplex::ridge_2d::<Avx2>(F32x8(x), F32x8(y), F32x8(lac), F32x8(gain), octaves, seed).0
 }
 /// Get a single value of 2d turbulence.
 #[target_feature(enable = "avx2")]
@@ -193,17 +162,9 @@ pub unsafe fn turbulence_2d(
     lac: __m256,
     gain: __m256,
     octaves: u8,
-    seed: i32
+    seed: i32,
 ) -> __m256 {
-    simplex::turbulence_2d::<Avx2>(
-        F32x8(x),
-        F32x8(y),
-        F32x8(lac),
-        F32x8(gain),
-        octaves,
-        seed
-    )
-    .0
+    simplex::turbulence_2d::<Avx2>(F32x8(x), F32x8(y), F32x8(lac), F32x8(gain), octaves, seed).0
 }
 
 /// Gets a width X height sized block of 2d noise, unscaled.
