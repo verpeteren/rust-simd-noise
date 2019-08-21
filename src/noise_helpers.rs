@@ -395,7 +395,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             s.octaves,
             s.dim.seed
         ),
-        NoiseType::Gradient(s) => get_3d_noise_helper!(s, simplex_3d::<S>,s.dim.seed),
+        NoiseType::Gradient(s) => get_3d_noise_helper!(s, simplex_3d::<S>, s.dim.seed),
         NoiseType::Cellular(s) => get_3d_noise_helper!(
             s,
             cellular_3d::<S>,
@@ -422,23 +422,26 @@ pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             fbm_4d::<S>,
             S::set1_ps(s.lacunarity),
             S::set1_ps(s.gain),
-            s.octaves
+            s.octaves,
+            s.dim.seed
         ),
         NoiseType::Ridge(s) => get_4d_noise_helper!(
             s,
             ridge_4d::<S>,
             S::set1_ps(s.lacunarity),
             S::set1_ps(s.gain),
-            s.octaves
+            s.octaves,
+            s.dim.seed
         ),
         NoiseType::Turbulence(s) => get_4d_noise_helper!(
             s,
             turbulence_4d::<S>,
             S::set1_ps(s.lacunarity),
             S::set1_ps(s.gain),
-            s.octaves
+            s.octaves,
+            s.dim.seed
         ),
-        NoiseType::Gradient(s) => get_4d_noise_helper!(s, simplex_4d::<S>),
+        NoiseType::Gradient(s) => get_4d_noise_helper!(s, simplex_4d::<S>, s.dim.seed),
         NoiseType::Cellular(_) => {
             panic!("not implemented");
         }
