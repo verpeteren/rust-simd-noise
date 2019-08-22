@@ -13,6 +13,7 @@ Super fast SIMD noise library for Rust. PRs welcome!
 * SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
 * AVX2 version also leverages FMA3
 * Runtime detection picks the best available instruction set
+* Provide a seed value to randomize your noise result
 
 ## Benchmarks
 *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
@@ -57,6 +58,7 @@ let (noise, min, max) = NoiseBuilder::ridge_3d(32, 32, 32)
     .with_freq(0.05)
     .with_octaves(5)
     .with_gain(2.0)
+    .with_seed(1337)
     .with_lacunarity(0.5)
     .generate();
 ```

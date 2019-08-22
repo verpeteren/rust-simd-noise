@@ -36,6 +36,7 @@
 //!        .with_freq(0.05)
 //!        .with_octaves(5)
 //!        .with_gain(2.0)
+//!        .with_seed(1337)
 //!        .with_lacunarity(0.5)
 //!        .generate();
 //!
