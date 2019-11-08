@@ -82,11 +82,11 @@
 
 extern crate simdeez;
 pub mod avx2;
-mod cellular;
+pub mod cellular;
 mod noise_helpers;
 pub mod scalar;
 mod shared;
-mod simplex;
+pub mod simplex;
 pub mod sse2;
 pub mod sse41;
 
