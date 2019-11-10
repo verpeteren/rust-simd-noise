@@ -1,7 +1,7 @@
 [package]
 exclude = ["*.jpg"]
 name = "simdnoise"
-version = "3.1.2"
+version = "3.1.3"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "SIMD accelerate noise library with runtime feature detection"
 license = "Apache-2.0/MIT"
@@ -14,8 +14,8 @@ edition="2018"
 
 
 [dependencies]
-# simdeez = "0.6.5"
-simdeez = {path = "c:/code/simdeez"}
+simdeez = "0.6.6"
+
 [dev-dependencies]
 criterion = "0.2.10"
 
