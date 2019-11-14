@@ -29,7 +29,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
 
 #[inline(always)]
 pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
-    let ips = S::fastfloor_ps(x);
+    let ips = S::fast_floor_ps(x);
     let mut i0 = S::cvtps_epi32(ips);
     let i1 = S::and_epi32(S::add_epi32(i0, S::set1_epi32(1)), S::set1_epi32(0xff));
 

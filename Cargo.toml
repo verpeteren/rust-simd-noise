@@ -14,7 +14,8 @@ edition="2018"
 
 
 [dependencies]
-simdeez = "0.6.6"
+#simdeez = "0.6.6"
+simdeez = { path = "c:/code/simdeez" }
 
 [dev-dependencies]
 criterion = "0.2.10"
