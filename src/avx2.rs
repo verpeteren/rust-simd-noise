@@ -10,7 +10,6 @@
 use super::*;
 use crate::shared::*;
 use simdeez::avx2::*;
-use simdeez::overloads::*;
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
 #[cfg(target_arch = "x86_64")]

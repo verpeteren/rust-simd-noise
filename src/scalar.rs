@@ -1,6 +1,5 @@
 use super::*;
 use crate::shared::*;
-use simdeez::overloads::*;
 use simdeez::scalar::*;
 use std::f32;
 
