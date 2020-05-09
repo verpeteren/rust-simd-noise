@@ -56,7 +56,7 @@
 //!         .with_return_type(Cell2ReturnType::Distance2Mul)
 //!         .with_jitter(0.5)
 //!         .wrap();
-//!  
+//!
 //! // get a block of noise with the sse41 version, using the above settings
 //! unsafe {
 //!     let (noise,min,max) = simdnoise::sse41::get_3d_noise(&noise_setting);
@@ -68,7 +68,7 @@
 //!   let x = _mm_set1_ps(5.0);
 //!   let y = _mm_set1_ps(10.0);
 //!   let f : __m128 = simdnoise::sse2::simplex_2d(x,y);
-//!   
+//!
 //!   // avx2 turbulence
 //!   let x = _mm256_set1_ps(5.0);
 //!   let y = _mm256_set1_ps(10.0);
@@ -76,7 +76,7 @@
 //!   let gain = _mm256_set1_ps(2.0);
 //!   let octaves = 3;
 //!   let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,lacunarity,gain,octaves);
-//!     
+//!
 //! }
 //! ```
 
@@ -274,7 +274,9 @@ impl NoiseDimensions {
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
     dim: NoiseDimensions,
-    freq: f32,
+    freq_x: f32,
+    freq_y: f32,
+    freq_z: f32,
     distance_function: CellDistanceFunction,
     return_type: CellReturnType,
     jitter: f32,
@@ -288,7 +290,9 @@ impl CellularSettings {
     pub fn default(dim: NoiseDimensions) -> CellularSettings {
         CellularSettings {
             dim,
-            freq: 0.02,
+            freq_x: 0.02,
+            freq_y: 0.02,
+            freq_z: 0.02,
             distance_function: CellDistanceFunction::Euclidean,
             return_type: CellReturnType::Distance,
             jitter: 0.25,
@@ -299,8 +303,24 @@ impl CellularSettings {
         self.dim.seed = seed;
         self
     }
+
     pub fn with_freq(&mut self, freq: f32) -> &mut CellularSettings {
-        self.freq = freq;
+        self.freq_x = freq;
+        self.freq_y = freq;
+        self.freq_z = freq;
+        self
+    }
+
+    pub fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut CellularSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self
+    }
+
+    pub fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut CellularSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
         self
     }
 
@@ -352,7 +372,9 @@ impl CellularSettings {
 #[derive(Copy, Clone)]
 pub struct Cellular2Settings {
     dim: NoiseDimensions,
-    freq: f32,
+    freq_x: f32,
+    freq_y: f32,
+    freq_z: f32,
     distance_function: CellDistanceFunction,
     return_type: Cell2ReturnType,
     jitter: f32,
@@ -368,7 +390,9 @@ impl Cellular2Settings {
     pub fn default(dim: NoiseDimensions) -> Cellular2Settings {
         Cellular2Settings {
             dim,
-            freq: 0.02,
+            freq_x: 0.02,
+            freq_y: 0.02,
+            freq_z: 0.02,
             distance_function: CellDistanceFunction::Euclidean,
             return_type: Cell2ReturnType::Distance2,
             jitter: 0.25,
@@ -383,7 +407,27 @@ impl Cellular2Settings {
     }
 
     pub fn with_freq(&mut self, freq: f32) -> &mut Cellular2Settings {
-        self.freq = freq;
+        self.freq_x = freq;
+        self.freq_y = freq;
+        self.freq_z = freq;
+        self
+    }
+
+    pub fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut Cellular2Settings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self
+    }
+
+    pub fn with_freq_3d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+    ) -> &mut Cellular2Settings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
         self
     }
 
@@ -451,7 +495,10 @@ impl Cellular2Settings {
 #[derive(Copy, Clone)]
 pub struct FbmSettings {
     dim: NoiseDimensions,
-    freq: f32,
+    freq_x: f32,
+    freq_y: f32,
+    freq_z: f32,
+    freq_w: f32,
     lacunarity: f32,
     gain: f32,
     octaves: u8,
@@ -465,7 +512,10 @@ impl FbmSettings {
     pub fn default(dim: NoiseDimensions) -> FbmSettings {
         FbmSettings {
             dim,
-            freq: 0.02,
+            freq_x: 0.02,
+            freq_y: 0.02,
+            freq_z: 0.02,
+            freq_w: 0.02,
             lacunarity: 0.5,
             gain: 2.0,
             octaves: 3,
@@ -475,8 +525,39 @@ impl FbmSettings {
         self.dim.seed = seed;
         self
     }
+
     pub fn with_freq(&mut self, freq: f32) -> &mut FbmSettings {
-        self.freq = freq;
+        self.freq_x = freq;
+        self.freq_y = freq;
+        self.freq_z = freq;
+        self.freq_w = freq;
+        self
+    }
+
+    pub fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut FbmSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self
+    }
+
+    pub fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut FbmSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self
+    }
+
+    pub fn with_freq_4d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+    ) -> &mut FbmSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
         self
     }
 
@@ -532,7 +613,10 @@ impl FbmSettings {
 #[derive(Copy, Clone)]
 pub struct RidgeSettings {
     dim: NoiseDimensions,
-    freq: f32,
+    freq_x: f32,
+    freq_y: f32,
+    freq_z: f32,
+    freq_w: f32,
     lacunarity: f32,
     gain: f32,
     octaves: u8,
@@ -546,7 +630,10 @@ impl RidgeSettings {
     pub fn default(dim: NoiseDimensions) -> RidgeSettings {
         RidgeSettings {
             dim,
-            freq: 0.02,
+            freq_x: 0.02,
+            freq_y: 0.02,
+            freq_z: 0.02,
+            freq_w: 0.02,
             lacunarity: 0.5,
             gain: 2.0,
             octaves: 3,
@@ -559,7 +646,37 @@ impl RidgeSettings {
     }
 
     pub fn with_freq(&mut self, freq: f32) -> &mut RidgeSettings {
-        self.freq = freq;
+        self.freq_x = freq;
+        self.freq_y = freq;
+        self.freq_z = freq;
+        self.freq_w = freq;
+        self
+    }
+
+    pub fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut RidgeSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self
+    }
+
+    pub fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut RidgeSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self
+    }
+
+    pub fn with_freq_4d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+    ) -> &mut RidgeSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
         self
     }
 
@@ -614,7 +731,10 @@ impl RidgeSettings {
 #[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
     dim: NoiseDimensions,
-    freq: f32,
+    freq_x: f32,
+    freq_y: f32,
+    freq_z: f32,
+    freq_w: f32,
     lacunarity: f32,
     gain: f32,
     octaves: u8,
@@ -628,7 +748,10 @@ impl TurbulenceSettings {
     pub fn default(dim: NoiseDimensions) -> TurbulenceSettings {
         TurbulenceSettings {
             dim,
-            freq: 0.02,
+            freq_x: 0.02,
+            freq_y: 0.02,
+            freq_z: 0.02,
+            freq_w: 0.02,
             lacunarity: 0.5,
             gain: 2.0,
             octaves: 3,
@@ -640,7 +763,42 @@ impl TurbulenceSettings {
     }
 
     pub fn with_freq(&mut self, freq: f32) -> &mut TurbulenceSettings {
-        self.freq = freq;
+        self.freq_x = freq;
+        self.freq_y = freq;
+        self.freq_z = freq;
+        self.freq_w = freq;
+        self
+    }
+
+    pub fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut TurbulenceSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self
+    }
+
+    pub fn with_freq_3d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+    ) -> &mut TurbulenceSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self
+    }
+
+    pub fn with_freq_4d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+    ) -> &mut TurbulenceSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
         self
     }
 
@@ -693,7 +851,10 @@ impl TurbulenceSettings {
 #[derive(Copy, Clone)]
 pub struct GradientSettings {
     dim: NoiseDimensions,
-    freq: f32,
+    freq_x: f32,
+    freq_y: f32,
+    freq_z: f32,
+    freq_w: f32,
 }
 impl DimensionalBeing for GradientSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
@@ -702,7 +863,13 @@ impl DimensionalBeing for GradientSettings {
 }
 impl GradientSettings {
     pub fn default(dim: NoiseDimensions) -> GradientSettings {
-        GradientSettings { dim, freq: 0.02 }
+        GradientSettings {
+            dim,
+            freq_x: 0.02,
+            freq_y: 0.02,
+            freq_z: 0.02,
+            freq_w: 0.02,
+        }
     }
 
     pub fn with_seed(&mut self, seed: i32) -> &mut GradientSettings {
@@ -711,7 +878,37 @@ impl GradientSettings {
     }
 
     pub fn with_freq(&mut self, freq: f32) -> &mut GradientSettings {
-        self.freq = freq;
+        self.freq_x = freq;
+        self.freq_y = freq;
+        self.freq_z = freq;
+        self.freq_w = freq;
+        self
+    }
+
+    pub fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut GradientSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self
+    }
+
+    pub fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut GradientSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self
+    }
+
+    pub fn with_freq_4d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+    ) -> &mut GradientSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
         self
     }
 
