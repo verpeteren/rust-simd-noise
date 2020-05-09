@@ -1,15 +1,12 @@
-#[macro_use]
 extern crate criterion;
 extern crate simdeez;
 extern crate simdnoise;
-use criterion::Fun;
 use criterion::*;
 use simdnoise::*;
 use std::time::Duration;
 
 fn d4(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_4d(8, 8, 8, 8).wrap();
-
     c.bench(
         "fbm4d",
         Benchmark::new("scalar 4d", move |b| {
@@ -29,6 +26,7 @@ fn d4(c: &mut Criterion) {
         .measurement_time(Duration::from_secs(5)),
     );
 }
+
 fn d3(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_3d(64, 64, 64).wrap();
     c.bench(
@@ -94,6 +92,7 @@ fn d1(c: &mut Criterion) {
         .measurement_time(Duration::from_secs(5)),
     );
 }
+
 fn d2_cell(c: &mut Criterion) {
     let setting = NoiseBuilder::cellular_2d(1024, 1024)
         .with_return_type(CellReturnType::CellValue)
@@ -117,6 +116,7 @@ fn d2_cell(c: &mut Criterion) {
         .measurement_time(Duration::from_secs(5)),
     );
 }
+
 fn d3_cell(c: &mut Criterion) {
     let setting = NoiseBuilder::cellular_3d(128, 128, 128).wrap();
     c.bench(
@@ -138,5 +138,6 @@ fn d3_cell(c: &mut Criterion) {
         .measurement_time(Duration::from_secs(5)),
     );
 }
+
 criterion_group!(benches, d4, d3, d2, d1, d2_cell, d3_cell);
 criterion_main!(benches);
