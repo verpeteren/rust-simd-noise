@@ -1,7 +1,7 @@
 [package]
 exclude = ["*.jpg"]
 name = "simdnoise"
-version = "3.1.4"
+version = "3.1.5"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "SIMD accelerate noise library with runtime feature detection"
 license = "Apache-2.0/MIT"
