@@ -280,18 +280,21 @@ pub unsafe fn turbulence_2d<S: Simd>(
 }
 
 #[inline(always)]
-unsafe fn grad3d<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
-    let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(15));
-
-    let mut u = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(8), h));
+unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j : S::Vi32, k: S::Vi32, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
+    let mut hash = S::xor_epi32(i,S::set1_epi32(seed));
+    hash = S::xor_epi32(j, hash);
+    hash = S::xor_epi32(k,hash);
+    hash = S::mullo_epi32(S::mullo_epi32(S::mullo_epi32(hash,hash),S::set1_epi32(60493)),hash);
+    hash =  S::xor_epi32(S::srai_epi32(hash,13),hash);
+    let mut u = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(8), hash));
     u = S::blendv_ps(y, x, u);
 
-    let mut v = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
+    let mut v = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), hash));
     let mut h12_or_14 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
         S::or_epi32(
-            S::cmpeq_epi32(h, S::set1_epi32(12)),
-            S::cmpeq_epi32(h, S::set1_epi32(14)),
+            S::cmpeq_epi32(hash, S::set1_epi32(12)),
+            S::cmpeq_epi32(hash, S::set1_epi32(14)),
         ),
     ));
     h12_or_14 = S::blendv_ps(x, z, h12_or_14);
@@ -299,17 +302,19 @@ unsafe fn grad3d<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32, z: S
 
     let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(1)),
+        S::and_epi32(hash, S::set1_epi32(1)),
     ));
     let h_and_2 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(2)),
+        S::and_epi32(hash, S::set1_epi32(2)),
     ));
 
     S::add_ps(
         S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
         S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
     )
+
+
 }
 
 #[inline(always)]
@@ -339,7 +344,7 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
     );
     let j1 = S::and_epi32(
         S::castps_epi32(S::cmpgt_ps(y0, x0)),
-        S::castps_epi32(S::cmpge_ps(y0, z0)),
+        S::castps_epi32(S::cmpgt_ps(y0, z0)),
     );
     let k1 = S::and_epi32(
         S::castps_epi32(S::cmpgt_ps(z0, x0)),
@@ -474,10 +479,10 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
     let mut t3q = S::mul_ps(t3, t3);
     t3q = S::mul_ps(t3q, t3q);
 
-    let mut n0 = S::mul_ps(t0q, grad3d::<S>(seed, gi0, x0, y0, z0));
-    let mut n1 = S::mul_ps(t1q, grad3d::<S>(seed, gi1, x1, y1, z1));
-    let mut n2 = S::mul_ps(t2q, grad3d::<S>(seed, gi2, x2, y2, z2));
-    let mut n3 = S::mul_ps(t3q, grad3d::<S>(seed, gi3, x3, y3, z3));
+    let mut n0 = S::mul_ps(t0q, grad3d::<S>(seed,i,j,k, x0, y0, z0));
+    let mut n1 = S::mul_ps(t1q, grad3d::<S>(seed, i,j,k, x1, y1, z1));
+    let mut n2 = S::mul_ps(t2q, grad3d::<S>(seed, i,j,k, x2, y2, z2));
+    let mut n3 = S::mul_ps(t3q, grad3d::<S>(seed, i,j,k, x3, y3, z3));
 
     //if ti < 0 then 0 else ni
     let mut cond = S::cmplt_ps(t0, S::setzero_ps());
