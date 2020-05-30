@@ -9,10 +9,15 @@ const F4: f32 = 0.309016994;
 const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
+const G33 : f32 = 3.0/6.0 - 1.0;
 const G4: f32 = 0.138196601;
 const G24: f32 = 2.0 * G4;
 const G34: f32 = 3.0 * G4;
 const G44: f32 = 4.0 * G4;
+
+const X_PRIME: i32 = 1619;
+const Y_PRIME: i32 = 31337;
+const Z_PRIME: i32 = 6791;
 
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
@@ -280,216 +285,108 @@ pub unsafe fn turbulence_2d<S: Simd>(
 }
 
 #[inline(always)]
-unsafe fn grad3d<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
-    let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(15));
+unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j : S::Vi32, k: S::Vi32, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
+    let mut hash = S::xor_epi32(i,S::set1_epi32(seed));
+    hash = S::xor_epi32(j, hash);
+    hash = S::xor_epi32(k,hash);
+    hash = S::mullo_epi32(S::mullo_epi32(S::mullo_epi32(hash,hash),S::set1_epi32(60493)),hash);
+    hash =  S::xor_epi32(S::srai_epi32(hash,13),hash);
+    let hasha13 = S::and_epi32(hash,S::set1_epi32(13));
 
-    let mut u = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(8), h));
-    u = S::blendv_ps(y, x, u);
+    let l8 = S::castepi32_ps(S::cmplt_epi32(hasha13,S::set1_epi32(8)));
+    let u = S::blendv_ps(y, x, l8);
 
-    let mut v = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
-    let mut h12_or_14 = S::castepi32_ps(S::cmpeq_epi32(
-        S::setzero_epi32(),
-        S::or_epi32(
-            S::cmpeq_epi32(h, S::set1_epi32(12)),
-            S::cmpeq_epi32(h, S::set1_epi32(14)),
-        ),
-    ));
-    h12_or_14 = S::blendv_ps(x, z, h12_or_14);
-    v = S::blendv_ps(h12_or_14, y, v);
+    let l4 = S::castepi32_ps(S::cmplt_epi32(hasha13,S::set1_epi32(2)));
+    let h12_or_14 = S::castepi32_ps(S::cmpeq_epi32(S::set1_epi32(12),hasha13));
+    let v = S::blendv_ps(S::blendv_ps(z,x,h12_or_14),y,l4);
 
-    let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
-        S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(1)),
-    ));
-    let h_and_2 = S::castepi32_ps(S::cmpeq_epi32(
-        S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(2)),
-    ));
-
-    S::add_ps(
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
-    )
+    let h1 = S::castepi32_ps(S::slli_epi32(hash,31));
+    let h2 = S::castepi32_ps(S::slli_epi32(S::and_epi32(hash,S::set1_epi32(2)),30));
+    S::add_ps(S::xor_ps(u, h1), S::xor_ps(v, h2))
 }
 
 #[inline(always)]
 pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32) -> S::Vf32 {
-    let s = S::mul_ps(S::set1_ps(F3), S::add_ps(x, S::add_ps(y, z)));
+    let f = S::mul_ps(S::set1_ps(F3),S::add_ps(S::add_ps(x,y),z));
+    let mut x0 = S::fast_floor_ps(S::add_ps(x,f));
+    let mut y0 = S::fast_floor_ps(S::add_ps(y,f));
+    let mut z0 = S::fast_floor_ps(S::add_ps(z,f));
+    
+    let i = S::mullo_epi32(S::cvtps_epi32(x0),S::set1_epi32(X_PRIME));
+    let j = S::mullo_epi32(S::cvtps_epi32(y0),S::set1_epi32(Y_PRIME));
+    let k = S::mullo_epi32(S::cvtps_epi32(z0),S::set1_epi32(Z_PRIME));
 
-    let ips = S::floor_ps(S::add_ps(x, s));
-    let jps = S::floor_ps(S::add_ps(y, s));
-    let kps = S::floor_ps(S::add_ps(z, s));
+    let g = S::mul_ps(S::set1_ps(G3),S::add_ps(S::add_ps(x0,y0),z0));
+    x0 = S::sub_ps(x,S::sub_ps(x0,g));
+    y0 = S::sub_ps(y,S::sub_ps(y0,g));
+    z0 = S::sub_ps(z,S::sub_ps(z0,g));
 
-    let i = S::cvtps_epi32(ips);
-    let j = S::cvtps_epi32(jps);
-    let k = S::cvtps_epi32(kps);
+    let x0_ge_y0 = S::cmpge_ps(x0,y0);
+    let y0_ge_z0 = S::cmpge_ps(y0,z0);
+    let x0_ge_z0 = S::cmpge_ps(x0,z0);
 
-    let t = S::mul_ps(
-        S::cvtepi32_ps(S::add_epi32(i, S::add_epi32(j, k))),
-        S::set1_ps(G3),
-    );
+    let i1 = x0_ge_y0 & x0_ge_z0;
+    let j1 = S::andnot_ps(x0_ge_y0,y0_ge_z0);
+    let k1 = S::andnot_ps(x0_ge_z0,!y0_ge_z0);
 
-    let x0 = S::sub_ps(x, S::sub_ps(ips, t));
-    let y0 = S::sub_ps(y, S::sub_ps(jps, t));
-    let z0 = S::sub_ps(z, S::sub_ps(kps, t));
+    let i2 = x0_ge_y0 | x0_ge_z0;
+    let j2 = (!x0_ge_y0) | y0_ge_z0;
+    let k2 = !(x0_ge_z0 & y0_ge_z0);
 
-    let i1 = S::and_epi32(
-        S::castps_epi32(S::cmpge_ps(x0, y0)),
-        S::castps_epi32(S::cmpge_ps(x0, z0)),
-    );
-    let j1 = S::and_epi32(
-        S::castps_epi32(S::cmpgt_ps(y0, x0)),
-        S::castps_epi32(S::cmpge_ps(y0, z0)),
-    );
-    let k1 = S::and_epi32(
-        S::castps_epi32(S::cmpgt_ps(z0, x0)),
-        S::castps_epi32(S::cmpgt_ps(z0, y0)),
-    );
+    let x1 = S::add_ps( S::sub_ps(x0,i1 & S::set1_ps(1.0)),S::set1_ps(G3));
+    let y1 = S::add_ps( S::sub_ps(y0,j1 & S::set1_ps(1.0)),S::set1_ps(G3));
+    let z1 = S::add_ps( S::sub_ps(z0,k1 & S::set1_ps(1.0)),S::set1_ps(G3));
 
-    //for i2
-    let yx_xz = S::and_epi32(
-        S::castps_epi32(S::cmpge_ps(x0, y0)),
-        S::castps_epi32(S::cmplt_ps(x0, z0)),
-    );
-    let zx_xy = S::and_epi32(
-        S::castps_epi32(S::cmpge_ps(x0, z0)),
-        S::castps_epi32(S::cmplt_ps(x0, y0)),
-    );
+    let x2 = S::add_ps( S::sub_ps(x0,i2 & S::set1_ps(1.0)),S::set1_ps(F3));
+    let y2 = S::add_ps( S::sub_ps(y0,j2 & S::set1_ps(1.0)),S::set1_ps(F3));
+    let z2 = S::add_ps( S::sub_ps(z0,k2 & S::set1_ps(1.0)),S::set1_ps(F3));
 
-    //for j2
-    let xy_yz = S::and_epi32(
-        S::castps_epi32(S::cmplt_ps(x0, y0)),
-        S::castps_epi32(S::cmplt_ps(y0, z0)),
-    );
-    let zy_yx = S::and_epi32(
-        S::castps_epi32(S::cmpge_ps(y0, z0)),
-        S::castps_epi32(S::cmpge_ps(x0, y0)),
-    );
+    let x3 = S::add_ps(x0,S::set1_ps(G33));
+    let y3 = S::add_ps(y0,S::set1_ps(G33));
+    let z3 = S::add_ps(z0,S::set1_ps(G33));
 
-    //for k2
-    let yz_zx = S::and_epi32(
-        S::castps_epi32(S::cmplt_ps(y0, z0)),
-        S::castps_epi32(S::cmpge_ps(x0, z0)),
-    );
-    let xz_zy = S::and_epi32(
-        S::castps_epi32(S::cmplt_ps(x0, z0)),
-        S::castps_epi32(S::cmpge_ps(y0, z0)),
-    );
+    //#define SIMDf_NMUL_ADD(a,b,c) = SIMDf_SUB(c, SIMDf_MUL(a,b)
+    let mut t0 = S::sub_ps(S::sub_ps(S::sub_ps(S::set1_ps(0.6),S::mul_ps(x0,x0)),S::mul_ps(y0,y0)),S::mul_ps(z0,z0));
+    let mut t1 = S::sub_ps(S::sub_ps(S::sub_ps(S::set1_ps(0.6),S::mul_ps(x1,x1)),S::mul_ps(y1,y1)),S::mul_ps(z1,z1));
+    let mut t2 = S::sub_ps(S::sub_ps(S::sub_ps(S::set1_ps(0.6),S::mul_ps(x2,x2)),S::mul_ps(y2,y2)),S::mul_ps(z2,z2));
+    let mut t3 = S::sub_ps(S::sub_ps(S::sub_ps(S::set1_ps(0.6),S::mul_ps(x3,x3)),S::mul_ps(y3,y3)),S::mul_ps(z3,z3));
 
-    let i2 = S::or_epi32(i1, S::or_epi32(yx_xz, zx_xy));
-    let j2 = S::or_epi32(j1, S::or_epi32(xy_yz, zy_yx));
-    let k2 = S::or_epi32(k1, S::or_epi32(yz_zx, xz_zy));
+    let n0 = S::cmpge_ps(t0,S::setzero_ps());
+    let n1 = S::cmpge_ps(t1,S::setzero_ps());
+    let n2 = S::cmpge_ps(t2,S::setzero_ps());
+    let n3 = S::cmpge_ps(t3,S::setzero_ps());
 
-    let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G3));
-    let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G3));
-    let z1 = S::add_ps(S::add_ps(z0, S::cvtepi32_ps(k1)), S::set1_ps(G3));
-    let x2 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i2)), S::set1_ps(F3));
-    let y2 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j2)), S::set1_ps(F3));
-    let z2 = S::add_ps(S::add_ps(z0, S::cvtepi32_ps(k2)), S::set1_ps(F3));
-    let x3 = S::add_ps(x0, S::set1_ps(-0.5));
-    let y3 = S::add_ps(y0, S::set1_ps(-0.5));
-    let z3 = S::add_ps(z0, S::set1_ps(-0.5));
+    t0 = t0 * t0;
+    t1 = t1 * t1;
+    t2 = t2 * t2;
+    t3 = t3 * t3;
 
-    // Wrap indices at 256 so it will fit in the PERM array
-    let ii = S::and_epi32(i, S::set1_epi32(0xff));
-    let jj = S::and_epi32(j, S::set1_epi32(0xff));
-    let kk = S::and_epi32(k, S::set1_epi32(0xff));
+    //#define SIMDf_MASK_ADD(m,a,b) SIMDf_ADD(a,SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),b))
 
-    let gi0 = S::i32gather_epi32(
-        &PERM,
-        S::add_epi32(
-            ii,
-            S::i32gather_epi32(&PERM, S::add_epi32(jj, S::i32gather_epi32(&PERM, kk))),
-        ),
-    );
-    let gi1 = S::i32gather_epi32(
-        &PERM,
-        S::add_epi32(
-            S::sub_epi32(ii, i1),
-            S::i32gather_epi32(
-                &PERM,
-                S::add_epi32(
-                    S::sub_epi32(jj, j1),
-                    S::i32gather_epi32(&PERM, S::sub_epi32(kk, k1)),
-                ),
-            ),
-        ),
-    );
-    let gi2 = S::i32gather_epi32(
-        &PERM,
-        S::add_epi32(
-            S::sub_epi32(ii, i2),
-            S::i32gather_epi32(
-                &PERM,
-                S::add_epi32(
-                    S::sub_epi32(jj, j2),
-                    S::i32gather_epi32(&PERM, S::sub_epi32(kk, k2)),
-                ),
-            ),
-        ),
-    );
-    let gi3 = S::i32gather_epi32(
-        &PERM,
-        S::add_epi32(
-            S::sub_epi32(ii, S::set1_epi32(-1)),
-            S::i32gather_epi32(
-                &PERM,
-                S::add_epi32(
-                    S::sub_epi32(jj, S::set1_epi32(-1)),
-                    S::i32gather_epi32(&PERM, S::sub_epi32(kk, S::set1_epi32(-1))),
-                ),
-            ),
-        ),
-    );
+    let v0 = (t0*t0) * grad3d::<S>(seed,i,j,k,x0,y0,z0);
 
-    // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y - z*z
-    let t0 = S::fnmadd_ps(
-        z0,
-        z0,
-        S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5))),
-    );
-    let t1 = S::fnmadd_ps(
-        z1,
-        z1,
-        S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5))),
-    );
-    let t2 = S::fnmadd_ps(
-        z2,
-        z2,
-        S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::set1_ps(0.5))),
-    );
-    let t3 = S::fnmadd_ps(
-        z3,
-        z3,
-        S::fnmadd_ps(y3, y3, S::fnmadd_ps(x3, x3, S::set1_ps(0.5))),
-    );
+    let v1x = S::add_epi32(i,S::and_epi32(S::castps_epi32(i1),S::set1_epi32(X_PRIME)));
+    let v1y = S::add_epi32(j,S::and_epi32(S::castps_epi32(j1),S::set1_epi32(Y_PRIME)));
+    let v1z = S::add_epi32(k,S::and_epi32(S::castps_epi32(k1),S::set1_epi32(Z_PRIME)));        
+    let v1 = (t1*t1) * grad3d::<S>(seed,v1x,v1y,v1z,x1,y1,z1);
 
-    //ti*ti*ti*ti
-    let mut t0q = S::mul_ps(t0, t0);
-    t0q = S::mul_ps(t0q, t0q);
-    let mut t1q = S::mul_ps(t1, t1);
-    t1q = S::mul_ps(t1q, t1q);
-    let mut t2q = S::mul_ps(t2, t2);
-    t2q = S::mul_ps(t2q, t2q);
-    let mut t3q = S::mul_ps(t3, t3);
-    t3q = S::mul_ps(t3q, t3q);
 
-    let mut n0 = S::mul_ps(t0q, grad3d::<S>(seed, gi0, x0, y0, z0));
-    let mut n1 = S::mul_ps(t1q, grad3d::<S>(seed, gi1, x1, y1, z1));
-    let mut n2 = S::mul_ps(t2q, grad3d::<S>(seed, gi2, x2, y2, z2));
-    let mut n3 = S::mul_ps(t3q, grad3d::<S>(seed, gi3, x3, y3, z3));
+    let v2x = S::add_epi32(i,S::and_epi32(S::castps_epi32(i2),S::set1_epi32(X_PRIME)));
+    let v2y = S::add_epi32(j,S::and_epi32(S::castps_epi32(j2),S::set1_epi32(Y_PRIME)));
+    let v2z = S::add_epi32(k,S::and_epi32(S::castps_epi32(k2),S::set1_epi32(Z_PRIME)));        
+    let v2 = (t2*t2) * grad3d::<S>(seed,v2x,v2y,v2z,x2,y2,z2);
+    
+//SIMDf v3 = SIMDf_MASK(n3, SIMDf_MUL(SIMDf_MUL(t3, t3), FUNC(GradCoord)(seed, SIMDi_ADD(i, SIMDi_NUM(xPrime)), SIMDi_ADD(j, SIMDi_NUM(yPrime)), SIMDi_ADD(k, SIMDi_NUM(zPrime)), x3, y3, z3)));
+    let v3x = S::add_epi32(i,S::set1_epi32(X_PRIME));
+    let v3y = S::add_epi32(j,S::set1_epi32(Y_PRIME));
+    let v3z = S::add_epi32(k,S::set1_epi32(Z_PRIME));
+    //define SIMDf_MASK(m,a) SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),a)    
+    let v3 = S::and_ps(n3,(t3*t3) * grad3d::<S>(seed,v3x,v3y,v3z,x3,y3,z3));
 
-    //if ti < 0 then 0 else ni
-    let mut cond = S::cmplt_ps(t0, S::setzero_ps());
-    n0 = S::andnot_ps(cond, n0);
-    cond = S::cmplt_ps(t1, S::setzero_ps());
-    n1 = S::andnot_ps(cond, n1);
-    cond = S::cmplt_ps(t2, S::setzero_ps());
-    n2 = S::andnot_ps(cond, n2);
-    cond = S::cmplt_ps(t3, S::setzero_ps());
-    n3 = S::andnot_ps(cond, n3);
 
-    S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, n3)))
+    let p1 = S::add_ps(v3,S::and_ps(n2,v2));
+    let p2 = S::add_ps(p1,S::and_ps(n1,v1));
+    S::add_ps(p2,S::and_ps(n0,v0))        
 }
 
 #[inline(always)]
