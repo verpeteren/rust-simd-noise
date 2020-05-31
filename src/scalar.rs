@@ -161,6 +161,21 @@ pub unsafe fn fbm_3d(x: f32, y: f32, z: f32, lac: f32, gain: f32, octaves: u8, s
     .0
 }
 
+/// Get a single value of 3d fractal brownian motion.
+
+pub unsafe fn fbm_3d_f64(x: f64, y: f64, z: f64, lac: f64, gain: f64, octaves: u8, seed: i64) -> f64 {
+    simplex_64::fbm_3d::<Scalar>(
+        F64x1(x),
+        F64x1(y),
+        F64x1(z),
+        F64x1(lac),
+        F64x1(gain),
+        octaves,
+        seed,
+    )
+    .0
+}
+
 /// Get a single value of 3d ridge noise.
 
 pub unsafe fn ridge_3d(x: f32, y: f32, z: f32, lac: f32, gain: f32, octaves: u8, seed: i32) -> f32 {

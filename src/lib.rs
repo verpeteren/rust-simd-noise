@@ -56,7 +56,7 @@
 //!         .with_return_type(Cell2ReturnType::Distance2Mul)
 //!         .with_jitter(0.5)
 //!         .wrap();
-//!  
+//!
 //! // get a block of noise with the sse41 version, using the above settings
 //! unsafe {
 //!     let (noise,min,max) = simdnoise::sse41::get_3d_noise(&noise_setting);
@@ -68,7 +68,7 @@
 //!   let x = _mm_set1_ps(5.0);
 //!   let y = _mm_set1_ps(10.0);
 //!   let f : __m128 = simdnoise::sse2::simplex_2d(x,y);
-//!   
+//!
 //!   // avx2 turbulence
 //!   let x = _mm256_set1_ps(5.0);
 //!   let y = _mm256_set1_ps(10.0);
@@ -76,7 +76,7 @@
 //!   let gain = _mm256_set1_ps(2.0);
 //!   let octaves = 3;
 //!   let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,lacunarity,gain,octaves);
-//!     
+//!
 //! }
 //! ```
 
@@ -87,6 +87,7 @@ mod noise_helpers;
 pub mod scalar;
 mod shared;
 pub mod simplex;
+pub mod simplex_64;
 pub mod sse2;
 pub mod sse41;
 
