@@ -83,6 +83,7 @@
 extern crate simdeez;
 pub mod avx2;
 pub mod cellular;
+pub mod cellular_64;
 mod noise_helpers;
 pub mod scalar;
 mod shared;

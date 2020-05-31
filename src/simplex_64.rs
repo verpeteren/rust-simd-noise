@@ -27,6 +27,95 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64, x: S::Vf64) -> S::Vf64 {
 }
 
 #[inline(always)]
+pub unsafe fn fbm_1d<S: Simd>(
+    mut x: S::Vf64,
+    lacunarity: S::Vf64,
+    gain: S::Vf64,
+    octaves: u8,
+    seed: i64,
+) -> S::Vf64 {
+    let mut amp = S::set1_pd(1.0);
+    let mut result = simplex_1d::<S>(x, seed);
+
+    for _ in 1..octaves {
+        x = S::mul_pd(x, lacunarity);
+        amp = S::mul_pd(amp, gain);
+        result = S::add_pd(result, simplex_1d::<S>(x, seed));
+    }
+
+    result
+}
+
+#[inline(always)]
+pub unsafe fn ridge_1d<S: Simd>(
+    mut x: S::Vf64,
+    lacunarity: S::Vf64,
+    gain: S::Vf64,
+    octaves: u8,
+    seed: i64,
+) -> S::Vf64 {
+    let mut amp = S::set1_pd(1.0);
+    let mut result = S::sub_pd(S::set1_pd(1.0), S::abs_pd(simplex_1d::<S>(x, seed)));
+
+    for _ in 1..octaves {
+        x = S::mul_pd(x, lacunarity);
+        amp = S::mul_pd(amp, gain);
+        result = S::add_pd(
+            result,
+            S::sub_pd(S::set1_pd(1.0), S::abs_pd(simplex_1d::<S>(x, seed))),
+        );
+    }
+
+    result
+}
+
+#[inline(always)]
+pub unsafe fn turbulence_1d<S: Simd>(
+    mut x: S::Vf64,
+    lacunarity: S::Vf64,
+    gain: S::Vf64,
+    octaves: u8,
+    seed: i64,
+) -> S::Vf64 {
+    let mut amp = S::set1_pd(1.0);
+    let mut result = S::abs_pd(simplex_1d::<S>(x, seed));
+
+    for _ in 1..octaves {
+        x = S::mul_pd(x, lacunarity);
+        amp = S::mul_pd(amp, gain);
+        result = S::add_pd(result, S::abs_pd(simplex_1d::<S>(x, seed)));
+    }
+
+    result
+}
+
+#[inline(always)]
+pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
+    let ipd = S::fast_floor_pd(x);
+    let mut i0 = S::cvtpd_epi64(ipd);
+    let i1 = S::and_epi64(S::add_epi64(i0, S::set1_epi64(1)), S::set1_epi64(0xff));
+
+    let x0 = S::sub_pd(x, ipd);
+    let x1 = S::sub_pd(x0, S::set1_pd(1.0));
+
+    i0 = S::and_epi64(i0, S::set1_epi64(0xff));
+    let gi0 = S::i64gather_epi64(&PERM64, i0);
+    let gi1 = S::i64gather_epi64(&PERM64, i1);
+
+    let mut t0 = S::sub_pd(S::set1_pd(1.0), S::mul_pd(x0, x0));
+    t0 = S::mul_pd(t0, t0);
+    t0 = S::mul_pd(t0, t0);
+    let n0 = S::mul_pd(t0, grad1::<S>(seed, gi0, x0));
+
+    let mut t1 = S::sub_pd(S::set1_pd(1.0), S::mul_pd(x1, x1));
+    t1 = S::mul_pd(t1, t1);
+    t1 = S::mul_pd(t1, t1);
+    let n1 = S::mul_pd(t1, grad1::<S>(seed, gi1, x1));
+
+    S::add_pd(n0, n1)
+}
+
+#[inline(always)]
 unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64, x: S::Vf64, y: S::Vf64) -> S::Vf64 {
     let h = S::and_epi64(S::xor_epi64(hash, S::set1_epi64(seed)), S::set1_epi64(7));
     let mask = S::castepi64_pd(S::cmpgt_epi64(S::set1_epi64(4), h));
@@ -223,32 +312,6 @@ unsafe fn grad3d<S: Simd>(seed: i64, hash: S::Vi64, x: S::Vf64, y: S::Vf64, z: S
     )
 }
 
-/*#[inline(always)]
-pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
-    let ipd = S::fast_floor_pd(x);
-    let mut i0 = S::cvtpd_epi64(ipd);
-    let i1 = S::and_epi64(S::add_epi64(i0, S::set1_epi64(1)), S::set1_epi64(0xff));
-
-    let x0 = S::sub_pd(x, ipd);
-    let x1 = S::sub_pd(x0, S::set1_pd(1.0));
-
-    i0 = S::and_epi64(i0, S::set1_epi64(0xff));
-    let gi0 = S::i64gather_epi64(&PERM64, i0);
-    let gi1 = S::i64gather_epi64(&PERM64, i1);
-
-    let mut t0 = S::sub_pd(S::set1_pd(1.0), S::mul_pd(x0, x0));
-    t0 = S::mul_pd(t0, t0);
-    t0 = S::mul_pd(t0, t0);
-    let n0 = S::mul_pd(t0, grad1::<S>(seed, gi0, x0));
-
-    let mut t1 = S::sub_pd(S::set1_pd(1.0), S::mul_pd(x1, x1));
-    t1 = S::mul_pd(t1, t1);
-    t1 = S::mul_pd(t1, t1);
-    let n1 = S::mul_pd(t1, grad1::<S>(seed, gi1, x1));
-
-    S::add_pd(n0, n1)
-}
-*/
 #[inline(always)]
 pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64) -> S::Vf64 {
     let s = S::mul_pd(S::set1_pd(F3), S::add_pd(x, S::add_pd(y, z)));

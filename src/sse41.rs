@@ -58,6 +58,50 @@ pub unsafe fn cellular_3d(
     .0
 }
 
+/// Get a single value of 2d cellular/voroni noise
+#[target_feature(enable = "sse4.1")]
+pub unsafe fn cellular_2d_f64(
+    x: __m128d,
+    y: __m128d,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: __m128d,
+    seed: i64,
+) -> __m128d {
+    cellular_64::cellular_2d::<Sse41>(
+        F64x2(x),
+        F64x2(y),
+        distance_function,
+        return_type,
+        F64x2(jitter),
+        seed,
+    )
+    .0
+}
+
+/// Get a single value of 3d cellular/voroni noise
+#[target_feature(enable = "sse4.1")]
+pub unsafe fn cellular_3d_f64(
+    x: __m128d,
+    y: __m128d,
+    z: __m128d,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: __m128d,
+    seed: i64,
+) -> __m128d {
+    cellular_64::cellular_3d::<Sse41>(
+        F64x2(x),
+        F64x2(y),
+        F64x2(z),
+        distance_function,
+        return_type,
+        F64x2(jitter),
+        seed,
+    )
+    .0
+}
+
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse4.1")]
@@ -99,6 +143,49 @@ pub unsafe fn turbulence_1d(
     seed: i32,
 ) -> __m128 {
     simplex::turbulence_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
+}
+
+/// Get a single value of 1d simplex noise, results
+/// are not scaled.
+#[target_feature(enable = "sse4.1")]
+pub unsafe fn simplex_1d_f64(x: __m128d, seed: i64) -> __m128d {
+    simplex_64::simplex_1d::<Sse41>(F64x2(x), seed).0
+}
+
+/// Get a single value of 1d fractal brownian motion.
+#[target_feature(enable = "sse4.1")]
+pub unsafe fn fbm_1d_f64(
+    x: __m128d,
+    lacunarity: __m128d,
+    gain: __m128d,
+    octaves: u8,
+    seed: i64,
+) -> __m128d {
+    simplex_64::fbm_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
+}
+
+/// Get a single value of 2d ridge noise.
+#[target_feature(enable = "sse4.1")]
+pub unsafe fn ridge_1d_f64(
+    x: __m128d,
+    lacunarity: __m128d,
+    gain: __m128d,
+    octaves: u8,
+    seed: i64,
+) -> __m128d {
+    simplex_64::ridge_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
+}
+
+/// Get a single value of 2d turbulence.
+#[target_feature(enable = "sse4.1")]
+pub unsafe fn turbulence_1d_f64(
+    x: __m128d,
+    lacunarity: __m128d,
+    gain: __m128d,
+    octaves: u8,
+    seed: i64,
+) -> __m128d {
+    simplex_64::turbulence_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
 }
 
 /// Gets a width sized block of 1d noise, unscaled.

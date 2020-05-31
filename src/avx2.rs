@@ -60,6 +60,50 @@ pub unsafe fn cellular_3d(
     .0
 }
 
+/// Get a single value of 2d cellular/voroni noise
+#[target_feature(enable = "avx2")]
+pub unsafe fn cellular_2d_f64(
+    x: __m256d,
+    y: __m256d,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: __m256d,
+    seed: i64,
+) -> __m256d {
+    cellular_64::cellular_2d::<Avx2>(
+        F64x4(x),
+        F64x4(y),
+        distance_function,
+        return_type,
+        F64x4(jitter),
+        seed,
+    )
+    .0
+}
+
+/// Get a single value of 3d cellular/voroni noise
+#[target_feature(enable = "avx2")]
+pub unsafe fn cellular_3d_f64(
+    x: __m256d,
+    y: __m256d,
+    z: __m256d,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: __m256d,
+    seed: i64,
+) -> __m256d {
+    cellular_64::cellular_3d::<Avx2>(
+        F64x4(x),
+        F64x4(y),
+        F64x4(z),
+        distance_function,
+        return_type,
+        F64x4(jitter),
+        seed,
+    )
+    .0
+}
+
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "avx2")]
@@ -101,6 +145,42 @@ pub unsafe fn turbulence_1d(
     seed: i32,
 ) -> __m256 {
     simplex::turbulence_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
+}
+
+/// Get a single value of 1d fractal brownian motion.
+#[target_feature(enable = "avx2")]
+pub unsafe fn fbm_1d_f64(
+    x: __m256d,
+    lacunarity: __m256d,
+    gain: __m256d,
+    octaves: u8,
+    seed: i64,
+) -> __m256d {
+    simplex_64::fbm_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
+}
+
+/// Get a single value of 2d ridge noise.
+#[target_feature(enable = "avx2")]
+pub unsafe fn ridge_1d_f64(
+    x: __m256d,
+    lacunarity: __m256d,
+    gain: __m256d,
+    octaves: u8,
+    seed: i64,
+) -> __m256d {
+    simplex_64::ridge_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
+}
+
+/// Get a single value of 2d turbulence.
+#[target_feature(enable = "avx2")]
+pub unsafe fn turbulence_1d_f64(
+    x: __m256d,
+    lacunarity: __m256d,
+    gain: __m256d,
+    octaves: u8,
+    seed: i64,
+) -> __m256d {
+    simplex_64::turbulence_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
 }
 
 /*

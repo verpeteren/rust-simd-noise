@@ -47,6 +47,50 @@ pub unsafe fn cellular_3d(
     .0
 }
 
+/// Get a single value of 2d cellular/voroni noise
+
+pub unsafe fn cellular_2d_f64(
+    x: f64,
+    y: f64,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: f64,
+    seed: i64,
+) -> f64 {
+    cellular_64::cellular_2d::<Scalar>(
+        F64x1(x),
+        F64x1(y),
+        distance_function,
+        return_type,
+        F64x1(jitter),
+        seed,
+    )
+    .0
+}
+
+/// Get a single value of 3d cellular/voroni noise
+
+pub unsafe fn cellular_3d_f64(
+    x: f64,
+    y: f64,
+    z: f64,
+    distance_function: CellDistanceFunction,
+    return_type: CellReturnType,
+    jitter: f64,
+    seed: i64,
+) -> f64 {
+    cellular_64::cellular_3d::<Scalar>(
+        F64x1(x),
+        F64x1(y),
+        F64x1(z),
+        distance_function,
+        return_type,
+        F64x1(jitter),
+        seed,
+    )
+    .0
+}
+
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
 pub unsafe fn simplex_1d(x: f32, seed: i32) -> f32 {
@@ -69,6 +113,30 @@ pub unsafe fn ridge_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8, seed: i3
 
 pub unsafe fn turbulence_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
     simplex::turbulence_1d::<Scalar>(F32x1(x), F32x1(lacunarity), F32x1(gain), octaves, seed).0
+}
+
+/// Get a single value of 1d simplex noise, results
+/// are not scaled.
+pub unsafe fn simplex_1d_f64(x: f64, seed: i64) -> f64 {
+    simplex_64::simplex_1d::<Scalar>(F64x1(x), seed).0
+}
+
+/// Get a single value of 1d fractal brownian motion.
+
+pub unsafe fn fbm_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8, seed: i64) -> f64 {
+    simplex_64::fbm_1d::<Scalar>(F64x1(x), F64x1(lacunarity), F64x1(gain), octaves, seed).0
+}
+
+/// Get a single value of 2d ridge noise.
+
+pub unsafe fn ridge_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8, seed: i64) -> f64 {
+    simplex_64::ridge_1d::<Scalar>(F64x1(x), F64x1(lacunarity), F64x1(gain), octaves, seed).0
+}
+
+/// Get a single value of 2d turbulence.
+
+pub unsafe fn turbulence_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8, seed: i64) -> f64 {
+    simplex_64::turbulence_1d::<Scalar>(F64x1(x), F64x1(lacunarity), F64x1(gain), octaves, seed).0
 }
 
 /// Gets a width sized block of 1d noise, unscaled.
