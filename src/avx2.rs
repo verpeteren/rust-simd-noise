@@ -183,51 +183,6 @@ pub unsafe fn turbulence_1d_f64(
     simplex_64::turbulence_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
 }
 
-/*
-/// Get a single value of 1d simplex noise, results
-/// are not scaled.
-#[target_feature(enable = "avx2")]
-pub unsafe fn simplex_1d_f64(x: __m256d, seed: i64) -> __m256d {
-    simplex_64::simplex_1d::<Avx2>(F64x4(x), seed).0
-}
-
-/// Get a single value of 1d fractal brownian motion.
-#[target_feature(enable = "avx2")]
-pub unsafe fn fbm_1d_f64(
-    x: __m256d,
-    lacunarity: __m256d,
-    gain: __m256d,
-    octaves: u8,
-    seed: i64,
-) -> __m256d {
-    simplex_64::fbm_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
-}
-
-/// Get a single value of 2d ridge noise.
-#[target_feature(enable = "avx2")]
-pub unsafe fn ridge_1d_f64(
-    x: __m256d,
-    lacunarity: __m256d,
-    gain: __m256d,
-    octaves: u8,
-    seed: i64,
-) -> __m256d {
-    simplex_64::ridge_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
-}
-
-/// Get a single value of 2d turbulence.
-#[target_feature(enable = "avx2")]
-pub unsafe fn turbulence_1d_f64(
-    x: __m256d,
-    lacunarity: __m256d,
-    gain: __m256d,
-    octaves: u8,
-    seed: i64,
-) -> __m256d {
-    simplex_64::turbulence_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
-}
-*/
-
 /// Gets a width sized block of 1d noise, unscaled.
 /// `start_x` can be used to provide an offset in the
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
