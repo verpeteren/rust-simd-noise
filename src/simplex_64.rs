@@ -247,8 +247,8 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
     let n1 = S::mul_pd(t1, grad1::<S>(seed, gi1, x1));
 
     S::add_pd(n0, n1)
-}*/
-
+}
+*/
 #[inline(always)]
 pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64) -> S::Vf64 {
     let s = S::mul_pd(S::set1_pd(F3), S::add_pd(x, S::add_pd(y, z)));
