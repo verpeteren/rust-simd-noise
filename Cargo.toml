@@ -14,7 +14,7 @@ edition="2018"
 
 
 [dependencies]
-simdeez = "1.0.3"
+simdeez = "1.0.6"
 #simdeez = {path = "../simdeez"}
 
 [dev-dependencies]
@@ -23,4 +23,3 @@ criterion = "0.3.0"
 [[bench]]
 name = "benchmarks"
 harness = false
-
