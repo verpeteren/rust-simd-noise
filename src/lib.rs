@@ -85,6 +85,7 @@ pub mod avx2;
 pub mod cellular;
 pub mod cellular_64;
 mod noise_helpers;
+mod noise_helpers_64;
 pub mod scalar;
 mod shared;
 pub mod simplex;
