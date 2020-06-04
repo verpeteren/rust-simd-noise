@@ -148,6 +148,7 @@ macro_rules! get_4d_noise {
         }
     };
 }
+
 macro_rules! get_1d_scaled_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
@@ -253,6 +254,7 @@ pub struct NoiseDimensions {
     max: f32,
     seed: i32,
 }
+
 impl NoiseDimensions {
     pub fn default(d: usize) -> NoiseDimensions {
         if d < 1 || d > 4 {
@@ -274,6 +276,7 @@ impl NoiseDimensions {
         }
     }
 }
+
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
     dim: NoiseDimensions,
@@ -284,11 +287,13 @@ pub struct CellularSettings {
     return_type: CellReturnType,
     jitter: f32,
 }
+
 impl DimensionalBeing for CellularSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
         return self.dim;
     }
 }
+
 impl CellularSettings {
     pub fn default(dim: NoiseDimensions) -> CellularSettings {
         CellularSettings {
@@ -372,6 +377,7 @@ impl CellularSettings {
         }
     }
 }
+
 #[derive(Copy, Clone)]
 pub struct Cellular2Settings {
     dim: NoiseDimensions,
@@ -384,11 +390,13 @@ pub struct Cellular2Settings {
     index0: usize,
     index1: usize,
 }
+
 impl DimensionalBeing for Cellular2Settings {
     fn get_dimensions(&self) -> NoiseDimensions {
         return self.dim;
     }
 }
+
 impl Cellular2Settings {
     pub fn default(dim: NoiseDimensions) -> Cellular2Settings {
         Cellular2Settings {
@@ -476,11 +484,13 @@ impl Cellular2Settings {
             _ => panic!("not implemented"),
         }
     }
+
     fn validate(self) {
         if self.index0 > 2 || self.index1 > 3 || self.index0 >= self.index1 {
             panic!("invalid index settings in cellular2 noise");
         }
     }
+
     /// Generate a chunk of noise with values scaled from min to max
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
         self.validate();
@@ -495,6 +505,7 @@ impl Cellular2Settings {
         }
     }
 }
+
 #[derive(Copy, Clone)]
 pub struct FbmSettings {
     dim: NoiseDimensions,
@@ -506,11 +517,13 @@ pub struct FbmSettings {
     gain: f32,
     octaves: u8,
 }
+
 impl DimensionalBeing for FbmSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
         return self.dim;
     }
 }
+
 impl FbmSettings {
     pub fn default(dim: NoiseDimensions) -> FbmSettings {
         FbmSettings {
@@ -524,6 +537,7 @@ impl FbmSettings {
             octaves: 3,
         }
     }
+
     pub fn with_seed(&mut self, seed: i32) -> &mut FbmSettings {
         self.dim.seed = seed;
         self
@@ -597,6 +611,7 @@ impl FbmSettings {
             _ => panic!("not implemented"),
         }
     }
+
     /// Generate a chunk of noise with values scaled from min to max
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
         let d = self.dim.dim;
@@ -624,11 +639,13 @@ pub struct RidgeSettings {
     gain: f32,
     octaves: u8,
 }
+
 impl DimensionalBeing for RidgeSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
         return self.dim;
     }
 }
+
 impl RidgeSettings {
     pub fn default(dim: NoiseDimensions) -> RidgeSettings {
         RidgeSettings {
@@ -731,6 +748,7 @@ impl RidgeSettings {
         }
     }
 }
+
 #[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
     dim: NoiseDimensions,
@@ -742,11 +760,13 @@ pub struct TurbulenceSettings {
     gain: f32,
     octaves: u8,
 }
+
 impl DimensionalBeing for TurbulenceSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
         return self.dim;
     }
 }
+
 impl TurbulenceSettings {
     pub fn default(dim: NoiseDimensions) -> TurbulenceSettings {
         TurbulenceSettings {
@@ -760,6 +780,7 @@ impl TurbulenceSettings {
             octaves: 3,
         }
     }
+
     pub fn with_seed(&mut self, seed: i32) -> &mut TurbulenceSettings {
         self.dim.seed = seed;
         self
@@ -819,11 +840,13 @@ impl TurbulenceSettings {
         self.octaves = octaves;
         self
     }
+
     /// If you want to call noise functions by hand, call wrap on the settings
     /// to get back a NoiseType to call the noise functions with
     pub fn wrap(self) -> NoiseType {
         NoiseType::Turbulence(self)
     }
+
     /// Generate a chunk of noise based on your settings, and the min and max value
     /// generated, so you can scale it as you wish
     pub fn generate(self) -> (Vec<f32>, f32, f32) {
@@ -836,6 +859,7 @@ impl TurbulenceSettings {
             _ => panic!("not implemented"),
         }
     }
+
     /// Generate a chunk of noise with values scaled from min to max
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
         let d = self.dim.dim;
@@ -851,6 +875,7 @@ impl TurbulenceSettings {
         }
     }
 }
+
 #[derive(Copy, Clone)]
 pub struct GradientSettings {
     dim: NoiseDimensions,
@@ -859,11 +884,13 @@ pub struct GradientSettings {
     freq_z: f32,
     freq_w: f32,
 }
+
 impl DimensionalBeing for GradientSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
         return self.dim;
     }
 }
+
 impl GradientSettings {
     pub fn default(dim: NoiseDimensions) -> GradientSettings {
         GradientSettings {
@@ -933,6 +960,7 @@ impl GradientSettings {
             _ => panic!("not implemented"),
         }
     }
+
     /// Generate a chunk of noise with values scaled from min to max
     pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
         let d = self.dim.dim;
@@ -959,6 +987,7 @@ pub enum NoiseType {
     Cellular(CellularSettings),
     Cellular2(Cellular2Settings),
 }
+
 impl DimensionalBeing for NoiseType {
     fn get_dimensions(&self) -> NoiseDimensions {
         match self {
@@ -971,6 +1000,7 @@ impl DimensionalBeing for NoiseType {
         }
     }
 }
+
 pub struct NoiseBuilder {}
 impl NoiseBuilder {
     pub fn cellular_2d(width: usize, height: usize) -> CellularSettings {
@@ -1072,18 +1102,21 @@ impl NoiseBuilder {
         dim.width = width;
         FbmSettings::default(dim)
     }
+
     pub fn fbm_1d_offset(x_offset: f32, width: usize) -> FbmSettings {
         let mut dim = NoiseDimensions::default(1);
         dim.width = width;
         dim.x = x_offset;
         FbmSettings::default(dim)
     }
+
     pub fn fbm_2d(width: usize, height: usize) -> FbmSettings {
         let mut dim = NoiseDimensions::default(2);
         dim.width = width;
         dim.height = height;
         FbmSettings::default(dim)
     }
+
     pub fn fbm_2d_offset(x_offset: f32, width: usize, y_offset: f32, height: usize) -> FbmSettings {
         let mut dim = NoiseDimensions::default(2);
         dim.width = width;
@@ -1092,6 +1125,7 @@ impl NoiseBuilder {
         dim.y = y_offset;
         FbmSettings::default(dim)
     }
+
     pub fn fbm_3d(width: usize, height: usize, depth: usize) -> FbmSettings {
         let mut dim = NoiseDimensions::default(3);
         dim.width = width;
@@ -1099,6 +1133,7 @@ impl NoiseBuilder {
         dim.depth = depth;
         FbmSettings::default(dim)
     }
+
     pub fn fbm_3d_offset(
         x_offset: f32,
         width: usize,
@@ -1116,6 +1151,7 @@ impl NoiseBuilder {
         dim.z = z_offset;
         FbmSettings::default(dim)
     }
+
     pub fn fbm_4d(width: usize, height: usize, depth: usize, time: usize) -> FbmSettings {
         let mut dim = NoiseDimensions::default(3);
         dim.width = width;
@@ -1124,6 +1160,7 @@ impl NoiseBuilder {
         dim.time = time;
         FbmSettings::default(dim)
     }
+
     pub fn fbm_4d_offset(
         x_offset: f32,
         width: usize,
@@ -1151,12 +1188,14 @@ impl NoiseBuilder {
         dim.width = width;
         RidgeSettings::default(dim)
     }
+
     pub fn ridge_1d_offset(x_offset: f32, width: usize) -> RidgeSettings {
         let mut dim = NoiseDimensions::default(1);
         dim.width = width;
         dim.x = x_offset;
         RidgeSettings::default(dim)
     }
+
     pub fn ridge_2d(width: usize, height: usize) -> RidgeSettings {
         let mut dim = NoiseDimensions::default(2);
         dim.width = width;
@@ -1241,12 +1280,14 @@ impl NoiseBuilder {
         dim.width = width;
         TurbulenceSettings::default(dim)
     }
+
     pub fn turbulence_1d_offset(x_offset: f32, width: usize) -> TurbulenceSettings {
         let mut dim = NoiseDimensions::default(1);
         dim.width = width;
         dim.x = x_offset;
         TurbulenceSettings::default(dim)
     }
+
     pub fn turbulence_2d(width: usize, height: usize) -> TurbulenceSettings {
         let mut dim = NoiseDimensions::default(2);
         dim.width = width;
@@ -1336,12 +1377,14 @@ impl NoiseBuilder {
         dim.width = width;
         GradientSettings::default(dim)
     }
+
     pub fn gradient_1d_offset(x_offset: f32, width: usize) -> GradientSettings {
         let mut dim = NoiseDimensions::default(1);
         dim.width = width;
         dim.x = x_offset;
         GradientSettings::default(dim)
     }
+
     pub fn gradient_2d(width: usize, height: usize) -> GradientSettings {
         let mut dim = NoiseDimensions::default(2);
         dim.width = width;

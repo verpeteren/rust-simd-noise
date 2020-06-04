@@ -253,7 +253,6 @@ pub unsafe fn turbulence_2d(
     simplex::turbulence_2d::<Sse2>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
 }
 
-
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
 #[target_feature(enable = "sse2")]
