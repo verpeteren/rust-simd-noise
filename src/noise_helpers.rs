@@ -128,6 +128,7 @@ macro_rules! get_2d_noise_helper {
 
 }};
 }
+
 macro_rules! get_3d_noise_helper {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {{
     let dim = $Setting.dim;
@@ -199,6 +200,7 @@ macro_rules! get_3d_noise_helper {
     (result, min, max)
 }};
 }
+
 macro_rules! get_4d_noise_helper {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {{
     let dim = $Setting.dim;
@@ -422,6 +424,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         ),
     }
 }
+
 #[inline(always)]
 pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
