@@ -1,5 +1,9 @@
 <img align="left" width="120" src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
 
+# Caveat
+
+This is a clone of [this repo](https://github.com/jackmott/rust-simd-noise) with added **support for *per-axis* frequency scaling**. It will disappear once/if this gets merged into the original repo.
+
 # SIMDNoise
 [![](https://img.shields.io/crates/v/simdnoise.svg)](https://crates.io/crates/simdnoise) [![](https://docs.rs/simdnoise/badge.svg)](https://docs.rs/simdnoise)
 
@@ -55,7 +59,7 @@ let noise = NoiseBuilder::fbm_2d(100, 100).generate_scaled(0.0, 1.0);
 
 // Get a block of 3d ridge noise, custom settings, 32x32x32 unscaled
 let (noise, min, max) = NoiseBuilder::ridge_3d(32, 32, 32)
-    .with_freq(0.05)
+    .with_freq(0.05, 0.05, 0.05)
     .with_octaves(5)
     .with_gain(2.0)
     .with_seed(1337)
@@ -69,7 +73,7 @@ Sometimes you may want to use SSE41 even with AVX2 is available.
 
 ```rust
 let noise_setting = NoiseBuilder::ridge_3d(32, 32, 32)
-    .with_freq(0.05)
+    .with_freq(0.05, 0.05, 0.05)
     .with_octaves(5)
     .with_gain(2.0)
     .with_lacunarity(0.5)
