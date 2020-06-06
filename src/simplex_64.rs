@@ -572,9 +572,6 @@ pub unsafe fn turbulence_3d<S: Simd>(
     result
 }
 
-
-
-
 #[inline(always)]
 unsafe fn grad4<S: Simd>(
     seed: i64,
@@ -736,9 +733,18 @@ pub unsafe fn simplex_4d<S: Simd>(
     let gi3 = S::i64gather_epi64(&PERM64, S::add_epi64(S::add_epi64(ii, i3), jp));
 
     let lp = S::i64gather_epi64(&PERM64, S::add_epi64(ll, S::set1_epi64(1)));
-    let kp = S::i64gather_epi64(&PERM64, S::add_epi64(S::add_epi64(kk, S::set1_epi64(1)), lp));
-    let jp = S::i64gather_epi64(&PERM64, S::add_epi64(S::add_epi64(jj, S::set1_epi64(1)), kp));
-    let gi4 = S::i64gather_epi64(&PERM64, S::add_epi64(S::add_epi64(ii, S::set1_epi64(1)), jp));
+    let kp = S::i64gather_epi64(
+        &PERM64,
+        S::add_epi64(S::add_epi64(kk, S::set1_epi64(1)), lp),
+    );
+    let jp = S::i64gather_epi64(
+        &PERM64,
+        S::add_epi64(S::add_epi64(jj, S::set1_epi64(1)), kp),
+    );
+    let gi4 = S::i64gather_epi64(
+        &PERM64,
+        S::add_epi64(S::add_epi64(ii, S::set1_epi64(1)), jp),
+    );
 
     let t0 = S::sub_pd(
         S::sub_pd(

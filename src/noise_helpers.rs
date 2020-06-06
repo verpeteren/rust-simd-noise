@@ -8,12 +8,11 @@ macro_rules! get_1d_noise_helper  {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {
  {
     let dim = $Setting.dim;
-    let freq = S::set1_ps($Setting.freq);
+    let freq_x = S::set1_ps($Setting.freq_x);
     let start_x = dim.x;
     let width = dim.width;
     let mut min_s = S::set1_ps(f32::MAX);
     let mut max_s = S::set1_ps(f32::MIN);
-
 
     let mut min = f32::MAX;
     let mut max = f32::MIN;
@@ -30,7 +29,7 @@ macro_rules! get_1d_noise_helper  {
     }
     let mut x = S::loadu_ps(&x_arr[0]);
     for _ in 0..width / vector_width {
-        let f = $f(S::mul_ps(x,freq) $(,$arg)*);
+        let f = $f(S::mul_ps(x, freq_x) $(,$arg)*);
         max_s = S::max_ps(max_s, f);
         min_s = S::min_ps(min_s, f);
         S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -38,7 +37,7 @@ macro_rules! get_1d_noise_helper  {
         x = S::add_ps(x, S::set1_ps(vector_width as f32));
     }
     if remainder != 0 {
-        let f = $f(S::mul_ps(x,freq) $(,$arg)*);
+        let f = $f(S::mul_ps(x, freq_x) $(,$arg)*);
         for j in 0..remainder {
             let n = f[j];
             *result.get_unchecked_mut(i) = n;
@@ -68,7 +67,8 @@ macro_rules! get_1d_noise_helper  {
 macro_rules! get_2d_noise_helper {
     ($Setting:expr,$f:expr $(,$arg:expr)*)=> {{
     let dim = $Setting.dim;
-    let freq = S::set1_ps($Setting.freq);
+    let freq_x = S::set1_ps($Setting.freq_x);
+    let freq_y = S::set1_ps($Setting.freq_y);
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -93,7 +93,7 @@ macro_rules! get_2d_noise_helper {
     for _ in 0..height {
         let mut x = S::loadu_ps(&x_arr[0]);
         for _ in 0..width / vector_width {
-            let f = $f(S::mul_ps(x,freq),S::mul_ps(y,freq) $(,$arg)*);
+            let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y) $(,$arg)*);
             max_s = S::max_ps(max_s, f);
             min_s = S::min_ps(min_s, f);
             S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -101,7 +101,7 @@ macro_rules! get_2d_noise_helper {
             x = S::add_ps(x, S::set1_ps(vector_width as f32));
         }
         if remainder != 0 {
-            let f = $f(S::mul_ps(x,freq),S::mul_ps(y,freq) $(,$arg)*);
+            let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y) $(,$arg)*);
             for j in 0..remainder {
                 let n = f[j];
                 *result.get_unchecked_mut(i) = n;
@@ -128,10 +128,13 @@ macro_rules! get_2d_noise_helper {
 
 }};
 }
+
 macro_rules! get_3d_noise_helper {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {{
     let dim = $Setting.dim;
-    let freq = S::set1_ps($Setting.freq);
+    let freq_x = S::set1_ps($Setting.freq_x);
+    let freq_y = S::set1_ps($Setting.freq_y);
+    let freq_z = S::set1_ps($Setting.freq_z);
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -161,16 +164,15 @@ macro_rules! get_3d_noise_helper {
         for _ in 0..height {
             let mut x = S::loadu_ps(&x_arr[0]);
             for _ in 0..width / vector_width {
-            let f = $f(S::mul_ps(x,freq),S::mul_ps(y,freq),S::mul_ps(z,freq) $(,$arg)*);
-
-                             max_s = S::max_ps(max_s, f);
+                let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z) $(,$arg)*);
+                max_s = S::max_ps(max_s, f);
                 min_s = S::min_ps(min_s, f);
                 S::storeu_ps(result.get_unchecked_mut(i), f);
                 i += vector_width;
                 x = S::add_ps(x, S::set1_ps(vector_width as f32));
             }
             if remainder != 0 {
-            let f = $f(S::mul_ps(x,freq),S::mul_ps(y,freq),S::mul_ps(z,freq) $(,$arg)*);
+            let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z) $(,$arg)*);
                 for j in 0..remainder {
                     let n = f[j];
                     *result.get_unchecked_mut(i) = n;
@@ -198,10 +200,14 @@ macro_rules! get_3d_noise_helper {
     (result, min, max)
 }};
 }
+
 macro_rules! get_4d_noise_helper {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {{
     let dim = $Setting.dim;
-    let freq = S::set1_ps($Setting.freq);
+    let freq_x = S::set1_ps($Setting.freq_x);
+    let freq_y = S::set1_ps($Setting.freq_y);
+    let freq_z = S::set1_ps($Setting.freq_z);
+    let freq_w = S::set1_ps($Setting.freq_w);
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -234,7 +240,7 @@ macro_rules! get_4d_noise_helper {
             for _ in 0..height {
                 let mut x = S::loadu_ps(&x_arr[0]);
                 for _ in 0..width / vector_width {
-            let f = $f(S::mul_ps(x,freq),S::mul_ps(y,freq),S::mul_ps(z,freq),S::mul_ps(w,freq) $(,$arg)*);
+                    let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z), S::mul_ps(w, freq_w) $(,$arg)*);
                     max_s = S::max_ps(max_s, f);
                     min_s = S::min_ps(min_s, f);
                     S::storeu_ps(result.get_unchecked_mut(i), f);
@@ -242,7 +248,7 @@ macro_rules! get_4d_noise_helper {
                     x = S::add_ps(x, S::set1_ps(vector_width as f32));
                 }
                 if remainder != 0 {
-            let f = $f(S::mul_ps(x,freq),S::mul_ps(y,freq),S::mul_ps(z,freq),S::mul_ps(w,freq) $(,$arg)*);
+                    let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z), S::mul_ps(w, freq_w) $(,$arg)*);
                     for j in 0..remainder {
                         let n = f[j];
                         *result.get_unchecked_mut(i) = n;
@@ -418,6 +424,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         ),
     }
 }
+
 #[inline(always)]
 pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
