@@ -13,6 +13,10 @@ const G24: f64 = 2.0 * G4;
 const G34: f64 = 3.0 * G4;
 const G44: f64 = 4.0 * G4;
 
+/// Generates a random integer gradient in ±7 inclusive, and returns its product with `x`
+///
+/// This differs from Gustavson's well-known implementation in that gradients can be zero, and the
+/// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64, x: S::Vf64) -> S::Vf64 {
     let h = S::and_epi64(S::xor_epi64(S::set1_epi64(seed), hash), S::set1_epi64(15));
@@ -89,6 +93,9 @@ pub unsafe fn turbulence_1d<S: Simd>(
     result
 }
 
+/// Samples 1-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
     let ipd = S::fast_floor_pd(x);
@@ -112,7 +119,7 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
     t1 = S::mul_pd(t1, t1);
     let n1 = S::mul_pd(t1, grad1::<S>(seed, gi1, x1));
 
-    S::add_pd(n0, n1)
+    S::add_pd(n0, n1) * S::set1_pd(256.0 / (81.0 * 7.0))
 }
 
 #[inline(always)]
@@ -916,4 +923,29 @@ pub unsafe fn turbulence_4d<S: Simd>(
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use simdeez::scalar::{F64x1, Scalar};
+
+    fn check_bounds(min: f64, max: f64) {
+        assert!(min < -0.75 && min >= -1.0, "min out of range {}", min);
+        assert!(max > 0.75 && max <= 1.0, "max out of range: {}", max);
+    }
+
+    #[test]
+    fn simplex_1d_range() {
+        for seed in 0..10 {
+            let mut min = f64::INFINITY;
+            let mut max = -f64::INFINITY;
+            for x in 0..1000 {
+                let n = unsafe { simplex_1d::<Scalar>(F64x1(x as f64 / 10.0), seed).0 };
+                min = min.min(n);
+                max = max.max(n);
+            }
+            check_bounds(min, max);
+        }
+    }
 }

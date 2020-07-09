@@ -19,6 +19,10 @@ const X_PRIME: i32 = 1619;
 const Y_PRIME: i32 = 31337;
 const Z_PRIME: i32 = 6791;
 
+/// Generates a random integer gradient in ±7 inclusive, and returns its product with `x`
+///
+/// This differs from Gustavson's well-known implementation in that gradients can be zero, and the
+/// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
     let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(15));
@@ -32,30 +36,50 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
     S::mul_ps(grad, x)
 }
 
+/// Samples 1-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
+    // Gradients are selected deterministically based on the whole part of `x`
     let ips = S::fast_floor_ps(x);
     let mut i0 = S::cvtps_epi32(ips);
     let i1 = S::and_epi32(S::add_epi32(i0, S::set1_epi32(1)), S::set1_epi32(0xff));
 
+    // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
     let x0 = S::sub_ps(x, ips);
+    // signed distance to the right gradient node
     let x1 = S::sub_ps(x0, S::set1_ps(1.0));
 
     i0 = S::and_epi32(i0, S::set1_epi32(0xff));
     let gi0 = S::i32gather_epi32(&PERM, i0);
     let gi1 = S::i32gather_epi32(&PERM, i1);
 
+    // Compute the contribution from the first gradient
     let mut t0 = S::sub_ps(S::set1_ps(1.0), S::mul_ps(x0, x0));
     t0 = S::mul_ps(t0, t0);
     t0 = S::mul_ps(t0, t0);
     let n0 = S::mul_ps(t0, grad1::<S>(seed, gi0, x0));
+    // n0 = (1 - x0^2)^4 * x0 * grad
 
+    // Compute the contribution from the second gradient
     let mut t1 = S::sub_ps(S::set1_ps(1.0), S::mul_ps(x1, x1));
     t1 = S::mul_ps(t1, t1);
     t1 = S::mul_ps(t1, t1);
     let n1 = S::mul_ps(t1, grad1::<S>(seed, gi1, x1));
 
-    S::add_ps(n0, n1)
+    // n0 + n1 =
+    //    grad0 * x0 * (1 - x0^2)^4
+    //  + grad1 * (x0 - 1) * (1 - (x0 - 1)^2)^4
+    //
+    // Assuming worst-case values for grad0 and grad1, we therefore need only determine the maximum of
+    //
+    // |x0 * (1 - x0^2)^4| + |(x0 - 1) * (1 - (x0 - 1)^2)^4|
+    //
+    // for 0 ≤ x0 < 1. This can be done by root-finding on the derivative, obtaining 81 / 256 when
+    // x0 = 0.5, which we finally multiply by the maximum gradient to get the maximum value,
+    // allowing us to scale into [-1, 1]
+    S::add_ps(n0, n1) * S::set1_ps(256.0 / (81.0 * 7.0))
 }
 
 #[inline(always)]
@@ -839,4 +863,29 @@ pub unsafe fn turbulence_4d<S: Simd>(
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use simdeez::scalar::{F32x1, Scalar};
+
+    fn check_bounds(min: f32, max: f32) {
+        assert!(min < -0.75 && min >= -1.0, "min out of range {}", min);
+        assert!(max > 0.75 && max <= 1.0, "max out of range: {}", max);
+    }
+
+    #[test]
+    fn simplex_1d_range() {
+        for seed in 0..10 {
+            let mut min = f32::INFINITY;
+            let mut max = -f32::INFINITY;
+            for x in 0..1000 {
+                let n = unsafe { simplex_1d::<Scalar>(F32x1(x as f32 / 10.0), seed).0 };
+                min = min.min(n);
+                max = max.max(n);
+            }
+            check_bounds(min, max);
+        }
+    }
 }
