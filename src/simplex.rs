@@ -25,12 +25,12 @@ const X_PRIME: i32 = 1619;
 const Y_PRIME: i32 = 31337;
 const Z_PRIME: i32 = 6791;
 
-/// Generates a random integer gradient in ±7 inclusive, and returns its product with `x`
+/// Generates a random integer gradient in ±7 inclusive
 ///
 /// This differs from Gustavson's well-known implementation in that gradients can be zero, and the
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
-pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
+pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
     let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(15));
     let v = S::cvtepi32_ps(S::and_epi32(h, S::set1_epi32(7)));
 
@@ -38,8 +38,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
         S::setzero_epi32(),
         S::and_epi32(h, S::set1_epi32(8)),
     ));
-    let grad = S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_8);
-    S::mul_ps(grad, x)
+    S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_8)
 }
 
 /// Samples 1-dimensional simplex noise
@@ -47,6 +46,12 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
+    simplex_1d_deriv::<S>(x, seed).0
+}
+
+/// Like `simplex_1d`, but also computes the derivative
+#[inline(always)]
+pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = S::fast_floor_ps(x);
     let mut i0 = S::cvtps_epi32(ips);
@@ -62,17 +67,21 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
     let gi1 = S::i32gather_epi32(&PERM, i1);
 
     // Compute the contribution from the first gradient
-    let mut t0 = S::sub_ps(S::set1_ps(1.0), S::mul_ps(x0, x0));
-    t0 = S::mul_ps(t0, t0);
-    t0 = S::mul_ps(t0, t0);
-    let n0 = S::mul_ps(t0, grad1::<S>(seed, gi0, x0));
+    let x20 = S::mul_ps(x0, x0); // x^2_0
+    let t0 = S::sub_ps(S::set1_ps(1.0), x20); // t_0
+    let t20 = S::mul_ps(t0, t0); // t^2_0
+    let t40 = S::mul_ps(t20, t20); // t^4_0
+    let gx0 = grad1::<S>(seed, gi0);
+    let n0 = S::mul_ps(t40, gx0 * x0);
     // n0 = (1 - x0^2)^4 * x0 * grad
 
     // Compute the contribution from the second gradient
-    let mut t1 = S::sub_ps(S::set1_ps(1.0), S::mul_ps(x1, x1));
-    t1 = S::mul_ps(t1, t1);
-    t1 = S::mul_ps(t1, t1);
-    let n1 = S::mul_ps(t1, grad1::<S>(seed, gi1, x1));
+    let x21 = S::mul_ps(x1, x1); // x^2_1
+    let t1 = S::sub_ps(S::set1_ps(1.0), x21); // t_1
+    let t21 = S::mul_ps(t1, t1); // t^2_1
+    let t41 = S::mul_ps(t21, t21); // t^4_1
+    let gx1 = grad1::<S>(seed, gi1);
+    let n1 = S::mul_ps(t41, gx1 * x1);
 
     // n0 + n1 =
     //    grad0 * x0 * (1 - x0^2)^4
@@ -85,7 +94,13 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
     // for 0 ≤ x0 < 1. This can be done by root-finding on the derivative, obtaining 81 / 256 when
     // x0 = 0.5, which we finally multiply by the maximum gradient to get the maximum value,
     // allowing us to scale into [-1, 1]
-    S::add_ps(n0, n1) * S::set1_ps(256.0 / (81.0 * 7.0))
+    const SCALE: f32 = 256.0 / (81.0 * 7.0);
+
+    let value = S::add_ps(n0, n1) * S::set1_ps(SCALE);
+    let derivative =
+        ((t20 * t0 * gx0 * x20 + t21 * t1 * gx1 * x21) * S::set1_ps(-8.0) + t40 * gx0 + t41 * gx1)
+            * S::set1_ps(SCALE);
+    (value, derivative)
 }
 
 #[inline(always)]
@@ -183,6 +198,16 @@ unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S:
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 {
+    simplex_2d_deriv::<S>(x, y, seed).0
+}
+
+/// Like `simplex_2d`, but also computes the derivative
+#[inline(always)]
+pub unsafe fn simplex_2d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
     let s = S::mul_ps(S::set1_ps(F2), S::add_ps(x, y));
@@ -943,6 +968,27 @@ mod tests {
             }
             check_bounds(min, max);
         }
+    }
+
+    #[test]
+    fn simplex_1d_deriv_sanity() {
+        let mut avg_err = 0.0;
+        const SEEDS: i32 = 10;
+        const POINTS: i32 = 1000;
+        for seed in 0..SEEDS {
+            for x in 0..POINTS {
+                // Offset a bit so we don't check derivative at lattice points, where it's always zero
+                let center = x as f32 / 10.0 + 0.1234;
+                const H: f32 = 0.01;
+                let n0 = unsafe { simplex_1d::<Scalar>(F32x1(center - H), seed).0 };
+                let (n1, d1) = unsafe { simplex_1d_deriv::<Scalar>(F32x1(center), seed) };
+                let n2 = unsafe { simplex_1d::<Scalar>(F32x1(center + H), seed).0 };
+                let (n1, d1) = (n1.0, d1.0);
+                avg_err += ((n2 - (n1 + d1 * H)).abs() + (n0 - (n1 - d1 * H)).abs())
+                    / (SEEDS * POINTS * 2) as f32;
+            }
+        }
+        assert!(avg_err < 1e-3);
     }
 
     #[test]
