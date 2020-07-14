@@ -5,11 +5,13 @@ use std::f32;
 
 /// Skew factor for 2D simplex noise
 const F2: f32 = 0.36602540378;
+/// Skew factor for 3D simplex noise
 const F3: f32 = 1.0 / 3.0;
 const F4: f32 = 0.309016994;
 /// Unskew factor for 2D simplex noise
 const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
+/// Unskew factor for 3D simplex noise
 const G3: f32 = 1.0 / 6.0;
 const G33: f32 = 3.0 / 6.0 - 1.0;
 const G4: f32 = 0.138196601;
@@ -326,6 +328,8 @@ pub unsafe fn turbulence_2d<S: Simd>(
     result
 }
 
+/// Generates a random gradient vector from the origin towards the midpoint of an edge of a
+/// double-unit cube
 #[inline(always)]
 unsafe fn grad3d<S: Simd>(
     seed: i32,
@@ -346,6 +350,7 @@ unsafe fn grad3d<S: Simd>(
     hash = S::xor_epi32(S::srai_epi32(hash, 13), hash);
     let hasha13 = S::and_epi32(hash, S::set1_epi32(13));
 
+    // Select two axes of the gradient vector to be 1, leaving the third as 0
     let l8 = S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(8)));
     let u = S::blendv_ps(y, x, l8);
 
@@ -353,22 +358,29 @@ unsafe fn grad3d<S: Simd>(
     let h12_or_14 = S::castepi32_ps(S::cmpeq_epi32(S::set1_epi32(12), hasha13));
     let v = S::blendv_ps(S::blendv_ps(z, x, h12_or_14), y, l4);
 
+    // Select signs of the nonzero gradient vector axes
     let h1 = S::castepi32_ps(S::slli_epi32(hash, 31));
     let h2 = S::castepi32_ps(S::slli_epi32(S::and_epi32(hash, S::set1_epi32(2)), 30));
     S::add_ps(S::xor_ps(u, h1), S::xor_ps(v, h2))
 }
 
+/// Samples 3-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32) -> S::Vf32 {
+    // Find skewed simplex grid coordinates associated with the input coordinates
     let f = S::mul_ps(S::set1_ps(F3), S::add_ps(S::add_ps(x, y), z));
     let mut x0 = S::fast_floor_ps(S::add_ps(x, f));
     let mut y0 = S::fast_floor_ps(S::add_ps(y, f));
     let mut z0 = S::fast_floor_ps(S::add_ps(z, f));
 
+    // Integer grid coordinates
     let i = S::mullo_epi32(S::cvtps_epi32(x0), S::set1_epi32(X_PRIME));
     let j = S::mullo_epi32(S::cvtps_epi32(y0), S::set1_epi32(Y_PRIME));
     let k = S::mullo_epi32(S::cvtps_epi32(z0), S::set1_epi32(Z_PRIME));
 
+    // Compute distance from first simplex vertex to input coordinates
     let g = S::mul_ps(S::set1_ps(G3), S::add_ps(S::add_ps(x0, y0), z0));
     x0 = S::sub_ps(x, S::sub_ps(x0, g));
     y0 = S::sub_ps(y, S::sub_ps(y0, g));
@@ -386,6 +398,7 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
     let j2 = (!x0_ge_y0) | y0_ge_z0;
     let k2 = !(x0_ge_z0 & y0_ge_z0);
 
+    // Compute distances from remaining simplex vertices to input coordinates
     let x1 = S::add_ps(S::sub_ps(x0, i1 & S::set1_ps(1.0)), S::set1_ps(G3));
     let y1 = S::add_ps(S::sub_ps(y0, j1 & S::set1_ps(1.0)), S::set1_ps(G3));
     let z1 = S::add_ps(S::sub_ps(z0, k1 & S::set1_ps(1.0)), S::set1_ps(G3));
@@ -398,6 +411,9 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
     let y3 = S::add_ps(y0, S::set1_ps(G33));
     let z3 = S::add_ps(z0, S::set1_ps(G33));
 
+    // Compute base weight factors associated with each vertex, `0.6 - v . v` where v is the
+    // distance to the vertex. Strictly the constant should be 0.5, but 0.6 is thought by Gustavson
+    // to give visually better results at the cost of subtle discontinuities.
     //#define SIMDf_NMUL_ADD(a,b,c) = SIMDf_SUB(c, SIMDf_MUL(a,b)
     let mut t0 = S::sub_ps(
         S::sub_ps(
@@ -428,11 +444,13 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
         S::mul_ps(z3, z3),
     );
 
+    // Prepare masks for zeroing out contributions from vertices with negative weights
     let n0 = S::cmpge_ps(t0, S::setzero_ps());
     let n1 = S::cmpge_ps(t1, S::setzero_ps());
     let n2 = S::cmpge_ps(t2, S::setzero_ps());
     let n3 = S::cmpge_ps(t3, S::setzero_ps());
 
+    // Square each weight
     t0 = t0 * t0;
     t1 = t1 * t1;
     t2 = t2 * t2;
@@ -440,6 +458,7 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
 
     //#define SIMDf_MASK_ADD(m,a,b) SIMDf_ADD(a,SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),b))
 
+    // Compute contribution from each vertex
     let v0 = (t0 * t0) * grad3d::<S>(seed, i, j, k, x0, y0, z0);
 
     let v1x = S::add_epi32(i, S::and_epi32(S::castps_epi32(i1), S::set1_epi32(X_PRIME)));
@@ -461,7 +480,9 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
 
     let p1 = S::add_ps(v3, S::and_ps(n2, v2));
     let p2 = S::add_ps(p1, S::and_ps(n1, v1));
-    S::add_ps(p2, S::and_ps(n0, v0))
+
+    // Scaling factor found by numerical approximation
+    S::add_ps(p2, S::and_ps(n0, v0)) * S::set1_ps(32.69587493801679)
 }
 
 #[inline(always)]
@@ -923,5 +944,30 @@ mod tests {
             }
             check_bounds(min, max);
         }
+    }
+
+    #[test]
+    fn simplex_3d_range() {
+        let mut min = f32::INFINITY;
+        let mut max = -f32::INFINITY;
+        const SEED: i32 = 0;
+        for z in 0..10 {
+            for y in 0..10 {
+                for x in 0..10000 {
+                    let n = unsafe {
+                        simplex_3d::<Scalar>(
+                            F32x1(x as f32 / 10.0),
+                            F32x1(y as f32 / 10.0),
+                            F32x1(z as f32 / 10.0),
+                            SEED,
+                        )
+                        .0
+                    };
+                    min = min.min(n);
+                    max = max.max(n);
+                }
+            }
+        }
+        check_bounds(min, max);
     }
 }
