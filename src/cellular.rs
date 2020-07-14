@@ -1,3 +1,8 @@
+//! Low-level cellular noise primitives
+//!
+//! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
+//! interfaces.
+
 extern crate simdeez;
 use self::simdeez::*;
 use super::*;

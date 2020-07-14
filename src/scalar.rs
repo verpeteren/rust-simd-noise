@@ -1,3 +1,7 @@
+//! Noise functions that compute one value at a time
+//!
+//! These are much slower than SIMD, and hence on capable hardware have little use but testing.
+
 use super::*;
 use crate::shared::*;
 use simdeez::scalar::*;

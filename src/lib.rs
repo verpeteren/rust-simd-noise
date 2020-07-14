@@ -67,7 +67,8 @@
 //!   // sse2 simplex noise
 //!   let x = _mm_set1_ps(5.0);
 //!   let y = _mm_set1_ps(10.0);
-//!   let f : __m128 = simdnoise::sse2::simplex_2d(x,y);
+//!   let seed = 42;
+//!   let f : __m128 = simdnoise::sse2::simplex_2d(x,y,seed);
 //!
 //!   // avx2 turbulence
 //!   let x = _mm256_set1_ps(5.0);
@@ -75,7 +76,7 @@
 //!   let lacunarity = _mm256_set1_ps(0.5);
 //!   let gain = _mm256_set1_ps(2.0);
 //!   let octaves = 3;
-//!   let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,lacunarity,gain,octaves);
+//!   let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,lacunarity,gain,octaves,seed);
 //!
 //! }
 //! ```
