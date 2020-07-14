@@ -122,6 +122,11 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
     S::add_pd(n0, n1) * S::set1_pd(256.0 / (81.0 * 7.0))
 }
 
+/// Generates a random gradient vector where one component is ±1 and the other is ±2, and computes
+/// the dot product with [x, y].
+///
+/// This differs from Gustavson's gradients by having a constant magnitude, providing results that
+/// are more consistent between directions.
 #[inline(always)]
 unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64, x: S::Vf64, y: S::Vf64) -> S::Vf64 {
     let h = S::and_epi64(S::xor_epi64(hash, S::set1_epi64(seed)), S::set1_epi64(7));
@@ -144,6 +149,9 @@ unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64, x: S::Vf64, y: S::Vf64) -> S:
     )
 }
 
+/// Samples 2-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 {
     let s = S::mul_pd(S::set1_pd(F2), S::add_pd(x, y));
@@ -211,7 +219,7 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 
     cond = S::cmplt_pd(t2, S::setzero_pd());
     n2 = S::andnot_pd(cond, n2);
 
-    S::add_pd(n0, S::add_pd(n1, n2))
+    S::add_pd(n0, S::add_pd(n1, n2)) * S::set1_pd(45.26450774985561631259)
 }
 
 #[inline(always)]
@@ -944,6 +952,24 @@ mod tests {
                 let n = unsafe { simplex_1d::<Scalar>(F64x1(x as f64 / 10.0), seed).0 };
                 min = min.min(n);
                 max = max.max(n);
+            }
+            check_bounds(min, max);
+        }
+    }
+
+    #[test]
+    fn simplex_2d_range() {
+        for seed in 0..10 {
+            let mut min = f64::INFINITY;
+            let mut max = -f64::INFINITY;
+            for y in 0..10 {
+                for x in 0..100 {
+                    let n = unsafe {
+                        simplex_2d::<Scalar>(F64x1(x as f64 / 10.0), F64x1(y as f64 / 10.0), seed).0
+                    };
+                    min = min.min(n);
+                    max = max.max(n);
+                }
             }
             check_bounds(min, max);
         }

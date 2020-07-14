@@ -3,9 +3,11 @@ use super::*;
 use crate::shared::*;
 use std::f32;
 
+/// Skew factor for 2D simplex noise
 const F2: f32 = 0.36602540378;
 const F3: f32 = 1.0 / 3.0;
 const F4: f32 = 0.309016994;
+/// Unskew factor for 2D simplex noise
 const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
 const G3: f32 = 1.0 / 6.0;
@@ -145,6 +147,11 @@ pub unsafe fn turbulence_1d<S: Simd>(
     result
 }
 
+/// Generates a random gradient vector where one component is ±1 and the other is ±2, and computes
+/// the dot product with [x, y].
+///
+/// This differs from Gustavson's gradients by having a constant magnitude, providing results that
+/// are more consistent between directions.
 #[inline(always)]
 unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
     let h = S::and_epi32(S::xor_epi32(hash, S::set1_epi32(seed)), S::set1_epi32(7));
@@ -167,17 +174,24 @@ unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S:
     )
 }
 
+/// Samples 2-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 {
+    // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
+    // squares
     let s = S::mul_ps(S::set1_ps(F2), S::add_ps(x, y));
     let ips = S::floor_ps(S::add_ps(x, s));
     let jps = S::floor_ps(S::add_ps(y, s));
 
+    // Integer coordinates for the base vertex of the triangle
     let i = S::cvtps_epi32(ips);
     let j = S::cvtps_epi32(jps);
 
     let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::set1_ps(G2));
 
+    // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
     let y0 = S::sub_ps(y, S::sub_ps(jps, t));
 
@@ -185,6 +199,7 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 
 
     let j1 = S::castps_epi32(S::cmpgt_ps(y0, x0));
 
+    // Distances to the second and third points of the enclosing simplex
     let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G2));
     let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G2));
     let x2 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(G22));
@@ -211,6 +226,7 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 
         ),
     );
 
+    // Weights associated with the gradients at each corner
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
     let t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5)));
     let t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5)));
@@ -234,8 +250,10 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 
     cond = S::cmplt_ps(t2, S::setzero_ps());
     n2 = S::andnot_ps(cond, n2);
 
-    S::add_ps(n0, S::add_ps(n1, n2))
+    // Scaling factor found by numerical approximation
+    S::add_ps(n0, S::add_ps(n1, n2)) * S::set1_ps(45.26450774985561631259)
 }
+
 #[inline(always)]
 pub unsafe fn fbm_2d<S: Simd>(
     mut x: S::Vf32,
@@ -884,6 +902,24 @@ mod tests {
                 let n = unsafe { simplex_1d::<Scalar>(F32x1(x as f32 / 10.0), seed).0 };
                 min = min.min(n);
                 max = max.max(n);
+            }
+            check_bounds(min, max);
+        }
+    }
+
+    #[test]
+    fn simplex_2d_range() {
+        for seed in 0..10 {
+            let mut min = f32::INFINITY;
+            let mut max = -f32::INFINITY;
+            for y in 0..10 {
+                for x in 0..100 {
+                    let n = unsafe {
+                        simplex_2d::<Scalar>(F32x1(x as f32 / 10.0), F32x1(y as f32 / 10.0), seed).0
+                    };
+                    min = min.min(n);
+                    max = max.max(n);
+                }
             }
             check_bounds(min, max);
         }
