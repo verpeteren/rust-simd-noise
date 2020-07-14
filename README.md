@@ -1,9 +1,5 @@
 <img align="left" width="120" src="https://raw.githubusercontent.com/jackmott/rust-simd-noise/master/logo.jpg"/>
 
-# Caveat
-
-This is a clone of [this repo](https://github.com/jackmott/rust-simd-noise) with added **support for *per-axis* frequency scaling**. It will disappear once/if this gets merged into the original repo.
-
 # SIMDNoise
 [![](https://img.shields.io/crates/v/simdnoise.svg)](https://crates.io/crates/simdnoise) [![](https://docs.rs/simdnoise/badge.svg)](https://docs.rs/simdnoise)
 
