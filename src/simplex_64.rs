@@ -625,6 +625,10 @@ unsafe fn grad4<S: Simd>(
         ),
     )
 }
+
+/// Samples 4-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_4d<S: Simd>(
     x: S::Vf64,
@@ -841,8 +845,9 @@ pub unsafe fn simplex_4d<S: Simd>(
     cond = S::cmplt_pd(t4, S::setzero_pd());
     n4 = S::andnot_pd(cond, n4);
 
-    S::add_pd(n0, S::add_pd(n1, S::add_pd(n2, S::add_pd(n3, n4))))
+    S::add_pd(n0, S::add_pd(n1, S::add_pd(n2, S::add_pd(n3, n4)))) * S::set1_pd(62.77772078955791)
 }
+
 #[inline(always)]
 pub unsafe fn fbm_4d<S: Simd>(
     mut x: S::Vf64,
@@ -973,5 +978,33 @@ mod tests {
             }
             check_bounds(min, max);
         }
+    }
+
+    #[test]
+    fn simplex_4d_range() {
+        let mut min = f64::INFINITY;
+        let mut max = -f64::INFINITY;
+        const SEED: i64 = 0;
+        for w in 0..10 {
+            for z in 0..10 {
+                for y in 0..10 {
+                    for x in 0..1000 {
+                        let n = unsafe {
+                            simplex_4d::<Scalar>(
+                                F64x1(x as f64 / 10.0),
+                                F64x1(y as f64 / 10.0),
+                                F64x1(z as f64 / 10.0),
+                                F64x1(w as f64 / 10.0),
+                                SEED,
+                            )
+                            .0
+                        };
+                        min = min.min(n);
+                        max = max.max(n);
+                    }
+                }
+            }
+        }
+        check_bounds(min, max);
     }
 }

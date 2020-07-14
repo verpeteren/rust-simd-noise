@@ -7,6 +7,7 @@ use std::f32;
 const F2: f32 = 0.36602540378;
 /// Skew factor for 3D simplex noise
 const F3: f32 = 1.0 / 3.0;
+/// Skew factor for 4D simplex noise
 const F4: f32 = 0.309016994;
 /// Unskew factor for 2D simplex noise
 const G2: f32 = 0.2113248654;
@@ -14,6 +15,7 @@ const G22: f32 = G2 * 2.0;
 /// Unskew factor for 3D simplex noise
 const G3: f32 = 1.0 / 6.0;
 const G33: f32 = 3.0 / 6.0 - 1.0;
+/// Unskew factor for 4D simplex noise
 const G4: f32 = 0.138196601;
 const G24: f32 = 2.0 * G4;
 const G34: f32 = 3.0 * G4;
@@ -605,6 +607,10 @@ unsafe fn grad4<S: Simd>(
         ),
     )
 }
+
+/// Samples 4-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_4d<S: Simd>(
     x: S::Vf32,
@@ -613,6 +619,11 @@ pub unsafe fn simplex_4d<S: Simd>(
     w: S::Vf32,
     seed: i32,
 ) -> S::Vf32 {
+    //
+    // Determine which simplex these points lie in, and compute the distance along each axis to each
+    // vertex of the simplex
+    //
+
     let s = S::mul_ps(S::set1_ps(F4), S::add_ps(x, S::add_ps(y, S::add_ps(z, w))));
 
     let ips = S::floor_ps(S::add_ps(x, s));
@@ -732,6 +743,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let jp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(jj, S::set1_epi32(1)), kp));
     let gi4 = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(ii, S::set1_epi32(1)), jp));
 
+    //
+    // Compute base weight factors associated with each vertex
+    //
+
     let t0 = S::sub_ps(
         S::sub_ps(
             S::sub_ps(
@@ -782,7 +797,7 @@ pub unsafe fn simplex_4d<S: Simd>(
         ),
         S::mul_ps(w4, w4),
     );
-    //ti*ti*ti*ti
+    // Cube each weight
     let mut t0q = S::mul_ps(t0, t0);
     t0q = S::mul_ps(t0q, t0q);
     let mut t1q = S::mul_ps(t1, t1);
@@ -800,7 +815,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut n3 = S::mul_ps(t3q, grad4::<S>(seed, gi3, x3, y3, z3, w3));
     let mut n4 = S::mul_ps(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
 
-    //if ti < 0 then 0 else ni
+    // Discard contributions whose base weight factors are negative
     let mut cond = S::cmplt_ps(t0, S::setzero_ps());
     n0 = S::andnot_ps(cond, n0);
     cond = S::cmplt_ps(t1, S::setzero_ps());
@@ -812,8 +827,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     cond = S::cmplt_ps(t4, S::setzero_ps());
     n4 = S::andnot_ps(cond, n4);
 
-    S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, S::add_ps(n3, n4))))
+    // Scaling factor found by numerical approximation
+    S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, S::add_ps(n3, n4)))) * S::set1_ps(62.77772078955791)
 }
+
 #[inline(always)]
 pub unsafe fn fbm_4d<S: Simd>(
     mut x: S::Vf32,
@@ -965,6 +982,34 @@ mod tests {
                     };
                     min = min.min(n);
                     max = max.max(n);
+                }
+            }
+        }
+        check_bounds(min, max);
+    }
+
+    #[test]
+    fn simplex_4d_range() {
+        let mut min = f32::INFINITY;
+        let mut max = -f32::INFINITY;
+        const SEED: i32 = 0;
+        for w in 0..10 {
+            for z in 0..10 {
+                for y in 0..10 {
+                    for x in 0..1000 {
+                        let n = unsafe {
+                            simplex_4d::<Scalar>(
+                                F32x1(x as f32 / 10.0),
+                                F32x1(y as f32 / 10.0),
+                                F32x1(z as f32 / 10.0),
+                                F32x1(w as f32 / 10.0),
+                                SEED,
+                            )
+                            .0
+                        };
+                        min = min.min(n);
+                        max = max.max(n);
+                    }
                 }
             }
         }
