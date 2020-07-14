@@ -166,17 +166,16 @@ pub unsafe fn turbulence_1d<S: Simd>(
     result
 }
 
-/// Generates a random gradient vector where one component is ±1 and the other is ±2, and computes
-/// the dot product with [x, y].
+/// Generates a random gradient vector where one component is ±1 and the other is ±2.
 ///
 /// This differs from Gustavson's gradients by having a constant magnitude, providing results that
 /// are more consistent between directions.
 #[inline(always)]
-unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
     let h = S::and_epi32(S::xor_epi32(hash, S::set1_epi32(seed)), S::set1_epi32(7));
     let mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
-    let u = S::blendv_ps(y, x, mask);
-    let v = S::mul_ps(S::set1_ps(2.0), S::blendv_ps(x, y, mask));
+    let x_magnitude = S::blendv_ps(S::set1_ps(2.0), S::set1_ps(1.0), mask);
+    let y_magnitude = S::blendv_ps(S::set1_ps(1.0), S::set1_ps(2.0), mask);
 
     let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
@@ -187,10 +186,17 @@ unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S:
         S::and_epi32(h, S::set1_epi32(2)),
     ));
 
-    S::add_ps(
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
-    )
+    let gx = S::blendv_ps(
+        S::sub_ps(S::setzero_ps(), x_magnitude),
+        x_magnitude,
+        S::blendv_ps(h_and_2, h_and_1, mask),
+    );
+    let gy = S::blendv_ps(
+        S::sub_ps(S::setzero_ps(), y_magnitude),
+        y_magnitude,
+        S::blendv_ps(h_and_1, h_and_2, mask),
+    );
+    [gx, gy]
 }
 
 /// Samples 2-dimensional simplex noise
@@ -257,30 +263,54 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 
     // Weights associated with the gradients at each corner
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
-    let t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5)));
-    let t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5)));
-    let t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::set1_ps(0.5)));
+    let mut t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5)));
+    let mut t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5)));
+    let mut t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::set1_ps(0.5)));
 
-    let mut t0q = S::mul_ps(t0, t0);
-    t0q = S::mul_ps(t0q, t0q);
-    let mut t1q = S::mul_ps(t1, t1);
-    t1q = S::mul_ps(t1q, t1q);
-    let mut t2q = S::mul_ps(t2, t2);
-    t2q = S::mul_ps(t2q, t2q);
+    // Zero out negative weights
+    t0 &= S::cmpge_ps(t0, S::setzero_ps());
+    t1 &= S::cmpge_ps(t1, S::setzero_ps());
+    t2 &= S::cmpge_ps(t2, S::setzero_ps());
 
-    let mut n0 = S::mul_ps(t0q, grad2::<S>(seed, gi0, x0, y0));
-    let mut n1 = S::mul_ps(t1q, grad2::<S>(seed, gi1, x1, y1));
-    let mut n2 = S::mul_ps(t2q, grad2::<S>(seed, gi2, x2, y2));
+    let t20 = S::mul_ps(t0, t0);
+    let t40 = S::mul_ps(t20, t20);
+    let t21 = S::mul_ps(t1, t1);
+    let t41 = S::mul_ps(t21, t21);
+    let t22 = S::mul_ps(t2, t2);
+    let t42 = S::mul_ps(t22, t22);
 
-    let mut cond = S::cmplt_ps(t0, S::setzero_ps());
-    n0 = S::andnot_ps(cond, n0);
-    cond = S::cmplt_ps(t1, S::setzero_ps());
-    n1 = S::andnot_ps(cond, n1);
-    cond = S::cmplt_ps(t2, S::setzero_ps());
-    n2 = S::andnot_ps(cond, n2);
+    let [gx0, gy0] = grad2::<S>(seed, gi0);
+    let g0 = gx0 * x0 + gy0 * y0;
+    let n0 = t40 * g0;
+    let [gx1, gy1] = grad2::<S>(seed, gi1);
+    let g1 = gx1 * x1 + gy1 * y1;
+    let n1 = t41 * g1;
+    let [gx2, gy2] = grad2::<S>(seed, gi2);
+    let g2 = gx2 * x2 + gy2 * y2;
+    let n2 = t42 * g2;
 
     // Scaling factor found by numerical approximation
-    S::add_ps(n0, S::add_ps(n1, n2)) * S::set1_ps(45.26450774985561631259)
+    let scale = S::set1_ps(45.26450774985561631259);
+    let value = S::add_ps(n0, S::add_ps(n1, n2)) * scale;
+    let derivative = {
+        let temp0 = t20 * t0 * g0;
+        let mut dnoise_dx = temp0 * x0;
+        let mut dnoise_dy = temp0 * y0;
+        let temp1 = t21 * t1 * g1;
+        dnoise_dx += temp1 * x1;
+        dnoise_dy += temp1 * y1;
+        let temp2 = t22 * t2 * g2;
+        dnoise_dx += temp2 * x2;
+        dnoise_dy += temp2 * y2;
+        dnoise_dx *= S::set1_ps(-8.0);
+        dnoise_dy *= S::set1_ps(-8.0);
+        dnoise_dx += t40 * gx0 + t41 * gx1 + t42 * gx2;
+        dnoise_dy += t40 * gy0 + t41 * gy1 + t42 * gy2;
+        dnoise_dx *= scale;
+        dnoise_dy *= scale;
+        [dnoise_dx, dnoise_dy]
+    };
+    (value, derivative)
 }
 
 #[inline(always)]
@@ -1007,6 +1037,45 @@ mod tests {
             }
             check_bounds(min, max);
         }
+    }
+
+    #[test]
+    fn simplex_2d_deriv_sanity() {
+        let mut avg_err = 0.0;
+        const SEEDS: i32 = 10;
+        const POINTS: i32 = 10;
+        for seed in 0..SEEDS {
+            for y in 0..POINTS {
+                for x in 0..POINTS {
+                    // Offset a bit so we don't check derivative at lattice points, where it's always zero
+                    let center_x = x as f32 / 10.0 + 0.1234;
+                    let center_y = y as f32 / 10.0 + 0.1234;
+                    const H: f32 = 0.01;
+                    let (value, d) = unsafe {
+                        simplex_2d_deriv::<Scalar>(F32x1(center_x), F32x1(center_y), seed)
+                    };
+                    let (value, d) = (value.0, [d[0].0, d[1].0]);
+                    let left = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x - H), F32x1(center_y), seed).0
+                    };
+                    let right = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x + H), F32x1(center_y), seed).0
+                    };
+                    let down = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y - H), seed).0
+                    };
+                    let up = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y + H), seed).0
+                    };
+                    avg_err += ((left - (value - d[0] * H)).abs()
+                        + (right - (value + d[0] * H)).abs()
+                        + (down - (value - d[1] * H)).abs()
+                        + (up - (value + d[1] * H)).abs())
+                        / (SEEDS * POINTS * POINTS * 4) as f32;
+                }
+            }
+        }
+        assert!(avg_err < 1e-3);
     }
 
     #[test]
