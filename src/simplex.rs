@@ -8,13 +8,19 @@ use super::*;
 use crate::shared::*;
 use std::f32;
 
+/// Skew factor for 2D simplex noise
 const F2: f32 = 0.36602540378;
+/// Skew factor for 3D simplex noise
 const F3: f32 = 1.0 / 3.0;
+/// Skew factor for 4D simplex noise
 const F4: f32 = 0.309016994;
+/// Unskew factor for 2D simplex noise
 const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
+/// Unskew factor for 3D simplex noise
 const G3: f32 = 1.0 / 6.0;
 const G33: f32 = 3.0 / 6.0 - 1.0;
+/// Unskew factor for 4D simplex noise
 const G4: f32 = 0.138196601;
 const G24: f32 = 2.0 * G4;
 const G34: f32 = 3.0 * G4;
@@ -24,8 +30,12 @@ const X_PRIME: i32 = 1619;
 const Y_PRIME: i32 = 31337;
 const Z_PRIME: i32 = 6791;
 
+/// Generates a random integer gradient in ±7 inclusive
+///
+/// This differs from Gustavson's well-known implementation in that gradients can be zero, and the
+/// maximum gradient is 7 rather than 8.
 #[inline(always)]
-pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
+pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
     let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(15));
     let v = S::cvtepi32_ps(S::and_epi32(h, S::set1_epi32(7)));
 
@@ -33,34 +43,69 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32) -> S::Vf32 {
         S::setzero_epi32(),
         S::and_epi32(h, S::set1_epi32(8)),
     ));
-    let grad = S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_8);
-    S::mul_ps(grad, x)
+    S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_8)
 }
 
+/// Samples 1-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
+    simplex_1d_deriv::<S>(x, seed).0
+}
+
+/// Like `simplex_1d`, but also computes the derivative
+#[inline(always)]
+pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
+    // Gradients are selected deterministically based on the whole part of `x`
     let ips = S::fast_floor_ps(x);
     let mut i0 = S::cvtps_epi32(ips);
     let i1 = S::and_epi32(S::add_epi32(i0, S::set1_epi32(1)), S::set1_epi32(0xff));
 
+    // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
     let x0 = S::sub_ps(x, ips);
+    // signed distance to the right gradient node
     let x1 = S::sub_ps(x0, S::set1_ps(1.0));
 
     i0 = S::and_epi32(i0, S::set1_epi32(0xff));
     let gi0 = S::i32gather_epi32(&PERM, i0);
     let gi1 = S::i32gather_epi32(&PERM, i1);
 
-    let mut t0 = S::sub_ps(S::set1_ps(1.0), S::mul_ps(x0, x0));
-    t0 = S::mul_ps(t0, t0);
-    t0 = S::mul_ps(t0, t0);
-    let n0 = S::mul_ps(t0, grad1::<S>(seed, gi0, x0));
+    // Compute the contribution from the first gradient
+    let x20 = S::mul_ps(x0, x0); // x^2_0
+    let t0 = S::sub_ps(S::set1_ps(1.0), x20); // t_0
+    let t20 = S::mul_ps(t0, t0); // t^2_0
+    let t40 = S::mul_ps(t20, t20); // t^4_0
+    let gx0 = grad1::<S>(seed, gi0);
+    let n0 = S::mul_ps(t40, gx0 * x0);
+    // n0 = (1 - x0^2)^4 * x0 * grad
 
-    let mut t1 = S::sub_ps(S::set1_ps(1.0), S::mul_ps(x1, x1));
-    t1 = S::mul_ps(t1, t1);
-    t1 = S::mul_ps(t1, t1);
-    let n1 = S::mul_ps(t1, grad1::<S>(seed, gi1, x1));
+    // Compute the contribution from the second gradient
+    let x21 = S::mul_ps(x1, x1); // x^2_1
+    let t1 = S::sub_ps(S::set1_ps(1.0), x21); // t_1
+    let t21 = S::mul_ps(t1, t1); // t^2_1
+    let t41 = S::mul_ps(t21, t21); // t^4_1
+    let gx1 = grad1::<S>(seed, gi1);
+    let n1 = S::mul_ps(t41, gx1 * x1);
 
-    S::add_ps(n0, n1)
+    // n0 + n1 =
+    //    grad0 * x0 * (1 - x0^2)^4
+    //  + grad1 * (x0 - 1) * (1 - (x0 - 1)^2)^4
+    //
+    // Assuming worst-case values for grad0 and grad1, we therefore need only determine the maximum of
+    //
+    // |x0 * (1 - x0^2)^4| + |(x0 - 1) * (1 - (x0 - 1)^2)^4|
+    //
+    // for 0 ≤ x0 < 1. This can be done by root-finding on the derivative, obtaining 81 / 256 when
+    // x0 = 0.5, which we finally multiply by the maximum gradient to get the maximum value,
+    // allowing us to scale into [-1, 1]
+    const SCALE: f32 = 256.0 / (81.0 * 7.0);
+
+    let value = S::add_ps(n0, n1) * S::set1_ps(SCALE);
+    let derivative =
+        ((t20 * t0 * gx0 * x20 + t21 * t1 * gx1 * x21) * S::set1_ps(-8.0) + t40 * gx0 + t41 * gx1)
+            * S::set1_ps(SCALE);
+    (value, derivative)
 }
 
 #[inline(always)]
@@ -126,12 +171,16 @@ pub unsafe fn turbulence_1d<S: Simd>(
     result
 }
 
+/// Generates a random gradient vector where one component is ±1 and the other is ±2.
+///
+/// This differs from Gustavson's gradients by having a constant magnitude, providing results that
+/// are more consistent between directions.
 #[inline(always)]
-unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
     let h = S::and_epi32(S::xor_epi32(hash, S::set1_epi32(seed)), S::set1_epi32(7));
     let mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
-    let u = S::blendv_ps(y, x, mask);
-    let v = S::mul_ps(S::set1_ps(2.0), S::blendv_ps(x, y, mask));
+    let x_magnitude = S::blendv_ps(S::set1_ps(2.0), S::set1_ps(1.0), mask);
+    let y_magnitude = S::blendv_ps(S::set1_ps(1.0), S::set1_ps(2.0), mask);
 
     let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
@@ -142,23 +191,47 @@ unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32, x: S::Vf32, y: S::Vf32) -> S:
         S::and_epi32(h, S::set1_epi32(2)),
     ));
 
-    S::add_ps(
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
-    )
+    let gx = S::blendv_ps(
+        S::sub_ps(S::setzero_ps(), x_magnitude),
+        x_magnitude,
+        S::blendv_ps(h_and_2, h_and_1, mask),
+    );
+    let gy = S::blendv_ps(
+        S::sub_ps(S::setzero_ps(), y_magnitude),
+        y_magnitude,
+        S::blendv_ps(h_and_1, h_and_2, mask),
+    );
+    [gx, gy]
 }
 
+/// Samples 2-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 {
+    simplex_2d_deriv::<S>(x, y, seed).0
+}
+
+/// Like `simplex_2d`, but also computes the derivative
+#[inline(always)]
+pub unsafe fn simplex_2d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 2]) {
+    // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
+    // squares
     let s = S::mul_ps(S::set1_ps(F2), S::add_ps(x, y));
     let ips = S::floor_ps(S::add_ps(x, s));
     let jps = S::floor_ps(S::add_ps(y, s));
 
+    // Integer coordinates for the base vertex of the triangle
     let i = S::cvtps_epi32(ips);
     let j = S::cvtps_epi32(jps);
 
     let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::set1_ps(G2));
 
+    // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
     let y0 = S::sub_ps(y, S::sub_ps(jps, t));
 
@@ -166,6 +239,7 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 
 
     let j1 = S::castps_epi32(S::cmpgt_ps(y0, x0));
 
+    // Distances to the second and third points of the enclosing simplex
     let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G2));
     let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G2));
     let x2 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(G22));
@@ -192,31 +266,58 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 
         ),
     );
 
+    // Weights associated with the gradients at each corner
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
-    let t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5)));
-    let t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5)));
-    let t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::set1_ps(0.5)));
+    let mut t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5)));
+    let mut t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5)));
+    let mut t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::set1_ps(0.5)));
 
-    let mut t0q = S::mul_ps(t0, t0);
-    t0q = S::mul_ps(t0q, t0q);
-    let mut t1q = S::mul_ps(t1, t1);
-    t1q = S::mul_ps(t1q, t1q);
-    let mut t2q = S::mul_ps(t2, t2);
-    t2q = S::mul_ps(t2q, t2q);
+    // Zero out negative weights
+    t0 &= S::cmpge_ps(t0, S::setzero_ps());
+    t1 &= S::cmpge_ps(t1, S::setzero_ps());
+    t2 &= S::cmpge_ps(t2, S::setzero_ps());
 
-    let mut n0 = S::mul_ps(t0q, grad2::<S>(seed, gi0, x0, y0));
-    let mut n1 = S::mul_ps(t1q, grad2::<S>(seed, gi1, x1, y1));
-    let mut n2 = S::mul_ps(t2q, grad2::<S>(seed, gi2, x2, y2));
+    let t20 = S::mul_ps(t0, t0);
+    let t40 = S::mul_ps(t20, t20);
+    let t21 = S::mul_ps(t1, t1);
+    let t41 = S::mul_ps(t21, t21);
+    let t22 = S::mul_ps(t2, t2);
+    let t42 = S::mul_ps(t22, t22);
 
-    let mut cond = S::cmplt_ps(t0, S::setzero_ps());
-    n0 = S::andnot_ps(cond, n0);
-    cond = S::cmplt_ps(t1, S::setzero_ps());
-    n1 = S::andnot_ps(cond, n1);
-    cond = S::cmplt_ps(t2, S::setzero_ps());
-    n2 = S::andnot_ps(cond, n2);
+    let [gx0, gy0] = grad2::<S>(seed, gi0);
+    let g0 = gx0 * x0 + gy0 * y0;
+    let n0 = t40 * g0;
+    let [gx1, gy1] = grad2::<S>(seed, gi1);
+    let g1 = gx1 * x1 + gy1 * y1;
+    let n1 = t41 * g1;
+    let [gx2, gy2] = grad2::<S>(seed, gi2);
+    let g2 = gx2 * x2 + gy2 * y2;
+    let n2 = t42 * g2;
 
-    S::add_ps(n0, S::add_ps(n1, n2))
+    // Scaling factor found by numerical approximation
+    let scale = S::set1_ps(45.26450774985561631259);
+    let value = S::add_ps(n0, S::add_ps(n1, n2)) * scale;
+    let derivative = {
+        let temp0 = t20 * t0 * g0;
+        let mut dnoise_dx = temp0 * x0;
+        let mut dnoise_dy = temp0 * y0;
+        let temp1 = t21 * t1 * g1;
+        dnoise_dx += temp1 * x1;
+        dnoise_dy += temp1 * y1;
+        let temp2 = t22 * t2 * g2;
+        dnoise_dx += temp2 * x2;
+        dnoise_dy += temp2 * y2;
+        dnoise_dx *= S::set1_ps(-8.0);
+        dnoise_dy *= S::set1_ps(-8.0);
+        dnoise_dx += t40 * gx0 + t41 * gx1 + t42 * gx2;
+        dnoise_dy += t40 * gy0 + t41 * gy1 + t42 * gy2;
+        dnoise_dx *= scale;
+        dnoise_dy *= scale;
+        [dnoise_dx, dnoise_dy]
+    };
+    (value, derivative)
 }
+
 #[inline(always)]
 pub unsafe fn fbm_2d<S: Simd>(
     mut x: S::Vf32,
@@ -289,8 +390,10 @@ pub unsafe fn turbulence_2d<S: Simd>(
     result
 }
 
+/// Generates a random gradient vector from the origin towards the midpoint of an edge of a
+/// double-unit cube and computes its dot product with [x, y, z]
 #[inline(always)]
-unsafe fn grad3d<S: Simd>(
+unsafe fn grad3d_dot<S: Simd>(
     seed: i32,
     i: S::Vi32,
     j: S::Vi32,
@@ -299,6 +402,58 @@ unsafe fn grad3d<S: Simd>(
     y: S::Vf32,
     z: S::Vf32,
 ) -> S::Vf32 {
+    let h = hash3d::<S>(seed, i, j, k);
+    let u = S::blendv_ps(y, x, h.l8);
+    let v = S::blendv_ps(S::blendv_ps(z, x, h.h12_or_14), y, h.l4);
+    let result = S::add_ps(S::xor_ps(u, h.h1), S::xor_ps(v, h.h2));
+    debug_assert_eq!(
+        result[0],
+        {
+            let [gx, gy, gz] = grad3d::<S>(seed, i, j, k);
+            gx * x + gy * y + gz * z
+        }[0],
+        "results match"
+    );
+    result
+}
+
+/// The gradient vector generated by `grad3d_dot`
+///
+/// This is a separate function because it's slower than `grad3d_dot` and only needed when computing
+/// derivatives.
+unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> [S::Vf32; 3] {
+    let h = hash3d::<S>(seed, i, j, k);
+
+    let first = S::set1_ps(1.0) | h.h1;
+    let mut gx = S::and_ps(h.l8, first);
+    let mut gy = S::andnot_ps(h.l8, first);
+
+    let second = S::set1_ps(1.0) | h.h2;
+    gy = S::blendv_ps(gy, second, h.l4);
+    gx = S::blendv_ps(gx, second, S::andnot_ps(h.l4, h.h12_or_14));
+    let gz = S::andnot_ps(h.h12_or_14 | h.l4, second);
+    debug_assert_eq!(
+        gx[0].abs() + gy[0].abs() + gz[0].abs(),
+        2.0,
+        "exactly two axes are chosen"
+    );
+    [gx, gy, gz]
+}
+
+struct Hash3d<S: Simd> {
+    // Masks guiding dimension selection
+    l8: S::Vf32,
+    l4: S::Vf32,
+    h12_or_14: S::Vf32,
+
+    // Signs for the selected dimensions
+    h1: S::Vf32,
+    h2: S::Vf32,
+}
+
+/// Compute hash values used by `grad3d` and `grad3d_dot`
+#[inline(always)]
+unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> Hash3d<S> {
     let mut hash = S::xor_epi32(i, S::set1_epi32(seed));
     hash = S::xor_epi32(j, hash);
     hash = S::xor_epi32(k, hash);
@@ -308,30 +463,44 @@ unsafe fn grad3d<S: Simd>(
     );
     hash = S::xor_epi32(S::srai_epi32(hash, 13), hash);
     let hasha13 = S::and_epi32(hash, S::set1_epi32(13));
+    Hash3d {
+        l8: S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(8))),
+        l4: S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(2))),
+        h12_or_14: S::castepi32_ps(S::cmpeq_epi32(S::set1_epi32(12), hasha13)),
 
-    let l8 = S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(8)));
-    let u = S::blendv_ps(y, x, l8);
-
-    let l4 = S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(2)));
-    let h12_or_14 = S::castepi32_ps(S::cmpeq_epi32(S::set1_epi32(12), hasha13));
-    let v = S::blendv_ps(S::blendv_ps(z, x, h12_or_14), y, l4);
-
-    let h1 = S::castepi32_ps(S::slli_epi32(hash, 31));
-    let h2 = S::castepi32_ps(S::slli_epi32(S::and_epi32(hash, S::set1_epi32(2)), 30));
-    S::add_ps(S::xor_ps(u, h1), S::xor_ps(v, h2))
+        h1: S::castepi32_ps(S::slli_epi32(hash, 31)),
+        h2: S::castepi32_ps(S::slli_epi32(S::and_epi32(hash, S::set1_epi32(2)), 30)),
+    }
 }
 
+/// Samples 3-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32) -> S::Vf32 {
+    simplex_3d_deriv::<S>(x, y, z, seed).0
+}
+
+/// Like `simplex_3d`, but also computes the derivative
+#[inline(always)]
+pub unsafe fn simplex_3d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 3]) {
+    // Find skewed simplex grid coordinates associated with the input coordinates
     let f = S::mul_ps(S::set1_ps(F3), S::add_ps(S::add_ps(x, y), z));
     let mut x0 = S::fast_floor_ps(S::add_ps(x, f));
     let mut y0 = S::fast_floor_ps(S::add_ps(y, f));
     let mut z0 = S::fast_floor_ps(S::add_ps(z, f));
 
+    // Integer grid coordinates
     let i = S::mullo_epi32(S::cvtps_epi32(x0), S::set1_epi32(X_PRIME));
     let j = S::mullo_epi32(S::cvtps_epi32(y0), S::set1_epi32(Y_PRIME));
     let k = S::mullo_epi32(S::cvtps_epi32(z0), S::set1_epi32(Z_PRIME));
 
+    // Compute distance from first simplex vertex to input coordinates
     let g = S::mul_ps(S::set1_ps(G3), S::add_ps(S::add_ps(x0, y0), z0));
     x0 = S::sub_ps(x, S::sub_ps(x0, g));
     y0 = S::sub_ps(y, S::sub_ps(y0, g));
@@ -349,6 +518,7 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
     let j2 = (!x0_ge_y0) | y0_ge_z0;
     let k2 = !(x0_ge_z0 & y0_ge_z0);
 
+    // Compute distances from remaining simplex vertices to input coordinates
     let x1 = S::add_ps(S::sub_ps(x0, i1 & S::set1_ps(1.0)), S::set1_ps(G3));
     let y1 = S::add_ps(S::sub_ps(y0, j1 & S::set1_ps(1.0)), S::set1_ps(G3));
     let z1 = S::add_ps(S::sub_ps(z0, k1 & S::set1_ps(1.0)), S::set1_ps(G3));
@@ -361,6 +531,9 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
     let y3 = S::add_ps(y0, S::set1_ps(G33));
     let z3 = S::add_ps(z0, S::set1_ps(G33));
 
+    // Compute base weight factors associated with each vertex, `0.6 - v . v` where v is the
+    // distance to the vertex. Strictly the constant should be 0.5, but 0.6 is thought by Gustavson
+    // to give visually better results at the cost of subtle discontinuities.
     //#define SIMDf_NMUL_ADD(a,b,c) = SIMDf_SUB(c, SIMDf_MUL(a,b)
     let mut t0 = S::sub_ps(
         S::sub_ps(
@@ -391,40 +564,90 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32)
         S::mul_ps(z3, z3),
     );
 
-    let n0 = S::cmpge_ps(t0, S::setzero_ps());
-    let n1 = S::cmpge_ps(t1, S::setzero_ps());
-    let n2 = S::cmpge_ps(t2, S::setzero_ps());
-    let n3 = S::cmpge_ps(t3, S::setzero_ps());
+    // Zero out negative weights
+    t0 &= S::cmpge_ps(t0, S::setzero_ps());
+    t1 &= S::cmpge_ps(t1, S::setzero_ps());
+    t2 &= S::cmpge_ps(t2, S::setzero_ps());
+    t3 &= S::cmpge_ps(t3, S::setzero_ps());
 
-    t0 = t0 * t0;
-    t1 = t1 * t1;
-    t2 = t2 * t2;
-    t3 = t3 * t3;
+    // Square each weight
+    let t20 = t0 * t0;
+    let t21 = t1 * t1;
+    let t22 = t2 * t2;
+    let t23 = t3 * t3;
+
+    // ...twice!
+    let t40 = t20 * t20;
+    let t41 = t21 * t21;
+    let t42 = t22 * t22;
+    let t43 = t23 * t23;
 
     //#define SIMDf_MASK_ADD(m,a,b) SIMDf_ADD(a,SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),b))
 
-    let v0 = (t0 * t0) * grad3d::<S>(seed, i, j, k, x0, y0, z0);
+    // Compute contribution from each vertex
+    let g0 = grad3d_dot::<S>(seed, i, j, k, x0, y0, z0);
+    let v0 = t40 * g0;
 
     let v1x = S::add_epi32(i, S::and_epi32(S::castps_epi32(i1), S::set1_epi32(X_PRIME)));
     let v1y = S::add_epi32(j, S::and_epi32(S::castps_epi32(j1), S::set1_epi32(Y_PRIME)));
     let v1z = S::add_epi32(k, S::and_epi32(S::castps_epi32(k1), S::set1_epi32(Z_PRIME)));
-    let v1 = (t1 * t1) * grad3d::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
+    let g1 = grad3d_dot::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
+    let v1 = t41 * g1;
 
     let v2x = S::add_epi32(i, S::and_epi32(S::castps_epi32(i2), S::set1_epi32(X_PRIME)));
     let v2y = S::add_epi32(j, S::and_epi32(S::castps_epi32(j2), S::set1_epi32(Y_PRIME)));
     let v2z = S::add_epi32(k, S::and_epi32(S::castps_epi32(k2), S::set1_epi32(Z_PRIME)));
-    let v2 = (t2 * t2) * grad3d::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
+    let g2 = grad3d_dot::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
+    let v2 = t42 * g2;
 
     //SIMDf v3 = SIMDf_MASK(n3, SIMDf_MUL(SIMDf_MUL(t3, t3), FUNC(GradCoord)(seed, SIMDi_ADD(i, SIMDi_NUM(xPrime)), SIMDi_ADD(j, SIMDi_NUM(yPrime)), SIMDi_ADD(k, SIMDi_NUM(zPrime)), x3, y3, z3)));
     let v3x = S::add_epi32(i, S::set1_epi32(X_PRIME));
     let v3y = S::add_epi32(j, S::set1_epi32(Y_PRIME));
     let v3z = S::add_epi32(k, S::set1_epi32(Z_PRIME));
     //define SIMDf_MASK(m,a) SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),a)
-    let v3 = S::and_ps(n3, (t3 * t3) * grad3d::<S>(seed, v3x, v3y, v3z, x3, y3, z3));
+    let g3 = grad3d_dot::<S>(seed, v3x, v3y, v3z, x3, y3, z3);
+    let v3 = t43 * g3;
 
-    let p1 = S::add_ps(v3, S::and_ps(n2, v2));
-    let p2 = S::add_ps(p1, S::and_ps(n1, v1));
-    S::add_ps(p2, S::and_ps(n0, v0))
+    let p1 = S::add_ps(v3, v2);
+    let p2 = S::add_ps(p1, v1);
+
+    // Scaling factor found by numerical approximation
+    let scale = S::set1_ps(32.69587493801679);
+    let result = S::add_ps(p2, v0) * scale;
+    let derivative = {
+        let temp0 = t20 * t0 * g0;
+        let mut dnoise_dx = temp0 * x0;
+        let mut dnoise_dy = temp0 * y0;
+        let mut dnoise_dz = temp0 * z0;
+        let temp1 = t21 * t1 * g1;
+        dnoise_dx += temp1 * x1;
+        dnoise_dy += temp1 * y1;
+        dnoise_dz += temp1 * z1;
+        let temp2 = t22 * t2 * g2;
+        dnoise_dx += temp2 * x2;
+        dnoise_dy += temp2 * y2;
+        dnoise_dz += temp2 * z2;
+        let temp3 = t23 * t3 * g3;
+        dnoise_dx += temp3 * x3;
+        dnoise_dy += temp3 * y3;
+        dnoise_dz += temp3 * z3;
+        dnoise_dx *= S::set1_ps(-8.0);
+        dnoise_dy *= S::set1_ps(-8.0);
+        dnoise_dz *= S::set1_ps(-8.0);
+        let [gx0, gy0, gz0] = grad3d::<S>(seed, i, j, k);
+        let [gx1, gy1, gz1] = grad3d::<S>(seed, v1x, v1y, v1z);
+        let [gx2, gy2, gz2] = grad3d::<S>(seed, v2x, v2y, v2z);
+        let [gx3, gy3, gz3] = grad3d::<S>(seed, v3x, v3y, v3z);
+        dnoise_dx += t40 * gx0 + t41 * gx1 + t42 * gx2 + t43 * gx3;
+        dnoise_dy += t40 * gy0 + t41 * gy1 + t42 * gy2 + t43 * gy3;
+        dnoise_dz += t40 * gz0 + t41 * gz1 + t42 * gz2 + t43 * gz3;
+        // Scale into range
+        dnoise_dx *= scale;
+        dnoise_dy *= scale;
+        dnoise_dz *= scale;
+        [dnoise_dx, dnoise_dy, dnoise_dz]
+    };
+    (result, derivative)
 }
 
 #[inline(always)]
@@ -547,6 +770,10 @@ unsafe fn grad4<S: Simd>(
         ),
     )
 }
+
+/// Samples 4-dimensional simplex noise
+///
+/// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_4d<S: Simd>(
     x: S::Vf32,
@@ -555,6 +782,11 @@ pub unsafe fn simplex_4d<S: Simd>(
     w: S::Vf32,
     seed: i32,
 ) -> S::Vf32 {
+    //
+    // Determine which simplex these points lie in, and compute the distance along each axis to each
+    // vertex of the simplex
+    //
+
     let s = S::mul_ps(S::set1_ps(F4), S::add_ps(x, S::add_ps(y, S::add_ps(z, w))));
 
     let ips = S::floor_ps(S::add_ps(x, s));
@@ -674,6 +906,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let jp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(jj, S::set1_epi32(1)), kp));
     let gi4 = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(ii, S::set1_epi32(1)), jp));
 
+    //
+    // Compute base weight factors associated with each vertex
+    //
+
     let t0 = S::sub_ps(
         S::sub_ps(
             S::sub_ps(
@@ -724,7 +960,7 @@ pub unsafe fn simplex_4d<S: Simd>(
         ),
         S::mul_ps(w4, w4),
     );
-    //ti*ti*ti*ti
+    // Cube each weight
     let mut t0q = S::mul_ps(t0, t0);
     t0q = S::mul_ps(t0q, t0q);
     let mut t1q = S::mul_ps(t1, t1);
@@ -742,7 +978,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut n3 = S::mul_ps(t3q, grad4::<S>(seed, gi3, x3, y3, z3, w3));
     let mut n4 = S::mul_ps(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
 
-    //if ti < 0 then 0 else ni
+    // Discard contributions whose base weight factors are negative
     let mut cond = S::cmplt_ps(t0, S::setzero_ps());
     n0 = S::andnot_ps(cond, n0);
     cond = S::cmplt_ps(t1, S::setzero_ps());
@@ -754,8 +990,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     cond = S::cmplt_ps(t4, S::setzero_ps());
     n4 = S::andnot_ps(cond, n4);
 
-    S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, S::add_ps(n3, n4))))
+    // Scaling factor found by numerical approximation
+    S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, S::add_ps(n3, n4)))) * S::set1_ps(62.77772078955791)
 }
+
 #[inline(always)]
 pub unsafe fn fbm_4d<S: Simd>(
     mut x: S::Vf32,
@@ -844,4 +1082,220 @@ pub unsafe fn turbulence_4d<S: Simd>(
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use simdeez::scalar::{F32x1, Scalar};
+
+    fn check_bounds(min: f32, max: f32) {
+        assert!(min < -0.75 && min >= -1.0, "min out of range {}", min);
+        assert!(max > 0.75 && max <= 1.0, "max out of range: {}", max);
+    }
+
+    #[test]
+    fn simplex_1d_range() {
+        for seed in 0..10 {
+            let mut min = f32::INFINITY;
+            let mut max = -f32::INFINITY;
+            for x in 0..1000 {
+                let n = unsafe { simplex_1d::<Scalar>(F32x1(x as f32 / 10.0), seed).0 };
+                min = min.min(n);
+                max = max.max(n);
+            }
+            check_bounds(min, max);
+        }
+    }
+
+    #[test]
+    fn simplex_1d_deriv_sanity() {
+        let mut avg_err = 0.0;
+        const SEEDS: i32 = 10;
+        const POINTS: i32 = 1000;
+        for seed in 0..SEEDS {
+            for x in 0..POINTS {
+                // Offset a bit so we don't check derivative at lattice points, where it's always zero
+                let center = x as f32 / 10.0 + 0.1234;
+                const H: f32 = 0.01;
+                let n0 = unsafe { simplex_1d::<Scalar>(F32x1(center - H), seed).0 };
+                let (n1, d1) = unsafe { simplex_1d_deriv::<Scalar>(F32x1(center), seed) };
+                let n2 = unsafe { simplex_1d::<Scalar>(F32x1(center + H), seed).0 };
+                let (n1, d1) = (n1.0, d1.0);
+                avg_err += ((n2 - (n1 + d1 * H)).abs() + (n0 - (n1 - d1 * H)).abs())
+                    / (SEEDS * POINTS * 2) as f32;
+            }
+        }
+        assert!(avg_err < 1e-3);
+    }
+
+    #[test]
+    fn simplex_2d_range() {
+        for seed in 0..10 {
+            let mut min = f32::INFINITY;
+            let mut max = -f32::INFINITY;
+            for y in 0..10 {
+                for x in 0..100 {
+                    let n = unsafe {
+                        simplex_2d::<Scalar>(F32x1(x as f32 / 10.0), F32x1(y as f32 / 10.0), seed).0
+                    };
+                    min = min.min(n);
+                    max = max.max(n);
+                }
+            }
+            check_bounds(min, max);
+        }
+    }
+
+    #[test]
+    fn simplex_2d_deriv_sanity() {
+        let mut avg_err = 0.0;
+        const SEEDS: i32 = 10;
+        const POINTS: i32 = 10;
+        for seed in 0..SEEDS {
+            for y in 0..POINTS {
+                for x in 0..POINTS {
+                    // Offset a bit so we don't check derivative at lattice points, where it's always zero
+                    let center_x = x as f32 / 10.0 + 0.1234;
+                    let center_y = y as f32 / 10.0 + 0.1234;
+                    const H: f32 = 0.01;
+                    let (value, d) = unsafe {
+                        simplex_2d_deriv::<Scalar>(F32x1(center_x), F32x1(center_y), seed)
+                    };
+                    let (value, d) = (value.0, [d[0].0, d[1].0]);
+                    let left = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x - H), F32x1(center_y), seed).0
+                    };
+                    let right = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x + H), F32x1(center_y), seed).0
+                    };
+                    let down = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y - H), seed).0
+                    };
+                    let up = unsafe {
+                        simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y + H), seed).0
+                    };
+                    avg_err += ((left - (value - d[0] * H)).abs()
+                        + (right - (value + d[0] * H)).abs()
+                        + (down - (value - d[1] * H)).abs()
+                        + (up - (value + d[1] * H)).abs())
+                        / (SEEDS * POINTS * POINTS * 4) as f32;
+                }
+            }
+        }
+        assert!(avg_err < 1e-3);
+    }
+
+    #[test]
+    fn simplex_3d_range() {
+        let mut min = f32::INFINITY;
+        let mut max = -f32::INFINITY;
+        const SEED: i32 = 0;
+        for z in 0..10 {
+            for y in 0..10 {
+                for x in 0..10000 {
+                    let n = unsafe {
+                        simplex_3d::<Scalar>(
+                            F32x1(x as f32 / 10.0),
+                            F32x1(y as f32 / 10.0),
+                            F32x1(z as f32 / 10.0),
+                            SEED,
+                        )
+                        .0
+                    };
+                    min = min.min(n);
+                    max = max.max(n);
+                }
+            }
+        }
+        check_bounds(min, max);
+    }
+
+    #[test]
+    fn simplex_3d_deriv_sanity() {
+        let mut avg_err = 0.0;
+        const SEEDS: i32 = 10;
+        const POINTS: i32 = 10;
+        const SEED: i32 = 0;
+        for z in 0..POINTS {
+            for y in 0..POINTS {
+                for x in 0..POINTS {
+                    // Offset a bit so we don't check derivative at lattice points, where it's always zero
+                    let center_x = x as f32 / 10.0 + 0.1234;
+                    let center_y = y as f32 / 10.0 + 0.1234;
+                    let center_z = z as f32 / 10.0 + 0.1234;
+                    const H: f32 = 0.01;
+                    let (value, d) = unsafe {
+                        simplex_3d_deriv::<Scalar>(
+                            F32x1(center_x),
+                            F32x1(center_y),
+                            F32x1(center_z),
+                            SEED,
+                        )
+                    };
+                    let (value, d) = (value.0, [d[0].0, d[1].0, d[2].0]);
+                    let right = unsafe {
+                        simplex_3d::<Scalar>(
+                            F32x1(center_x + H),
+                            F32x1(center_y),
+                            F32x1(center_z),
+                            SEED,
+                        )
+                        .0
+                    };
+                    let up = unsafe {
+                        simplex_3d::<Scalar>(
+                            F32x1(center_x),
+                            F32x1(center_y + H),
+                            F32x1(center_z),
+                            SEED,
+                        )
+                        .0
+                    };
+                    let forward = unsafe {
+                        simplex_3d::<Scalar>(
+                            F32x1(center_x),
+                            F32x1(center_y),
+                            F32x1(center_z + H),
+                            SEED,
+                        )
+                        .0
+                    };
+                    avg_err += ((right - (value + d[0] * H)).abs()
+                        + (up - (value + d[1] * H)).abs()
+                        + (forward - (value + d[2] * H)).abs())
+                        / (POINTS * POINTS * POINTS * 3) as f32;
+                }
+            }
+        }
+        assert!(avg_err < 1e-3);
+    }
+
+    #[test]
+    fn simplex_4d_range() {
+        let mut min = f32::INFINITY;
+        let mut max = -f32::INFINITY;
+        const SEED: i32 = 0;
+        for w in 0..10 {
+            for z in 0..10 {
+                for y in 0..10 {
+                    for x in 0..1000 {
+                        let n = unsafe {
+                            simplex_4d::<Scalar>(
+                                F32x1(x as f32 / 10.0),
+                                F32x1(y as f32 / 10.0),
+                                F32x1(z as f32 / 10.0),
+                                F32x1(w as f32 / 10.0),
+                                SEED,
+                            )
+                            .0
+                        };
+                        min = min.min(n);
+                        max = max.max(n);
+                    }
+                }
+            }
+        }
+        check_bounds(min, max);
+    }
 }
