@@ -147,6 +147,13 @@ pub unsafe fn turbulence_1d(
     simplex::turbulence_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
 }
 
+/// Get a single value of 1d simplex noise, results
+/// are not scaled.
+#[target_feature(enable = "avx2")]
+pub unsafe fn simplex_1d_f64(x: __m256d, seed: i64) -> __m256d {
+    simplex_64::simplex_1d::<Avx2>(F64x4(x), seed).0
+}
+
 /// Get a single value of 1d fractal brownian motion.
 #[target_feature(enable = "avx2")]
 pub unsafe fn fbm_1d_f64(
