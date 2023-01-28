@@ -401,7 +401,7 @@ pub unsafe fn turbulence_3d(
 /// Get a single value of 3d simplex_64 noise, results
 /// are not scaled.
 #[target_feature(enable = "sse4.1")]
-pub unsafe fn simplex_64_3d_f64(x: __m128d, y: __m128d, z: __m128d, seed: i64) -> __m128d {
+pub unsafe fn simplex_3d_f64(x: __m128d, y: __m128d, z: __m128d, seed: i64) -> __m128d {
     simplex_64::simplex_3d::<Sse41>(F64x2(x), F64x2(y), F64x2(z), seed).0
 }
 
