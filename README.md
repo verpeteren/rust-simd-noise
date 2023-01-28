@@ -4,6 +4,8 @@
 [![](https://img.shields.io/crates/v/simdnoise.svg)](https://crates.io/crates/simdnoise) [![](https://docs.rs/simdnoise/badge.svg)](https://docs.rs/simdnoise)
 
 Super fast SIMD noise library for Rust. PRs welcome!
+This library was created by Jack Mott.
+The current maintainer is Peter Reijnders.
 
 ## Features
 
