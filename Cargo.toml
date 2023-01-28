@@ -8,7 +8,7 @@ license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/simdnoise/"
 readme = "README.md"
 keywords = ["SIMD", "noise", "simplex", "perlin", "performance"]
-repository = "https://github.com/jackmott/rust-simd-noise"
+repository = "https://github.com/verpeteren/rust-simd-noise"
 categories = ["game-engines", "multimedia::images"]
 edition = "2018"
 

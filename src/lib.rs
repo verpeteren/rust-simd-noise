@@ -1,7 +1,7 @@
 //! Fast, SIMD accelerated noise generation functions
 //! with optional runtime feature detection.
 //!
-//! [Github Link](https://github.com/jackmott/rust-simd-noise)
+//! [Github Link](https://github.com/verpeteren/rust-simd-noise)
 //!
 //!## Features
 //!
@@ -12,7 +12,7 @@
 //!* Cellular / Voroni Noise  2D and 3D
 //!
 //!## Benchmarks
-//! See [Github](https://github.com/jackmott/rust-simd-noise)
+//! See [Github](https://github.com/verpeteren/rust-simd-noise)
 //!## Todo
 //!
 //!* AVX512 support

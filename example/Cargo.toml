@@ -4,7 +4,7 @@ version = "1.0.0"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "Example app that uses SIMD Noise"
 license = "Apache-2.0/MIT"
-repository = "https://github.com/jackmott/rust-simd-noise"
+repository = "https://github.com/verpeteren/rust-simd-noise"
 categories = ["game-engines","multimedia::images"]
 edition="2018"
 
