@@ -47,8 +47,11 @@
 //! Sometimes you may want to use SSE41 even with AVX2 is available
 //!
 //!
-#![cfg_attr(any(target_arch = "x86", target_arch = "x86_64"), doc="```rust")]
-#![cfg_attr(not(any(target_arch = "x86", target_arch = "x86_64")), doc="```rust,ignore")]
+#![cfg_attr(any(target_arch = "x86", target_arch = "x86_64"), doc = "```rust")]
+#![cfg_attr(
+    not(any(target_arch = "x86", target_arch = "x86_64")),
+    doc = "```rust,ignore"
+)]
 //! use simdnoise::*;
 //! use core::arch::x86_64::*;
 //!
