@@ -12,6 +12,3 @@ edition="2018"
 [dependencies]
 simdnoise = {path = ".."}
 minifb="*"
-
-
-
