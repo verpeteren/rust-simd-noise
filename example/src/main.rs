@@ -22,8 +22,17 @@ struct Args {
     #[clap(long, value_parser, default_value_t = HEIGHT, help="The height of the generated image", global=true)]
     pub height: usize,
 
-    #[clap(long, value_parser, default_value_t = Dimension::Three, help="The number of dimensions of the generated noice ", global=true)]
+    #[clap(long, value_parser, default_value_t = Dimension::Three, help="The number of dimensions of the generated noice", global=true)]
     pub dimension: Dimension,
+
+    #[clap(
+        long,
+        value_parser,
+        default_value_t = false,
+        help = "Use an offset",
+        global = true
+    )]
+    pub offset: bool,
 
     #[command(subcommand)]
     command: Commands,
@@ -66,7 +75,7 @@ fn main() {
     let width = args.width;
     let height = args.height;
     let dimension = args.dimension;
-    let offset = false;
+    let offset = args.offset;
     let noise = match (args.command, dimension, offset) {
         (Commands::Ridge { frequency, octaves }, Dimension::Three, true) => {
             simdnoise::NoiseBuilder::ridge_3d_offset(
