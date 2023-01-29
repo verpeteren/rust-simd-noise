@@ -6,6 +6,13 @@ use minifb::{Key, Window, WindowOptions};
 const WIDTH: usize = 1920;
 const HEIGHT: usize = 1080;
 
+const OFFSET_X: f32 = 1200.0;
+const OFFSET_Y: f32 = 200.0;
+const OFFSET_Z: f32 = 1.0;
+const SCALE_MIN: f32 = 0.0;
+const SCALE_MAX: f32 = 255.0;
+const DEPTH: usize = 1;
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -59,12 +66,15 @@ fn main() {
     let width = args.width;
     let height = args.height;
     let dimension = args.dimension;
-    let noise = match (dimension, args.command) {
-        (Dimension::Three, Commands::Ridge { frequency, octaves }) => {
-            simdnoise::NoiseBuilder::ridge_3d_offset(1200.0, width, 200.0, height, 1.0, 1)
-                .with_freq(frequency)
-                .with_octaves(octaves)
-                .generate_scaled(0.0, 255.0)
+    let offset = false;
+    let noise = match (args.command, dimension, offset) {
+        (Commands::Ridge { frequency, octaves }, Dimension::Three, true) => {
+            simdnoise::NoiseBuilder::ridge_3d_offset(
+                OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH,
+            )
+            .with_freq(frequency)
+            .with_octaves(octaves)
+            .generate_scaled(SCALE_MIN, SCALE_MAX)
         }
         _ => {
             unimplemented!();
