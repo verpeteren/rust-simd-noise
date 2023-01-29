@@ -11,9 +11,11 @@ const HEIGHT: usize = 1080;
 const OFFSET_X: f32 = 1200.0;
 const OFFSET_Y: f32 = 200.0;
 const OFFSET_Z: f32 = 1.0;
+//const OFFSET_W: f32 = 5.0;
 const SCALE_MIN: f32 = 0.0;
 const SCALE_MAX: f32 = 255.0;
 const DEPTH: usize = 1;
+//const TIME: usize = 0;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -45,7 +47,7 @@ enum Dimension {
     One,
     Two,
     Three,
-    Four,
+    //Four,
 }
 
 impl Display for Dimension {
@@ -54,7 +56,7 @@ impl Display for Dimension {
             Dimension::One => "one",
             Dimension::Two => "two",
             Dimension::Three => "three",
-            Dimension::Four => "four",
+            //Dimension::Four => "four",
         };
         write!(f, "{}", num)
     }
@@ -78,26 +80,83 @@ fn main() {
     let height = args.height;
     let dimension = args.dimension;
     let offset = args.offset;
-    let noise = match (args.command, dimension, offset) {
-        (Commands::Ridge { frequency, octaves }, Dimension::Three, false) => {
-            simdnoise::NoiseBuilder::ridge_3d(width, height, DEPTH)
+    let buffer: Vec<u32> = match (args.command, dimension, offset) {
+        (Commands::Ridge { frequency, octaves }, Dimension::One, false) => {
+            let noise = simdnoise::NoiseBuilder::ridge_1d(width)
                 .with_freq(frequency)
                 .with_octaves(octaves)
-                .generate_scaled(SCALE_MIN, SCALE_MAX)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
+            let mut xy = Vec::with_capacity(x.len() * height);
+            for _i in 0..height {
+                xy.extend_from_slice(x.as_slice());
+            }
+            xy
+        }
+        (Commands::Ridge { frequency, octaves }, Dimension::One, true) => {
+            let noise = simdnoise::NoiseBuilder::ridge_1d_offset(OFFSET_X, width)
+                .with_freq(frequency)
+                .with_octaves(octaves)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
+            let mut xy = Vec::with_capacity(x.len() * height);
+            for _i in 0..height {
+                xy.extend_from_slice(x.as_slice());
+            }
+            xy
+        }
+        (Commands::Ridge { frequency, octaves }, Dimension::Two, false) => {
+            let noise = simdnoise::NoiseBuilder::ridge_2d(width, height)
+                .with_freq(frequency)
+                .with_octaves(octaves)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+        (Commands::Ridge { frequency, octaves }, Dimension::Two, true) => {
+            let noise = simdnoise::NoiseBuilder::ridge_2d_offset(OFFSET_X, width, OFFSET_Y, height)
+                .with_freq(frequency)
+                .with_octaves(octaves)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+        (Commands::Ridge { frequency, octaves }, Dimension::Three, false) => {
+            let noise = simdnoise::NoiseBuilder::ridge_3d(width, height, DEPTH)
+                .with_freq(frequency)
+                .with_octaves(octaves)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
         }
         (Commands::Ridge { frequency, octaves }, Dimension::Three, true) => {
-            simdnoise::NoiseBuilder::ridge_3d_offset(
+            let noise = simdnoise::NoiseBuilder::ridge_3d_offset(
                 OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH,
             )
             .with_freq(frequency)
             .with_octaves(octaves)
-            .generate_scaled(SCALE_MIN, SCALE_MAX)
+            .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
         }
+        /*
+        (Commands::Ridge { frequency, octaves }, Dimension::Four, false) => {
+            let noise = simdnoise::NoiseBuilder::ridge_4d(width, height, DEPTH, TIME)
+                .with_freq(frequency)
+                .with_octaves(octaves)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+        (Commands::Ridge { frequency, octaves }, Dimension::Four, true) => {
+            let noise = simdnoise::NoiseBuilder::ridge_4d_offset(
+                OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH, OFFSET_W, TIME,
+            )
+            .with_freq(frequency)
+            .with_octaves(octaves)
+            .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+        */
         _ => {
             unimplemented!();
         }
     };
-    let buffer: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
     let mut window = Window::new(
         "Test - ESC to exit",
         width,
