@@ -63,7 +63,7 @@
 //!
 //! // get a block of noise with the sse41 version, using the above settings
 //! unsafe {
-//!     let (noise,min,max) = simdnoise::sse41::get_3d_noise(&noise_setting);
+//!     let (noise,min,max) = simdnoise::intrinsics::sse41::get_3d_noise(&noise_setting);
 //! }
 //!
 //! // send your own SIMD x,y values to the noise functions directly
@@ -72,7 +72,7 @@
 //!   let x = _mm_set1_ps(5.0);
 //!   let y = _mm_set1_ps(10.0);
 //!   let seed = 42;
-//!   let f : __m128 = simdnoise::sse2::simplex_2d(x,y,seed);
+//!   let f : __m128 = simdnoise::intrinsics::sse2::simplex_2d(x,y,seed);
 //!
 //!   // avx2 turbulence
 //!   let x = _mm256_set1_ps(5.0);
@@ -87,19 +87,11 @@
 
 extern crate simdeez;
 
-mod noise_helpers;
-mod noise_helpers_64;
-
-mod shared;
-
 pub mod intrinsics;
 pub mod noise;
-
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod sse2;
-
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod sse41;
+mod noise_helpers;
+mod noise_helpers_64;
+mod shared;
 
 use intrinsics::*;
 

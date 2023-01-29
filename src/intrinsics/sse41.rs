@@ -6,11 +6,11 @@
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 4, and when it is not small relative height and depth.
 
-use super::noise::cellular as cell;
-use super::noise::cellular_64 as cell_64;
-use super::noise::simplex as smplx;
-use super::noise::simplex_64 as smplx_64;
-use super::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
+use crate::noise::cellular as cell;
+use crate::noise::cellular_64 as cell_64;
+use crate::noise::simplex as smplx;
+use crate::noise::simplex_64 as smplx_64;
+use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
 use crate::shared::*;
 
@@ -204,7 +204,7 @@ pub unsafe fn turbulence_1d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    super::noise_helpers::get_1d_noise::<Sse41>(noise_type)
+    crate::noise_helpers::get_1d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width sized block of scaled 2d noise
@@ -316,7 +316,7 @@ pub unsafe fn turbulence_2d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    super::noise_helpers::get_2d_noise::<Sse41>(noise_type)
+    crate::noise_helpers::get_2d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width X height sized block of scaled 2d noise
@@ -490,7 +490,7 @@ pub unsafe fn turbulence_3d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    super::noise_helpers::get_3d_noise::<Sse41>(noise_type)
+    crate::noise_helpers::get_3d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width X height X depth sized block of scaled 3d noise
@@ -674,7 +674,7 @@ pub unsafe fn turbulence_4d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse4.1")]
 pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    super::noise_helpers::get_4d_noise::<Sse41>(noise_type)
+    crate::noise_helpers::get_4d_noise::<Sse41>(noise_type)
 }
 
 /// Gets a width X height X depth X time sized block of scaled 4d noise
