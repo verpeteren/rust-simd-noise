@@ -49,4 +49,18 @@ jobs:
         with:
           command: bench
           args: --no-run
+  example-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - working-directory: ./example
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
 
