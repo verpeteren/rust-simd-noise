@@ -1077,6 +1077,7 @@ impl DimensionalBeing for NoiseType {
 }
 
 pub struct NoiseBuilder {}
+
 impl NoiseBuilder {
     pub fn cellular_2d(width: usize, height: usize) -> CellularSettings {
         let mut dim = NoiseDimensions::default(2);
