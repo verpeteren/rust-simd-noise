@@ -4,7 +4,7 @@ const WIDTH: usize = 1920;
 const HEIGHT: usize = 1080;
 
 fn main() {
-    let noise = simdnoise::NoiseBuilder::ridge_3d_offset(1200.0, 1920, 200.0, 1080, 1.0, 1)
+    let noise = simdnoise::NoiseBuilder::ridge_3d_offset(1200.0, WIDTH, 200.0, HEIGHT, 1.0, 1)
         .with_freq(1.2)
         .with_octaves(8)
         .generate_scaled(0.0, 255.0);
