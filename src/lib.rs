@@ -99,7 +99,6 @@ mod noise_helpers_64;
 pub mod scalar;
 mod shared;
 
-pub mod simplex;
 pub mod simplex_64;
 
 pub mod noise;

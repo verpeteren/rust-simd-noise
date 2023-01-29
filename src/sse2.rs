@@ -8,7 +8,7 @@
 
 use super::cellular as cell;
 use super::cellular_64 as cell_64;
-use super::simplex as smplx;
+use super::noise::simplex as smplx;
 use super::simplex_64 as smplx_64;
 use super::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
