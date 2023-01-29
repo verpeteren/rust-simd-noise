@@ -1,5 +1,4 @@
 use minifb::{Key, Window, WindowOptions};
-use simdnoise::*;
 
 const WIDTH: usize = 1920;
 const HEIGHT: usize = 1080;

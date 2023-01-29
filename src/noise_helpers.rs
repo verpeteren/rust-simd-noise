@@ -284,6 +284,7 @@ macro_rules! get_4d_noise_helper {
 }
 
 #[inline(always)]
+#[allow(dead_code)]
 pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
         NoiseType::Fbm(s) => get_1d_noise_helper!(
@@ -326,6 +327,7 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[inline(always)]
+#[allow(dead_code)]
 pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
         NoiseType::Fbm(s) => get_2d_noise_helper!(
@@ -380,6 +382,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 #[inline(always)]
+#[allow(dead_code)]
 pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
         NoiseType::Fbm(s) => get_3d_noise_helper!(
@@ -429,6 +432,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
 }
 
 #[inline(always)]
+#[allow(dead_code)]
 pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
         NoiseType::Fbm(s) => get_4d_noise_helper!(
