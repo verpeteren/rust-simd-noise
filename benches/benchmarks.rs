@@ -5,6 +5,8 @@ use criterion::*;
 use simdnoise::*;
 use std::time::Duration;
 
+use simdnoise::intrinsics::*;
+
 fn d4(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_4d(8, 8, 8, 8).wrap();
     let mut group = c.benchmark_group("fbm4d");
