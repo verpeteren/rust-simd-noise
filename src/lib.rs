@@ -80,20 +80,16 @@
 //!   let lacunarity = _mm256_set1_ps(0.5);
 //!   let gain = _mm256_set1_ps(2.0);
 //!   let octaves = 3;
-//!   let f_turbulence : __m256 = simdnoise::avx2::turbulence_2d(x,y,lacunarity,gain,octaves,seed);
+//!   let f_turbulence : __m256 = simdnoise::intrinsics::avx2::turbulence_2d(x,y,lacunarity,gain,octaves,seed);
 //!
 //! }
 //! ```
 
 extern crate simdeez;
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod avx2;
-
 mod noise_helpers;
 mod noise_helpers_64;
 
-pub mod scalar;
 mod shared;
 
 pub mod intrinsics;
@@ -104,6 +100,8 @@ pub mod sse2;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod sse41;
+
+use intrinsics::*;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 macro_rules! get_1d_noise {
