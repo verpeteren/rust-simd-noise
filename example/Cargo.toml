@@ -11,4 +11,5 @@ edition="2018"
 
 [dependencies]
 simdnoise = {path = ".."}
-minifb="*"
+minifb="0.23.0"
+
