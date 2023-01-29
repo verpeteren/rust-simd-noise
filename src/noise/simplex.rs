@@ -1241,7 +1241,6 @@ mod tests {
     #[test]
     fn simplex_3d_deriv_sanity() {
         let mut avg_err = 0.0;
-        const SEEDS: i32 = 10;
         const POINTS: i32 = 10;
         const SEED: i32 = 0;
         for z in 0..POINTS {
