@@ -1,4 +1,4 @@
-use self::simdeez::*;
+use simdeez::*;
 
 use super::*;
 use crate::shared::*;

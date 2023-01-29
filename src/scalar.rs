@@ -5,6 +5,7 @@
 use super::*;
 
 use crate::shared::*;
+
 use simdeez::scalar::*;
 
 use std::f32;

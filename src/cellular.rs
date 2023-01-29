@@ -3,12 +3,10 @@
 //! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
 //! interfaces.
 
-extern crate simdeez;
-
 use super::*;
 use std::f32;
 
-use self::simdeez::*;
+use simdeez::*;
 
 const X_PRIME: i32 = 1619;
 const Y_PRIME: i32 = 31337;
