@@ -1,7 +1,10 @@
 use self::simdeez::*;
+
 use super::*;
+
 use crate::cellular_64::*;
 use crate::simplex_64::*;
+
 use std::f64;
 
 macro_rules! get_1d_noise_helper_f64  {

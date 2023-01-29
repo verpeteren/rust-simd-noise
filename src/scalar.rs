@@ -3,8 +3,10 @@
 //! These are much slower than SIMD, and hence on capable hardware have little use but testing.
 
 use super::*;
+
 use crate::shared::*;
 use simdeez::scalar::*;
+
 use std::f32;
 
 /// Get a single value of 2d cellular/voroni noise

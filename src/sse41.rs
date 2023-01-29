@@ -5,13 +5,18 @@
 //!
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 4, and when it is not small relative height and depth.
+
 use super::*;
+
 use crate::shared::*;
+
 use simdeez::sse41::*;
+
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
+
 use std::f32;
 
 /// Get a single value of 2d cellular/voroni noise

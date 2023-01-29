@@ -1,7 +1,9 @@
 extern crate simdeez;
-use self::simdeez::*;
+
 use super::*;
 use std::f64;
+
+use self::simdeez::*;
 
 const X_PRIME: i64 = 1619;
 const Y_PRIME: i64 = 31337;

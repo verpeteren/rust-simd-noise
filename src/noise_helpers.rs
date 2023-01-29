@@ -1,7 +1,9 @@
 use self::simdeez::*;
+
 use super::*;
 use crate::cellular::*;
 use crate::simplex::*;
+
 use std::f32;
 
 macro_rules! get_1d_noise_helper  {

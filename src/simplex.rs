@@ -4,8 +4,10 @@
 //! interfaces.
 
 use self::simdeez::*;
+
 use super::*;
 use crate::shared::*;
+
 use std::f32;
 
 /// Skew factor for 2D simplex noise

@@ -4,9 +4,11 @@
 //! interfaces.
 
 extern crate simdeez;
-use self::simdeez::*;
+
 use super::*;
 use std::f32;
+
+use self::simdeez::*;
 
 const X_PRIME: i32 = 1619;
 const Y_PRIME: i32 = 31337;
