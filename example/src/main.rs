@@ -11,11 +11,9 @@ const HEIGHT: usize = 1080;
 const OFFSET_X: f32 = 1200.0;
 const OFFSET_Y: f32 = 200.0;
 const OFFSET_Z: f32 = 1.0;
-//const OFFSET_W: f32 = 5.0;
 const SCALE_MIN: f32 = 0.0;
 const SCALE_MAX: f32 = 255.0;
 const DEPTH: usize = 1;
-//const TIME: usize = 0;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -47,7 +45,6 @@ enum Dimension {
     One,
     Two,
     Three,
-    //Four,
 }
 
 impl Display for Dimension {
@@ -56,7 +53,6 @@ impl Display for Dimension {
             Dimension::One => "one",
             Dimension::Two => "two",
             Dimension::Three => "three",
-            //Dimension::Four => "four",
         };
         write!(f, "{}", num)
     }
@@ -64,6 +60,13 @@ impl Display for Dimension {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    #[command(arg_required_else_help = true)]
+    Cellular {
+        #[arg(short, long, value_parser, default_value_t = 1.2)]
+        frequency: f32,
+        #[arg(short, long, value_parser, default_value_t = 8)]
+        seed: i32,
+    },
     #[command(arg_required_else_help = true)]
     Ridge {
         #[arg(short, long, value_parser, default_value_t = 1.2)]
@@ -81,6 +84,48 @@ fn main() {
     let dimension = args.dimension;
     let offset = args.offset;
     let buffer: Vec<u32> = match (args.command, dimension, offset) {
+        (
+            Commands::Cellular {
+                frequency: _,
+                seed: _,
+            },
+            Dimension::One,
+            _,
+        ) => {
+            unimplemented!()
+        }
+        (Commands::Cellular { frequency, seed }, Dimension::Two, false) => {
+            let noise = simdnoise::NoiseBuilder::cellular_2d(width, height)
+                .with_freq(frequency)
+                .with_seed(seed)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+        (Commands::Cellular { frequency, seed }, Dimension::Two, true) => {
+            let noise =
+                simdnoise::NoiseBuilder::cellular_2d_offset(OFFSET_X, width, OFFSET_Y, height)
+                    .with_freq(frequency)
+                    .with_seed(seed)
+                    .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+        (Commands::Cellular { frequency, seed }, Dimension::Three, false) => {
+            let noise = simdnoise::NoiseBuilder::cellular_3d(width, height, DEPTH)
+                .with_freq(frequency)
+                .with_seed(seed)
+                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+        (Commands::Cellular { frequency, seed }, Dimension::Three, true) => {
+            let noise = simdnoise::NoiseBuilder::cellular_3d_offset(
+                OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH,
+            )
+            .with_freq(frequency)
+            .with_seed(seed)
+            .generate_scaled(SCALE_MIN, SCALE_MAX);
+            noise.iter().map(|x| *x as u32).collect()
+        }
+
         (Commands::Ridge { frequency, octaves }, Dimension::One, false) => {
             let noise = simdnoise::NoiseBuilder::ridge_1d(width)
                 .with_freq(frequency)
@@ -135,24 +180,6 @@ fn main() {
             .generate_scaled(SCALE_MIN, SCALE_MAX);
             noise.iter().map(|x| *x as u32).collect()
         }
-        /*
-        (Commands::Ridge { frequency, octaves }, Dimension::Four, false) => {
-            let noise = simdnoise::NoiseBuilder::ridge_4d(width, height, DEPTH, TIME)
-                .with_freq(frequency)
-                .with_octaves(octaves)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        (Commands::Ridge { frequency, octaves }, Dimension::Four, true) => {
-            let noise = simdnoise::NoiseBuilder::ridge_4d_offset(
-                OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH, OFFSET_W, TIME,
-            )
-            .with_freq(frequency)
-            .with_octaves(octaves)
-            .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        */
         _ => {
             unimplemented!();
         }
