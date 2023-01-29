@@ -99,8 +99,6 @@ mod noise_helpers_64;
 pub mod scalar;
 mod shared;
 
-pub mod simplex_64;
-
 pub mod noise;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
