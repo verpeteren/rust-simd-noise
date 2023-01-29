@@ -79,6 +79,12 @@ fn main() {
     let dimension = args.dimension;
     let offset = args.offset;
     let noise = match (args.command, dimension, offset) {
+        (Commands::Ridge { frequency, octaves }, Dimension::Three, false) => {
+            simdnoise::NoiseBuilder::ridge_3d(width, height, DEPTH)
+                .with_freq(frequency)
+                .with_octaves(octaves)
+                .generate_scaled(SCALE_MIN, SCALE_MAX)
+        }
         (Commands::Ridge { frequency, octaves }, Dimension::Three, true) => {
             simdnoise::NoiseBuilder::ridge_3d_offset(
                 OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH,
