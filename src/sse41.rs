@@ -7,7 +7,7 @@
 //! is evenly divisble by 4, and when it is not small relative height and depth.
 
 use super::noise::cellular as cell;
-use super::cellular_64 as cell_64;
+use super::noise::cellular_64 as cell_64;
 use super::noise::simplex as smplx;
 use super::noise::simplex_64 as smplx_64;
 use super::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};

@@ -1,4 +1,4 @@
-use super::{Cell2ReturnType, CellDistanceFunction, CellReturnType};
+use crate::{Cell2ReturnType, CellDistanceFunction, CellReturnType};
 
 use std::f64;
 

@@ -90,8 +90,6 @@ extern crate simdeez;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod avx2;
 
-pub mod cellular_64;
-
 mod noise_helpers;
 mod noise_helpers_64;
 

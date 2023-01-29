@@ -2,7 +2,7 @@ use simdeez::*;
 
 use super::NoiseType;
 
-use crate::cellular_64::*;
+use crate::noise::cellular_64::*;
 use crate::noise::simplex_64::*;
 
 use std::f64;
