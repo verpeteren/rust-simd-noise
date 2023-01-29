@@ -1,4 +1,6 @@
-use clap::{Parser, Subcommand};
+use std::fmt::{Display, Formatter, Result};
+
+use clap::{Parser, Subcommand, ValueEnum};
 use minifb::{Key, Window, WindowOptions};
 
 const WIDTH: usize = 1920;
@@ -13,8 +15,31 @@ struct Args {
     #[clap(long, value_parser, default_value_t = HEIGHT, help="The height of the generated image", global=true)]
     pub height: usize,
 
+    #[clap(long, value_parser, default_value_t = Dimension::Three, help="The number of dimensions of the generated noice ", global=true)]
+    pub dimension: Dimension,
+
     #[command(subcommand)]
     command: Commands,
+}
+
+#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
+enum Dimension {
+    One,
+    Two,
+    Three,
+    Four,
+}
+
+impl Display for Dimension {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let num = match self {
+            Dimension::One => "one",
+            Dimension::Two => "two",
+            Dimension::Three => "three",
+            Dimension::Four => "four",
+        };
+        write!(f, "{}", num)
+    }
 }
 
 #[derive(Debug, Subcommand)]
@@ -33,12 +58,16 @@ fn main() {
     let args = Args::parse();
     let width = args.width;
     let height = args.height;
-    let noise = match args.command {
-        Commands::Ridge { frequency, octaves } => {
+    let dimension = args.dimension;
+    let noise = match (dimension, args.command) {
+        (Dimension::Three, Commands::Ridge { frequency, octaves }) => {
             simdnoise::NoiseBuilder::ridge_3d_offset(1200.0, width, 200.0, height, 1.0, 1)
                 .with_freq(frequency)
                 .with_octaves(octaves)
                 .generate_scaled(0.0, 255.0)
+        }
+        _ => {
+            unimplemented!();
         }
     };
     let buffer: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
