@@ -1,6 +1,5 @@
 use simdeez::*;
 
-use super::*;
 use crate::shared::*;
 
 const F2: f64 = 0.36602540378;

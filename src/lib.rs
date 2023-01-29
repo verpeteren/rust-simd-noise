@@ -97,8 +97,10 @@ pub mod scalar;
 mod shared;
 pub mod simplex;
 pub mod simplex_64;
+
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod sse2;
+
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod sse41;
 
@@ -1539,7 +1541,7 @@ impl NoiseBuilder {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{avx2, scalar, sse2, sse41, NoiseBuilder};
 
     macro_rules! assert_delta {
         ($x:expr, $y:expr, $d:expr) => {

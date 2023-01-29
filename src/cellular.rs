@@ -3,7 +3,8 @@
 //! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
 //! interfaces.
 
-use super::*;
+use super::{Cell2ReturnType, CellDistanceFunction, CellReturnType};
+
 use std::f32;
 
 use simdeez::*;

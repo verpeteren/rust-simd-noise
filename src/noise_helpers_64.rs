@@ -1,6 +1,6 @@
 use simdeez::*;
 
-use super::*;
+use super::NoiseType;
 
 use crate::cellular_64::*;
 use crate::simplex_64::*;

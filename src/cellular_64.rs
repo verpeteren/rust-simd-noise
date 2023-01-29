@@ -1,4 +1,5 @@
-use super::*;
+use super::{Cell2ReturnType, CellDistanceFunction, CellReturnType};
+
 use std::f64;
 
 use simdeez::*;

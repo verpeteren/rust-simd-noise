@@ -5,7 +5,6 @@
 
 use simdeez::*;
 
-use super::*;
 use crate::shared::*;
 
 use std::f32;

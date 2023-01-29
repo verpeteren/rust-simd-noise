@@ -1,7 +1,8 @@
 use simdeez::*;
 
-use super::*;
-use crate::cellular::*;
+use super::NoiseType;
+
+use crate::cellular as cell;
 use crate::simplex::*;
 
 use std::f32;
@@ -354,7 +355,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Gradient(s) => get_2d_noise_helper!(s, simplex_2d::<S>, s.dim.seed),
         NoiseType::Cellular(s) => get_2d_noise_helper!(
             s,
-            cellular_2d::<S>,
+            cell::cellular_2d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),
@@ -362,7 +363,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         ),
         NoiseType::Cellular2(s) => get_2d_noise_helper!(
             s,
-            cellular2_2d::<S>,
+            cell::cellular2_2d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),
@@ -408,7 +409,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Gradient(s) => get_3d_noise_helper!(s, simplex_3d::<S>, s.dim.seed),
         NoiseType::Cellular(s) => get_3d_noise_helper!(
             s,
-            cellular_3d::<S>,
+            cell::cellular_3d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),
@@ -416,7 +417,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         ),
         NoiseType::Cellular2(s) => get_3d_noise_helper!(
             s,
-            cellular2_3d::<S>,
+            cell::cellular2_3d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),
