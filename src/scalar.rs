@@ -2,8 +2,8 @@
 //!
 //! These are much slower than SIMD, and hence on capable hardware have little use but testing.
 
-use super::cellular as cell;
 use super::cellular_64 as cell_64;
+use super::noise::cellular as cell;
 use super::noise::simplex as smplx;
 use super::noise::simplex_64 as smplx_64;
 use super::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};

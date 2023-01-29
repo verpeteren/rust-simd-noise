@@ -2,7 +2,7 @@ use simdeez::*;
 
 use super::NoiseType;
 
-use crate::cellular as cell;
+use crate::noise::cellular as cell;
 use crate::noise::simplex::*;
 
 use std::f32;
