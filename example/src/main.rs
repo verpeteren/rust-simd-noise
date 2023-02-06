@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter, Result};
 
 use clap::{Parser, Subcommand, ValueEnum};
 use minifb::{Key, Window, WindowOptions};
+use simdnoise::CellDistanceFunction;
 
 const FPS: u64 = 60;
 
@@ -67,12 +68,55 @@ impl Display for Dimension {
     }
 }
 
+// should we expose ValueEnum to CellDistanceFunction?
+#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
+enum Distance {
+    Euclidean,
+    Manhattan,
+    Natural,
+}
+
+impl From<Distance> for CellDistanceFunction {
+    fn from(distance: Distance) -> Self {
+        match distance {
+            Distance::Euclidean => CellDistanceFunction::Euclidean,
+            Distance::Manhattan => CellDistanceFunction::Manhattan,
+            Distance::Natural => CellDistanceFunction::Natural,
+        }
+    }
+}
+
+impl Display for Distance {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let num = match self {
+            Distance::Euclidean => "Euclidean",
+            Distance::Manhattan => "Manhattan",
+            Distance::Natural => "Natural",
+        };
+        write!(f, "{}", num)
+    }
+}
+impl Distance {
+    pub fn into(&self) -> CellDistanceFunction {
+        match self {
+            Distance::Euclidean => CellDistanceFunction::Euclidean,
+            Distance::Manhattan => CellDistanceFunction::Manhattan,
+            Distance::Natural => CellDistanceFunction::Natural,
+        }
+    }
+}
+
 #[derive(Debug, Subcommand)]
 enum Commands {
     #[command(arg_required_else_help = true)]
     Cellular {
+        #[clap(long, value_parser, default_value_t = Distance::Euclidean, help="The distance function", global=true)]
+        distance: Distance,
         #[arg(short, long, value_parser, default_value_t = 1.2)]
         frequency: f32,
+        #[arg(short, long, value_parser, default_value_t = 1.2)]
+        jitter: f32,
+        //@TODO: index0/1
     },
     #[command(arg_required_else_help = true)]
     Ridge {
@@ -80,7 +124,6 @@ enum Commands {
         frequency: f32,
         #[arg(short, long, value_parser, default_value_t = 8)]
         octaves: u8,
-        //todo scaled
     },
 }
 
@@ -89,36 +132,84 @@ fn main() {
     let width = args.width;
     let height = args.height;
     let buffer: Vec<u32> = match (args.command, args.dimension, args.offset) {
-        (Commands::Cellular { frequency: _ }, Dimension::One, _) => {
+        (
+            Commands::Cellular {
+                frequency: _,
+                jitter: _,
+                distance: _,
+            },
+            Dimension::One,
+            _,
+        ) => {
             unimplemented!()
         }
-        (Commands::Cellular { frequency }, Dimension::Two, false) => {
+        (
+            Commands::Cellular {
+                frequency,
+                jitter,
+                distance,
+            },
+            Dimension::Two,
+            false,
+        ) => {
             let noise = simdnoise::NoiseBuilder::cellular_2d(width, height)
                 .with_freq(frequency)
+                .with_jitter(jitter)
+                .with_distance_function(distance.into())
                 .with_seed(args.seed)
                 .generate_scaled(SCALE_MIN, SCALE_MAX);
             noise.iter().map(|x| *x as u32).collect()
         }
-        (Commands::Cellular { frequency }, Dimension::Two, true) => {
+        (
+            Commands::Cellular {
+                frequency,
+                jitter,
+                distance,
+            },
+            Dimension::Two,
+            true,
+        ) => {
             let noise =
                 simdnoise::NoiseBuilder::cellular_2d_offset(OFFSET_X, width, OFFSET_Y, height)
                     .with_freq(frequency)
+                    .with_jitter(jitter)
+                    .with_distance_function(distance.into())
                     .with_seed(args.seed)
                     .generate_scaled(SCALE_MIN, SCALE_MAX);
             noise.iter().map(|x| *x as u32).collect()
         }
-        (Commands::Cellular { frequency }, Dimension::Three, false) => {
+        (
+            Commands::Cellular {
+                frequency,
+                jitter,
+                distance,
+            },
+            Dimension::Three,
+            false,
+        ) => {
             let noise = simdnoise::NoiseBuilder::cellular_3d(width, height, DEPTH)
                 .with_freq(frequency)
+                .with_jitter(jitter)
+                .with_distance_function(distance.into())
                 .with_seed(args.seed)
                 .generate_scaled(SCALE_MIN, SCALE_MAX);
             noise.iter().map(|x| *x as u32).collect()
         }
-        (Commands::Cellular { frequency }, Dimension::Three, true) => {
+        (
+            Commands::Cellular {
+                frequency,
+                jitter,
+                distance,
+            },
+            Dimension::Three,
+            true,
+        ) => {
             let noise = simdnoise::NoiseBuilder::cellular_3d_offset(
                 OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH,
             )
             .with_freq(frequency)
+            .with_jitter(jitter)
+            .with_distance_function(distance.into())
             .with_seed(args.seed)
             .generate_scaled(SCALE_MIN, SCALE_MAX);
             noise.iter().map(|x| *x as u32).collect()
@@ -183,6 +274,9 @@ fn main() {
             .with_octaves(octaves)
             .generate_scaled(SCALE_MIN, SCALE_MAX);
             noise.iter().map(|x| *x as u32).collect()
+        }
+        _ => {
+            unimplemented!();
         }
     };
     let mut window = Window::new(
