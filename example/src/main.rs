@@ -8,13 +8,11 @@ const FPS: u64 = 60;
 
 const WIDTH: usize = 1920;
 const HEIGHT: usize = 1080;
+const DEPTH: usize = 1;
+const TIME: usize = 5;
 
-const OFFSET_X: f32 = 1200.0;
-const OFFSET_Y: f32 = 200.0;
-const OFFSET_Z: f32 = 1.0;
 const SCALE_MIN: f32 = 0.0;
 const SCALE_MAX: f32 = 255.0;
-const DEPTH: usize = 1;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -24,6 +22,12 @@ struct Args {
 
     #[clap(long, value_parser, default_value_t = HEIGHT, help="The height of the generated image", global=true)]
     pub height: usize,
+
+    #[clap(long, value_parser, default_value_t = DEPTH, help="The z dimension of the generated image", global=true, required=false)]
+    pub depth: usize,
+
+    #[clap(long, value_parser, default_value_t = TIME, help="The w dimension of the generated image", global=true, required=false)]
+    pub time: usize,
 
     #[clap(long, value_parser, default_value_t = Dimension::Three, help="The number of dimensions of the generated noice", global=true)]
     pub dimension: Dimension,
@@ -40,11 +44,38 @@ struct Args {
     #[clap(
         long,
         value_parser,
-        default_value_t = false,
-        help = "Use an offset",
-        global = true
+        help = "Use an offset for the first dimension",
+        global = true,
+        required = false
     )]
-    pub offset: bool,
+    pub offset_x: Option<f32>,
+
+    #[clap(
+        long,
+        value_parser,
+        help = "Use an offset for the second dimension",
+        global = true,
+        required = false
+    )]
+    pub offset_y: Option<f32>,
+
+    #[clap(
+        long,
+        value_parser,
+        help = "Use an offset for the third dimension",
+        global = true,
+        required = false
+    )]
+    pub offset_z: Option<f32>,
+
+    #[clap(
+        long,
+        value_parser,
+        help = "Use an offset for the fourth dimension",
+        global = true,
+        required = false
+    )]
+    pub offset_w: Option<f32>,
 
     #[command(subcommand)]
     command: Commands,
@@ -55,6 +86,7 @@ enum Dimension {
     One,
     Two,
     Three,
+    Four,
 }
 
 impl Display for Dimension {
@@ -63,6 +95,7 @@ impl Display for Dimension {
             Dimension::One => "one",
             Dimension::Two => "two",
             Dimension::Three => "three",
+            Dimension::Four => "four",
         };
         write!(f, "{}", num)
     }
@@ -89,20 +122,11 @@ impl From<Distance> for CellDistanceFunction {
 impl Display for Distance {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let num = match self {
-            Distance::Euclidean => "Euclidean",
-            Distance::Manhattan => "Manhattan",
-            Distance::Natural => "Natural",
+            Distance::Euclidean => "euclidean",
+            Distance::Manhattan => "manhattan",
+            Distance::Natural => "natural",
         };
         write!(f, "{}", num)
-    }
-}
-impl Distance {
-    pub fn into(&self) -> CellDistanceFunction {
-        match self {
-            Distance::Euclidean => CellDistanceFunction::Euclidean,
-            Distance::Manhattan => CellDistanceFunction::Manhattan,
-            Distance::Natural => CellDistanceFunction::Natural,
-        }
     }
 }
 
@@ -127,158 +151,206 @@ enum Commands {
     },
 }
 
+struct Coordinate<T> {
+    x: T,
+    y: T,
+    z: T,
+    w: T,
+}
+
+impl<T> Default for Coordinate<T>
+where
+    T: Default,
+{
+    fn default() -> Self {
+        Coordinate {
+            x: T::default(),
+            y: T::default(),
+            z: T::default(),
+            w: T::default(),
+        }
+    }
+}
+
+impl<T> Coordinate<T>
+where
+    T: Default,
+{
+    fn new(x: T, y: T, z: T, w: T) -> Self {
+        Self { x, y, z, w }
+    }
+    fn new_checked(
+        dimension: Dimension,
+        x: Option<T>,
+        y: Option<T>,
+        z: Option<T>,
+        w: Option<T>,
+    ) -> Self {
+        let mut coord = Coordinate::<T>::default();
+        match (dimension, x, y, z, w) {
+            (Dimension::One, x, None, None, None) => {
+                coord.x = match x {
+                    Some(xu) => xu,
+                    None => T::default(),
+                };
+            }
+            (Dimension::Two, x, y, None, None) => {
+                coord.x = match x {
+                    Some(xu) => xu,
+                    None => T::default(),
+                };
+                coord.y = match y {
+                    Some(yu) => yu,
+                    None => T::default(),
+                };
+            }
+            (Dimension::Three, x, y, z, None) => {
+                coord.x = match x {
+                    Some(xu) => xu,
+                    None => T::default(),
+                };
+                coord.y = match y {
+                    Some(yu) => yu,
+                    None => T::default(),
+                };
+                coord.z = match z {
+                    Some(zu) => zu,
+                    None => T::default(),
+                };
+            }
+            (Dimension::Four, x, y, z, w) => {
+                coord.x = match x {
+                    Some(xu) => xu,
+                    None => T::default(),
+                };
+                coord.y = match y {
+                    Some(yu) => yu,
+                    None => T::default(),
+                };
+                coord.z = match z {
+                    Some(zu) => zu,
+                    None => T::default(),
+                };
+                coord.w = match w {
+                    Some(wu) => wu,
+                    None => T::default(),
+                };
+            }
+            _ => {
+                panic!(
+                    "Coordinate parameters are not matching for this dimension {:?}",
+                    dimension
+                );
+            }
+        }
+        coord
+    }
+}
+
 fn main() {
     let args = Args::parse();
-    let width = args.width;
-    let height = args.height;
-    let buffer: Vec<u32> = match (args.command, args.dimension, args.offset) {
-        (
-            Commands::Cellular {
-                frequency: _,
-                jitter: _,
-                distance: _,
-            },
-            Dimension::One,
-            _,
-        ) => {
-            unimplemented!()
-        }
-        (
-            Commands::Cellular {
-                frequency,
-                jitter,
-                distance,
-            },
-            Dimension::Two,
-            false,
-        ) => {
-            let noise = simdnoise::NoiseBuilder::cellular_2d(width, height)
-                .with_freq(frequency)
-                .with_jitter(jitter)
-                .with_distance_function(distance.into())
-                .with_seed(args.seed)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        (
-            Commands::Cellular {
-                frequency,
-                jitter,
-                distance,
-            },
-            Dimension::Two,
-            true,
-        ) => {
-            let noise =
-                simdnoise::NoiseBuilder::cellular_2d_offset(OFFSET_X, width, OFFSET_Y, height)
-                    .with_freq(frequency)
-                    .with_jitter(jitter)
-                    .with_distance_function(distance.into())
-                    .with_seed(args.seed)
-                    .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        (
-            Commands::Cellular {
-                frequency,
-                jitter,
-                distance,
-            },
-            Dimension::Three,
-            false,
-        ) => {
-            let noise = simdnoise::NoiseBuilder::cellular_3d(width, height, DEPTH)
-                .with_freq(frequency)
-                .with_jitter(jitter)
-                .with_distance_function(distance.into())
-                .with_seed(args.seed)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        (
-            Commands::Cellular {
-                frequency,
-                jitter,
-                distance,
-            },
-            Dimension::Three,
-            true,
-        ) => {
-            let noise = simdnoise::NoiseBuilder::cellular_3d_offset(
-                OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH,
-            )
-            .with_freq(frequency)
-            .with_jitter(jitter)
-            .with_distance_function(distance.into())
-            .with_seed(args.seed)
-            .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-
-        (Commands::Ridge { frequency, octaves }, Dimension::One, false) => {
-            let noise = simdnoise::NoiseBuilder::ridge_1d(width)
-                .with_freq(frequency)
-                .with_seed(args.seed)
-                .with_octaves(octaves)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
-            let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
-            let mut xy = Vec::with_capacity(x.len() * height);
-            for _i in 0..height {
-                xy.extend_from_slice(x.as_slice());
+    let position = Coordinate::new(args.width, args.height, args.depth, args.time);
+    let offset = Coordinate::new_checked(
+        args.dimension,
+        args.offset_x,
+        args.offset_y,
+        args.offset_z,
+        args.offset_w,
+    );
+    macro_rules! common_build_settings {
+        ($builder: expr, $seed : expr, $scale_min: expr, $scale_max: expr) => {
+            $builder
+                .with_seed($seed)
+                .generate_scaled($scale_min, $scale_max)
+        };
+    }
+    macro_rules! noise_build_settings {
+        ($builder: expr, $frequency: expr, $octaves: expr/* TODO: and more */) => {
+            $builder.with_freq($frequency).with_octaves($octaves)
+        };
+    }
+    let buffer: Vec<u32> = match args.command {
+        Commands::Cellular {
+            frequency,
+            jitter,
+            distance,
+        } => {
+            macro_rules! cellular_build_settings {
+                ($builder: expr, $freq: expr, $jitter: expr, $distance: expr) => {
+                    $builder
+                        .with_freq($freq)
+                        .with_jitter($jitter)
+                        .with_distance_function($distance)
+                };
             }
-            xy
-        }
-        (Commands::Ridge { frequency, octaves }, Dimension::One, true) => {
-            let noise = simdnoise::NoiseBuilder::ridge_1d_offset(OFFSET_X, width)
-                .with_freq(frequency)
-                .with_seed(args.seed)
-                .with_octaves(octaves)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
-            let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
-            let mut xy = Vec::with_capacity(x.len() * height);
-            for _i in 0..height {
-                xy.extend_from_slice(x.as_slice());
-            }
-            xy
-        }
-        (Commands::Ridge { frequency, octaves }, Dimension::Two, false) => {
-            let noise = simdnoise::NoiseBuilder::ridge_2d(width, height)
-                .with_freq(frequency)
-                .with_seed(args.seed)
-                .with_octaves(octaves)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
+            let noise = match args.dimension {
+                Dimension::Two => {
+                    let mut builder = simdnoise::NoiseBuilder::cellular_2d_offset(
+                        offset.x, position.x, offset.y, position.y,
+                    );
+                    let builder =
+                        cellular_build_settings!(builder, frequency, jitter, distance.into());
+                    common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX)
+                }
+                Dimension::Three => {
+                    let mut builder = simdnoise::NoiseBuilder::cellular_3d_offset(
+                        offset.x, position.x, offset.y, position.y, offset.z, position.z,
+                    );
+                    let builder =
+                        cellular_build_settings!(builder, frequency, jitter, distance.into());
+                    common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX)
+                }
+                _ => {
+                    unimplemented!()
+                }
+            };
             noise.iter().map(|x| *x as u32).collect()
         }
-        (Commands::Ridge { frequency, octaves }, Dimension::Two, true) => {
-            let noise = simdnoise::NoiseBuilder::ridge_2d_offset(OFFSET_X, width, OFFSET_Y, height)
-                .with_freq(frequency)
-                .with_seed(args.seed)
-                .with_octaves(octaves)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        (Commands::Ridge { frequency, octaves }, Dimension::Three, false) => {
-            let noise = simdnoise::NoiseBuilder::ridge_3d(width, height, DEPTH)
-                .with_freq(frequency)
-                .with_seed(args.seed)
-                .with_octaves(octaves)
-                .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        (Commands::Ridge { frequency, octaves }, Dimension::Three, true) => {
-            let noise = simdnoise::NoiseBuilder::ridge_3d_offset(
-                OFFSET_X, width, OFFSET_Y, height, OFFSET_Z, DEPTH,
-            )
-            .with_freq(frequency)
-            .with_seed(args.seed)
-            .with_octaves(octaves)
-            .generate_scaled(SCALE_MIN, SCALE_MAX);
-            noise.iter().map(|x| *x as u32).collect()
-        }
-        _ => {
-            unimplemented!();
+        Commands::Ridge { frequency, octaves } => {
+            let noise = match args.dimension {
+                Dimension::One => {
+                    let mut builder =
+                        simdnoise::NoiseBuilder::ridge_1d_offset(offset.x, position.x);
+                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                    let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
+                    let mut xy = Vec::with_capacity(x.len() * position.y);
+                    for _i in 0..(position.y) {
+                        xy.extend_from_slice(x.as_slice());
+                    }
+                    xy
+                }
+                Dimension::Two => {
+                    let mut builder = simdnoise::NoiseBuilder::ridge_2d_offset(
+                        offset.x, position.x, offset.y, position.y,
+                    );
+                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                    noise.iter().map(|x| *x as u32).collect()
+                }
+                Dimension::Three => {
+                    let mut builder = simdnoise::NoiseBuilder::ridge_3d_offset(
+                        offset.x, position.x, offset.y, position.y, offset.z, position.z,
+                    );
+                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                    noise.iter().map(|x| *x as u32).collect()
+                }
+                Dimension::Four => {
+                    let mut builder = simdnoise::NoiseBuilder::ridge_4d_offset(
+                        offset.x, position.x, offset.y, position.y, offset.z, position.z, offset.w,
+                        position.z,
+                    );
+                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                    noise.iter().map(|x| *x as u32).collect() // TODO: probably animate
+                }
+            };
+            noise
         }
     };
+    let width = args.width;
+    let height = args.height;
     let mut window = Window::new(
         "Test - ESC to exit",
         width,
