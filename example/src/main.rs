@@ -12,6 +12,7 @@ const DEPTH: usize = 1;
 const TIME: usize = 5;
 const DEFAULT_FREQUENCY: f32 = 1.2;
 const DEFAULT_JITTER: f32 = 1.2;
+const DEFAULT_OCTAVES: u8 = 3;
 
 const SCALE_MIN: f32 = 0.0;
 const SCALE_MAX: f32 = 255.0;
@@ -148,7 +149,7 @@ enum Commands {
     Ridge {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
-        #[arg(short, long, value_parser, default_value_t = 8)]
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
         octaves: u8,
     },
 }
