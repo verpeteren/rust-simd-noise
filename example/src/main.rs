@@ -296,14 +296,15 @@ fn main() {
                         .with_distance_function($distance)
                 };
             }
-            let noise = match args.dimension {
+            match args.dimension {
                 Dimension::Two => {
                     let mut builder = simdnoise::NoiseBuilder::cellular_2d_offset(
                         offset.x, position.x, offset.y, position.y,
                     );
                     let builder =
                         cellular_build_settings!(builder, frequency, jitter, distance.into());
-                    common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX)
+                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                    noise.iter().map(|x| *x as u32).collect()
                 }
                 Dimension::Three => {
                     let mut builder = simdnoise::NoiseBuilder::cellular_3d_offset(
@@ -311,13 +312,13 @@ fn main() {
                     );
                     let builder =
                         cellular_build_settings!(builder, frequency, jitter, distance.into());
-                    common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX)
+                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                    noise.iter().map(|x| *x as u32).collect()
                 }
                 _ => {
                     unimplemented!()
                 }
-            };
-            noise.iter().map(|x| *x as u32).collect()
+            }
         }
         Commands::Ridge {
             frequency,
@@ -325,7 +326,7 @@ fn main() {
             gain,
             octaves,
         } => {
-            let noise = match args.dimension {
+            match args.dimension {
                 Dimension::One => {
                     let mut builder =
                         simdnoise::NoiseBuilder::ridge_1d_offset(offset.x, position.x);
@@ -367,8 +368,7 @@ fn main() {
                     let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
                     noise.iter().map(|x| *x as u32).collect() // TODO: probably animate
                 }
-            };
-            noise
+            }
         }
     };
     let width = args.width;
