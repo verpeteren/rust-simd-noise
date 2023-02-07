@@ -11,6 +11,7 @@ const HEIGHT: usize = 1080;
 const DEPTH: usize = 1;
 const TIME: usize = 5;
 const DEFAULT_FREQUENCY: f32 = 1.2;
+const DEFAULT_JITTER: f32 = 1.2;
 
 const SCALE_MIN: f32 = 0.0;
 const SCALE_MAX: f32 = 255.0;
@@ -139,7 +140,7 @@ enum Commands {
         distance: Distance,
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
-        #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_JITTER)]
         jitter: f32,
         //@TODO: index0/1
     },
