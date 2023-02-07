@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter, Result};
+use std::slice::Iter;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use minifb::{Key, Window, WindowOptions};
@@ -290,7 +291,7 @@ fn main() {
                 .with_octaves($octaves)
         };
     }
-    let buffer: Vec<u32> = match args.command {
+    let buffers: Vec<Vec<u32>> = match args.command {
         Commands::Cellular {
             frequency,
             jitter,
@@ -302,7 +303,7 @@ fn main() {
                 );
                 let builder = cellular_build_settings!(builder, frequency, jitter, distance.into());
                 let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                noise.iter().map(|x| *x as u32).collect()
+                vec![noise.iter().map(|x| *x as u32).collect()]
             }
             Dimension::Three => {
                 let mut builder = simdnoise::NoiseBuilder::cellular_3d_offset(
@@ -310,7 +311,7 @@ fn main() {
                 );
                 let builder = cellular_build_settings!(builder, frequency, jitter, distance.into());
                 let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                noise.iter().map(|x| *x as u32).collect()
+                vec![noise.iter().map(|x| *x as u32).collect()]
             }
             _ => {
                 unimplemented!()
@@ -321,51 +322,59 @@ fn main() {
             lacunarity,
             gain,
             octaves,
-        } => {
-            match args.dimension {
-                Dimension::One => {
-                    let mut builder =
-                        simdnoise::NoiseBuilder::ridge_1d_offset(offset.x, position.x);
-                    let builder =
-                        noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                    let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
-                    let mut xy = Vec::with_capacity(x.len() * position.y);
-                    for _i in 0..(position.y) {
-                        xy.extend_from_slice(x.as_slice());
-                    }
-                    xy
+        } => match args.dimension {
+            Dimension::One => {
+                let mut builder = simdnoise::NoiseBuilder::ridge_1d_offset(offset.x, position.x);
+                let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
+                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
+                let mut xy = Vec::with_capacity(x.len() * position.y);
+                for _i in 0..(position.y) {
+                    xy.extend_from_slice(x.as_slice());
                 }
-                Dimension::Two => {
-                    let mut builder = simdnoise::NoiseBuilder::ridge_2d_offset(
-                        offset.x, position.x, offset.y, position.y,
-                    );
-                    let builder =
-                        noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                    noise.iter().map(|x| *x as u32).collect()
-                }
-                Dimension::Three => {
-                    let mut builder = simdnoise::NoiseBuilder::ridge_3d_offset(
-                        offset.x, position.x, offset.y, position.y, offset.z, position.z,
-                    );
-                    let builder =
-                        noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                    noise.iter().map(|x| *x as u32).collect()
-                }
-                Dimension::Four => {
-                    let mut builder = simdnoise::NoiseBuilder::ridge_4d_offset(
-                        offset.x, position.x, offset.y, position.y, offset.z, position.z, offset.w,
-                        position.z,
-                    );
-                    let builder =
-                        noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                    noise.iter().map(|x| *x as u32).collect() // TODO: probably animate
-                }
+                vec![xy]
             }
-        }
+            Dimension::Two => {
+                let mut builder = simdnoise::NoiseBuilder::ridge_2d_offset(
+                    offset.x, position.x, offset.y, position.y,
+                );
+                let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
+                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                vec![noise.iter().map(|x| *x as u32).collect()]
+            }
+            Dimension::Three => {
+                let mut builder = simdnoise::NoiseBuilder::ridge_3d_offset(
+                    offset.x, position.x, offset.y, position.y, offset.z, position.z,
+                );
+                let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
+                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                vec![noise.iter().map(|x| *x as u32).collect()]
+            }
+            Dimension::Four => {
+                let mut builder = simdnoise::NoiseBuilder::ridge_4d_offset(
+                    offset.x, position.x, offset.y, position.y, offset.z, position.z, offset.w,
+                    position.w,
+                );
+                let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
+                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let mut frames = Vec::with_capacity(position.z * position.z);
+                let frame_size = position.x * position.y;
+                let mut niter: Iter<f32> = noise.iter();
+                for _w in 0..position.w {
+                    for _z in 0..position.z {
+                        let mut frame = Vec::with_capacity(frame_size);
+                        for _xy in 0..frame_size {
+                            let pix = niter.next();
+                            if let Some(xy) = pix {
+                                frame.push(*xy as u32);
+                            }
+                        }
+                        frames.push(frame);
+                    }
+                }
+                frames
+            }
+        },
     };
     let width = args.width;
     let height = args.height;
@@ -382,6 +391,8 @@ fn main() {
     window.limit_update_rate(Some(std::time::Duration::from_micros(refresh_interval)));
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
-        window.update_with_buffer(&buffer, width, height).unwrap();
+        for buffer in &buffers {
+            window.update_with_buffer(&buffer, width, height).unwrap();
+        }
     }
 }
