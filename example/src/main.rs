@@ -12,6 +12,7 @@ const DEPTH: usize = 1;
 const TIME: usize = 5;
 const DEFAULT_FREQUENCY: f32 = 1.2;
 const DEFAULT_JITTER: f32 = 1.2;
+const DEFAULT_LACUNARITY: f32 = 0.5;
 const DEFAULT_OCTAVES: u8 = 3;
 
 const SCALE_MIN: f32 = 0.0;
@@ -149,6 +150,8 @@ enum Commands {
     Ridge {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_LACUNARITY)]
+        lacunarity: f32,
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
         octaves: u8,
     },
@@ -268,8 +271,11 @@ fn main() {
         };
     }
     macro_rules! noise_build_settings {
-        ($builder: expr, $frequency: expr, $octaves: expr/* TODO: and more */) => {
-            $builder.with_freq($frequency).with_octaves($octaves)
+        ($builder: expr, $frequency: expr, $lacunarity: expr, $octaves: expr/* TODO: and more */) => {
+            $builder
+                .with_freq($frequency)
+                .with_lacunarity($lacunarity)
+                .with_octaves($octaves)
         };
     }
     let buffer: Vec<u32> = match args.command {
@@ -309,12 +315,16 @@ fn main() {
             };
             noise.iter().map(|x| *x as u32).collect()
         }
-        Commands::Ridge { frequency, octaves } => {
+        Commands::Ridge {
+            frequency,
+            lacunarity,
+            octaves,
+        } => {
             let noise = match args.dimension {
                 Dimension::One => {
                     let mut builder =
                         simdnoise::NoiseBuilder::ridge_1d_offset(offset.x, position.x);
-                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let builder = noise_build_settings!(builder, frequency, lacunarity, octaves);
                     let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
                     let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
                     let mut xy = Vec::with_capacity(x.len() * position.y);
@@ -327,7 +337,7 @@ fn main() {
                     let mut builder = simdnoise::NoiseBuilder::ridge_2d_offset(
                         offset.x, position.x, offset.y, position.y,
                     );
-                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let builder = noise_build_settings!(builder, frequency, lacunarity, octaves);
                     let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
                     noise.iter().map(|x| *x as u32).collect()
                 }
@@ -335,7 +345,7 @@ fn main() {
                     let mut builder = simdnoise::NoiseBuilder::ridge_3d_offset(
                         offset.x, position.x, offset.y, position.y, offset.z, position.z,
                     );
-                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let builder = noise_build_settings!(builder, frequency, lacunarity, octaves);
                     let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
                     noise.iter().map(|x| *x as u32).collect()
                 }
@@ -344,7 +354,7 @@ fn main() {
                         offset.x, position.x, offset.y, position.y, offset.z, position.z, offset.w,
                         position.z,
                     );
-                    let builder = noise_build_settings!(builder, frequency, octaves);
+                    let builder = noise_build_settings!(builder, frequency, lacunarity, octaves);
                     let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
                     noise.iter().map(|x| *x as u32).collect() // TODO: probably animate
                 }
