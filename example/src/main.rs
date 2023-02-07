@@ -273,6 +273,14 @@ fn main() {
                 .generate_scaled($scale_min, $scale_max)
         };
     }
+    macro_rules! cellular_build_settings {
+        ($builder: expr, $freq: expr, $jitter: expr, $distance: expr) => {
+            $builder
+                .with_freq($freq)
+                .with_jitter($jitter)
+                .with_distance_function($distance)
+        };
+    }
     macro_rules! noise_build_settings {
         ($builder: expr, $frequency: expr, $lacunarity: expr, $gain: expr, $octaves: expr) => {
             $builder
@@ -287,39 +295,27 @@ fn main() {
             frequency,
             jitter,
             distance,
-        } => {
-            macro_rules! cellular_build_settings {
-                ($builder: expr, $freq: expr, $jitter: expr, $distance: expr) => {
-                    $builder
-                        .with_freq($freq)
-                        .with_jitter($jitter)
-                        .with_distance_function($distance)
-                };
+        } => match args.dimension {
+            Dimension::Two => {
+                let mut builder = simdnoise::NoiseBuilder::cellular_2d_offset(
+                    offset.x, position.x, offset.y, position.y,
+                );
+                let builder = cellular_build_settings!(builder, frequency, jitter, distance.into());
+                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                noise.iter().map(|x| *x as u32).collect()
             }
-            match args.dimension {
-                Dimension::Two => {
-                    let mut builder = simdnoise::NoiseBuilder::cellular_2d_offset(
-                        offset.x, position.x, offset.y, position.y,
-                    );
-                    let builder =
-                        cellular_build_settings!(builder, frequency, jitter, distance.into());
-                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                    noise.iter().map(|x| *x as u32).collect()
-                }
-                Dimension::Three => {
-                    let mut builder = simdnoise::NoiseBuilder::cellular_3d_offset(
-                        offset.x, position.x, offset.y, position.y, offset.z, position.z,
-                    );
-                    let builder =
-                        cellular_build_settings!(builder, frequency, jitter, distance.into());
-                    let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
-                    noise.iter().map(|x| *x as u32).collect()
-                }
-                _ => {
-                    unimplemented!()
-                }
+            Dimension::Three => {
+                let mut builder = simdnoise::NoiseBuilder::cellular_3d_offset(
+                    offset.x, position.x, offset.y, position.y, offset.z, position.z,
+                );
+                let builder = cellular_build_settings!(builder, frequency, jitter, distance.into());
+                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                noise.iter().map(|x| *x as u32).collect()
             }
-        }
+            _ => {
+                unimplemented!()
+            }
+        },
         Commands::Ridge {
             frequency,
             lacunarity,
