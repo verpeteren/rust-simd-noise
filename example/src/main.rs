@@ -10,6 +10,7 @@ const WIDTH: usize = 1920;
 const HEIGHT: usize = 1080;
 const DEPTH: usize = 1;
 const TIME: usize = 5;
+const DEFAULT_FREQUENCY: f32 = 1.2;
 
 const SCALE_MIN: f32 = 0.0;
 const SCALE_MAX: f32 = 255.0;
@@ -136,15 +137,15 @@ enum Commands {
     Cellular {
         #[clap(long, value_parser, default_value_t = Distance::Euclidean, help="The distance function", global=true)]
         distance: Distance,
-        #[arg(short, long, value_parser, default_value_t = 1.2)]
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
-        #[arg(short, long, value_parser, default_value_t = 1.2)]
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         jitter: f32,
         //@TODO: index0/1
     },
     #[command(arg_required_else_help = true)]
     Ridge {
-        #[arg(short, long, value_parser, default_value_t = 1.2)]
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
         #[arg(short, long, value_parser, default_value_t = 8)]
         octaves: u8,
