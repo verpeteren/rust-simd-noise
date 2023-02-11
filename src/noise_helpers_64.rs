@@ -1,13 +1,13 @@
-use simdeez::*;
+use simdeez::Simd;
 
 use super::NoiseType;
 
-use crate::noise::cell2_64::*;
-use crate::noise::cell_64::*;
-use crate::noise::fbm_64::*;
-use crate::noise::ridge_64::*;
-use crate::noise::simplex_64::*;
-use crate::noise::turbulence_64::*;
+use crate::noise::cell2_64::{cellular2_2d, cellular2_3d};
+use crate::noise::cell_64::{cellular_2d, cellular_3d};
+use crate::noise::fbm_64::{fbm_1d, fbm_2d, fbm_3d, fbm_4d};
+use crate::noise::ridge_64::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
+use crate::noise::simplex_64::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
+use crate::noise::turbulence_64::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
 
 use std::f64;
 

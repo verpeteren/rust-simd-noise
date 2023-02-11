@@ -5,7 +5,7 @@
 
 use std::f32;
 
-use simdeez::*;
+use simdeez::Simd;
 
 pub const X_PRIME: i32 = 1619;
 pub const Y_PRIME: i32 = 31337;

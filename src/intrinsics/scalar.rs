@@ -14,9 +14,9 @@ use crate::noise::turbulence as simplex_turbulence;
 use crate::noise::turbulence_64 as simplex_turbulence_64;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
-use crate::shared::*;
+use crate::shared::scale_noise;
 
-use simdeez::scalar::*;
+use simdeez::scalar::{F32x1, F64x1, Scalar};
 
 use std::f32;
 

@@ -1,5 +1,6 @@
 use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4};
-use simdeez::*;
+
+use simdeez::Simd;
 
 const F2: f64 = 0.36602540378;
 const F3: f64 = 1.0 / 3.0;

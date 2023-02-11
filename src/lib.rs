@@ -93,7 +93,7 @@ mod noise_helpers;
 mod noise_helpers_64;
 mod shared;
 
-use intrinsics::*;
+use intrinsics::{avx2, scalar, sse2, sse41};
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 macro_rules! get_1d_noise {
@@ -275,7 +275,7 @@ pub mod cell_distance_function;
 pub use cell_distance_function::CellDistanceFunction;
 
 pub mod cell_return_type;
-use cell_return_type::CellReturnType;
+pub use cell_return_type::CellReturnType;
 
 pub mod cell2_return_type;
 pub use cell2_return_type::Cell2ReturnType;

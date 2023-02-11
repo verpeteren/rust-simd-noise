@@ -1,13 +1,13 @@
-use simdeez::*;
+use crate::NoiseType;
 
-use super::NoiseType;
-
-use crate::noise::cell;
-use crate::noise::cell2;
+use crate::noise::cell::{cellular_2d, cellular_3d};
+use crate::noise::cell2::{cellular2_2d, cellular2_3d};
 use crate::noise::fbm::{fbm_1d, fbm_2d, fbm_3d, fbm_4d};
 use crate::noise::ridge::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
-use crate::noise::simplex::*;
+use crate::noise::simplex::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 use crate::noise::turbulence::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
+
+use simdeez::Simd;
 
 use std::f32;
 
@@ -361,7 +361,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Gradient(s) => get_2d_noise_helper!(s, simplex_2d::<S>, s.dim.seed),
         NoiseType::Cellular(s) => get_2d_noise_helper!(
             s,
-            cell::cellular_2d::<S>,
+            cellular_2d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),
@@ -369,7 +369,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         ),
         NoiseType::Cellular2(s) => get_2d_noise_helper!(
             s,
-            cell2::cellular2_2d::<S>,
+            cellular2_2d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),
@@ -416,7 +416,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Gradient(s) => get_3d_noise_helper!(s, simplex_3d::<S>, s.dim.seed),
         NoiseType::Cellular(s) => get_3d_noise_helper!(
             s,
-            cell::cellular_3d::<S>,
+            cellular_3d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),
@@ -424,7 +424,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         ),
         NoiseType::Cellular2(s) => get_3d_noise_helper!(
             s,
-            cell2::cellular2_3d::<S>,
+            cellular2_3d::<S>,
             s.distance_function,
             s.return_type,
             S::set1_ps(s.jitter),

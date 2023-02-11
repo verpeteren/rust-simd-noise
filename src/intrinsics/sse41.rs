@@ -18,9 +18,9 @@ use crate::noise::turbulence as simplex_turbulence;
 use crate::noise::turbulence_64 as simplex_turbulence_64;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
-use crate::shared::*;
+use crate::shared::scale_noise;
 
-use simdeez::sse41::*;
+use simdeez::sse41::{F32x4, F64x2, Sse41};
 
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;

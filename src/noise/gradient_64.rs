@@ -1,4 +1,4 @@
-use simdeez::*;
+use simdeez::Simd;
 
 /// Generates a random integer gradient in ±7 inclusive, and returns its product with `x`
 ///

@@ -18,10 +18,10 @@ use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
 use crate::noise::turbulence as simplex_turbulence;
 use crate::noise::turbulence_64 as simplex_turbulence_64;
-use crate::shared::*;
+use crate::shared::scale_noise;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
-use simdeez::avx2::*;
+use simdeez::avx2::{Avx2, F32x8, F64x4};
 
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;

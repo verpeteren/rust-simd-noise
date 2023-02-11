@@ -1,6 +1,6 @@
 use std::f64;
 
-use simdeez::*;
+use simdeez::Simd;
 
 pub const X_PRIME: i64 = 1619;
 pub const Y_PRIME: i64 = 31337;

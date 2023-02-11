@@ -4,7 +4,8 @@
 //! interfaces.
 
 use crate::noise::gradient::{grad1, grad2, grad3d, grad3d_dot, grad4};
-use simdeez::*;
+
+use simdeez::Simd;
 
 use std::f32;
 

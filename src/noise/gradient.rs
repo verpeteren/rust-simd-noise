@@ -1,5 +1,6 @@
 use crate::noise::hash3d::Hash3d;
-use simdeez::*;
+
+use simdeez::Simd;
 
 /// Generates a random integer gradient in ±7 inclusive
 ///

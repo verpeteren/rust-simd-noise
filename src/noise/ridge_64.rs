@@ -1,5 +1,6 @@
-use crate::noise::simplex_64::*;
-use simdeez::*;
+use crate::noise::simplex_64::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
+
+use simdeez::Simd;
 
 #[inline(always)]
 pub unsafe fn ridge_1d<S: Simd>(
