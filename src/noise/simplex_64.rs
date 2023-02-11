@@ -56,26 +56,6 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64, x: S::Vf64) -> S::Vf64 {
     S::mul_pd(grad, x)
 }
 
-#[inline(always)]
-pub unsafe fn turbulence_1d<S: Simd>(
-    mut x: S::Vf64,
-    lacunarity: S::Vf64,
-    gain: S::Vf64,
-    octaves: u8,
-    seed: i64,
-) -> S::Vf64 {
-    let mut amp = S::set1_pd(1.0);
-    let mut result = S::abs_pd(simplex_1d::<S>(x, seed));
-
-    for _ in 1..octaves {
-        x = S::mul_pd(x, lacunarity);
-        amp = S::mul_pd(amp, gain);
-        result = S::add_pd(result, S::abs_pd(simplex_1d::<S>(x, seed)));
-    }
-
-    result
-}
-
 /// Samples 1-dimensional simplex noise
 ///
 /// Produces a value -1 ≤ n ≤ 1.
@@ -203,32 +183,6 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 
     n2 = S::andnot_pd(cond, n2);
 
     S::add_pd(n0, S::add_pd(n1, n2)) * S::set1_pd(45.26450774985561631259)
-}
-
-#[inline(always)]
-pub unsafe fn turbulence_2d<S: Simd>(
-    mut x: S::Vf64,
-    mut y: S::Vf64,
-    lac: S::Vf64,
-    gain: S::Vf64,
-    octaves: u8,
-    seed: i64,
-) -> S::Vf64 {
-    let mut result = S::abs_pd(simplex_2d::<S>(x, y, seed));
-
-    let mut amp = S::set1_pd(1.0);
-
-    for _ in 1..octaves {
-        x = S::mul_pd(x, lac);
-        y = S::mul_pd(y, lac);
-        amp = S::mul_pd(amp, gain);
-        result = S::add_pd(
-            result,
-            S::abs_pd(S::mul_pd(simplex_2d::<S>(x, y, seed), amp)),
-        );
-    }
-
-    result
 }
 
 #[inline(always)]
@@ -442,33 +396,6 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64)
     n3 = S::andnot_pd(cond, n3);
 
     S::add_pd(n0, S::add_pd(n1, S::add_pd(n2, n3)))
-}
-
-#[inline(always)]
-pub unsafe fn turbulence_3d<S: Simd>(
-    mut x: S::Vf64,
-    mut y: S::Vf64,
-    mut z: S::Vf64,
-    lac: S::Vf64,
-    gain: S::Vf64,
-    octaves: u8,
-    seed: i64,
-) -> S::Vf64 {
-    let mut result = S::abs_pd(simplex_3d::<S>(x, y, z, seed));
-    let mut amp = S::set1_pd(1.0);
-
-    for _ in 1..octaves {
-        x = S::mul_pd(x, lac);
-        y = S::mul_pd(y, lac);
-        z = S::mul_pd(z, lac);
-        amp = S::mul_pd(amp, gain);
-        result = S::add_pd(
-            result,
-            S::abs_pd(S::mul_pd(simplex_3d::<S>(x, y, z, seed), amp)),
-        );
-    }
-
-    result
 }
 
 #[inline(always)]
@@ -730,35 +657,6 @@ pub unsafe fn simplex_4d<S: Simd>(
     n4 = S::andnot_pd(cond, n4);
 
     S::add_pd(n0, S::add_pd(n1, S::add_pd(n2, S::add_pd(n3, n4)))) * S::set1_pd(62.77772078955791)
-}
-
-#[inline(always)]
-pub unsafe fn turbulence_4d<S: Simd>(
-    mut x: S::Vf64,
-    mut y: S::Vf64,
-    mut z: S::Vf64,
-    mut w: S::Vf64,
-    lac: S::Vf64,
-    gain: S::Vf64,
-    octaves: u8,
-    seed: i64,
-) -> S::Vf64 {
-    let mut result = S::abs_pd(simplex_4d::<S>(x, y, z, w, seed));
-    let mut amp = S::set1_pd(1.0);
-
-    for _ in 1..octaves {
-        x = S::mul_pd(x, lac);
-        y = S::mul_pd(y, lac);
-        z = S::mul_pd(z, lac);
-        w = S::mul_pd(w, lac);
-        amp = S::mul_pd(amp, gain);
-        result = S::add_pd(
-            result,
-            S::abs_pd(S::mul_pd(simplex_4d::<S>(x, y, z, w, seed), amp)),
-        );
-    }
-
-    result
 }
 
 #[cfg(test)]

@@ -7,6 +7,7 @@ use crate::noise::cell_64::*;
 use crate::noise::fbm_64::*;
 use crate::noise::ridge_64::*;
 use crate::noise::simplex_64::*;
+use crate::noise::turbulence_64::*;
 
 use std::f64;
 

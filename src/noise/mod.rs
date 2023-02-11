@@ -12,3 +12,4 @@ pub mod ridge_64;
 pub mod simplex;
 pub mod simplex_64;
 pub mod turbulence;
+pub mod turbulence_64;
