@@ -5,7 +5,6 @@ use simdeez::Simd;
 pub const X_PRIME: i64 = 1619;
 pub const Y_PRIME: i64 = 31337;
 pub const Z_PRIME: i64 = 6971;
-//pub const BIT_5_MASK : i64 = 31;
 pub const BIT_10_MASK: i64 = 1023;
 pub const HASH_2_FLOAT: f64 = 1.0 / 2147483648.0;
 
