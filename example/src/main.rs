@@ -281,6 +281,15 @@ where
     }
 }
 
+fn noise_1d_to_frames(noise: Vec<f32>, position: Coordinate<usize>) -> Vec<Vec<u32>> {
+    let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
+    let mut xy = Vec::with_capacity(x.len() * position.y);
+    for _i in 0..(position.y) {
+        xy.extend_from_slice(x.as_slice());
+    }
+    vec![xy]
+}
+
 fn noise_4d_to_frames(noise: Vec<f32>, position: Coordinate<usize>) -> Vec<Vec<u32>> {
     let mut frames = Vec::with_capacity(position.z * position.z);
     let frame_size = position.x * position.y;
@@ -332,12 +341,7 @@ macro_rules! process_noise_command {
                 let builder =
                     noise_build_settings!(builder, $frequency, $lacunarity, $gain, $octaves);
                 let noise = common_build_settings!(builder, $seed, SCALE_MIN, SCALE_MAX);
-                let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
-                let mut xy = Vec::with_capacity(x.len() * $position.y);
-                for _i in 0..($position.y) {
-                    xy.extend_from_slice(x.as_slice());
-                }
-                vec![xy]
+                noise_1d_to_frames(noise, $position)
             }
             Dimension::Two => {
                 let mut builder = simdnoise::NoiseBuilder::$func_2d(
