@@ -8,7 +8,8 @@
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 8, and when it is not small relative height and depth.
 
-use crate::noise::cellular as cell;
+use crate::noise::cell;
+use crate::noise::cell2;
 use crate::noise::cellular_64 as cell_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
