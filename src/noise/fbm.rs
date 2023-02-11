@@ -1,8 +1,5 @@
-use crate::noise::hash3d::Hash3d;
 use crate::noise::simplex::*;
 use simdeez::*;
-
-use std::f32;
 
 #[inline(always)]
 pub unsafe fn fbm_1d<S: Simd>(
