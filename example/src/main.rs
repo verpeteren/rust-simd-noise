@@ -170,6 +170,17 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
         octaves: u8,
     },
+    #[command(arg_required_else_help = true)]
+    Turbulence {
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
+        frequency: f32,
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_LACUNARITY)]
+        lacunarity: f32,
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_GAIN)]
+        gain: f32,
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
+        octaves: u8,
+    },
 }
 
 struct Coordinate<T> {
@@ -432,6 +443,25 @@ fn process_command(
             ridge_2d_offset,
             ridge_3d_offset,
             ridge_4d_offset,
+            dimension,
+            seed,
+            position,
+            offset,
+            frequency,
+            lacunarity,
+            gain,
+            octaves
+        ),
+        Commands::Turbulence {
+            frequency,
+            lacunarity,
+            gain,
+            octaves,
+        } => process_noise_command!(
+            turbulence_1d_offset,
+            turbulence_2d_offset,
+            turbulence_3d_offset,
+            turbulence_4d_offset,
             dimension,
             seed,
             position,
