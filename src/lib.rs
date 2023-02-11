@@ -278,7 +278,7 @@ pub mod cell_return_type;
 use cell_return_type::CellReturnType;
 
 pub mod cell2_return_type;
-use cell2_return_type::Cell2ReturnType;
+pub use cell2_return_type::Cell2ReturnType;
 
 pub mod noise_dimensions;
 use noise_dimensions::NoiseDimensions;
@@ -986,29 +986,8 @@ impl GradientSettings {
     }
 }
 
-/// Specifies what type of noise to generate and contains any relevant settings.
-#[derive(Copy, Clone)]
-pub enum NoiseType {
-    Fbm(FbmSettings),
-    Ridge(RidgeSettings),
-    Turbulence(TurbulenceSettings),
-    Gradient(GradientSettings),
-    Cellular(CellularSettings),
-    Cellular2(Cellular2Settings),
-}
-
-impl DimensionalBeing for NoiseType {
-    fn get_dimensions(&self) -> NoiseDimensions {
-        match self {
-            NoiseType::Fbm(s) => s.get_dimensions(),
-            NoiseType::Ridge(s) => s.get_dimensions(),
-            NoiseType::Turbulence(s) => s.get_dimensions(),
-            NoiseType::Gradient(s) => s.get_dimensions(),
-            NoiseType::Cellular(s) => s.get_dimensions(),
-            NoiseType::Cellular2(s) => s.get_dimensions(),
-        }
-    }
-}
+pub mod noise_type;
+pub use noise_type::NoiseType;
 
 pub struct NoiseBuilder {}
 
