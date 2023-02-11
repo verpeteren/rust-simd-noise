@@ -4,6 +4,7 @@ use super::NoiseType;
 
 use crate::noise::cell;
 use crate::noise::cell2;
+use crate::noise::ridge::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::simplex::*;
 
 use std::f32;

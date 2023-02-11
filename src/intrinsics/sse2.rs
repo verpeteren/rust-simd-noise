@@ -8,6 +8,7 @@
 
 use crate::noise::cell;
 use crate::noise::cell_64;
+use crate::noise::ridge as simplex_ridge;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
@@ -138,7 +139,7 @@ pub unsafe fn ridge_1d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::ridge_1d::<Sse2>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
+    simplex_ridge::ridge_1d::<Sse2>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d turbulence.
@@ -247,7 +248,7 @@ pub unsafe fn ridge_2d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::ridge_2d::<Sse2>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
+    simplex_ridge::ridge_2d::<Sse2>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
 }
 /// Get a single value of 2d turbulence.
 #[target_feature(enable = "sse2")]
@@ -370,7 +371,7 @@ pub unsafe fn ridge_3d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::ridge_3d::<Sse2>(
+    simplex_ridge::ridge_3d::<Sse2>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
@@ -546,7 +547,7 @@ pub unsafe fn ridge_4d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::ridge_4d::<Sse2>(
+    simplex_ridge::ridge_4d::<Sse2>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
