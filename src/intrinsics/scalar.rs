@@ -3,8 +3,7 @@
 //! These are much slower than SIMD, and hence on capable hardware have little use but testing.
 
 use crate::noise::cell;
-use crate::noise::cell2;
-use crate::noise::cellular_64 as cell_64;
+use crate::noise::cell_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
