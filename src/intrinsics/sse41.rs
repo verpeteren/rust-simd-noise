@@ -14,6 +14,7 @@ use crate::noise::ridge as simplex_ridge;
 use crate::noise::ridge_64 as simplex_ridge_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
+use crate::noise::turbulence as simplex_turbulence;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
 use crate::shared::*;
@@ -155,7 +156,14 @@ pub unsafe fn turbulence_1d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::turbulence_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
+    simplex_turbulence::turbulence_1d::<Sse41>(
+        F32x4(x),
+        F32x4(lacunarity),
+        F32x4(gain),
+        octaves,
+        seed,
+    )
+    .0
 }
 
 /// Get a single value of 1d simplex noise, results
@@ -265,7 +273,15 @@ pub unsafe fn turbulence_2d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::turbulence_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
+    simplex_turbulence::turbulence_2d::<Sse41>(
+        F32x4(x),
+        F32x4(y),
+        F32x4(lac),
+        F32x4(gain),
+        octaves,
+        seed,
+    )
+    .0
 }
 
 /// Get a single value of 2d simplex noise, results
@@ -400,7 +416,7 @@ pub unsafe fn turbulence_3d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::turbulence_3d::<Sse41>(
+    simplex_turbulence::turbulence_3d::<Sse41>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
@@ -578,7 +594,7 @@ pub unsafe fn turbulence_4d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    smplx::turbulence_4d::<Sse41>(
+    simplex_turbulence::turbulence_4d::<Sse41>(
         F32x4(x),
         F32x4(y),
         F32x4(z),

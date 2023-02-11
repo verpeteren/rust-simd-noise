@@ -7,6 +7,7 @@ use crate::noise::cell2;
 use crate::noise::fbm::{fbm_1d, fbm_2d, fbm_3d, fbm_4d};
 use crate::noise::ridge::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::simplex::*;
+use crate::noise::turbulence::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
 
 use std::f32;
 
