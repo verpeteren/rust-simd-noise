@@ -282,28 +282,25 @@ macro_rules! noise_build_settings {
     };
 }
 
-fn main() {
-    let args = Args::parse();
-    let position = Coordinate::new(args.width, args.height, args.depth, args.time);
-    let offset = Coordinate::new_checked(
-        args.dimension,
-        args.offset_x,
-        args.offset_y,
-        args.offset_z,
-        args.offset_w,
-    );
-    let buffers: Vec<Vec<u32>> = match args.command {
+fn process_command(
+    command: Commands,
+    dimension: Dimension,
+    seed: i32,
+    position: Coordinate<usize>,
+    offset: Coordinate<f32>,
+) -> Vec<Vec<u32>> {
+    match command {
         Commands::Cellular {
             frequency,
             jitter,
             distance,
-        } => match args.dimension {
+        } => match dimension {
             Dimension::Two => {
                 let mut builder = simdnoise::NoiseBuilder::cellular_2d_offset(
                     offset.x, position.x, offset.y, position.y,
                 );
                 let builder = cellular_build_settings!(builder, frequency, jitter, distance.into());
-                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
                 vec![noise.iter().map(|x| *x as u32).collect()]
             }
             Dimension::Three => {
@@ -311,7 +308,7 @@ fn main() {
                     offset.x, position.x, offset.y, position.y, offset.z, position.z,
                 );
                 let builder = cellular_build_settings!(builder, frequency, jitter, distance.into());
-                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
                 vec![noise.iter().map(|x| *x as u32).collect()]
             }
             _ => {
@@ -324,11 +321,11 @@ fn main() {
             lacunarity,
             gain,
             octaves,
-        } => match args.dimension {
+        } => match dimension {
             Dimension::One => {
                 let mut builder = simdnoise::NoiseBuilder::ridge_1d_offset(offset.x, position.x);
                 let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
                 let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
                 let mut xy = Vec::with_capacity(x.len() * position.y);
                 for _i in 0..(position.y) {
@@ -341,7 +338,7 @@ fn main() {
                     offset.x, position.x, offset.y, position.y,
                 );
                 let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
                 vec![noise.iter().map(|x| *x as u32).collect()]
             }
             Dimension::Three => {
@@ -349,7 +346,7 @@ fn main() {
                     offset.x, position.x, offset.y, position.y, offset.z, position.z,
                 );
                 let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
                 vec![noise.iter().map(|x| *x as u32).collect()]
             }
             Dimension::Four => {
@@ -358,7 +355,7 @@ fn main() {
                     position.w,
                 );
                 let builder = noise_build_settings!(builder, frequency, lacunarity, gain, octaves);
-                let noise = common_build_settings!(builder, args.seed, SCALE_MIN, SCALE_MAX);
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
                 let mut frames = Vec::with_capacity(position.z * position.z);
                 let frame_size = position.x * position.y;
                 let mut niter: Iter<f32> = noise.iter();
@@ -377,7 +374,21 @@ fn main() {
                 frames
             }
         },
-    };
+    }
+}
+
+fn main() {
+    let args = Args::parse();
+    let position = Coordinate::new(args.width, args.height, args.depth, args.time);
+    let offset = Coordinate::new_checked(
+        args.dimension,
+        args.offset_x,
+        args.offset_y,
+        args.offset_z,
+        args.offset_w,
+    );
+    let buffers = process_command(args.command, args.dimension, args.seed, position, offset);
+
     let width = args.width;
     let height = args.height;
     let mut window = Window::new(
