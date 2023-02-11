@@ -3,6 +3,7 @@
 //! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
 //! interfaces.
 
+use crate::noise::hash3d::Hash3d;
 use simdeez::*;
 
 use std::f32;
@@ -465,17 +466,6 @@ unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> [S::
         "exactly two axes are chosen"
     );
     [gx, gy, gz]
-}
-
-struct Hash3d<S: Simd> {
-    // Masks guiding dimension selection
-    l8: S::Vf32,
-    l4: S::Vf32,
-    h12_or_14: S::Vf32,
-
-    // Signs for the selected dimensions
-    h1: S::Vf32,
-    h2: S::Vf32,
 }
 
 /// Compute hash values used by `grad3d` and `grad3d_dot`
