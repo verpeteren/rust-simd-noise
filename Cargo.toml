@@ -13,6 +13,7 @@ categories = ["game-engines", "multimedia::images"]
 edition = "2018"
 
 [dependencies]
+readonly = "0.2.3"
 simdeez = "1.0.8"
 #simdeez = {path = "../simdeez"}
 
