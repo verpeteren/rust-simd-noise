@@ -35,7 +35,7 @@ struct Args {
     #[clap(long, value_parser, default_value_t = TIME, help="The w dimension of the generated image", global=true, required=false)]
     pub time: usize,
 
-    #[clap(long, value_parser, default_value_t = Dimension::Three, help="The number of dimensions of the generated noice", global=true)]
+    #[clap(long, value_parser, default_value_t = Dimension::Three, help="The number of dimensions of the generated noise", global=true)]
     pub dimension: Dimension,
 
     #[clap(
