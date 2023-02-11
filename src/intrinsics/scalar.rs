@@ -5,6 +5,7 @@
 use crate::noise::cell;
 use crate::noise::cell_64;
 use crate::noise::ridge as simplex_ridge;
+use crate::noise::ridge_64 as simplex_ridge_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
@@ -142,7 +143,7 @@ pub unsafe fn fbm_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8, seed: 
 /// Get a single value of 2d ridge noise.
 
 pub unsafe fn ridge_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8, seed: i64) -> f64 {
-    smplx_64::ridge_1d::<Scalar>(F64x1(x), F64x1(lacunarity), F64x1(gain), octaves, seed).0
+    simplex_ridge_64::ridge_1d::<Scalar>(F64x1(x), F64x1(lacunarity), F64x1(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d turbulence.
@@ -208,7 +209,8 @@ pub unsafe fn ridge_2d(x: f32, y: f32, lac: f32, gain: f32, octaves: u8, seed: i
 /// Get a single value of 2d ridge noise.
 
 pub unsafe fn ridge_2d_f64(x: f64, y: f64, lac: f64, gain: f64, octaves: u8, seed: i64) -> f64 {
-    smplx_64::ridge_2d::<Scalar>(F64x1(x), F64x1(y), F64x1(lac), F64x1(gain), octaves, seed).0
+    simplex_ridge_64::ridge_2d::<Scalar>(F64x1(x), F64x1(y), F64x1(lac), F64x1(gain), octaves, seed)
+        .0
 }
 
 /// Get a single value of 2d turbulence.
@@ -327,7 +329,7 @@ pub unsafe fn ridge_3d_f64(
     octaves: u8,
     seed: i64,
 ) -> f64 {
-    smplx_64::ridge_3d::<Scalar>(
+    simplex_ridge_64::ridge_3d::<Scalar>(
         F64x1(x),
         F64x1(y),
         F64x1(z),
@@ -504,7 +506,7 @@ pub unsafe fn ridge_4d_f64(
     octaves: u8,
     seed: i64,
 ) -> f64 {
-    smplx_64::ridge_4d::<Scalar>(
+    simplex_ridge_64::ridge_4d::<Scalar>(
         F64x1(x),
         F64x1(y),
         F64x1(z),
