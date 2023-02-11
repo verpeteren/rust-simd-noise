@@ -1,6 +1,6 @@
 use simdeez::*;
 
-#[readonly::make]
+//#[readonly::make]// this causes a -50% performance regression in fbm3d/sse2
 pub struct Hash3d<S: Simd> {
     // Masks guiding dimension selection
     pub l8: S::Vf32,
