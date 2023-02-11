@@ -271,16 +271,8 @@ macro_rules! get_4d_scaled_noise {
     };
 }
 
-#[derive(Copy, Clone)]
-/// The function to use to compute distance between cells
-pub enum CellDistanceFunction {
-    /// The actual straight line distance
-    Euclidean,
-    /// Sum of the X and Y distances
-    Manhattan,
-    /// Combines Manhattan and Euclidean
-    Natural,
-}
+pub mod cell_distance_function;
+pub use cell_distance_function::CellDistanceFunction;
 
 pub mod cell_return_type;
 use cell_return_type::CellReturnType;
