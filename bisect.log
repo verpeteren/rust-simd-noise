@@ -1,0 +1,15 @@
+git bisect start
+# good: [3a4f3e6f79608616b6ee186dc665b601d015dc1e] Merge pull request #36 from Linus789/master
+git bisect good 3a4f3e6f79608616b6ee186dc665b601d015dc1e
+# bad: [56d69326cd8e194089ffcb95569860ed5e593257] chore: remove dead code
+git bisect bad 56d69326cd8e194089ffcb95569860ed5e593257
+# good: [69cc7c11a598d014092c1f8c636762e8495b130e] patch: example; ridge 'complete'
+git bisect good 69cc7c11a598d014092c1f8c636762e8495b130e
+# good: [92ecff15f174d5ed624914eb64ac91d2974a47b4] patch: example; extract noise_2d_to_frames
+git bisect good 92ecff15f174d5ed624914eb64ac91d2974a47b4
+# bad: [9a8153a5687233e2c0f622ce0509c776a4e9f151] patch: move Cell & Cell2 to its own files
+git bisect bad 9a8153a5687233e2c0f622ce0509c776a4e9f151
+# bad: [9a8153a5687233e2c0f622ce0509c776a4e9f151] patch: move Cell & Cell2 to its own files
+git bisect bad 9a8153a5687233e2c0f622ce0509c776a4e9f151
+# bad: [9a8153a5687233e2c0f622ce0509c776a4e9f151] patch: move Cell & Cell2 to its own files
+git bisect bad 9a8153a5687233e2c0f622ce0509c776a4e9f151
