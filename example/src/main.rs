@@ -181,6 +181,8 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
         octaves: u8,
     },
+    #[command(arg_required_else_help = true)]
+    Gradient {},
 }
 
 struct Coordinate<T> {
@@ -303,7 +305,6 @@ macro_rules! noise_build_settings {
             .with_octaves($octaves)
     };
 }
-
 macro_rules! process_noise_command {
     ($func_1d: ident, $func_2d: ident, $func_3d: ident, $func_4d: ident, $dimension: expr, $seed: expr, $position: expr, $offset: expr, $frequency: expr, $lacunarity: expr, $gain: expr, $octaves: expr) => {
         match $dimension {
@@ -471,6 +472,56 @@ fn process_command(
             gain,
             octaves
         ),
+
+        Commands::Gradient {} => match dimension {
+            Dimension::One => {
+                let mut builder = simdnoise::NoiseBuilder::gradient_1d_offset(offset.x, position.x);
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
+                let x: Vec<u32> = noise.iter().map(|x| *x as u32).collect();
+                let mut xy = Vec::with_capacity(x.len() * position.y);
+                for _i in 0..(position.y) {
+                    xy.extend_from_slice(x.as_slice());
+                }
+                vec![xy]
+            }
+            Dimension::Two => {
+                let mut builder = simdnoise::NoiseBuilder::gradient_2d_offset(
+                    offset.x, position.x, offset.y, position.y,
+                );
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
+                vec![noise.iter().map(|x| *x as u32).collect()]
+            }
+            Dimension::Three => {
+                let mut builder = simdnoise::NoiseBuilder::gradient_3d_offset(
+                    offset.x, position.x, offset.y, position.y, offset.z, position.z,
+                );
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
+                vec![noise.iter().map(|x| *x as u32).collect()]
+            }
+            Dimension::Four => {
+                let mut builder = simdnoise::NoiseBuilder::gradient_4d_offset(
+                    offset.x, position.x, offset.y, position.y, offset.z, position.z, offset.w,
+                    position.w,
+                );
+                let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
+                let mut frames = Vec::with_capacity(position.z * position.z);
+                let frame_size = position.x * position.y;
+                let mut niter: Iter<f32> = noise.iter();
+                for _w in 0..position.w {
+                    for _z in 0..position.z {
+                        let mut frame = Vec::with_capacity(frame_size);
+                        for _xy in 0..frame_size {
+                            let pix = niter.next();
+                            if let Some(xy) = pix {
+                                frame.push(*xy as u32);
+                            }
+                        }
+                        frames.push(frame);
+                    }
+                }
+                frames
+            }
+        },
     }
 }
 
