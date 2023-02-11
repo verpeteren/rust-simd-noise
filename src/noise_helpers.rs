@@ -4,6 +4,7 @@ use super::NoiseType;
 
 use crate::noise::cell;
 use crate::noise::cell2;
+use crate::noise::fbm::{fbm_1d, fbm_2d, fbm_3d, fbm_4d};
 use crate::noise::ridge::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::simplex::*;
 

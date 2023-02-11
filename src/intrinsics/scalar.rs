@@ -4,6 +4,7 @@
 
 use crate::noise::cell;
 use crate::noise::cell_64;
+use crate::noise::fbm as simplex_fbm;
 use crate::noise::ridge as simplex_ridge;
 use crate::noise::ridge_64 as simplex_ridge_64;
 use crate::noise::simplex as smplx;
@@ -113,7 +114,7 @@ pub unsafe fn simplex_1d(x: f32, seed: i32) -> f32 {
 /// Get a single value of 1d fractal brownian motion.
 
 pub unsafe fn fbm_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    smplx::fbm_1d::<Scalar>(F32x1(x), F32x1(lacunarity), F32x1(gain), octaves, seed).0
+    simplex_fbm::fbm_1d::<Scalar>(F32x1(x), F32x1(lacunarity), F32x1(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -191,7 +192,7 @@ pub unsafe fn simplex_2d_f64(x: f64, y: f64, seed: i64) -> f64 {
 /// Get a single value of 2d fractal brownian motion.
 
 pub unsafe fn fbm_2d(x: f32, y: f32, lac: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    smplx::fbm_2d::<Scalar>(F32x1(x), F32x1(y), F32x1(lac), F32x1(gain), octaves, seed).0
+    simplex_fbm::fbm_2d::<Scalar>(F32x1(x), F32x1(y), F32x1(lac), F32x1(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
@@ -268,7 +269,7 @@ pub unsafe fn simplex_3d_f64(x: f64, y: f64, z: f64, seed: i64) -> f64 {
 /// Get a single value of 3d fractal brownian motion.
 
 pub unsafe fn fbm_3d(x: f32, y: f32, z: f32, lac: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    smplx::fbm_3d::<Scalar>(
+    simplex_fbm::fbm_3d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),
@@ -431,7 +432,7 @@ pub unsafe fn fbm_4d(
     octaves: u8,
     seed: i32,
 ) -> f32 {
-    smplx::fbm_4d::<Scalar>(
+    simplex_fbm::fbm_4d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),

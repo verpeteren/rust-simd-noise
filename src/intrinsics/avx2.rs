@@ -10,6 +10,7 @@
 
 use crate::noise::cell;
 use crate::noise::cell_64;
+use crate::noise::fbm as simplex_fbm;
 use crate::noise::ridge as simplex_ridge;
 use crate::noise::ridge_64 as simplex_ridge_64;
 use crate::noise::simplex as smplx;
@@ -130,7 +131,7 @@ pub unsafe fn fbm_1d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    smplx::fbm_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
+    simplex_fbm::fbm_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -239,7 +240,7 @@ pub unsafe fn fbm_2d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    smplx::fbm_2d::<Avx2>(F32x8(x), F32x8(y), F32x8(lac), F32x8(gain), octaves, seed).0
+    simplex_fbm::fbm_2d::<Avx2>(F32x8(x), F32x8(y), F32x8(lac), F32x8(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -351,7 +352,7 @@ pub unsafe fn fbm_3d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    smplx::fbm_3d::<Avx2>(
+    simplex_fbm::fbm_3d::<Avx2>(
         F32x8(x),
         F32x8(y),
         F32x8(z),
@@ -525,7 +526,7 @@ pub unsafe fn fbm_4d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    smplx::fbm_4d::<Avx2>(
+    simplex_fbm::fbm_4d::<Avx2>(
         F32x8(x),
         F32x8(y),
         F32x8(z),

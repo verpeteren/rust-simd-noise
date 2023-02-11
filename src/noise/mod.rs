@@ -4,6 +4,7 @@ pub mod cell2_64;
 pub mod cell_64;
 mod cellular;
 mod cellular_64;
+pub mod fbm;
 mod hash3d;
 pub mod ridge;
 pub mod ridge_64;
