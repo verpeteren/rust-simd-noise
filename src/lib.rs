@@ -301,46 +301,11 @@ pub enum Cell2ReturnType {
     Distance2Div,
 }
 
+pub mod noise_dimensions;
+use noise_dimensions::NoiseDimensions;
+
 trait DimensionalBeing {
     fn get_dimensions(&self) -> NoiseDimensions;
-}
-
-#[derive(Copy, Clone)]
-pub struct NoiseDimensions {
-    dim: usize,
-    x: f32,
-    y: f32,
-    z: f32,
-    w: f32,
-    width: usize,
-    height: usize,
-    depth: usize,
-    time: usize,
-    min: f32,
-    max: f32,
-    seed: i32,
-}
-
-impl NoiseDimensions {
-    pub fn default(d: usize) -> NoiseDimensions {
-        if d < 1 || d > 4 {
-            panic!("dimension invalid");
-        }
-        NoiseDimensions {
-            dim: d,
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-            w: 0.0,
-            width: 1,
-            height: 1,
-            depth: 1,
-            time: 1,
-            min: 0.0,
-            max: 1.0,
-            seed: 1,
-        }
-    }
 }
 
 #[derive(Copy, Clone)]
