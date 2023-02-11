@@ -379,16 +379,6 @@ fn process_command(
 
 fn main() {
     let args = Args::parse();
-    let position = Coordinate::new(args.width, args.height, args.depth, args.time);
-    let offset = Coordinate::new_checked(
-        args.dimension,
-        args.offset_x,
-        args.offset_y,
-        args.offset_z,
-        args.offset_w,
-    );
-    let buffers = process_command(args.command, args.dimension, args.seed, position, offset);
-
     let width = args.width;
     let height = args.height;
     let mut window = Window::new(
@@ -403,6 +393,15 @@ fn main() {
     let refresh_interval = 1_000_000 / FPS;
     window.limit_update_rate(Some(std::time::Duration::from_micros(refresh_interval)));
 
+    let position = Coordinate::new(args.width, args.height, args.depth, args.time);
+    let offset = Coordinate::new_checked(
+        args.dimension,
+        args.offset_x,
+        args.offset_y,
+        args.offset_z,
+        args.offset_w,
+    );
+    let buffers = process_command(args.command, args.dimension, args.seed, position, offset);
     while window.is_open() && !window.is_key_down(Key::Escape) {
         for buffer in &buffers {
             window.update_with_buffer(&buffer, width, height).unwrap();
