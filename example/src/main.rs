@@ -281,6 +281,25 @@ where
     }
 }
 
+fn noise_4d_to_frames(noise: Vec<f32>, position: Coordinate<usize>) -> Vec<Vec<u32>> {
+    let mut frames = Vec::with_capacity(position.z * position.z);
+    let frame_size = position.x * position.y;
+    let mut niter: Iter<f32> = noise.iter();
+    for _w in 0..position.w {
+        for _z in 0..position.z {
+            let mut frame = Vec::with_capacity(frame_size);
+            for _xy in 0..frame_size {
+                let pix = niter.next();
+                if let Some(xy) = pix {
+                    frame.push(*xy as u32);
+                }
+            }
+            frames.push(frame);
+        }
+    }
+    frames
+}
+
 macro_rules! common_build_settings {
     ($builder: expr, $seed : expr, $scale_min: expr, $scale_max: expr) => {
         $builder
@@ -360,22 +379,7 @@ macro_rules! process_noise_command {
                 let builder =
                     noise_build_settings!(builder, $frequency, $lacunarity, $gain, $octaves);
                 let noise = common_build_settings!(builder, $seed, SCALE_MIN, SCALE_MAX);
-                let mut frames = Vec::with_capacity($position.z * $position.z);
-                let frame_size = $position.x * $position.y;
-                let mut niter: Iter<f32> = noise.iter();
-                for _w in 0..$position.w {
-                    for _z in 0..$position.z {
-                        let mut frame = Vec::with_capacity(frame_size);
-                        for _xy in 0..frame_size {
-                            let pix = niter.next();
-                            if let Some(xy) = pix {
-                                frame.push(*xy as u32);
-                            }
-                        }
-                        frames.push(frame);
-                    }
-                }
-                frames
+                noise_4d_to_frames(noise, $position)
             }
         }
     };
@@ -504,22 +508,7 @@ fn process_command(
                     position.w,
                 );
                 let noise = common_build_settings!(builder, seed, SCALE_MIN, SCALE_MAX);
-                let mut frames = Vec::with_capacity(position.z * position.z);
-                let frame_size = position.x * position.y;
-                let mut niter: Iter<f32> = noise.iter();
-                for _w in 0..position.w {
-                    for _z in 0..position.z {
-                        let mut frame = Vec::with_capacity(frame_size);
-                        for _xy in 0..frame_size {
-                            let pix = niter.next();
-                            if let Some(xy) = pix {
-                                frame.push(*xy as u32);
-                            }
-                        }
-                        frames.push(frame);
-                    }
-                }
-                frames
+                noise_4d_to_frames(noise, position)
             }
         },
     }
