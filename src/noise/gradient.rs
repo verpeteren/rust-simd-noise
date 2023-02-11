@@ -120,3 +120,42 @@ unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> Hash
         S::castepi32_ps(S::slli_epi32(S::and_epi32(hash, S::set1_epi32(2)), 30)),
     )
 }
+
+#[inline(always)]
+pub unsafe fn grad4<S: Simd>(
+    seed: i32,
+    hash: S::Vi32,
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    t: S::Vf32,
+) -> S::Vf32 {
+    let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(31));
+    let mut mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(24), h));
+    let u = S::blendv_ps(y, x, mask);
+    mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(16), h));
+    let v = S::blendv_ps(z, y, mask);
+    mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(8), h));
+    let w = S::blendv_ps(t, z, mask);
+
+    let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
+        S::setzero_epi32(),
+        S::and_epi32(h, S::set1_epi32(1)),
+    ));
+    let h_and_2 = S::castepi32_ps(S::cmpeq_epi32(
+        S::setzero_epi32(),
+        S::and_epi32(h, S::set1_epi32(2)),
+    ));
+    let h_and_4 = S::castepi32_ps(S::cmpeq_epi32(
+        S::setzero_epi32(),
+        S::and_epi32(h, S::set1_epi32(4)),
+    ));
+
+    S::add_ps(
+        S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
+        S::add_ps(
+            S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
+            S::blendv_ps(S::sub_ps(S::setzero_ps(), w), w, h_and_4),
+        ),
+    )
+}

@@ -3,7 +3,7 @@
 //! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
 //! interfaces.
 
-use crate::noise::gradient::{grad1, grad2, grad3d, grad3d_dot};
+use crate::noise::gradient::{grad1, grad2, grad3d, grad3d_dot, grad4};
 use simdeez::*;
 
 use std::f32;
@@ -409,45 +409,6 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
         [dnoise_dx, dnoise_dy, dnoise_dz]
     };
     (result, derivative)
-}
-
-#[inline(always)]
-unsafe fn grad4<S: Simd>(
-    seed: i32,
-    hash: S::Vi32,
-    x: S::Vf32,
-    y: S::Vf32,
-    z: S::Vf32,
-    t: S::Vf32,
-) -> S::Vf32 {
-    let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(31));
-    let mut mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(24), h));
-    let u = S::blendv_ps(y, x, mask);
-    mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(16), h));
-    let v = S::blendv_ps(z, y, mask);
-    mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(8), h));
-    let w = S::blendv_ps(t, z, mask);
-
-    let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
-        S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(1)),
-    ));
-    let h_and_2 = S::castepi32_ps(S::cmpeq_epi32(
-        S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(2)),
-    ));
-    let h_and_4 = S::castepi32_ps(S::cmpeq_epi32(
-        S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(4)),
-    ));
-
-    S::add_ps(
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
-        S::add_ps(
-            S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
-            S::blendv_ps(S::sub_ps(S::setzero_ps(), w), w, h_and_4),
-        ),
-    )
 }
 
 /// Samples 4-dimensional simplex noise
