@@ -271,19 +271,19 @@ macro_rules! get_4d_scaled_noise {
     };
 }
 
-pub mod cell_distance_function;
+mod cell_distance_function;
 pub use cell_distance_function::CellDistanceFunction;
 
-pub mod cell_return_type;
+mod cell_return_type;
 pub use cell_return_type::CellReturnType;
 
-pub mod cell2_return_type;
+mod cell2_return_type;
 pub use cell2_return_type::Cell2ReturnType;
 
-pub mod noise_dimensions;
+mod noise_dimensions;
 use noise_dimensions::NoiseDimensions;
 
-pub mod dimensional_being;
+mod dimensional_being;
 use dimensional_being::DimensionalBeing;
 
 #[derive(Copy, Clone)]
@@ -986,10 +986,10 @@ impl GradientSettings {
     }
 }
 
-pub mod noise_type;
+mod noise_type;
 pub use noise_type::NoiseType;
 
-pub mod noise_builder;
+mod noise_builder;
 pub use noise_builder::NoiseBuilder;
 
 #[cfg(test)]
