@@ -257,6 +257,31 @@ where
     }
 }
 
+macro_rules! common_build_settings {
+    ($builder: expr, $seed : expr, $scale_min: expr, $scale_max: expr) => {
+        $builder
+            .with_seed($seed)
+            .generate_scaled($scale_min, $scale_max)
+    };
+}
+macro_rules! cellular_build_settings {
+    ($builder: expr, $freq: expr, $jitter: expr, $distance: expr) => {
+        $builder
+            .with_freq($freq)
+            .with_jitter($jitter)
+            .with_distance_function($distance)
+    };
+}
+macro_rules! noise_build_settings {
+    ($builder: expr, $frequency: expr, $lacunarity: expr, $gain: expr, $octaves: expr) => {
+        $builder
+            .with_freq($frequency)
+            .with_lacunarity($lacunarity)
+            .with_gain($gain)
+            .with_octaves($octaves)
+    };
+}
+
 fn main() {
     let args = Args::parse();
     let position = Coordinate::new(args.width, args.height, args.depth, args.time);
@@ -267,30 +292,6 @@ fn main() {
         args.offset_z,
         args.offset_w,
     );
-    macro_rules! common_build_settings {
-        ($builder: expr, $seed : expr, $scale_min: expr, $scale_max: expr) => {
-            $builder
-                .with_seed($seed)
-                .generate_scaled($scale_min, $scale_max)
-        };
-    }
-    macro_rules! cellular_build_settings {
-        ($builder: expr, $freq: expr, $jitter: expr, $distance: expr) => {
-            $builder
-                .with_freq($freq)
-                .with_jitter($jitter)
-                .with_distance_function($distance)
-        };
-    }
-    macro_rules! noise_build_settings {
-        ($builder: expr, $frequency: expr, $lacunarity: expr, $gain: expr, $octaves: expr) => {
-            $builder
-                .with_freq($frequency)
-                .with_lacunarity($lacunarity)
-                .with_gain($gain)
-                .with_octaves($octaves)
-        };
-    }
     let buffers: Vec<Vec<u32>> = match args.command {
         Commands::Cellular {
             frequency,
@@ -317,6 +318,7 @@ fn main() {
                 unimplemented!()
             }
         },
+
         Commands::Ridge {
             frequency,
             lacunarity,
