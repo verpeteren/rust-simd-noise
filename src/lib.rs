@@ -285,15 +285,8 @@ pub enum CellDistanceFunction {
 pub mod cell_return_type;
 use cell_return_type::CellReturnType;
 
-#[derive(Copy, Clone)]
-/// Determines what final value is returned for the cell2 noise
-pub enum Cell2ReturnType {
-    Distance2,
-    Distance2Add,
-    Distance2Sub,
-    Distance2Mul,
-    Distance2Div,
-}
+pub mod cell2_return_type;
+use cell2_return_type::Cell2ReturnType;
 
 pub mod noise_dimensions;
 use noise_dimensions::NoiseDimensions;
