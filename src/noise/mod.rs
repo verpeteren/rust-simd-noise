@@ -7,6 +7,7 @@ mod cellular_64;
 pub mod fbm;
 pub mod fbm_64;
 pub mod gradient;
+pub mod gradient_64;
 mod hash3d;
 pub mod ridge;
 pub mod ridge_64;
