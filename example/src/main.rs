@@ -149,6 +149,17 @@ enum Commands {
         //@TODO: index0/1
     },
     #[command(arg_required_else_help = true)]
+    FBM {
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
+        frequency: f32,
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_LACUNARITY)]
+        lacunarity: f32,
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_GAIN)]
+        gain: f32,
+        #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
+        octaves: u8,
+    },
+    #[command(arg_required_else_help = true)]
     Ridge {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
@@ -392,6 +403,25 @@ fn process_command(
             }
         },
 
+        Commands::FBM {
+            frequency,
+            lacunarity,
+            gain,
+            octaves,
+        } => process_noise_command!(
+            fbm_1d_offset,
+            fbm_2d_offset,
+            fbm_3d_offset,
+            fbm_4d_offset,
+            dimension,
+            seed,
+            position,
+            offset,
+            frequency,
+            lacunarity,
+            gain,
+            octaves
+        ),
         Commands::Ridge {
             frequency,
             lacunarity,
