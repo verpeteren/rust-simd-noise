@@ -304,9 +304,8 @@ pub enum Cell2ReturnType {
 pub mod noise_dimensions;
 use noise_dimensions::NoiseDimensions;
 
-trait DimensionalBeing {
-    fn get_dimensions(&self) -> NoiseDimensions;
-}
+pub mod dimensional_being;
+use dimensional_being::DimensionalBeing;
 
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
