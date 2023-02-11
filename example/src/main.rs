@@ -283,10 +283,10 @@ macro_rules! noise_build_settings {
 }
 
 macro_rules! process_noise_command {
-    ($dimension: expr, $seed: expr, $position: expr, $offset: expr, $frequency: expr, $lacunarity: expr, $gain: expr, $octaves: expr) => {
+    ($func_1d: ident, $func_2d: ident, $func_3d: ident, $func_4d: ident, $dimension: expr, $seed: expr, $position: expr, $offset: expr, $frequency: expr, $lacunarity: expr, $gain: expr, $octaves: expr) => {
         match $dimension {
             Dimension::One => {
-                let mut builder = simdnoise::NoiseBuilder::ridge_1d_offset($offset.x, $position.x);
+                let mut builder = simdnoise::NoiseBuilder::$func_1d($offset.x, $position.x);
                 let builder =
                     noise_build_settings!(builder, $frequency, $lacunarity, $gain, $octaves);
                 let noise = common_build_settings!(builder, $seed, SCALE_MIN, SCALE_MAX);
@@ -298,7 +298,7 @@ macro_rules! process_noise_command {
                 vec![xy]
             }
             Dimension::Two => {
-                let mut builder = simdnoise::NoiseBuilder::ridge_2d_offset(
+                let mut builder = simdnoise::NoiseBuilder::$func_2d(
                     $offset.x,
                     $position.x,
                     $offset.y,
@@ -310,7 +310,7 @@ macro_rules! process_noise_command {
                 vec![noise.iter().map(|x| *x as u32).collect()]
             }
             Dimension::Three => {
-                let mut builder = simdnoise::NoiseBuilder::ridge_3d_offset(
+                let mut builder = simdnoise::NoiseBuilder::$func_3d(
                     $offset.x,
                     $position.x,
                     $offset.y,
@@ -324,7 +324,7 @@ macro_rules! process_noise_command {
                 vec![noise.iter().map(|x| *x as u32).collect()]
             }
             Dimension::Four => {
-                let mut builder = simdnoise::NoiseBuilder::ridge_4d_offset(
+                let mut builder = simdnoise::NoiseBuilder::$func_4d(
                     $offset.x,
                     $position.x,
                     $offset.y,
@@ -398,7 +398,18 @@ fn process_command(
             gain,
             octaves,
         } => process_noise_command!(
-            dimension, seed, position, offset, frequency, lacunarity, gain, octaves
+            ridge_1d_offset,
+            ridge_2d_offset,
+            ridge_3d_offset,
+            ridge_4d_offset,
+            dimension,
+            seed,
+            position,
+            offset,
+            frequency,
+            lacunarity,
+            gain,
+            octaves
         ),
     }
 }
