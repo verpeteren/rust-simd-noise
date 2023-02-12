@@ -1,5 +1,5 @@
 use super::cellular_64::{
-    hash_2d, hash_3d, BIT_10_MASK, HASH_2_FLOAT, X_PRIME_64, Y_PRIME, Z_PRIME,
+    hash_2d, hash_3d, BIT_10_MASK, HASH_2_FLOAT, X_PRIME_64, Y_PRIME_64, Z_PRIME,
 };
 use crate::{CellDistanceFunction, CellReturnType};
 
@@ -22,7 +22,7 @@ pub unsafe fn cellular_2d<S: Simd>(
     let ycf_base = S::sub_pd(S::cvtepi64_pd(yc_base), y);
 
     xc = S::mullo_epi64(xc, S::set1_epi64(X_PRIME_64));
-    yc_base = S::mullo_epi64(yc_base, S::set1_epi64(Y_PRIME));
+    yc_base = S::mullo_epi64(yc_base, S::set1_epi64(Y_PRIME_64));
     match return_type {
         CellReturnType::Distance => {
             match distance_function {
@@ -53,7 +53,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = S::min_pd(new_distance, distance);
 
                             ycf = S::add_pd(ycf, S::set1_pd(1.0));
-                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME));
+                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
                         }
                         xcf = S::add_pd(xcf, S::set1_pd(1.0));
                         xc = S::add_epi64(xc, S::set1_epi64(X_PRIME_64));
@@ -87,7 +87,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = S::min_pd(new_distance, distance);
 
                             ycf = S::add_pd(ycf, S::set1_pd(1.0));
-                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME));
+                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
                         }
                         xcf = S::add_pd(xcf, S::set1_pd(1.0));
                         xc = S::add_epi64(xc, S::set1_epi64(X_PRIME_64));
@@ -125,7 +125,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = S::min_pd(new_distance, distance);
 
                             ycf = S::add_pd(ycf, S::set1_pd(1.0));
-                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME));
+                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
                         }
                         xcf = S::add_pd(xcf, S::set1_pd(1.0));
                         xc = S::add_epi64(xc, S::set1_epi64(X_PRIME_64));
@@ -169,7 +169,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = S::blendv_pd(cell_value, new_cell_value, closer);
 
                             ycf = S::add_pd(ycf, S::set1_pd(1.0));
-                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME));
+                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
                         }
                         xcf = S::add_pd(xcf, S::set1_pd(1.0));
                         xc = S::add_epi64(xc, S::set1_epi64(X_PRIME_64));
@@ -207,7 +207,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = S::blendv_pd(cell_value, new_cell_value, closer);
 
                             ycf = S::add_pd(ycf, S::set1_pd(1.0));
-                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME));
+                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
                         }
                         xcf = S::add_pd(xcf, S::set1_pd(1.0));
                         xc = S::add_epi64(xc, S::set1_epi64(X_PRIME_64));
@@ -249,7 +249,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = S::blendv_pd(cell_value, new_cell_value, closer);
 
                             ycf = S::add_pd(ycf, S::set1_pd(1.0));
-                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME));
+                            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
                         }
                         xcf = S::add_pd(xcf, S::set1_pd(1.0));
                         xc = S::add_epi64(xc, S::set1_epi64(X_PRIME_64));
@@ -283,7 +283,7 @@ pub unsafe fn cellular_3d<S: Simd>(
     let zcf_base = S::sub_pd(S::cvtepi64_pd(zc_base), z);
 
     xc = S::mullo_epi64(xc, S::set1_epi64(X_PRIME_64));
-    yc_base = S::mullo_epi64(yc_base, S::set1_epi64(Y_PRIME));
+    yc_base = S::mullo_epi64(yc_base, S::set1_epi64(Y_PRIME_64));
     zc_base = S::mullo_epi64(zc_base, S::set1_epi64(Z_PRIME));
 
     for _x in 0..3 {
@@ -348,7 +348,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                 zc = S::add_epi64(yc, S::set1_epi64(Z_PRIME));
             }
             ycf = S::add_pd(ycf, S::set1_pd(1.0));
-            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME));
+            yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
         }
         xcf = S::add_pd(xcf, S::set1_pd(1.0));
         xc = S::add_epi64(xc, S::set1_epi64(X_PRIME_64));
