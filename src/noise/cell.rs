@@ -1,5 +1,5 @@
 use super::cellular::{
-    hash_2d, hash_3d, BIT_10_MASK, HASH_2_FLOAT, X_PRIME_32, Y_PRIME_32, Z_PRIME_32,
+    hash_2d, hash_3d, BIT_10_MASK_32, HASH_2_FLOAT, X_PRIME_32, Y_PRIME_32, Z_PRIME_32,
 };
 use crate::{CellDistanceFunction, CellReturnType};
 
@@ -33,13 +33,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
                                 S::set1_ps(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK),
+                                    S::set1_epi32(BIT_10_MASK_32),
                                 )),
                                 S::set1_ps(511.5),
                             );
@@ -66,13 +66,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
                                 S::set1_ps(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK),
+                                    S::set1_epi32(BIT_10_MASK_32),
                                 )),
                                 S::set1_ps(511.5),
                             );
@@ -100,13 +100,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
                                 S::set1_ps(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK),
+                                    S::set1_epi32(BIT_10_MASK_32),
                                 )),
                                 S::set1_ps(511.5),
                             );
@@ -144,13 +144,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
                                 S::set1_ps(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK),
+                                    S::set1_epi32(BIT_10_MASK_32),
                                 )),
                                 S::set1_ps(511.5),
                             );
@@ -182,13 +182,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
                                 S::set1_ps(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK),
+                                    S::set1_epi32(BIT_10_MASK_32),
                                 )),
                                 S::set1_ps(511.5),
                             );
@@ -220,13 +220,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
                                 S::set1_ps(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK),
+                                    S::set1_epi32(BIT_10_MASK_32),
                                 )),
                                 S::set1_ps(511.5),
                             );
@@ -295,20 +295,20 @@ pub unsafe fn cellular_3d<S: Simd>(
             for _z in 0..3 {
                 let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_ps(
-                    S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK))),
+                    S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
                     S::set1_ps(511.5),
                 );
                 let mut yd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
                         S::srai_epi32(hash, 10),
-                        S::set1_epi32(BIT_10_MASK),
+                        S::set1_epi32(BIT_10_MASK_32),
                     )),
                     S::set1_ps(511.5),
                 );
                 let mut zd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
                         S::srai_epi32(hash, 20),
-                        S::set1_epi32(BIT_10_MASK),
+                        S::set1_epi32(BIT_10_MASK_32),
                     )),
                     S::set1_ps(511.5),
                 );
