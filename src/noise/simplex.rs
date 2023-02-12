@@ -10,7 +10,7 @@ use simdeez::Simd;
 use std::f32;
 
 /// Skew factor for 2D simplex noise
-const F2: f32 = 0.36602540378;
+const F2_32: f32 = 0.36602540378;
 /// Skew factor for 3D simplex noise
 const F3: f32 = 1.0 / 3.0;
 /// Skew factor for 4D simplex noise
@@ -138,7 +138,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 ) -> (S::Vf32, [S::Vf32; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
-    let s = S::mul_ps(S::set1_ps(F2), S::add_ps(x, y));
+    let s = S::mul_ps(S::set1_ps(F2_32), S::add_ps(x, y));
     let ips = S::floor_ps(S::add_ps(x, s));
     let jps = S::floor_ps(S::add_ps(y, s));
 
