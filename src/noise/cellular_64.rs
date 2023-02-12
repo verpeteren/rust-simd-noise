@@ -2,12 +2,6 @@ use std::f64;
 
 use simdeez::Simd;
 
-pub const X_PRIME_64: i64 = 1619;
-pub const Y_PRIME_64: i64 = 31337;
-pub const Z_PRIME_64: i64 = 6971;
-pub const BIT_10_MASK_64: i64 = 1023;
-pub const HASH_2_FLOAT_64: f64 = 1.0 / 2147483648.0;
-
 #[inline(always)]
 pub unsafe fn hash_2d<S: Simd>(seed: i64, x: S::Vi64, y: S::Vi64) -> S::Vi64 {
     let mut hash = S::xor_epi64(x, S::set1_epi64(seed));
