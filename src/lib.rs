@@ -274,8 +274,7 @@ macro_rules! get_4d_scaled_noise {
 mod cell_distance_function;
 pub use cell_distance_function::CellDistanceFunction;
 
-mod cell_return_type;
-pub use cell_return_type::CellReturnType;
+pub use noise::cell_return_type::CellReturnType;
 
 mod cell2_return_type;
 pub use cell2_return_type::Cell2ReturnType;

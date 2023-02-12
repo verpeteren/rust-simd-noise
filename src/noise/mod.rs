@@ -2,6 +2,7 @@ pub mod cell;
 pub mod cell2;
 pub mod cell2_64;
 pub mod cell_64;
+pub mod cell_return_type;
 mod cellular;
 mod cellular_64;
 pub mod fbm;
