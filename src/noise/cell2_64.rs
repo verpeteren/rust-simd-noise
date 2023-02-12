@@ -1,4 +1,4 @@
-use super::cellular_64::{hash_2d, hash_3d, BIT_10_MASK, X_PRIME_64, Y_PRIME_64, Z_PRIME};
+use super::cellular_64::{hash_2d, hash_3d, BIT_10_MASK, X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
 use crate::{Cell2ReturnType, CellDistanceFunction};
 
 use simdeez::Simd;
@@ -103,7 +103,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
 
     xc = S::mullo_epi64(xc, S::set1_epi64(X_PRIME_64));
     yc_base = S::mullo_epi64(yc_base, S::set1_epi64(Y_PRIME_64));
-    zc_base = S::mullo_epi64(zc_base, S::set1_epi64(Z_PRIME));
+    zc_base = S::mullo_epi64(zc_base, S::set1_epi64(Z_PRIME_64));
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -166,7 +166,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     i -= 1;
                 }
                 zcf = S::add_pd(ycf, S::set1_pd(1.0));
-                zc = S::add_epi64(yc, S::set1_epi64(Z_PRIME));
+                zc = S::add_epi64(yc, S::set1_epi64(Z_PRIME_64));
             }
             ycf = S::add_pd(ycf, S::set1_pd(1.0));
             yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
