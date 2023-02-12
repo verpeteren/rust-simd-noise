@@ -20,7 +20,7 @@ const G2_32: f32 = 0.2113248654;
 const G22_32: f32 = G2_32 * 2.0;
 /// Unskew factor for 3D simplex noise
 const G3_32: f32 = 1.0 / 6.0;
-const G33: f32 = 3.0 / 6.0 - 1.0;
+const G33_32: f32 = 3.0 / 6.0 - 1.0;
 /// Unskew factor for 4D simplex noise
 const G4: f32 = 0.138196601;
 const G24: f32 = 2.0 * G4;
@@ -289,9 +289,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let y2 = S::add_ps(S::sub_ps(y0, j2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
     let z2 = S::add_ps(S::sub_ps(z0, k2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
 
-    let x3 = S::add_ps(x0, S::set1_ps(G33));
-    let y3 = S::add_ps(y0, S::set1_ps(G33));
-    let z3 = S::add_ps(z0, S::set1_ps(G33));
+    let x3 = S::add_ps(x0, S::set1_ps(G33_32));
+    let y3 = S::add_ps(y0, S::set1_ps(G33_32));
+    let z3 = S::add_ps(z0, S::set1_ps(G33_32));
 
     // Compute base weight factors associated with each vertex, `0.6 - v . v` where v is the
     // distance to the vertex. Strictly the constant should be 0.5, but 0.6 is thought by Gustavson
