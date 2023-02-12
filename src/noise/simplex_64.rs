@@ -2,7 +2,7 @@ use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4};
 
 use simdeez::Simd;
 
-const F2: f64 = 0.36602540378;
+const F2_64: f64 = 0.36602540378;
 const F3: f64 = 1.0 / 3.0;
 const F4: f64 = 0.309016994;
 const G2: f64 = 0.2113248654;
@@ -75,7 +75,7 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
 pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 {
-    let s = S::mul_pd(S::set1_pd(F2), S::add_pd(x, y));
+    let s = S::mul_pd(S::set1_pd(F2_64), S::add_pd(x, y));
     let ipd = S::floor_pd(S::add_pd(x, s));
     let jpd = S::floor_pd(S::add_pd(y, s));
 
