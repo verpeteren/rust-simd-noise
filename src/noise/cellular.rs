@@ -9,7 +9,7 @@ use simdeez::Simd;
 
 pub const X_PRIME_32: i32 = 1619;
 pub const Y_PRIME_32: i32 = 31337;
-pub const Z_PRIME: i32 = 6971;
+pub const Z_PRIME_32: i32 = 6971;
 pub const BIT_10_MASK: i32 = 1023;
 pub const HASH_2_FLOAT: f32 = 1.0 / 2147483648.0;
 
