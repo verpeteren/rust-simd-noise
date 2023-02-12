@@ -4,7 +4,7 @@ use simdeez::Simd;
 
 const F2_64: f64 = 0.36602540378;
 const F3_64: f64 = 1.0 / 3.0;
-const F4: f64 = 0.309016994;
+const F4_64: f64 = 0.309016994;
 const G2: f64 = 0.2113248654;
 const G22: f64 = G2 * 2.0;
 const G3: f64 = 1.0 / 6.0;
@@ -334,7 +334,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     w: S::Vf64,
     seed: i64,
 ) -> S::Vf64 {
-    let s = S::mul_pd(S::set1_pd(F4), S::add_pd(x, S::add_pd(y, S::add_pd(z, w))));
+    let s = S::mul_pd(
+        S::set1_pd(F4_64),
+        S::add_pd(x, S::add_pd(y, S::add_pd(z, w))),
+    );
 
     let ipd = S::floor_pd(S::add_pd(x, s));
     let jpd = S::floor_pd(S::add_pd(y, s));
