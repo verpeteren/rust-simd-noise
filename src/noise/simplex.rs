@@ -19,7 +19,7 @@ const F4_32: f32 = 0.309016994;
 const G2_32: f32 = 0.2113248654;
 const G22_32: f32 = G2_32 * 2.0;
 /// Unskew factor for 3D simplex noise
-const G3: f32 = 1.0 / 6.0;
+const G3_32: f32 = 1.0 / 6.0;
 const G33: f32 = 3.0 / 6.0 - 1.0;
 /// Unskew factor for 4D simplex noise
 const G4: f32 = 0.138196601;
@@ -263,7 +263,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let k = S::mullo_epi32(S::cvtps_epi32(z0), S::set1_epi32(Z_PRIME));
 
     // Compute distance from first simplex vertex to input coordinates
-    let g = S::mul_ps(S::set1_ps(G3), S::add_ps(S::add_ps(x0, y0), z0));
+    let g = S::mul_ps(S::set1_ps(G3_32), S::add_ps(S::add_ps(x0, y0), z0));
     x0 = S::sub_ps(x, S::sub_ps(x0, g));
     y0 = S::sub_ps(y, S::sub_ps(y0, g));
     z0 = S::sub_ps(z, S::sub_ps(z0, g));
@@ -281,9 +281,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let k2 = !(x0_ge_z0 & y0_ge_z0);
 
     // Compute distances from remaining simplex vertices to input coordinates
-    let x1 = S::add_ps(S::sub_ps(x0, i1 & S::set1_ps(1.0)), S::set1_ps(G3));
-    let y1 = S::add_ps(S::sub_ps(y0, j1 & S::set1_ps(1.0)), S::set1_ps(G3));
-    let z1 = S::add_ps(S::sub_ps(z0, k1 & S::set1_ps(1.0)), S::set1_ps(G3));
+    let x1 = S::add_ps(S::sub_ps(x0, i1 & S::set1_ps(1.0)), S::set1_ps(G3_32));
+    let y1 = S::add_ps(S::sub_ps(y0, j1 & S::set1_ps(1.0)), S::set1_ps(G3_32));
+    let z1 = S::add_ps(S::sub_ps(z0, k1 & S::set1_ps(1.0)), S::set1_ps(G3_32));
 
     let x2 = S::add_ps(S::sub_ps(x0, i2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
     let y2 = S::add_ps(S::sub_ps(y0, j2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
