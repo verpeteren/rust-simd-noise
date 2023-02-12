@@ -25,7 +25,7 @@ const G33_32: f32 = 3.0 / 6.0 - 1.0;
 const G4_32: f32 = 0.138196601;
 const G24_32: f32 = 2.0 * G4_32;
 const G34_32: f32 = 3.0 * G4_32;
-const G44: f32 = 4.0 * G4_32;
+const G44_32: f32 = 4.0 * G4_32;
 
 const X_PRIME: i32 = 1619;
 const Y_PRIME: i32 = 31337;
@@ -515,10 +515,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let y3 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j3)), S::set1_ps(G34_32));
     let z3 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k3)), S::set1_ps(G34_32));
     let w3 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l3)), S::set1_ps(G34_32));
-    let x4 = S::add_ps(S::sub_ps(x0, S::set1_ps(1.0)), S::set1_ps(G44));
-    let y4 = S::add_ps(S::sub_ps(y0, S::set1_ps(1.0)), S::set1_ps(G44));
-    let z4 = S::add_ps(S::sub_ps(z0, S::set1_ps(1.0)), S::set1_ps(G44));
-    let w4 = S::add_ps(S::sub_ps(w0, S::set1_ps(1.0)), S::set1_ps(G44));
+    let x4 = S::add_ps(S::sub_ps(x0, S::set1_ps(1.0)), S::set1_ps(G44_32));
+    let y4 = S::add_ps(S::sub_ps(y0, S::set1_ps(1.0)), S::set1_ps(G44_32));
+    let z4 = S::add_ps(S::sub_ps(z0, S::set1_ps(1.0)), S::set1_ps(G44_32));
+    let w4 = S::add_ps(S::sub_ps(w0, S::set1_ps(1.0)), S::set1_ps(G44_32));
 
     let ii = S::and_epi32(i, S::set1_epi32(0xff));
     let jj = S::and_epi32(j, S::set1_epi32(0xff));
