@@ -3,7 +3,7 @@ use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4};
 use simdeez::Simd;
 
 const F2_64: f64 = 0.36602540378;
-const F3: f64 = 1.0 / 3.0;
+const F3_64: f64 = 1.0 / 3.0;
 const F4: f64 = 0.309016994;
 const G2: f64 = 0.2113248654;
 const G22: f64 = G2 * 2.0;
@@ -145,7 +145,7 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 
 
 #[inline(always)]
 pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64) -> S::Vf64 {
-    let s = S::mul_pd(S::set1_pd(F3), S::add_pd(x, S::add_pd(y, z)));
+    let s = S::mul_pd(S::set1_pd(F3_64), S::add_pd(x, S::add_pd(y, z)));
 
     let ipd = S::floor_pd(S::add_pd(x, s));
     let jpd = S::floor_pd(S::add_pd(y, s));
@@ -214,9 +214,9 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64)
     let x1 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i1)), S::set1_pd(G3));
     let y1 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j1)), S::set1_pd(G3));
     let z1 = S::add_pd(S::add_pd(z0, S::cvtepi64_pd(k1)), S::set1_pd(G3));
-    let x2 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i2)), S::set1_pd(F3));
-    let y2 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j2)), S::set1_pd(F3));
-    let z2 = S::add_pd(S::add_pd(z0, S::cvtepi64_pd(k2)), S::set1_pd(F3));
+    let x2 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i2)), S::set1_pd(F3_64));
+    let y2 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j2)), S::set1_pd(F3_64));
+    let z2 = S::add_pd(S::add_pd(z0, S::cvtepi64_pd(k2)), S::set1_pd(F3_64));
     let x3 = S::add_pd(x0, S::set1_pd(-0.5));
     let y3 = S::add_pd(y0, S::set1_pd(-0.5));
     let z3 = S::add_pd(z0, S::set1_pd(-0.5));
