@@ -6,7 +6,7 @@ const F2_64: f64 = 0.36602540378;
 const F3_64: f64 = 1.0 / 3.0;
 const F4_64: f64 = 0.309016994;
 const G2_64: f64 = 0.2113248654;
-const G22: f64 = G2_64 * 2.0;
+const G22_64: f64 = G2_64 * 2.0;
 const G3: f64 = 1.0 / 6.0;
 const G4: f64 = 0.138196601;
 const G24: f64 = 2.0 * G4;
@@ -93,8 +93,8 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 
 
     let x1 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i1)), S::set1_pd(G2_64));
     let y1 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j1)), S::set1_pd(G2_64));
-    let x2 = S::add_pd(S::add_pd(x0, S::set1_pd(-1.0)), S::set1_pd(G22));
-    let y2 = S::add_pd(S::add_pd(y0, S::set1_pd(-1.0)), S::set1_pd(G22));
+    let x2 = S::add_pd(S::add_pd(x0, S::set1_pd(-1.0)), S::set1_pd(G22_64));
+    let y2 = S::add_pd(S::add_pd(y0, S::set1_pd(-1.0)), S::set1_pd(G22_64));
 
     let ii = S::and_epi64(i, S::set1_epi64(0xff));
     let jj = S::and_epi64(j, S::set1_epi64(0xff));
