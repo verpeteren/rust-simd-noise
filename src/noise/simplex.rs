@@ -14,7 +14,7 @@ const F2_32: f32 = 0.36602540378;
 /// Skew factor for 3D simplex noise
 const F3_32: f32 = 1.0 / 3.0;
 /// Skew factor for 4D simplex noise
-const F4: f32 = 0.309016994;
+const F4_32: f32 = 0.309016994;
 /// Unskew factor for 2D simplex noise
 const G2: f32 = 0.2113248654;
 const G22: f32 = G2 * 2.0;
@@ -428,7 +428,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     // vertex of the simplex
     //
 
-    let s = S::mul_ps(S::set1_ps(F4), S::add_ps(x, S::add_ps(y, S::add_ps(z, w))));
+    let s = S::mul_ps(
+        S::set1_ps(F4_32),
+        S::add_ps(x, S::add_ps(y, S::add_ps(z, w))),
+    );
 
     let ips = S::floor_ps(S::add_ps(x, s));
     let jps = S::floor_ps(S::add_ps(y, s));
