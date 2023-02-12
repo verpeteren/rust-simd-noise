@@ -11,7 +11,7 @@ pub const X_PRIME_32: i32 = 1619;
 pub const Y_PRIME_32: i32 = 31337;
 pub const Z_PRIME_32: i32 = 6971;
 pub const BIT_10_MASK_32: i32 = 1023;
-pub const HASH_2_FLOAT: f32 = 1.0 / 2147483648.0;
+pub const HASH_2_FLOAT_32: f32 = 1.0 / 2147483648.0;
 
 #[inline(always)]
 pub unsafe fn hash_2d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32) -> S::Vi32 {

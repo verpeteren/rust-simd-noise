@@ -1,5 +1,5 @@
 use super::cellular::{
-    hash_2d, hash_3d, BIT_10_MASK_32, HASH_2_FLOAT, X_PRIME_32, Y_PRIME_32, Z_PRIME_32,
+    hash_2d, hash_3d, BIT_10_MASK_32, HASH_2_FLOAT_32, X_PRIME_32, Y_PRIME_32, Z_PRIME_32,
 };
 use crate::{CellDistanceFunction, CellReturnType};
 
@@ -162,7 +162,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
 
                             let new_cell_value =
-                                S::mul_ps(S::set1_ps(HASH_2_FLOAT), S::cvtepi32_ps(hash));
+                                S::mul_ps(S::set1_ps(HASH_2_FLOAT_32), S::cvtepi32_ps(hash));
                             let new_distance = S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd));
                             let closer = S::cmplt_ps(new_distance, distance);
                             distance = S::min_ps(new_distance, distance);
@@ -200,7 +200,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
 
                             let new_cell_value =
-                                S::mul_ps(S::set1_ps(HASH_2_FLOAT), S::cvtepi32_ps(hash));
+                                S::mul_ps(S::set1_ps(HASH_2_FLOAT_32), S::cvtepi32_ps(hash));
                             let new_distance = S::add_ps(S::abs_ps(xd), S::abs_ps(yd));
                             let closer = S::cmplt_ps(new_distance, distance);
                             distance = S::min_ps(new_distance, distance);
@@ -238,7 +238,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
 
                             let new_cell_value =
-                                S::mul_ps(S::set1_ps(HASH_2_FLOAT), S::cvtepi32_ps(hash));
+                                S::mul_ps(S::set1_ps(HASH_2_FLOAT_32), S::cvtepi32_ps(hash));
                             let new_distance = {
                                 let euc = S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd));
                                 let man = S::add_ps(S::abs_ps(xd), S::abs_ps(yd));
@@ -323,7 +323,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                 yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
                 zd = S::add_ps(S::mul_ps(zd, inv_mag), zcf);
 
-                let new_cell_value = S::mul_ps(S::set1_ps(HASH_2_FLOAT), S::cvtepi32_ps(hash));
+                let new_cell_value = S::mul_ps(S::set1_ps(HASH_2_FLOAT_32), S::cvtepi32_ps(hash));
                 let new_distance = match distance_function {
                     CellDistanceFunction::Euclidean => S::add_ps(
                         S::mul_ps(xd, xd),
