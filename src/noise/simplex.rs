@@ -12,7 +12,7 @@ use std::f32;
 /// Skew factor for 2D simplex noise
 const F2_32: f32 = 0.36602540378;
 /// Skew factor for 3D simplex noise
-const F3: f32 = 1.0 / 3.0;
+const F3_32: f32 = 1.0 / 3.0;
 /// Skew factor for 4D simplex noise
 const F4: f32 = 0.309016994;
 /// Unskew factor for 2D simplex noise
@@ -252,7 +252,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     seed: i32,
 ) -> (S::Vf32, [S::Vf32; 3]) {
     // Find skewed simplex grid coordinates associated with the input coordinates
-    let f = S::mul_ps(S::set1_ps(F3), S::add_ps(S::add_ps(x, y), z));
+    let f = S::mul_ps(S::set1_ps(F3_32), S::add_ps(S::add_ps(x, y), z));
     let mut x0 = S::fast_floor_ps(S::add_ps(x, f));
     let mut y0 = S::fast_floor_ps(S::add_ps(y, f));
     let mut z0 = S::fast_floor_ps(S::add_ps(z, f));
@@ -285,9 +285,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let y1 = S::add_ps(S::sub_ps(y0, j1 & S::set1_ps(1.0)), S::set1_ps(G3));
     let z1 = S::add_ps(S::sub_ps(z0, k1 & S::set1_ps(1.0)), S::set1_ps(G3));
 
-    let x2 = S::add_ps(S::sub_ps(x0, i2 & S::set1_ps(1.0)), S::set1_ps(F3));
-    let y2 = S::add_ps(S::sub_ps(y0, j2 & S::set1_ps(1.0)), S::set1_ps(F3));
-    let z2 = S::add_ps(S::sub_ps(z0, k2 & S::set1_ps(1.0)), S::set1_ps(F3));
+    let x2 = S::add_ps(S::sub_ps(x0, i2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
+    let y2 = S::add_ps(S::sub_ps(y0, j2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
+    let z2 = S::add_ps(S::sub_ps(z0, k2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
 
     let x3 = S::add_ps(x0, S::set1_ps(G33));
     let y3 = S::add_ps(y0, S::set1_ps(G33));
