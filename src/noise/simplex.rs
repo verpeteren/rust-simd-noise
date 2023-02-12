@@ -22,10 +22,10 @@ const G22_32: f32 = G2_32 * 2.0;
 const G3_32: f32 = 1.0 / 6.0;
 const G33_32: f32 = 3.0 / 6.0 - 1.0;
 /// Unskew factor for 4D simplex noise
-const G4: f32 = 0.138196601;
-const G24: f32 = 2.0 * G4;
-const G34: f32 = 3.0 * G4;
-const G44: f32 = 4.0 * G4;
+const G4_32: f32 = 0.138196601;
+const G24: f32 = 2.0 * G4_32;
+const G34: f32 = 3.0 * G4_32;
+const G44: f32 = 4.0 * G4_32;
 
 const X_PRIME: i32 = 1619;
 const Y_PRIME: i32 = 31337;
@@ -445,7 +445,7 @@ pub unsafe fn simplex_4d<S: Simd>(
 
     let t = S::mul_ps(
         S::cvtepi32_ps(S::add_epi32(i, S::add_epi32(j, S::add_epi32(k, l)))),
-        S::set1_ps(G4),
+        S::set1_ps(G4_32),
     );
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
     let y0 = S::sub_ps(y, S::sub_ps(jps, t));
@@ -503,10 +503,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let cond = S::cmpgt_epi32(rank_w, S::setzero_epi32());
     let l3 = S::and_epi32(S::set1_epi32(1), cond);
 
-    let x1 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G4));
-    let y1 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G4));
-    let z1 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k1)), S::set1_ps(G4));
-    let w1 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l1)), S::set1_ps(G4));
+    let x1 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G4_32));
+    let y1 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G4_32));
+    let z1 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k1)), S::set1_ps(G4_32));
+    let w1 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l1)), S::set1_ps(G4_32));
     let x2 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i2)), S::set1_ps(G24));
     let y2 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j2)), S::set1_ps(G24));
     let z2 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k2)), S::set1_ps(G24));
