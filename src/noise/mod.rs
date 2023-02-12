@@ -3,6 +3,7 @@ pub mod cell2;
 pub mod cell2_64;
 pub mod cell2_return_type;
 pub mod cell_64;
+pub mod cell_distance_function;
 pub mod cell_return_type;
 mod cellular;
 mod cellular_64;
