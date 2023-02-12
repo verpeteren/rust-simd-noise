@@ -2,7 +2,7 @@ use std::f64;
 
 use simdeez::Simd;
 
-pub const X_PRIME: i64 = 1619;
+pub const X_PRIME_64: i64 = 1619;
 pub const Y_PRIME: i64 = 31337;
 pub const Z_PRIME: i64 = 6971;
 pub const BIT_10_MASK: i64 = 1023;
