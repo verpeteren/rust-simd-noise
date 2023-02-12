@@ -87,13 +87,24 @@
 
 extern crate simdeez;
 
+mod dimensional_being;
 pub mod intrinsics;
 pub mod noise;
+mod noise_builder;
+mod noise_dimensions;
 mod noise_helpers;
 mod noise_helpers_64;
+mod noise_type;
 mod shared;
 
+use dimensional_being::DimensionalBeing;
 use intrinsics::{avx2, scalar, sse2, sse41};
+pub use noise::cell2_return_type::Cell2ReturnType;
+pub use noise::cell_distance_function::CellDistanceFunction;
+pub use noise::cell_return_type::CellReturnType;
+pub use noise_builder::NoiseBuilder;
+use noise_dimensions::NoiseDimensions;
+pub use noise_type::NoiseType;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 macro_rules! get_1d_noise {
@@ -270,19 +281,6 @@ macro_rules! get_4d_scaled_noise {
         unsafe { scalar::get_4d_scaled_noise($setting) }
     };
 }
-
-mod cell_distance_function;
-pub use cell_distance_function::CellDistanceFunction;
-
-pub use noise::cell_return_type::CellReturnType;
-
-pub use noise::cell2_return_type::Cell2ReturnType;
-
-mod noise_dimensions;
-use noise_dimensions::NoiseDimensions;
-
-mod dimensional_being;
-use dimensional_being::DimensionalBeing;
 
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
@@ -983,12 +981,6 @@ impl GradientSettings {
         }
     }
 }
-
-mod noise_type;
-pub use noise_type::NoiseType;
-
-mod noise_builder;
-pub use noise_builder::NoiseBuilder;
 
 #[cfg(test)]
 mod tests {
