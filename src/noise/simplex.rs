@@ -17,7 +17,7 @@ const F3_32: f32 = 1.0 / 3.0;
 const F4_32: f32 = 0.309016994;
 /// Unskew factor for 2D simplex noise
 const G2_32: f32 = 0.2113248654;
-const G22: f32 = G2_32 * 2.0;
+const G22_32: f32 = G2_32 * 2.0;
 /// Unskew factor for 3D simplex noise
 const G3: f32 = 1.0 / 6.0;
 const G33: f32 = 3.0 / 6.0 - 1.0;
@@ -159,8 +159,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     // Distances to the second and third points of the enclosing simplex
     let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G2_32));
     let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G2_32));
-    let x2 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(G22));
-    let y2 = S::add_ps(S::add_ps(y0, S::set1_ps(-1.0)), S::set1_ps(G22));
+    let x2 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(G22_32));
+    let y2 = S::add_ps(S::add_ps(y0, S::set1_ps(-1.0)), S::set1_ps(G22_32));
 
     let ii = S::and_epi32(i, S::set1_epi32(0xff));
     let jj = S::and_epi32(j, S::set1_epi32(0xff));
