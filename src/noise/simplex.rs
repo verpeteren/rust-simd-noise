@@ -3,6 +3,7 @@
 //! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
 //! interfaces.
 
+use crate::noise::cellular::{X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
 use crate::noise::gradient::{grad1, grad2, grad3d, grad3d_dot, grad4};
 
 use simdeez::Simd;
@@ -26,10 +27,6 @@ const G4_32: f32 = 0.138196601;
 const G24_32: f32 = 2.0 * G4_32;
 const G34_32: f32 = 3.0 * G4_32;
 const G44_32: f32 = 4.0 * G4_32;
-
-const X_PRIME_32: i32 = 1619;
-const Y_PRIME_32: i32 = 31337;
-const Z_PRIME_32: i32 = 6791;
 
 const PERM: [i32; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
