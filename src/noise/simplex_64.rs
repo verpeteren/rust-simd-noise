@@ -2,16 +2,9 @@ use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4};
 
 use simdeez::Simd;
 
-const F2_64: f64 = 0.36602540378;
-const F3_64: f64 = 1.0 / 3.0;
-const F4_64: f64 = 0.309016994;
-const G2_64: f64 = 0.2113248654;
-const G22_64: f64 = G2_64 * 2.0;
-const G3_64: f64 = 1.0 / 6.0;
-const G4_64: f64 = 0.138196601;
-const G24_64: f64 = 2.0 * G4_64;
-const G34_64: f64 = 3.0 * G4_64;
-const G44_64: f64 = 4.0 * G4_64;
+use crate::noise::simplex::{
+    F2_64, F3_64, F4_64, G22_64, G24_64, G2_64, G34_64, G3_64, G44_64, G4_64,
+};
 
 const PERM64: [i64; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,

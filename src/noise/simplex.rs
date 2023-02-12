@@ -9,24 +9,35 @@ use crate::noise::gradient::{grad1, grad2, grad3d, grad3d_dot, grad4};
 use simdeez::Simd;
 
 use std::f32;
+use std::f64;
 
 /// Skew factor for 2D simplex noise
 const F2_32: f32 = 0.36602540378;
+pub const F2_64: f64 = 0.36602540378;
 /// Skew factor for 3D simplex noise
 const F3_32: f32 = 1.0 / 3.0;
+pub const F3_64: f64 = 1.0 / 3.0;
 /// Skew factor for 4D simplex noise
 const F4_32: f32 = 0.309016994;
+pub const F4_64: f64 = 0.309016994;
 /// Unskew factor for 2D simplex noise
 const G2_32: f32 = 0.2113248654;
+pub const G2_64: f64 = 0.2113248654;
 const G22_32: f32 = G2_32 * 2.0;
+pub const G22_64: f64 = G2_64 * 2.0;
 /// Unskew factor for 3D simplex noise
 const G3_32: f32 = 1.0 / 6.0;
+pub const G3_64: f64 = 1.0 / 6.0;
 const G33_32: f32 = 3.0 / 6.0 - 1.0;
 /// Unskew factor for 4D simplex noise
 const G4_32: f32 = 0.138196601;
+pub const G4_64: f64 = 0.138196601;
 const G24_32: f32 = 2.0 * G4_32;
+pub const G24_64: f64 = 2.0 * G4_64;
 const G34_32: f32 = 3.0 * G4_32;
+pub const G34_64: f64 = 3.0 * G4_64;
 const G44_32: f32 = 4.0 * G4_32;
+pub const G44_64: f64 = 4.0 * G4_64;
 
 const PERM: [i32; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
