@@ -28,7 +28,7 @@ const G34_32: f32 = 3.0 * G4_32;
 const G44_32: f32 = 4.0 * G4_32;
 
 const X_PRIME_32: i32 = 1619;
-const Y_PRIME: i32 = 31337;
+const Y_PRIME_32: i32 = 31337;
 const Z_PRIME: i32 = 6791;
 
 const PERM: [i32; 512] = [
@@ -259,7 +259,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
 
     // Integer grid coordinates
     let i = S::mullo_epi32(S::cvtps_epi32(x0), S::set1_epi32(X_PRIME_32));
-    let j = S::mullo_epi32(S::cvtps_epi32(y0), S::set1_epi32(Y_PRIME));
+    let j = S::mullo_epi32(S::cvtps_epi32(y0), S::set1_epi32(Y_PRIME_32));
     let k = S::mullo_epi32(S::cvtps_epi32(z0), S::set1_epi32(Z_PRIME));
 
     // Compute distance from first simplex vertex to input coordinates
@@ -354,7 +354,10 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
         i,
         S::and_epi32(S::castps_epi32(i1), S::set1_epi32(X_PRIME_32)),
     );
-    let v1y = S::add_epi32(j, S::and_epi32(S::castps_epi32(j1), S::set1_epi32(Y_PRIME)));
+    let v1y = S::add_epi32(
+        j,
+        S::and_epi32(S::castps_epi32(j1), S::set1_epi32(Y_PRIME_32)),
+    );
     let v1z = S::add_epi32(k, S::and_epi32(S::castps_epi32(k1), S::set1_epi32(Z_PRIME)));
     let g1 = grad3d_dot::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
     let v1 = t41 * g1;
@@ -363,14 +366,17 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
         i,
         S::and_epi32(S::castps_epi32(i2), S::set1_epi32(X_PRIME_32)),
     );
-    let v2y = S::add_epi32(j, S::and_epi32(S::castps_epi32(j2), S::set1_epi32(Y_PRIME)));
+    let v2y = S::add_epi32(
+        j,
+        S::and_epi32(S::castps_epi32(j2), S::set1_epi32(Y_PRIME_32)),
+    );
     let v2z = S::add_epi32(k, S::and_epi32(S::castps_epi32(k2), S::set1_epi32(Z_PRIME)));
     let g2 = grad3d_dot::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
     let v2 = t42 * g2;
 
     //SIMDf v3 = SIMDf_MASK(n3, SIMDf_MUL(SIMDf_MUL(t3, t3), FUNC(GradCoord)(seed, SIMDi_ADD(i, SIMDi_NUM(xPrime)), SIMDi_ADD(j, SIMDi_NUM(yPrime)), SIMDi_ADD(k, SIMDi_NUM(zPrime)), x3, y3, z3)));
     let v3x = S::add_epi32(i, S::set1_epi32(X_PRIME_32));
-    let v3y = S::add_epi32(j, S::set1_epi32(Y_PRIME));
+    let v3y = S::add_epi32(j, S::set1_epi32(Y_PRIME_32));
     let v3z = S::add_epi32(k, S::set1_epi32(Z_PRIME));
     //define SIMDf_MASK(m,a) SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),a)
     let g3 = grad3d_dot::<S>(seed, v3x, v3y, v3z, x3, y3, z3);
