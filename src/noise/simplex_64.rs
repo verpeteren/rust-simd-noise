@@ -5,8 +5,8 @@ use simdeez::Simd;
 const F2_64: f64 = 0.36602540378;
 const F3_64: f64 = 1.0 / 3.0;
 const F4_64: f64 = 0.309016994;
-const G2: f64 = 0.2113248654;
-const G22: f64 = G2 * 2.0;
+const G2_64: f64 = 0.2113248654;
+const G22: f64 = G2_64 * 2.0;
 const G3: f64 = 1.0 / 6.0;
 const G4: f64 = 0.138196601;
 const G24: f64 = 2.0 * G4;
@@ -82,7 +82,7 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 
     let i = S::cvtpd_epi64(ipd);
     let j = S::cvtpd_epi64(jpd);
 
-    let t = S::mul_pd(S::cvtepi64_pd(S::add_epi64(i, j)), S::set1_pd(G2));
+    let t = S::mul_pd(S::cvtepi64_pd(S::add_epi64(i, j)), S::set1_pd(G2_64));
 
     let x0 = S::sub_pd(x, S::sub_pd(ipd, t));
     let y0 = S::sub_pd(y, S::sub_pd(jpd, t));
@@ -91,8 +91,8 @@ pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 
 
     let j1 = S::castpd_epi64(S::cmpgt_pd(y0, x0));
 
-    let x1 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i1)), S::set1_pd(G2));
-    let y1 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j1)), S::set1_pd(G2));
+    let x1 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i1)), S::set1_pd(G2_64));
+    let y1 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j1)), S::set1_pd(G2_64));
     let x2 = S::add_pd(S::add_pd(x0, S::set1_pd(-1.0)), S::set1_pd(G22));
     let y2 = S::add_pd(S::add_pd(y0, S::set1_pd(-1.0)), S::set1_pd(G22));
 
