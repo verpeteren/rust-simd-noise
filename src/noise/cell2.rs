@@ -1,4 +1,4 @@
-use super::cellular::{hash_2d, hash_3d, BIT_10_MASK, X_PRIME_32, Y_PRIME, Z_PRIME};
+use super::cellular::{hash_2d, hash_3d, BIT_10_MASK, X_PRIME_32, Y_PRIME_32, Z_PRIME};
 use crate::{Cell2ReturnType, CellDistanceFunction};
 
 use simdeez::Simd;
@@ -23,7 +23,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
     let ycf_base = S::sub_ps(S::cvtepi32_ps(yc_base), y);
 
     xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME_32));
-    yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME));
+    yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME_32));
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -64,7 +64,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
                 i -= 1;
             }
             ycf = S::add_ps(ycf, S::set1_ps(1.0));
-            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
+            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
         }
         xcf = S::add_ps(xcf, S::set1_ps(1.0));
         xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
@@ -102,7 +102,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
     let zcf_base = S::sub_ps(S::cvtepi32_ps(zc_base), z);
 
     xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME_32));
-    yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME));
+    yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME_32));
     zc_base = S::mullo_epi32(zc_base, S::set1_epi32(Z_PRIME));
 
     for _x in 0..3 {
@@ -169,7 +169,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 zc = S::add_epi32(yc, S::set1_epi32(Z_PRIME));
             }
             ycf = S::add_ps(ycf, S::set1_ps(1.0));
-            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
+            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
         }
         xcf = S::add_ps(xcf, S::set1_ps(1.0));
         xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
