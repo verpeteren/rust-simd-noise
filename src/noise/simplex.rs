@@ -16,8 +16,8 @@ const F3_32: f32 = 1.0 / 3.0;
 /// Skew factor for 4D simplex noise
 const F4_32: f32 = 0.309016994;
 /// Unskew factor for 2D simplex noise
-const G2: f32 = 0.2113248654;
-const G22: f32 = G2 * 2.0;
+const G2_32: f32 = 0.2113248654;
+const G22: f32 = G2_32 * 2.0;
 /// Unskew factor for 3D simplex noise
 const G3: f32 = 1.0 / 6.0;
 const G33: f32 = 3.0 / 6.0 - 1.0;
@@ -146,7 +146,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let i = S::cvtps_epi32(ips);
     let j = S::cvtps_epi32(jps);
 
-    let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::set1_ps(G2));
+    let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::set1_ps(G2_32));
 
     // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
@@ -157,8 +157,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let j1 = S::castps_epi32(S::cmpgt_ps(y0, x0));
 
     // Distances to the second and third points of the enclosing simplex
-    let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G2));
-    let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G2));
+    let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G2_32));
+    let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G2_32));
     let x2 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(G22));
     let y2 = S::add_ps(S::add_ps(y0, S::set1_ps(-1.0)), S::set1_ps(G22));
 
