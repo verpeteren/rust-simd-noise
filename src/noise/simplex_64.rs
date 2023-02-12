@@ -7,7 +7,7 @@ const F3_64: f64 = 1.0 / 3.0;
 const F4_64: f64 = 0.309016994;
 const G2_64: f64 = 0.2113248654;
 const G22_64: f64 = G2_64 * 2.0;
-const G3: f64 = 1.0 / 6.0;
+const G3_64: f64 = 1.0 / 6.0;
 const G4: f64 = 0.138196601;
 const G24: f64 = 2.0 * G4;
 const G34: f64 = 3.0 * G4;
@@ -157,7 +157,7 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64)
 
     let t = S::mul_pd(
         S::cvtepi64_pd(S::add_epi64(i, S::add_epi64(j, k))),
-        S::set1_pd(G3),
+        S::set1_pd(G3_64),
     );
 
     let x0 = S::sub_pd(x, S::sub_pd(ipd, t));
@@ -211,9 +211,9 @@ pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64)
     let j2 = S::or_epi64(j1, S::or_epi64(xy_yz, zy_yx));
     let k2 = S::or_epi64(k1, S::or_epi64(yz_zx, xz_zy));
 
-    let x1 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i1)), S::set1_pd(G3));
-    let y1 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j1)), S::set1_pd(G3));
-    let z1 = S::add_pd(S::add_pd(z0, S::cvtepi64_pd(k1)), S::set1_pd(G3));
+    let x1 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i1)), S::set1_pd(G3_64));
+    let y1 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j1)), S::set1_pd(G3_64));
+    let z1 = S::add_pd(S::add_pd(z0, S::cvtepi64_pd(k1)), S::set1_pd(G3_64));
     let x2 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i2)), S::set1_pd(F3_64));
     let y2 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j2)), S::set1_pd(F3_64));
     let z2 = S::add_pd(S::add_pd(z0, S::cvtepi64_pd(k2)), S::set1_pd(F3_64));
