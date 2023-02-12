@@ -1,4 +1,4 @@
-use super::cellular_64::{hash_2d, hash_3d, BIT_10_MASK, X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
+use super::cellular_64::{hash_2d, hash_3d, BIT_10_MASK_64, X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
 use crate::{Cell2ReturnType, CellDistanceFunction};
 
 use simdeez::Simd;
@@ -31,13 +31,13 @@ pub unsafe fn cellular2_2d<S: Simd>(
         for _y in 0..3 {
             let hash = hash_2d::<S>(seed, xc, yc);
             let mut xd = S::sub_pd(
-                S::cvtepi64_pd(S::and_epi64(hash, S::set1_epi64(BIT_10_MASK))),
+                S::cvtepi64_pd(S::and_epi64(hash, S::set1_epi64(BIT_10_MASK_64))),
                 S::set1_pd(511.5),
             );
             let mut yd = S::sub_pd(
                 S::cvtepi64_pd(S::and_epi64(
                     S::srai_epi64(hash, 10),
-                    S::set1_epi64(BIT_10_MASK),
+                    S::set1_epi64(BIT_10_MASK_64),
                 )),
                 S::set1_pd(511.5),
             );
@@ -114,20 +114,20 @@ pub unsafe fn cellular2_3d<S: Simd>(
             for _z in 0..3 {
                 let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_pd(
-                    S::cvtepi64_pd(S::and_epi64(hash, S::set1_epi64(BIT_10_MASK))),
+                    S::cvtepi64_pd(S::and_epi64(hash, S::set1_epi64(BIT_10_MASK_64))),
                     S::set1_pd(511.5),
                 );
                 let mut yd = S::sub_pd(
                     S::cvtepi64_pd(S::and_epi64(
                         S::srai_epi64(hash, 10),
-                        S::set1_epi64(BIT_10_MASK),
+                        S::set1_epi64(BIT_10_MASK_64),
                     )),
                     S::set1_pd(511.5),
                 );
                 let mut zd = S::sub_pd(
                     S::cvtepi64_pd(S::and_epi64(
                         S::srai_epi64(hash, 20),
-                        S::set1_epi64(BIT_10_MASK),
+                        S::set1_epi64(BIT_10_MASK_64),
                     )),
                     S::set1_pd(511.5),
                 );
