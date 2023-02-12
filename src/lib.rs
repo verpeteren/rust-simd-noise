@@ -276,8 +276,7 @@ pub use cell_distance_function::CellDistanceFunction;
 
 pub use noise::cell_return_type::CellReturnType;
 
-mod cell2_return_type;
-pub use cell2_return_type::Cell2ReturnType;
+pub use noise::cell2_return_type::Cell2ReturnType;
 
 mod noise_dimensions;
 use noise_dimensions::NoiseDimensions;
