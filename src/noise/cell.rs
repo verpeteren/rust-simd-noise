@@ -1,4 +1,4 @@
-use super::cellular::{hash_2d, hash_3d, BIT_10_MASK, HASH_2_FLOAT, X_PRIME, Y_PRIME, Z_PRIME};
+use super::cellular::{hash_2d, hash_3d, BIT_10_MASK, HASH_2_FLOAT, X_PRIME_32, Y_PRIME, Z_PRIME};
 use crate::{CellDistanceFunction, CellReturnType};
 
 use simdeez::Simd;
@@ -19,7 +19,7 @@ pub unsafe fn cellular_2d<S: Simd>(
     let mut xcf = S::sub_ps(S::cvtepi32_ps(xc), x);
     let ycf_base = S::sub_ps(S::cvtepi32_ps(yc_base), y);
 
-    xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME));
+    xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME_32));
     yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME));
     match return_type {
         CellReturnType::Distance => {
@@ -54,7 +54,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
                         }
                         xcf = S::add_ps(xcf, S::set1_ps(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME));
+                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -88,7 +88,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
                         }
                         xcf = S::add_ps(xcf, S::set1_ps(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME));
+                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -126,7 +126,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
                         }
                         xcf = S::add_ps(xcf, S::set1_ps(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME));
+                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
                     }
                 }
             }
@@ -170,7 +170,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
                         }
                         xcf = S::add_ps(xcf, S::set1_ps(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME));
+                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -208,7 +208,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
                         }
                         xcf = S::add_ps(xcf, S::set1_ps(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME));
+                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -250,7 +250,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
                         }
                         xcf = S::add_ps(xcf, S::set1_ps(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME));
+                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
                     }
                 }
             }
@@ -280,7 +280,7 @@ pub unsafe fn cellular_3d<S: Simd>(
     let ycf_base = S::sub_ps(S::cvtepi32_ps(yc_base), y);
     let zcf_base = S::sub_ps(S::cvtepi32_ps(zc_base), z);
 
-    xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME));
+    xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME_32));
     yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME));
     zc_base = S::mullo_epi32(zc_base, S::set1_epi32(Z_PRIME));
 
@@ -349,7 +349,7 @@ pub unsafe fn cellular_3d<S: Simd>(
             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME));
         }
         xcf = S::add_ps(xcf, S::set1_ps(1.0));
-        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME));
+        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
     }
 
     match return_type {

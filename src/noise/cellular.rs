@@ -7,7 +7,7 @@ use std::f32;
 
 use simdeez::Simd;
 
-pub const X_PRIME: i32 = 1619;
+pub const X_PRIME_32: i32 = 1619;
 pub const Y_PRIME: i32 = 31337;
 pub const Z_PRIME: i32 = 6971;
 pub const BIT_10_MASK: i32 = 1023;
