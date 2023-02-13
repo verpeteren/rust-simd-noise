@@ -1,4 +1,4 @@
-pub mod cell2;
+pub mod cell2_32;
 pub mod cell2_64;
 pub mod cell2_return_type;
 pub mod cell_32;
