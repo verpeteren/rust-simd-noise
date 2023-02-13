@@ -92,7 +92,7 @@ pub mod intrinsics;
 mod noise;
 mod noise_builder;
 mod noise_dimensions;
-mod noise_helpers;
+mod noise_helpers_32;
 mod noise_helpers_64;
 mod noise_type;
 mod shared;

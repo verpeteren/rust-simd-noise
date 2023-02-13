@@ -222,7 +222,7 @@ pub unsafe fn turbulence_1d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse2")]
 pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_1d_noise::<Sse2>(noise_type)
+    crate::noise_helpers_32::get_1d_noise::<Sse2>(noise_type)
 }
 
 /// Gets a width sized block of scaled 2d noise
@@ -350,7 +350,7 @@ pub unsafe fn turbulence_2d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse2")]
 pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_2d_noise::<Sse2>(noise_type)
+    crate::noise_helpers_32::get_2d_noise::<Sse2>(noise_type)
 }
 
 /// Gets a width X height sized block of scaled 2d noise
@@ -524,7 +524,7 @@ pub unsafe fn turbulence_3d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse2")]
 pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_3d_noise::<Sse2>(noise_type)
+    crate::noise_helpers_32::get_3d_noise::<Sse2>(noise_type)
 }
 
 /// Gets a width X height X depth sized block of scaled 3d noise
@@ -708,7 +708,7 @@ pub unsafe fn turbulence_4d_f64(
 /// in a single pass.
 #[target_feature(enable = "sse2")]
 pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_4d_noise::<Sse2>(noise_type)
+    crate::noise_helpers_32::get_4d_noise::<Sse2>(noise_type)
 }
 
 /// Gets a width X height X depth X time sized block of scaled 4d noise

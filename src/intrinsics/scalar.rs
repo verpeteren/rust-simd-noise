@@ -177,7 +177,7 @@ pub unsafe fn turbulence_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8,
 /// in a single pass.
 
 pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_1d_noise::<Scalar>(noise_type)
+    crate::noise_helpers_32::get_1d_noise::<Scalar>(noise_type)
 }
 
 /// Gets a width sized block of scaled 2d noise
@@ -273,7 +273,7 @@ pub unsafe fn turbulence_2d_f64(
 /// in a single pass.
 
 pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_2d_noise::<Scalar>(noise_type)
+    crate::noise_helpers_32::get_2d_noise::<Scalar>(noise_type)
 }
 
 /// Gets a width X height sized block of scaled 2d noise
@@ -425,7 +425,7 @@ pub unsafe fn turbulence_3d_f64(
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
 pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_3d_noise::<Scalar>(noise_type)
+    crate::noise_helpers_32::get_3d_noise::<Scalar>(noise_type)
 }
 
 /// Gets a width X height X depth sized block of scaled 3d noise
@@ -610,7 +610,7 @@ pub unsafe fn turbulence_4d_f64(
 /// in a single pass.
 
 pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    crate::noise_helpers::get_4d_noise::<Scalar>(noise_type)
+    crate::noise_helpers_32::get_4d_noise::<Scalar>(noise_type)
 }
 
 /// Gets a width X height X depth X time sized block of scaled 4d noise
