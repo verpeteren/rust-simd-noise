@@ -2,7 +2,7 @@ use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4};
 
 use simdeez::Simd;
 
-use crate::noise::simplex::{
+use crate::noise::simplex_32::{
     F2_64, F3_64, F4_64, G22_64, G24_64, G2_64, G34_64, G3_64, G44_64, G4_64,
 };
 

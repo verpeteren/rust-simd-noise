@@ -14,8 +14,8 @@ use crate::noise::fbm_32;
 use crate::noise::fbm_64;
 use crate::noise::ridge_32;
 use crate::noise::ridge_64;
-use crate::noise::simplex as smplx;
-use crate::noise::simplex_64 as smplx_64;
+use crate::noise::simplex_32;
+use crate::noise::simplex_64;
 use crate::noise::turbulence_32;
 use crate::noise::turbulence_64;
 use crate::shared::scale_noise;
@@ -122,7 +122,7 @@ pub unsafe fn cellular_3d_f64(
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_1d(x: __m256, seed: i32) -> __m256 {
-    smplx::simplex_1d::<Avx2>(F32x8(x), seed).0
+    simplex_32::simplex_1d::<Avx2>(F32x8(x), seed).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
@@ -165,7 +165,7 @@ pub unsafe fn turbulence_1d(
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_1d_f64(x: __m256d, seed: i64) -> __m256d {
-    smplx_64::simplex_1d::<Avx2>(F64x4(x), seed).0
+    simplex_64::simplex_1d::<Avx2>(F64x4(x), seed).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
@@ -230,7 +230,7 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_2d(x: __m256, y: __m256, seed: i32) -> __m256 {
-    smplx::simplex_2d::<Avx2>(F32x8(x), F32x8(y), seed).0
+    simplex_32::simplex_2d::<Avx2>(F32x8(x), F32x8(y), seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
@@ -276,7 +276,7 @@ pub unsafe fn turbulence_2d(
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_2d_f64(x: __m256d, y: __m256d, seed: i64) -> __m256d {
-    smplx_64::simplex_2d::<Avx2>(F64x4(x), F64x4(y), seed).0
+    simplex_64::simplex_2d::<Avx2>(F64x4(x), F64x4(y), seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
@@ -343,7 +343,7 @@ pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_3d(x: __m256, y: __m256, z: __m256, seed: i32) -> __m256 {
-    smplx::simplex_3d::<Avx2>(F32x8(x), F32x8(y), F32x8(z), seed).0
+    simplex_32::simplex_3d::<Avx2>(F32x8(x), F32x8(y), F32x8(z), seed).0
 }
 
 /// Get a single value of 3d fractal brownian motion.
@@ -419,7 +419,7 @@ pub unsafe fn turbulence_3d(
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_3d_f64(x: __m256d, y: __m256d, z: __m256d, seed: i64) -> __m256d {
-    smplx_64::simplex_3d::<Avx2>(F64x4(x), F64x4(y), F64x4(z), seed).0
+    simplex_64::simplex_3d::<Avx2>(F64x4(x), F64x4(y), F64x4(z), seed).0
 }
 
 /// Get a single value of 3d fractal brownian motion.
@@ -517,7 +517,7 @@ pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_4d(x: __m256, y: __m256, z: __m256, w: __m256, seed: i32) -> __m256 {
-    smplx::simplex_4d::<Avx2>(F32x8(x), F32x8(y), F32x8(z), F32x8(w), seed).0
+    simplex_32::simplex_4d::<Avx2>(F32x8(x), F32x8(y), F32x8(z), F32x8(w), seed).0
 }
 /// Get a single value of 4d fractal brownian motion.
 #[target_feature(enable = "avx2")]
@@ -598,7 +598,7 @@ pub unsafe fn turbulence_4d(
 /// are not scaled.
 #[target_feature(enable = "avx2")]
 pub unsafe fn simplex_4d_f64(x: __m256d, y: __m256d, z: __m256d, w: __m256d, seed: i64) -> __m256d {
-    smplx_64::simplex_4d::<Avx2>(F64x4(x), F64x4(y), F64x4(z), F64x4(w), seed).0
+    simplex_64::simplex_4d::<Avx2>(F64x4(x), F64x4(y), F64x4(z), F64x4(w), seed).0
 }
 /// Get a single value of 4d fractal brownian motion.
 #[target_feature(enable = "avx2")]

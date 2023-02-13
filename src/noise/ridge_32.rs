@@ -1,4 +1,4 @@
-use crate::noise::simplex::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
+use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 
 use simdeez::Simd;
 
