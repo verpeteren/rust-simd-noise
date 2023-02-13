@@ -10,8 +10,8 @@ use crate::noise::cell_32;
 use crate::noise::cell_64;
 use crate::noise::fbm as simplex_fbm;
 use crate::noise::fbm_64 as simplex_fbm_64;
-use crate::noise::ridge as simplex_ridge;
-use crate::noise::ridge_64 as simplex_ridge_64;
+use crate::noise::ridge_32;
+use crate::noise::ridge_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
 use crate::noise::turbulence as simplex_turbulence;
@@ -145,7 +145,7 @@ pub unsafe fn ridge_1d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_ridge::ridge_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
+    ridge_32::ridge_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d turbulence.
@@ -195,7 +195,7 @@ pub unsafe fn ridge_1d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_ridge_64::ridge_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
+    ridge_64::ridge_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d turbulence.
@@ -269,7 +269,7 @@ pub unsafe fn ridge_2d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_ridge::ridge_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
+    ridge_32::ridge_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
 }
 /// Get a single value of 2d turbulence.
 #[target_feature(enable = "sse4.1")]
@@ -322,8 +322,7 @@ pub unsafe fn ridge_2d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_ridge_64::ridge_2d::<Sse41>(F64x2(x), F64x2(y), F64x2(lac), F64x2(gain), octaves, seed)
-        .0
+    ridge_64::ridge_2d::<Sse41>(F64x2(x), F64x2(y), F64x2(lac), F64x2(gain), octaves, seed).0
 }
 /// Get a single value of 2d turbulence.
 #[target_feature(enable = "sse4.1")]
@@ -409,7 +408,7 @@ pub unsafe fn ridge_3d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_ridge::ridge_3d::<Sse41>(
+    ridge_32::ridge_3d::<Sse41>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
@@ -485,7 +484,7 @@ pub unsafe fn ridge_3d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_ridge_64::ridge_3d::<Sse41>(
+    ridge_64::ridge_3d::<Sse41>(
         F64x2(x),
         F64x2(y),
         F64x2(z),
@@ -585,7 +584,7 @@ pub unsafe fn ridge_4d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_ridge::ridge_4d::<Sse41>(
+    ridge_32::ridge_4d::<Sse41>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
@@ -666,7 +665,7 @@ pub unsafe fn ridge_4d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_ridge_64::ridge_4d::<Sse41>(
+    ridge_64::ridge_4d::<Sse41>(
         F64x2(x),
         F64x2(y),
         F64x2(z),

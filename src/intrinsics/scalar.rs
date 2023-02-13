@@ -6,7 +6,7 @@ use crate::noise::cell_32;
 use crate::noise::cell_64;
 use crate::noise::fbm as simplex_fbm;
 use crate::noise::fbm_64 as simplex_fbm_64;
-use crate::noise::ridge as simplex_ridge;
+use crate::noise::ridge_32;
 use crate::noise::ridge_64 as simplex_ridge_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
@@ -123,7 +123,7 @@ pub unsafe fn fbm_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8, seed: i32)
 /// Get a single value of 2d ridge noise.
 
 pub unsafe fn ridge_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    simplex_ridge::ridge_1d::<Scalar>(F32x1(x), F32x1(lacunarity), F32x1(gain), octaves, seed).0
+    ridge_32::ridge_1d::<Scalar>(F32x1(x), F32x1(lacunarity), F32x1(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d turbulence.
@@ -221,7 +221,7 @@ pub unsafe fn fbm_2d_f64(x: f64, y: f64, lac: f64, gain: f64, octaves: u8, seed:
 /// Get a single value of 2d ridge noise.
 
 pub unsafe fn ridge_2d(x: f32, y: f32, lac: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    simplex_ridge::ridge_2d::<Scalar>(F32x1(x), F32x1(y), F32x1(lac), F32x1(gain), octaves, seed).0
+    ridge_32::ridge_2d::<Scalar>(F32x1(x), F32x1(y), F32x1(lac), F32x1(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -340,7 +340,7 @@ pub unsafe fn fbm_3d_f64(
 /// Get a single value of 3d ridge noise.
 
 pub unsafe fn ridge_3d(x: f32, y: f32, z: f32, lac: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    simplex_ridge::ridge_3d::<Scalar>(
+    ridge_32::ridge_3d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),
@@ -515,7 +515,7 @@ pub unsafe fn ridge_4d(
     octaves: u8,
     seed: i32,
 ) -> f32 {
-    simplex_ridge::ridge_4d::<Scalar>(
+    ridge_32::ridge_4d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),
