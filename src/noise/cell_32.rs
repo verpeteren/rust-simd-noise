@@ -1,4 +1,4 @@
-use super::cellular::{
+use super::cellular_32::{
     hash_2d, hash_3d, BIT_10_MASK_32, HASH_2_FLOAT_32, X_PRIME_32, Y_PRIME_32, Z_PRIME_32,
 };
 use crate::{CellDistanceFunction, CellReturnType};

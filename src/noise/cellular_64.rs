@@ -1,5 +1,3 @@
-use std::f64;
-
 use simdeez::Simd;
 
 #[inline(always)]

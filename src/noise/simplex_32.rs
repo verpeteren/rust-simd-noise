@@ -3,8 +3,8 @@
 //! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
 //! interfaces.
 
-use crate::noise::cellular::{X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
-use crate::noise::gradient::{grad1, grad2, grad3d, grad3d_dot, grad4};
+use crate::noise::cellular_32::{X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
+use crate::noise::gradient_32::{grad1, grad2, grad3d, grad3d_dot, grad4};
 
 use simdeez::Simd;
 
