@@ -8,8 +8,8 @@
 
 use crate::noise::cell_32;
 use crate::noise::cell_64;
-use crate::noise::fbm as simplex_fbm;
-use crate::noise::fbm_64 as simplex_fbm_64;
+use crate::noise::fbm_32;
+use crate::noise::fbm_64;
 use crate::noise::ridge_32;
 use crate::noise::ridge_64;
 use crate::noise::simplex as smplx;
@@ -133,7 +133,7 @@ pub unsafe fn fbm_1d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_fbm::fbm_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
+    fbm_32::fbm_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -183,7 +183,7 @@ pub unsafe fn fbm_1d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_fbm_64::fbm_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
+    fbm_64::fbm_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -256,7 +256,7 @@ pub unsafe fn fbm_2d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_fbm::fbm_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
+    fbm_32::fbm_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -309,7 +309,7 @@ pub unsafe fn fbm_2d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_fbm_64::fbm_2d::<Sse41>(F64x2(x), F64x2(y), F64x2(lac), F64x2(gain), octaves, seed).0
+    fbm_64::fbm_2d::<Sse41>(F64x2(x), F64x2(y), F64x2(lac), F64x2(gain), octaves, seed).0
 }
 
 /// Get a single value of 2d ridge noise.
@@ -385,7 +385,7 @@ pub unsafe fn fbm_3d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_fbm::fbm_3d::<Sse41>(
+    fbm_32::fbm_3d::<Sse41>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
@@ -461,7 +461,7 @@ pub unsafe fn fbm_3d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_fbm_64::fbm_3d::<Sse41>(
+    fbm_64::fbm_3d::<Sse41>(
         F64x2(x),
         F64x2(y),
         F64x2(z),
@@ -559,7 +559,7 @@ pub unsafe fn fbm_4d(
     octaves: u8,
     seed: i32,
 ) -> __m128 {
-    simplex_fbm::fbm_4d::<Sse41>(
+    fbm_32::fbm_4d::<Sse41>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
@@ -640,7 +640,7 @@ pub unsafe fn fbm_4d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m128d {
-    simplex_fbm_64::fbm_4d::<Sse41>(
+    fbm_64::fbm_4d::<Sse41>(
         F64x2(x),
         F64x2(y),
         F64x2(z),

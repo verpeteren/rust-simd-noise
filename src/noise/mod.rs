@@ -7,7 +7,7 @@ pub mod cell_distance_function;
 pub mod cell_return_type;
 mod cellular;
 mod cellular_64;
-pub mod fbm;
+pub mod fbm_32;
 pub mod fbm_64;
 mod gradient;
 mod gradient_64;
