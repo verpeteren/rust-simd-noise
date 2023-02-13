@@ -2,7 +2,7 @@
 //!
 //! These are much slower than SIMD, and hence on capable hardware have little use but testing.
 
-use crate::noise::cell;
+use crate::noise::cell_32;
 use crate::noise::cell_64;
 use crate::noise::fbm as simplex_fbm;
 use crate::noise::fbm_64 as simplex_fbm_64;
@@ -30,7 +30,7 @@ pub unsafe fn cellular_2d(
     jitter: f32,
     seed: i32,
 ) -> f32 {
-    cell::cellular_2d::<Scalar>(
+    cell_32::cellular_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
         distance_function,
@@ -52,7 +52,7 @@ pub unsafe fn cellular_3d(
     jitter: f32,
     seed: i32,
 ) -> f32 {
-    cell::cellular_3d::<Scalar>(
+    cell_32::cellular_3d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),

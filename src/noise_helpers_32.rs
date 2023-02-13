@@ -1,7 +1,7 @@
 use crate::NoiseType;
 
-use crate::noise::cell::{cellular_2d, cellular_3d};
 use crate::noise::cell2::{cellular2_2d, cellular2_3d};
+use crate::noise::cell_32::{cellular_2d, cellular_3d};
 use crate::noise::fbm::{fbm_1d, fbm_2d, fbm_3d, fbm_4d};
 use crate::noise::ridge::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::simplex::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};

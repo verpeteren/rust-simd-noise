@@ -6,7 +6,7 @@
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 4, and when it is not small relative height and depth.
 
-use crate::noise::cell;
+use crate::noise::cell_32;
 use crate::noise::cell_64;
 use crate::noise::fbm as simplex_fbm;
 use crate::noise::fbm_64 as simplex_fbm_64;
@@ -39,7 +39,7 @@ pub unsafe fn cellular_2d(
     jitter: __m128,
     seed: i32,
 ) -> __m128 {
-    cell::cellular_2d::<Sse41>(
+    cell_32::cellular_2d::<Sse41>(
         F32x4(x),
         F32x4(y),
         distance_function,
@@ -61,7 +61,7 @@ pub unsafe fn cellular_3d(
     jitter: __m128,
     seed: i32,
 ) -> __m128 {
-    cell::cellular_3d::<Sse41>(
+    cell_32::cellular_3d::<Sse41>(
         F32x4(x),
         F32x4(y),
         F32x4(z),
