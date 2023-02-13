@@ -5,7 +5,7 @@ use crate::noise::cell_32::{cellular_2d, cellular_3d};
 use crate::noise::fbm_32::{fbm_1d, fbm_2d, fbm_3d, fbm_4d};
 use crate::noise::ridge_32::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::simplex::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
-use crate::noise::turbulence::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
+use crate::noise::turbulence_32::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
 
 use simdeez::Simd;
 

@@ -10,8 +10,8 @@ use crate::noise::ridge_32;
 use crate::noise::ridge_64 as simplex_ridge_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
-use crate::noise::turbulence as simplex_turbulence;
-use crate::noise::turbulence_64 as simplex_turbulence_64;
+use crate::noise::turbulence_32;
+use crate::noise::turbulence_64;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
 use crate::shared::scale_noise;
@@ -129,14 +129,8 @@ pub unsafe fn ridge_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8, seed: i3
 /// Get a single value of 2d turbulence.
 
 pub unsafe fn turbulence_1d(x: f32, lacunarity: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    simplex_turbulence::turbulence_1d::<Scalar>(
-        F32x1(x),
-        F32x1(lacunarity),
-        F32x1(gain),
-        octaves,
-        seed,
-    )
-    .0
+    turbulence_32::turbulence_1d::<Scalar>(F32x1(x), F32x1(lacunarity), F32x1(gain), octaves, seed)
+        .0
 }
 
 /// Get a single value of 1d simplex noise, results
@@ -160,14 +154,8 @@ pub unsafe fn ridge_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8, seed
 /// Get a single value of 2d turbulence.
 
 pub unsafe fn turbulence_1d_f64(x: f64, lacunarity: f64, gain: f64, octaves: u8, seed: i64) -> f64 {
-    simplex_turbulence_64::turbulence_1d::<Scalar>(
-        F64x1(x),
-        F64x1(lacunarity),
-        F64x1(gain),
-        octaves,
-        seed,
-    )
-    .0
+    turbulence_64::turbulence_1d::<Scalar>(F64x1(x), F64x1(lacunarity), F64x1(gain), octaves, seed)
+        .0
 }
 
 /// Gets a width sized block of 1d noise, unscaled.
@@ -234,7 +222,7 @@ pub unsafe fn ridge_2d_f64(x: f64, y: f64, lac: f64, gain: f64, octaves: u8, see
 /// Get a single value of 2d turbulence.
 
 pub unsafe fn turbulence_2d(x: f32, y: f32, lac: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    simplex_turbulence::turbulence_2d::<Scalar>(
+    turbulence_32::turbulence_2d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(lac),
@@ -255,7 +243,7 @@ pub unsafe fn turbulence_2d_f64(
     octaves: u8,
     seed: i64,
 ) -> f64 {
-    simplex_turbulence_64::turbulence_2d::<Scalar>(
+    turbulence_64::turbulence_2d::<Scalar>(
         F64x1(x),
         F64x1(y),
         F64x1(lac),
@@ -385,7 +373,7 @@ pub unsafe fn turbulence_3d(
     octaves: u8,
     seed: i32,
 ) -> f32 {
-    simplex_turbulence::turbulence_3d::<Scalar>(
+    turbulence_32::turbulence_3d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),
@@ -407,7 +395,7 @@ pub unsafe fn turbulence_3d_f64(
     octaves: u8,
     seed: i64,
 ) -> f64 {
-    simplex_turbulence_64::turbulence_3d::<Scalar>(
+    turbulence_64::turbulence_3d::<Scalar>(
         F64x1(x),
         F64x1(y),
         F64x1(z),
@@ -565,7 +553,7 @@ pub unsafe fn turbulence_4d(
     octaves: u8,
     seed: i32,
 ) -> f32 {
-    simplex_turbulence::turbulence_4d::<Scalar>(
+    turbulence_32::turbulence_4d::<Scalar>(
         F32x1(x),
         F32x1(y),
         F32x1(z),
@@ -590,7 +578,7 @@ pub unsafe fn turbulence_4d_f64(
     octaves: u8,
     seed: i64,
 ) -> f64 {
-    simplex_turbulence_64::turbulence_4d::<Scalar>(
+    turbulence_64::turbulence_4d::<Scalar>(
         F64x1(x),
         F64x1(y),
         F64x1(z),

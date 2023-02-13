@@ -16,8 +16,8 @@ use crate::noise::ridge_32;
 use crate::noise::ridge_64;
 use crate::noise::simplex as smplx;
 use crate::noise::simplex_64 as smplx_64;
-use crate::noise::turbulence as simplex_turbulence;
-use crate::noise::turbulence_64 as simplex_turbulence_64;
+use crate::noise::turbulence_32;
+use crate::noise::turbulence_64;
 use crate::shared::scale_noise;
 use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
 
@@ -158,14 +158,7 @@ pub unsafe fn turbulence_1d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    simplex_turbulence::turbulence_1d::<Avx2>(
-        F32x8(x),
-        F32x8(lacunarity),
-        F32x8(gain),
-        octaves,
-        seed,
-    )
-    .0
+    turbulence_32::turbulence_1d::<Avx2>(F32x8(x), F32x8(lacunarity), F32x8(gain), octaves, seed).0
 }
 
 /// Get a single value of 1d simplex noise, results
@@ -208,14 +201,7 @@ pub unsafe fn turbulence_1d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m256d {
-    simplex_turbulence_64::turbulence_1d::<Avx2>(
-        F64x4(x),
-        F64x4(lacunarity),
-        F64x4(gain),
-        octaves,
-        seed,
-    )
-    .0
+    turbulence_64::turbulence_1d::<Avx2>(F64x4(x), F64x4(lacunarity), F64x4(gain), octaves, seed).0
 }
 
 /// Gets a width sized block of 1d noise, unscaled.
@@ -282,15 +268,8 @@ pub unsafe fn turbulence_2d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    simplex_turbulence::turbulence_2d::<Avx2>(
-        F32x8(x),
-        F32x8(y),
-        F32x8(lac),
-        F32x8(gain),
-        octaves,
-        seed,
-    )
-    .0
+    turbulence_32::turbulence_2d::<Avx2>(F32x8(x), F32x8(y), F32x8(lac), F32x8(gain), octaves, seed)
+        .0
 }
 
 /// Get a single value of 2d simplex noise, results
@@ -335,15 +314,8 @@ pub unsafe fn turbulence_2d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m256d {
-    simplex_turbulence_64::turbulence_2d::<Avx2>(
-        F64x4(x),
-        F64x4(y),
-        F64x4(lac),
-        F64x4(gain),
-        octaves,
-        seed,
-    )
-    .0
+    turbulence_64::turbulence_2d::<Avx2>(F64x4(x), F64x4(y), F64x4(lac), F64x4(gain), octaves, seed)
+        .0
 }
 /// Gets a width X height sized block of 2d noise, unscaled.
 /// `start_x` and `start_y` can be used to provide an offset in the
@@ -431,7 +403,7 @@ pub unsafe fn turbulence_3d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    simplex_turbulence::turbulence_3d::<Avx2>(
+    turbulence_32::turbulence_3d::<Avx2>(
         F32x8(x),
         F32x8(y),
         F32x8(z),
@@ -507,7 +479,7 @@ pub unsafe fn turbulence_3d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m256d {
-    simplex_turbulence_64::turbulence_3d::<Avx2>(
+    turbulence_64::turbulence_3d::<Avx2>(
         F64x4(x),
         F64x4(y),
         F64x4(z),
@@ -609,7 +581,7 @@ pub unsafe fn turbulence_4d(
     octaves: u8,
     seed: i32,
 ) -> __m256 {
-    simplex_turbulence::turbulence_4d::<Avx2>(
+    turbulence_32::turbulence_4d::<Avx2>(
         F32x8(x),
         F32x8(y),
         F32x8(z),
@@ -690,7 +662,7 @@ pub unsafe fn turbulence_4d_f64(
     octaves: u8,
     seed: i64,
 ) -> __m256d {
-    simplex_turbulence_64::turbulence_4d::<Avx2>(
+    turbulence_64::turbulence_4d::<Avx2>(
         F64x4(x),
         F64x4(y),
         F64x4(z),
