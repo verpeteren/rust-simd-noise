@@ -78,14 +78,14 @@ let noise_setting = NoiseBuilder::ridge_3d(32, 32, 32)
     .wrap();
 
 // get a block of noise with the sse41 version, using the above settings
-let (noise, min, max) = unsafe { simdnoise::sse41::get_2d_noise(&noise_setting) };
+let (noise, min, max) = unsafe { simdnoise::intrinsics::sse41::get_2d_noise(&noise_setting) };
 
 // send your own SIMD x,y values to the noise functions directly
 unsafe {
     // sse2 simplex noise
     let x = _mm_set1_ps(5.0);
     let y = _mm_set1_ps(10.0);
-    let f: __m128 = simdnoise::sse2::simplex_2d(x, y);
+    let f: __m128 = simdnoise::intrinsics::sse2::simplex_2d(x, y);
 
     // avx2 turbulence
     let x = _mm256_set1_ps(5.0);
@@ -94,7 +94,7 @@ unsafe {
     let lacunarity = _mm256_set1_ps(0.5);
     let gain = _mm256_set1_ps(2.0);
     let octaves = 3;
-    let f_turbulence: __m256 = simdnoise::avx2::turbulence_2d(x, y, lacunarity, gain, octaves);
+    let f_turbulence: __m256 = simdnoise::intrinsics::avx2::turbulence_2d(x, y, lacunarity, gain, octaves);
 };
 
 ```
