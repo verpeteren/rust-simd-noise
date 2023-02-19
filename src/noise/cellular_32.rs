@@ -11,10 +11,16 @@ pub const BIT_10_MASK_32: i32 = 1023;
 pub const BIT_10_MASK_64: i64 = 1023;
 pub const HASH_2_FLOAT_32: f32 = 1.0 / 2147483648.0;
 pub const HASH_2_FLOAT_64: f64 = 1.0 / 2147483648.0;
+
 pub const X_PRIME_32: i32 = 1619;
 pub const X_PRIME_64: i64 = 1619;
+
 pub const Y_PRIME_32: i32 = 31337;
 pub const Y_PRIME_64: i64 = 31337;
+
+// It seems that b47708e459 had a typo and set this value to 6791.
+// That seems to be a type (not 100 % sure though), because it is also a prime.
+// This went unnoticed untill cce07cdc.
 pub const Z_PRIME_32: i32 = 6971;
 pub const Z_PRIME_64: i64 = 6971;
 
