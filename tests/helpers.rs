@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 
 use byteorder::{ByteOrder, LittleEndian, WriteBytesExt};
+
 pub fn read_from_file_f32(file_name: &str) -> std::io::Result<Vec<f32>> {
     let file = File::open(file_name)?;
     let len = metadata(file_name)?.len();
@@ -29,7 +30,7 @@ pub fn read_from_file_f64(file_name: &str) -> std::io::Result<Vec<f64>> {
     let len = metadata(file_name)?.len();
     let mut noise = Vec::with_capacity((len / 4) as usize);
     let mut reader = BufReader::new(file);
-    let mut block: [u8; 4] = [0; 4];
+    let mut block: [u8; 8] = [0; 8];
     loop {
         match reader.read_exact(&mut block) {
             Ok(_) => {
