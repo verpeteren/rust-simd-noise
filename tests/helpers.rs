@@ -5,6 +5,8 @@ use std::io::BufReader;
 
 use byteorder::{ByteOrder, LittleEndian, WriteBytesExt};
 
+pub const BIN_PATH: &'static str = "tests/assets";
+
 pub fn read_from_file_f32(file_name: &str) -> std::io::Result<Vec<f32>> {
     let file = File::open(file_name)?;
     let len = metadata(file_name)?.len();

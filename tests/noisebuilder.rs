@@ -1,11 +1,10 @@
 use simdnoise::NoiseBuilder;
 
 mod helpers;
-use helpers::{read_from_file_f32, save_to_file_f32};
+use helpers::{read_from_file_f32, save_to_file_f32, BIN_PATH};
 
 mod noise {
     use super::*;
-    const BIN_PATH: &'static str = "tests/assets";
 
     mod cellular {
         use super::*;
