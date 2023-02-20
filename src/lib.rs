@@ -103,7 +103,7 @@ pub use noise::cell2_return_type::Cell2ReturnType;
 pub use noise::cell_distance_function::CellDistanceFunction;
 pub use noise::cell_return_type::CellReturnType;
 pub use noise_builder::NoiseBuilder;
-use noise_dimensions::NoiseDimensions;
+pub use noise_dimensions::NoiseDimensions;
 pub use noise_type::NoiseType;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
