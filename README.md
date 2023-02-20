@@ -94,7 +94,8 @@ unsafe {
     let lacunarity = _mm256_set1_ps(0.5);
     let gain = _mm256_set1_ps(2.0);
     let octaves = 3;
-    let f_turbulence: __m256 = simdnoise::intrinsics::avx2::turbulence_2d(x, y, lacunarity, gain, octaves);
+    let seed = 1337;
+    let f_turbulence: __m256 = simdnoise::intrinsics::avx2::turbulence_2d(x, y, lacunarity, gain, octaves, seed);
 };
 
 ```
