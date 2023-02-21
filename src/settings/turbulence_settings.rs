@@ -7,6 +7,8 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
+use super::Settings;
+
 #[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
     dim: NoiseDimensions,
@@ -25,8 +27,8 @@ impl DimensionalBeing for TurbulenceSettings {
     }
 }
 
-impl TurbulenceSettings {
-    pub fn default(dim: NoiseDimensions) -> TurbulenceSettings {
+impl Settings for TurbulenceSettings {
+    fn default(dim: NoiseDimensions) -> TurbulenceSettings {
         TurbulenceSettings {
             dim,
             freq_x: 0.02,
@@ -38,7 +40,9 @@ impl TurbulenceSettings {
             octaves: 3,
         }
     }
+}
 
+impl TurbulenceSettings {
     pub fn with_seed(&mut self, seed: i32) -> &mut TurbulenceSettings {
         self.dim.seed = seed;
         self

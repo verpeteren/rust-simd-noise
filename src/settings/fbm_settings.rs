@@ -7,6 +7,8 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
+use super::Settings;
+
 #[derive(Copy, Clone)]
 pub struct FbmSettings {
     dim: NoiseDimensions,
@@ -25,8 +27,8 @@ impl DimensionalBeing for FbmSettings {
     }
 }
 
-impl FbmSettings {
-    pub fn default(dim: NoiseDimensions) -> FbmSettings {
+impl Settings for FbmSettings {
+    fn default(dim: NoiseDimensions) -> FbmSettings {
         FbmSettings {
             dim,
             freq_x: 0.02,
@@ -38,7 +40,9 @@ impl FbmSettings {
             octaves: 3,
         }
     }
+}
 
+impl FbmSettings {
     pub fn with_seed(&mut self, seed: i32) -> &mut FbmSettings {
         self.dim.seed = seed;
         self

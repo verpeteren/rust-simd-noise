@@ -7,6 +7,8 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
+use super::Settings;
+
 #[derive(Copy, Clone)]
 pub struct Cellular2Settings {
     dim: NoiseDimensions,
@@ -26,8 +28,8 @@ impl DimensionalBeing for Cellular2Settings {
     }
 }
 
-impl Cellular2Settings {
-    pub fn default(dim: NoiseDimensions) -> Cellular2Settings {
+impl Settings for Cellular2Settings {
+    fn default(dim: NoiseDimensions) -> Cellular2Settings {
         Cellular2Settings {
             dim,
             freq_x: 0.02,
@@ -40,7 +42,9 @@ impl Cellular2Settings {
             index1: 1,
         }
     }
+}
 
+impl Cellular2Settings {
     pub fn with_seed(&mut self, seed: i32) -> &mut Cellular2Settings {
         self.dim.seed = seed;
         self

@@ -2,7 +2,8 @@ use core::arch::x86_64::__m256;
 use simdnoise::intrinsics::{avx2, scalar, sse2, sse41};
 use simdnoise::{
     Cell2ReturnType, CellDistanceFunction, CellReturnType, Cellular2Settings, CellularSettings,
-    FbmSettings, GradientSettings, NoiseDimensions, NoiseType, RidgeSettings, TurbulenceSettings,
+    FbmSettings, GradientSettings, NoiseDimensions, NoiseType, RidgeSettings, Settings,
+    TurbulenceSettings,
 };
 
 mod helpers;

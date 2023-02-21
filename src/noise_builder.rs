@@ -1,6 +1,6 @@
 use super::{
     Cellular2Settings, CellularSettings, FbmSettings, GradientSettings, NoiseDimensions,
-    RidgeSettings, TurbulenceSettings,
+    RidgeSettings, Settings, TurbulenceSettings,
 };
 
 pub struct NoiseBuilder {}

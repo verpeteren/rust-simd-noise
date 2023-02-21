@@ -5,6 +5,10 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
+pub trait Settings {
+    fn default(dim: NoiseDimensions) -> Self;
+}
+
 mod cellular2_settings;
 mod cellular_settings;
 mod fbm_settings;

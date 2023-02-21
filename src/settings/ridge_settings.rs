@@ -7,6 +7,8 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
+use super::Settings;
+
 #[derive(Copy, Clone)]
 pub struct RidgeSettings {
     dim: NoiseDimensions,
@@ -25,8 +27,8 @@ impl DimensionalBeing for RidgeSettings {
     }
 }
 
-impl RidgeSettings {
-    pub fn default(dim: NoiseDimensions) -> RidgeSettings {
+impl Settings for RidgeSettings {
+    fn default(dim: NoiseDimensions) -> RidgeSettings {
         RidgeSettings {
             dim,
             freq_x: 0.02,
@@ -38,7 +40,9 @@ impl RidgeSettings {
             octaves: 3,
         }
     }
+}
 
+impl RidgeSettings {
     pub fn with_seed(&mut self, seed: i32) -> &mut RidgeSettings {
         self.dim.seed = seed;
         self

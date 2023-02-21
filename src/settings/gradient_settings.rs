@@ -7,6 +7,8 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
+use super::Settings;
+
 #[derive(Copy, Clone)]
 pub struct GradientSettings {
     dim: NoiseDimensions,
@@ -22,8 +24,8 @@ impl DimensionalBeing for GradientSettings {
     }
 }
 
-impl GradientSettings {
-    pub fn default(dim: NoiseDimensions) -> GradientSettings {
+impl Settings for GradientSettings {
+    fn default(dim: NoiseDimensions) -> GradientSettings {
         GradientSettings {
             dim,
             freq_x: 0.02,
@@ -32,7 +34,9 @@ impl GradientSettings {
             freq_w: 0.02,
         }
     }
+}
 
+impl GradientSettings {
     pub fn with_seed(&mut self, seed: i32) -> &mut GradientSettings {
         self.dim.seed = seed;
         self

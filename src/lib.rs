@@ -283,7 +283,7 @@ macro_rules! get_4d_scaled_noise {
 
 mod settings;
 pub use settings::{
-    Cellular2Settings, CellularSettings, FbmSettings, GradientSettings, RidgeSettings,
+    Cellular2Settings, CellularSettings, FbmSettings, GradientSettings, RidgeSettings, Settings,
     TurbulenceSettings,
 };
 
