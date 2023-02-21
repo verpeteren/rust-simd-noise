@@ -1,5 +1,3 @@
-use crate::dimensional_being::DimensionalBeing;
-use crate::intrinsics::{avx2, scalar, sse2, sse41};
 pub use crate::noise::cell2_return_type::Cell2ReturnType;
 pub use crate::noise::cell_distance_function::CellDistanceFunction;
 pub use crate::noise::cell_return_type::CellReturnType;
@@ -7,15 +5,16 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
-mod cellular_settings;
-pub use cellular_settings::CellularSettings;
 mod cellular2_settings;
-pub use cellular2_settings::Cellular2Settings;
+mod cellular_settings;
 mod fbm_settings;
-pub use fbm_settings::FbmSettings;
-mod ridge_settings;
-pub use ridge_settings::RidgeSettings;
-mod turbulence_settings;
-pub use turbulence_settings::TurbulenceSettings;
 mod gradient_settings;
+mod ridge_settings;
+mod turbulence_settings;
+
+pub use cellular2_settings::Cellular2Settings;
+pub use cellular_settings::CellularSettings;
+pub use fbm_settings::FbmSettings;
 pub use gradient_settings::GradientSettings;
+pub use ridge_settings::RidgeSettings;
+pub use turbulence_settings::TurbulenceSettings;
