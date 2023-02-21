@@ -1,4 +1,4 @@
-use crate::noise::hash3d::{hash3d, Hash3d};
+use crate::noise::hash3d_32::hash3d;
 
 use simdeez::Simd;
 

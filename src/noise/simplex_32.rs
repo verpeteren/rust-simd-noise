@@ -29,6 +29,7 @@ pub const G22_64: f64 = G2_64 * 2.0;
 const G3_32: f32 = 1.0 / 6.0;
 pub const G3_64: f64 = 1.0 / 6.0;
 const G33_32: f32 = 3.0 / 6.0 - 1.0;
+pub const G33_64: f64 = 3.0 / 6.0 - 1.0;
 /// Unskew factor for 4D simplex noise
 const G4_32: f32 = 0.138196601;
 pub const G4_64: f64 = 0.138196601;
