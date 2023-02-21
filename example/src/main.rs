@@ -3,7 +3,7 @@ use std::slice::Iter;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use minifb::{Key, Window, WindowOptions};
-use simdnoise::CellDistanceFunction;
+use simdnoise::{CellDistanceFunction, Settings};
 
 const FPS: u64 = 60;
 

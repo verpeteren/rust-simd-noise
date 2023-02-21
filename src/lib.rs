@@ -289,8 +289,8 @@ pub use settings::{
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::intrinsics::{avx2, scalar, sse2, sse41};
-    use crate::noise_builder::NoiseBuilder;
 
     macro_rules! assert_delta {
         ($x:expr, $y:expr, $d:expr) => {

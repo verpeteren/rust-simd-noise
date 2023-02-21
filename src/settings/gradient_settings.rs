@@ -7,7 +7,7 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
-use super::Settings;
+use crate::settings::Settings;
 
 #[derive(Copy, Clone)]
 pub struct GradientSettings {
@@ -34,15 +34,12 @@ impl Settings for GradientSettings {
             freq_w: 0.02,
         }
     }
-}
-
-impl GradientSettings {
-    pub fn with_seed(&mut self, seed: i32) -> &mut GradientSettings {
+    fn with_seed(&mut self, seed: i32) -> &mut GradientSettings {
         self.dim.seed = seed;
         self
     }
 
-    pub fn with_freq(&mut self, freq: f32) -> &mut GradientSettings {
+    fn with_freq(&mut self, freq: f32) -> &mut GradientSettings {
         self.freq_x = freq;
         self.freq_y = freq;
         self.freq_z = freq;
@@ -50,20 +47,20 @@ impl GradientSettings {
         self
     }
 
-    pub fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut GradientSettings {
+    fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut GradientSettings {
         self.freq_x = freq_x;
         self.freq_y = freq_y;
         self
     }
 
-    pub fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut GradientSettings {
+    fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut GradientSettings {
         self.freq_x = freq_x;
         self.freq_y = freq_y;
         self.freq_z = freq_z;
         self
     }
 
-    pub fn with_freq_4d(
+    fn with_freq_4d(
         &mut self,
         freq_x: f32,
         freq_y: f32,
@@ -77,15 +74,16 @@ impl GradientSettings {
         self
     }
 
-    /// If you want to call noise functions by hand, call wrap on the settings
-    /// to get back a NoiseType to call the noise functions with
-    pub fn wrap(self) -> NoiseType {
+    fn wrap(self) -> NoiseType {
+        self.validate();
         NoiseType::Gradient(self)
     }
 
-    /// Generate a chunk of noise based on your settings, and the min and max value
-    /// generated, so you can scale it as you wish
-    pub fn generate(self) -> (Vec<f32>, f32, f32) {
+    fn validate(&self) {
+        //todo
+    }
+
+    fn generate(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
             1 => get_1d_noise!(&NoiseType::Gradient(self)),
@@ -96,8 +94,7 @@ impl GradientSettings {
         }
     }
 
-    /// Generate a chunk of noise with values scaled from min to max
-    pub fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
+    fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
         let d = self.dim.dim;
         let mut new_self = self;
         new_self.dim.min = min;
@@ -111,3 +108,5 @@ impl GradientSettings {
         }
     }
 }
+
+impl GradientSettings {}
