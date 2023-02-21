@@ -26,6 +26,12 @@ pub trait Settings {
     fn generate_scaled(self, min: f32, max: f32) -> Vec<f32>;
 }
 
+pub trait SimplexSettings {
+    fn with_lacunarity(&mut self, lacunarity: f32) -> &mut Self;
+    fn with_gain(&mut self, gain: f32) -> &mut Self;
+    fn with_octaves(&mut self, octaves: u8) -> &mut Self;
+}
+
 mod cellular2_settings;
 mod cellular_settings;
 mod fbm_settings;

@@ -7,7 +7,7 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
-use super::Settings;
+use super::{Settings, SimplexSettings};
 
 #[derive(Copy, Clone)]
 pub struct RidgeSettings {
@@ -116,19 +116,21 @@ impl Settings for RidgeSettings {
     }
 }
 
-impl RidgeSettings {
-    pub fn with_lacunarity(&mut self, lacunarity: f32) -> &mut RidgeSettings {
+impl SimplexSettings for RidgeSettings {
+    fn with_lacunarity(&mut self, lacunarity: f32) -> &mut RidgeSettings {
         self.lacunarity = lacunarity;
         self
     }
 
-    pub fn with_gain(&mut self, gain: f32) -> &mut RidgeSettings {
+    fn with_gain(&mut self, gain: f32) -> &mut RidgeSettings {
         self.gain = gain;
         self
     }
 
-    pub fn with_octaves(&mut self, octaves: u8) -> &mut RidgeSettings {
+    fn with_octaves(&mut self, octaves: u8) -> &mut RidgeSettings {
         self.octaves = octaves;
         self
     }
 }
+
+impl RidgeSettings {}

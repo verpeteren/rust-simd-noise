@@ -3,7 +3,7 @@ use simdnoise::intrinsics::{avx2, scalar, sse2, sse41};
 use simdnoise::{
     Cell2ReturnType, CellDistanceFunction, CellReturnType, Cellular2Settings, CellularSettings,
     FbmSettings, GradientSettings, NoiseDimensions, NoiseType, RidgeSettings, Settings,
-    TurbulenceSettings,
+    SimplexSettings, TurbulenceSettings,
 };
 
 mod helpers;

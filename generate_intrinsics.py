@@ -27,7 +27,7 @@ def generate_intrinsic_tests()-> List[str]:
 """
 use core::arch::x86_64::__m256;
 use simdnoise::intrinsics::{avx2, scalar, sse2, sse41};
-use simdnoise::{NoiseType, TurbulenceSettings, RidgeSettings, FbmSettings, CellularSettings, Cellular2Settings, GradientSettings, Settings, NoiseDimensions, CellDistanceFunction, CellReturnType, Cell2ReturnType};
+use simdnoise::{NoiseType, TurbulenceSettings, RidgeSettings, FbmSettings, CellularSettings, Cellular2Settings, GradientSettings, SimplexSettings, Settings, NoiseDimensions, CellDistanceFunction, CellReturnType, Cell2ReturnType};
 
 mod helpers;
 use helpers::{BIN_PATH, read_from_file_f32, save_to_file_f32, read_from_file_f64, save_to_file_f64};

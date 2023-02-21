@@ -7,7 +7,7 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
-use crate::settings::Settings;
+use super::{Settings, SimplexSettings};
 
 #[derive(Copy, Clone)]
 pub struct FbmSettings {
@@ -115,19 +115,21 @@ impl Settings for FbmSettings {
     }
 }
 
-impl FbmSettings {
-    pub fn with_lacunarity(&mut self, lacunarity: f32) -> &mut FbmSettings {
+impl SimplexSettings for FbmSettings {
+    fn with_lacunarity(&mut self, lacunarity: f32) -> &mut FbmSettings {
         self.lacunarity = lacunarity;
         self
     }
 
-    pub fn with_gain(&mut self, gain: f32) -> &mut FbmSettings {
+    fn with_gain(&mut self, gain: f32) -> &mut FbmSettings {
         self.gain = gain;
         self
     }
 
-    pub fn with_octaves(&mut self, octaves: u8) -> &mut FbmSettings {
+    fn with_octaves(&mut self, octaves: u8) -> &mut FbmSettings {
         self.octaves = octaves;
         self
     }
 }
+
+impl FbmSettings {}

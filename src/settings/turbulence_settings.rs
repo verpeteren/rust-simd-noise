@@ -7,7 +7,7 @@ pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
-use super::Settings;
+use super::{Settings, SimplexSettings};
 
 #[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
@@ -116,19 +116,21 @@ impl Settings for TurbulenceSettings {
     }
 }
 
-impl TurbulenceSettings {
-    pub fn with_lacunarity(&mut self, lacunarity: f32) -> &mut TurbulenceSettings {
+impl SimplexSettings for TurbulenceSettings {
+    fn with_lacunarity(&mut self, lacunarity: f32) -> &mut TurbulenceSettings {
         self.lacunarity = lacunarity;
         self
     }
 
-    pub fn with_gain(&mut self, gain: f32) -> &mut TurbulenceSettings {
+    fn with_gain(&mut self, gain: f32) -> &mut TurbulenceSettings {
         self.gain = gain;
         self
     }
 
-    pub fn with_octaves(&mut self, octaves: u8) -> &mut TurbulenceSettings {
+    fn with_octaves(&mut self, octaves: u8) -> &mut TurbulenceSettings {
         self.octaves = octaves;
         self
     }
 }
+
+impl TurbulenceSettings {}
