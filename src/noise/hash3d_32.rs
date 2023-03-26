@@ -1,4 +1,4 @@
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 pub struct Hash3d<S: Simd> {
     // Masks guiding dimension selection
@@ -29,20 +29,17 @@ where
 
 #[inline(always)]
 pub unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> Hash3d<S> {
-    let mut hash = S::xor_epi32(i, S::set1_epi32(seed));
-    hash = S::xor_epi32(j, hash);
-    hash = S::xor_epi32(k, hash);
-    hash = S::mullo_epi32(
-        S::mullo_epi32(S::mullo_epi32(hash, hash), S::set1_epi32(60493)),
-        hash,
-    );
-    hash = S::xor_epi32(S::srai_epi32(hash, 13), hash);
-    let hasha13 = S::and_epi32(hash, S::set1_epi32(13));
+    let mut hash = i ^ S::Vi32::set1(seed);
+    hash = j ^ hash;
+    hash = k ^ hash;
+    hash = (hash * hash * 60493) * hash;
+    hash = (hash >> 13) ^ hash;
+    let hasha13 = hash & S::Vi32::set1(13);
     Hash3d::new(
-        S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(8))),
-        S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(2))),
-        S::castepi32_ps(S::cmpeq_epi32(S::set1_epi32(12), hasha13)),
-        S::castepi32_ps(S::slli_epi32(hash, 31)),
-        S::castepi32_ps(S::slli_epi32(S::and_epi32(hash, S::set1_epi32(2)), 30)),
+        (hasha13.cmp_lt(S::Vi32::set1(8))).cast_f32(),
+        (hasha13.cmp_lt(S::Vi32::set1(2))).cast_f32(),
+        (hasha13.cmp_eq(S::Vi32::set1(12))).cast_f32(),
+        (hash << 31).cast_f32(),
+        ((hash & S::Vi32::set1(2)) << 30).cast_f32(),
     )
 }

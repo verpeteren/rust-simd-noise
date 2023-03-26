@@ -8,7 +8,7 @@ use crate::noise::ridge_32::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 use crate::noise::turbulence_32::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
 
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 use std::f32;
 
@@ -28,7 +28,7 @@ macro_rules! get_1d_noise_helper_f32 {
     let mut result: Vec<f32> = Vec::with_capacity(width);
     result.set_len(width);
     let mut i = 0;
-    let vector_width = S::VF32_WIDTH;
+    let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -91,7 +91,7 @@ macro_rules! get_2d_noise_helper_f32 {
     result.set_len(width * height);
     let mut y = S::set1_ps(start_y);
     let mut i = 0;
-    let vector_width = S::VF32_WIDTH;
+    let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -158,7 +158,7 @@ macro_rules! get_3d_noise_helper_f32 {
     let mut result = Vec::with_capacity(width * height * depth);
     result.set_len(width * height * depth);
     let mut i = 0;
-    let vector_width = S::VF32_WIDTH;
+    let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -233,7 +233,7 @@ macro_rules! get_4d_noise_helper_f32 {
     let mut result = Vec::with_capacity(width * height * depth * time);
     result.set_len(width * height * depth * time);
     let mut i = 0;
-    let vector_width = S::VF32_WIDTH;
+    let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
