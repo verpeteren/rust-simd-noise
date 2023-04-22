@@ -89,7 +89,7 @@ extern crate simdeez;
 
 mod dimensional_being;
 pub mod intrinsics;
-mod noise;
+pub mod noise;
 mod noise_builder;
 mod noise_dimensions;
 mod noise_helpers_32;
