@@ -1,4 +1,4 @@
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 #[inline(always)]
 pub unsafe fn scale_noise<S: Simd>(
@@ -12,15 +12,13 @@ pub unsafe fn scale_noise<S: Simd>(
     let range = max - min;
     let multiplier = scale_range / range;
     let offset = scale_min - min * multiplier;
-    let vector_width = S::VF32_WIDTH;
+    let vector_width = S::Vf32::WIDTH;
     let mut i = 0;
     if data.len() >= vector_width {
         while i <= data.len() - vector_width {
-            let value = S::add_ps(
-                S::mul_ps(S::set1_ps(multiplier), S::loadu_ps(&data[i])),
-                S::set1_ps(offset),
-            );
-            S::storeu_ps(data.get_unchecked_mut(i), value);
+            let loaded = S::Vf32::load_from_ptr_unaligned(&data[i]);
+            let value = loaded * multiplier + offset;
+            value.copy_to_ptr_unaligned(data.get_unchecked_mut(i));
             i += vector_width;
         }
     }
