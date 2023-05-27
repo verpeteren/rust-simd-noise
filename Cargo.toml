@@ -13,8 +13,8 @@ categories = ["game-engines", "multimedia::images"]
 edition = "2018"
 
 [dependencies]
-simdeez = "1.0.8"
-#simdeez = {path = "../simdeez"}
+#simdeez = "1.0.8"
+simdeez = {path = "../simdeez"}
 
 [dev-dependencies]
 criterion = "0.4.0"

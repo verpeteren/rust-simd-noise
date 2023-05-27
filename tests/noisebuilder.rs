@@ -1,4 +1,4 @@
-use simdnoise::NoiseBuilder;
+use simdnoise::{NoiseBuilder, Settings, SimplexSettings};
 
 mod helpers;
 use helpers::{read_from_file_f32, save_to_file_f32, BIN_PATH};
