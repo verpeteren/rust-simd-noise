@@ -29,6 +29,9 @@ where
 
 #[inline(always)]
 pub unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> Hash3d<S> {
+    // It seems that this function is inspired by FastNoise-SIMD and Auburn/FastNoise2Simd
+    // https://github.com/jackmott/FastNoise-SIMD/blob/31c4a74d649ef4bc93aaabe4bf94fa81e4c0eadc/FastNoise/FastNoise3d.cpp#L348-L353
+    //
     let mut hash = S::xor_epi32(i, S::set1_epi32(seed));
     hash = S::xor_epi32(j, hash);
     hash = S::xor_epi32(k, hash);
