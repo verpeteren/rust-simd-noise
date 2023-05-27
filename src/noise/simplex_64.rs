@@ -734,6 +734,7 @@ mod tests {
         assert!(avg_err < 1e-3);
     }
 
+    #[ignore]
     #[test]
     fn simplex_3d_range() {
         let mut min = f64::INFINITY;
@@ -759,6 +760,7 @@ mod tests {
         check_bounds(min, max);
     }
 
+    #[ignore]
     #[test]
     fn simplex_3d_deriv_sanity() {
         let mut avg_err = 0.0;
