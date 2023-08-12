@@ -31,56 +31,19 @@ use std::f32;
 
 /// Get a single value of 2d cellular/voroni noise
 #[target_feature(enable = "sse2")]
-cellular_2d!(cellular_2d, __m128, F32x4, i32, cell_32, Sse2);
+cellular!("2d", cellular_2d, __m128, F32x4, i32, cell_32, Sse2);
 
 /// Get a single value of 3d cellular/voroni noise
 #[target_feature(enable = "sse2")]
-pub unsafe fn cellular_3d(
-    x: __m128,
-    y: __m128,
-    z: __m128,
-    distance_function: CellDistanceFunction,
-    return_type: CellReturnType,
-    jitter: __m128,
-    seed: i32,
-) -> __m128 {
-    cell_32::cellular_3d::<Sse2>(
-        F32x4(x),
-        F32x4(y),
-        F32x4(z),
-        distance_function,
-        return_type,
-        F32x4(jitter),
-        seed,
-    )
-    .0
-}
+cellular!("3d", cellular_3d, __m128, F32x4, i32, cell_32, Sse2);
+
 /// Get a single value of 2d cellular/voroni noise
 #[target_feature(enable = "sse2")]
-cellular_2d!(cellular_2d_f64, __m128d, F64x2, i64, cell_64, Sse2);
+cellular!("2d", cellular_2d_f64, __m128d, F64x2, i64, cell_64, Sse2);
 
 /// Get a single value of 3d cellular/voroni noise
 #[target_feature(enable = "sse2")]
-pub unsafe fn cellular_3d_f64(
-    x: __m128d,
-    y: __m128d,
-    z: __m128d,
-    distance_function: CellDistanceFunction,
-    return_type: CellReturnType,
-    jitter: __m128d,
-    seed: i64,
-) -> __m128d {
-    cell_64::cellular_3d::<Sse2>(
-        F64x2(x),
-        F64x2(y),
-        F64x2(z),
-        distance_function,
-        return_type,
-        F64x2(jitter),
-        seed,
-    )
-    .0
-}
+cellular!("3d", cellular_3d_f64, __m128d, F64x2, i64, cell_64, Sse2);
 
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
