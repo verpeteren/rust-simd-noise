@@ -30,30 +30,24 @@ use std::arch::x86_64::*;
 use std::f32;
 
 /// Get a single value of 2d cellular/voroni noise
-#[target_feature(enable = "sse4.1")]
 cellular!("2d", cellular_2d, __m128, F32x4, i32, cell_32, Sse41);
 
 /// Get a single value of 3d cellular/voroni noise
-#[target_feature(enable = "sse4.1")]
 cellular!("3d", cellular_3d, __m128, F32x4, i32, cell_32, Sse41);
 
 /// Get a single value of 2d cellular/voroni noise
-#[target_feature(enable = "sse4.1")]
 cellular!("2d", cellular_2d_f64, __m128d, F64x2, i64, cell_64, Sse41);
 
 /// Get a single value of 3d cellular/voroni noise
-#[target_feature(enable = "sse4.1")]
 cellular!("3d", cellular_3d_f64, __m128d, F64x2, i64, cell_64, Sse41);
 
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_1d(x: __m128, seed: i32) -> __m128 {
     simplex_32::simplex_1d::<Sse41>(F32x4(x), seed).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_1d(
     x: __m128,
     lacunarity: __m128,
@@ -65,7 +59,6 @@ pub unsafe fn fbm_1d(
 }
 
 /// Get a single value of 2d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_1d(
     x: __m128,
     lacunarity: __m128,
@@ -77,7 +70,6 @@ pub unsafe fn ridge_1d(
 }
 
 /// Get a single value of 2d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_1d(
     x: __m128,
     lacunarity: __m128,
@@ -90,13 +82,11 @@ pub unsafe fn turbulence_1d(
 
 /// Get a single value of 1d simplex noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_1d_f64(x: __m128d, seed: i64) -> __m128d {
     simplex_64::simplex_1d::<Sse41>(F64x2(x), seed).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_1d_f64(
     x: __m128d,
     lacunarity: __m128d,
@@ -108,7 +98,6 @@ pub unsafe fn fbm_1d_f64(
 }
 
 /// Get a single value of 2d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_1d_f64(
     x: __m128d,
     lacunarity: __m128d,
@@ -120,7 +109,6 @@ pub unsafe fn ridge_1d_f64(
 }
 
 /// Get a single value of 2d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_1d_f64(
     x: __m128d,
     lacunarity: __m128d,
@@ -136,10 +124,10 @@ pub unsafe fn turbulence_1d_f64(
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     crate::noise_helpers_32::get_1d_noise::<Sse41>(noise_type)
 }
+
 pub unsafe fn get_1d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
     crate::noise_helpers_64::get_1d_noise_f64::<Sse41>(noise_type)
 }
@@ -148,7 +136,6 @@ pub unsafe fn get_1d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
 /// `start_x` can be used to provide an offset in the
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_1d_noise(noise_type);
     let dim = noise_type.get_dimensions();
@@ -158,13 +145,11 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_2d(x: __m128, y: __m128, seed: i32) -> __m128 {
     simplex_32::simplex_2d::<Sse41>(F32x4(x), F32x4(y), seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_2d(
     x: __m128,
     y: __m128,
@@ -177,7 +162,6 @@ pub unsafe fn fbm_2d(
 }
 
 /// Get a single value of 2d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_2d(
     x: __m128,
     y: __m128,
@@ -189,7 +173,6 @@ pub unsafe fn ridge_2d(
     ridge_32::ridge_2d::<Sse41>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
 }
 /// Get a single value of 2d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_2d(
     x: __m128,
     y: __m128,
@@ -211,13 +194,11 @@ pub unsafe fn turbulence_2d(
 
 /// Get a single value of 2d simplex noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_2d_f64(x: __m128d, y: __m128d, seed: i64) -> __m128d {
     simplex_64::simplex_2d::<Sse41>(F64x2(x), F64x2(y), seed).0
 }
 
 /// Get a single value of 2d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_2d_f64(
     x: __m128d,
     y: __m128d,
@@ -230,7 +211,6 @@ pub unsafe fn fbm_2d_f64(
 }
 
 /// Get a single value of 2d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_2d_f64(
     x: __m128d,
     y: __m128d,
@@ -242,7 +222,6 @@ pub unsafe fn ridge_2d_f64(
     ridge_64::ridge_2d::<Sse41>(F64x2(x), F64x2(y), F64x2(lac), F64x2(gain), octaves, seed).0
 }
 /// Get a single value of 2d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_2d_f64(
     x: __m128d,
     y: __m128d,
@@ -267,10 +246,10 @@ pub unsafe fn turbulence_2d_f64(
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     crate::noise_helpers_32::get_2d_noise::<Sse41>(noise_type)
 }
+
 pub unsafe fn get_2d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
     crate::noise_helpers_64::get_2d_noise_f64::<Sse41>(noise_type)
 }
@@ -279,7 +258,6 @@ pub unsafe fn get_2d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
 /// `start_x` and `start_y` can be used to provide an offset in the
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_2d_noise(noise_type);
     let dim = noise_type.get_dimensions();
@@ -289,13 +267,11 @@ pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 
 /// Get a single value of 3d simplex noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128, seed: i32) -> __m128 {
     simplex_32::simplex_3d::<Sse41>(F32x4(x), F32x4(y), F32x4(z), seed).0
 }
 
 /// Get a single value of 3d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_3d(
     x: __m128,
     y: __m128,
@@ -318,7 +294,6 @@ pub unsafe fn fbm_3d(
 }
 
 /// Get a single value of 3d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_3d(
     x: __m128,
     y: __m128,
@@ -341,7 +316,6 @@ pub unsafe fn ridge_3d(
 }
 
 /// Get a single value of 3d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_3d(
     x: __m128,
     y: __m128,
@@ -365,13 +339,11 @@ pub unsafe fn turbulence_3d(
 
 /// Get a single value of 3d simplex_64 noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_3d_f64(x: __m128d, y: __m128d, z: __m128d, seed: i64) -> __m128d {
     simplex_64::simplex_3d::<Sse41>(F64x2(x), F64x2(y), F64x2(z), seed).0
 }
 
 /// Get a single value of 3d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_3d_f64(
     x: __m128d,
     y: __m128d,
@@ -394,7 +366,6 @@ pub unsafe fn fbm_3d_f64(
 }
 
 /// Get a single value of 3d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_3d_f64(
     x: __m128d,
     y: __m128d,
@@ -417,7 +388,6 @@ pub unsafe fn ridge_3d_f64(
 }
 
 /// Get a single value of 3d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_3d_f64(
     x: __m128d,
     y: __m128d,
@@ -444,10 +414,10 @@ pub unsafe fn turbulence_3d_f64(
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     crate::noise_helpers_32::get_3d_noise::<Sse41>(noise_type)
 }
+
 pub unsafe fn get_3d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
     crate::noise_helpers_64::get_3d_noise_f64::<Sse41>(noise_type)
 }
@@ -456,7 +426,6 @@ pub unsafe fn get_3d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
 /// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_3d_noise(noise_type);
     let dim = noise_type.get_dimensions();
@@ -466,12 +435,11 @@ pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
 
 /// Get a single value of 4d simplex noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_4d(x: __m128, y: __m128, z: __m128, w: __m128, seed: i32) -> __m128 {
     simplex_32::simplex_4d::<Sse41>(F32x4(x), F32x4(y), F32x4(z), F32x4(w), seed).0
 }
+
 /// Get a single value of 4d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_4d(
     x: __m128,
     y: __m128,
@@ -496,7 +464,6 @@ pub unsafe fn fbm_4d(
 }
 
 /// Get a single value of 4d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_4d(
     x: __m128,
     y: __m128,
@@ -521,7 +488,6 @@ pub unsafe fn ridge_4d(
 }
 
 /// Get a single value of 4d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_4d(
     x: __m128,
     y: __m128,
@@ -547,12 +513,11 @@ pub unsafe fn turbulence_4d(
 
 /// Get a single value of 4d simplex noise, results
 /// are not scaled.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn simplex_4d_f64(x: __m128d, y: __m128d, z: __m128d, w: __m128d, seed: i64) -> __m128d {
     simplex_64::simplex_4d::<Sse41>(F64x2(x), F64x2(y), F64x2(z), F64x2(w), seed).0
 }
+
 /// Get a single value of 4d fractal brownian motion.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn fbm_4d_f64(
     x: __m128d,
     y: __m128d,
@@ -577,7 +542,6 @@ pub unsafe fn fbm_4d_f64(
 }
 
 /// Get a single value of 4d ridge noise.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn ridge_4d_f64(
     x: __m128d,
     y: __m128d,
@@ -602,7 +566,6 @@ pub unsafe fn ridge_4d_f64(
 }
 
 /// Get a single value of 4d turbulence.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn turbulence_4d_f64(
     x: __m128d,
     y: __m128d,
@@ -631,10 +594,10 @@ pub unsafe fn turbulence_4d_f64(
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
 /// are returned so you can scale and transform the noise as you see fit
 /// in a single pass.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     crate::noise_helpers_32::get_4d_noise::<Sse41>(noise_type)
 }
+
 pub unsafe fn get_4d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
     crate::noise_helpers_64::get_4d_noise_f64::<Sse41>(noise_type)
 }
@@ -643,7 +606,6 @@ pub unsafe fn get_4d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
 /// `start_*` can be used to provide an offset in the
 /// coordinates.
 /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-#[target_feature(enable = "sse4.1")]
 pub unsafe fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let (mut noise, min, max) = get_4d_noise(noise_type);
     let dim = noise_type.get_dimensions();

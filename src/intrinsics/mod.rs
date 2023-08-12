@@ -1,5 +1,10 @@
 macro_rules! cellular {
     ("2d", $fn_name: ident, $f32_type: ty, $transmute_from: ident, $seed_type: ty, $mod: ident, $intrinsic: ty) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
         pub unsafe fn $fn_name<S>(
             x: $f32_type,
             y: $f32_type,
@@ -20,6 +25,11 @@ macro_rules! cellular {
         }
     };
     ("3d", $fn_name: ident, $f32_type: ty, $transmute_from: ident, $seed_type: ty, $mod: ident, $intrinsic: ty) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
         pub unsafe fn $fn_name<S>(
             x: $f32_type,
             y: $f32_type,
@@ -43,13 +53,7 @@ macro_rules! cellular {
     };
 }
 
-pub mod scalar;
-
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod sse2;
-
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod sse41;
-
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod avx2;
+pub mod scalar;
+pub mod sse2;
+pub mod sse41;
