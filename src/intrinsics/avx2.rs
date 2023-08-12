@@ -30,16 +30,9 @@ use std::arch::x86_64::*;
 
 use std::f32;
 
-/// Get a single value of 2d cellular/voroni noise
 cellular!("2d", cellular_2d, __m256, F32x8, i32, cell_32, Avx2);
-
-/// Get a single value of 3d cellular/voroni noise
 cellular!("3d", cellular_3d, __m256, F32x8, i32, cell_32, Avx2);
-
-/// Get a single value of 2d cellular/voroni noise
 cellular!("2d", cellular_2d_f64, __m256d, F64x4, i64, cell_64, Avx2);
-
-/// Get a single value of 3d cellular/voroni noise
 cellular!("3d", cellular_3d_f64, __m256d, F64x4, i64, cell_64, Avx2);
 
 /// Get a single value of 1d simplex noise, results

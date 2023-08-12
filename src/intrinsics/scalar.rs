@@ -20,16 +20,9 @@ use simdeez::scalar::{F32x1, F64x1, Scalar};
 
 use std::f32;
 
-/// Get a single value of 2d cellular/voroni noise
 cellular!("2d", cellular_2d, f32, F32x1, i32, cell_32, Scalar);
-
-/// Get a single value of 3d cellular/voroni noise
 cellular!("3d", cellular_3d, f32, F32x1, i32, cell_32, Scalar);
-
-/// Get a single value of 2d cellular/voroni noise
 cellular!("2d", cellular_2d_f64, f64, F64x1, i64, cell_64, Scalar);
-
-/// Get a single value of 3d cellular/voroni noise
 cellular!("3d", cellular_3d_f64, f64, F64x1, i64, cell_64, Scalar);
 
 /// Get a single value of 1d simplex noise, results

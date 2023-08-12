@@ -5,6 +5,7 @@ macro_rules! cellular {
             target_feature = "sse4.1",
             target_feature = "avx2"
         ))]
+        /// Get a single value of 2d cellular/voroni noise
         pub unsafe fn $fn_name<S>(
             x: $f32_type,
             y: $f32_type,
@@ -30,6 +31,7 @@ macro_rules! cellular {
             target_feature = "sse4.1",
             target_feature = "avx2"
         ))]
+        /// Get a single value of 3d cellular/voroni noise
         pub unsafe fn $fn_name<S>(
             x: $f32_type,
             y: $f32_type,
