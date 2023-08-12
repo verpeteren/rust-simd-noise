@@ -21,25 +21,7 @@ use simdeez::scalar::{F32x1, F64x1, Scalar};
 use std::f32;
 
 /// Get a single value of 2d cellular/voroni noise
-
-pub unsafe fn cellular_2d(
-    x: f32,
-    y: f32,
-    distance_function: CellDistanceFunction,
-    return_type: CellReturnType,
-    jitter: f32,
-    seed: i32,
-) -> f32 {
-    cell_32::cellular_2d::<Scalar>(
-        F32x1(x),
-        F32x1(y),
-        distance_function,
-        return_type,
-        F32x1(jitter),
-        seed,
-    )
-    .0
-}
+cellular_2d!(cellular_2d, f32, F32x1, i32, cell_32, Scalar);
 
 /// Get a single value of 3d cellular/voroni noise
 
@@ -65,28 +47,9 @@ pub unsafe fn cellular_3d(
 }
 
 /// Get a single value of 2d cellular/voroni noise
-
-pub unsafe fn cellular_2d_f64(
-    x: f64,
-    y: f64,
-    distance_function: CellDistanceFunction,
-    return_type: CellReturnType,
-    jitter: f64,
-    seed: i64,
-) -> f64 {
-    cell_64::cellular_2d::<Scalar>(
-        F64x1(x),
-        F64x1(y),
-        distance_function,
-        return_type,
-        F64x1(jitter),
-        seed,
-    )
-    .0
-}
+cellular_2d!(cellular_2d_f64, f64, F64x1, i64, cell_64, Scalar);
 
 /// Get a single value of 3d cellular/voroni noise
-
 pub unsafe fn cellular_3d_f64(
     x: f64,
     y: f64,
