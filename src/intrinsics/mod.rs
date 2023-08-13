@@ -68,6 +68,18 @@ macro_rules! simplex {
             $mod::simplex_1d::<$intrinsic>($transmute_from(x), seed).0
         }
     };
+    ("2d", $fn_name: ident, $f_type: ty, $transmute_from: ident, $seed_type: ty, $mod: ident, $intrinsic: ty) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 2d simplex noise, results
+        /// are not scaled.
+        pub unsafe fn $fn_name<S>(x: $f_type, y: $f_type, seed: $seed_type) -> $f_type {
+            $mod::simplex_2d::<$intrinsic>($transmute_from(x), $transmute_from(y), seed).0
+        }
+    };
 }
 
 pub mod avx2;
