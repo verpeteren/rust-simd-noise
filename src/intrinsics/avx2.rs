@@ -36,12 +36,12 @@ cellular!("2d", cellular_2d_f64, __m256d, F64x4, i64, cell_64, Avx2);
 cellular!("3d", cellular_3d_f64, __m256d, F64x4, i64, cell_64, Avx2);
 
 simplex!("1d", simplex_1d, __m256, F32x8, i32, simplex_32, Avx2);
-simplex!("1d", simplex_1d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
 simplex!("2d", simplex_2d, __m256, F32x8, i32, simplex_32, Avx2);
-simplex!("2d", simplex_2d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
 simplex!("3d", simplex_3d, __m256, F32x8, i32, simplex_32, Avx2);
-simplex!("3d", simplex_3d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
 simplex!("4d", simplex_4d, __m256, F32x8, i32, simplex_32, Avx2);
+simplex!("1d", simplex_1d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
+simplex!("2d", simplex_2d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
+simplex!("3d", simplex_3d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
 simplex!("4d", simplex_4d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
 
 /// Get a single value of 1d fractal brownian motion.
