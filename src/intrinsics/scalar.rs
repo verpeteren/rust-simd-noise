@@ -31,6 +31,8 @@ simplex!("2d", simplex_2d, f32, F32x1, i32, simplex_32, Scalar);
 simplex!("2d", simplex_2d_f64, f64, F64x1, i64, simplex_64, Scalar);
 simplex!("3d", simplex_3d, f32, F32x1, i32, simplex_32, Scalar);
 simplex!("3d", simplex_3d_f64, f64, F64x1, i64, simplex_64, Scalar);
+simplex!("4d", simplex_4d, f32, F32x1, i32, simplex_32, Scalar);
+simplex!("4d", simplex_4d_f64, f64, F64x1, i64, simplex_64, Scalar);
 
 /// Get a single value of 1d fractal brownian motion.
 
@@ -323,22 +325,7 @@ pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     noise
 }
 
-/// Get a single value of 4d simplex noise, results
-/// are not scaled.
-
-pub unsafe fn simplex_4d(x: f32, y: f32, z: f32, w: f32, seed: i32) -> f32 {
-    simplex_32::simplex_4d::<Scalar>(F32x1(x), F32x1(y), F32x1(z), F32x1(w), seed).0
-}
-
-/// Get a single value of 4d simplex noise, results
-/// are not scaled.
-
-pub unsafe fn simplex_4d_f64(x: f64, y: f64, z: f64, w: f64, seed: i64) -> f64 {
-    simplex_64::simplex_4d::<Scalar>(F64x1(x), F64x1(y), F64x1(z), F64x1(w), seed).0
-}
-
 /// Get a single value of 4d fractal brownian motion.
-
 pub unsafe fn fbm_4d(
     x: f32,
     y: f32,
