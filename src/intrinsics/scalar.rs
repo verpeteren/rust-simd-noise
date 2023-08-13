@@ -127,100 +127,15 @@ turbulence!(
     Scalar
 );
 
-/// Gets a width sized block of 1d noise, unscaled.
-/// `start_x` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-
-pub unsafe fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    noise_helpers_32::get_1d_noise::<Scalar>(noise_type)
-}
-pub unsafe fn get_1d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-    noise_helpers_64::get_1d_noise::<Scalar>(noise_type)
-}
-
-/// Gets a width sized block of scaled 2d noise
-/// `start_x` can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-
-pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
-    let (mut noise, min, max) = get_1d_noise(noise_type);
-    let dim = noise_type.get_dimensions();
-    scale_noise::<Scalar>(dim.min, dim.max, min, max, &mut noise);
-    noise
-}
-
-/// Gets a width X height sized block of 2d noise, unscaled.
-/// `start_x` and `start_y` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-
-pub unsafe fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    noise_helpers_32::get_2d_noise::<Scalar>(noise_type)
-}
-pub unsafe fn get_2d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-    noise_helpers_64::get_2d_noise::<Scalar>(noise_type)
-}
-
-/// Gets a width X height sized block of scaled 2d noise
-/// `start_x` and `start_y` can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-
-pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
-    let (mut noise, min, max) = get_2d_noise(noise_type);
-    let dim = noise_type.get_dimensions();
-    scale_noise::<Scalar>(dim.min, dim.max, min, max, &mut noise);
-    noise
-}
-
-/// Gets a width X height X depth sized block of 3d noise, unscaled,
-/// `start_x`,`start_y` and `start_z` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-pub unsafe fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    noise_helpers_32::get_3d_noise::<Scalar>(noise_type)
-}
-pub unsafe fn get_3d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-    noise_helpers_64::get_3d_noise::<Scalar>(noise_type)
-}
-
-/// Gets a width X height X depth sized block of scaled 3d noise
-/// `start_x`, `start_y` and `start_z` can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
-    let (mut noise, min, max) = get_3d_noise(noise_type);
-    let dim = noise_type.get_dimensions();
-    scale_noise::<Scalar>(dim.min, dim.max, min, max, &mut noise);
-    noise
-}
-
-/// Gets a width X height X depth x time sized block of 4d noise, unscaled,
-/// `start_*` can be used to provide an offset in the
-/// coordinates. Results are unscaled, 'min' and 'max' noise values
-/// are returned so you can scale and transform the noise as you see fit
-/// in a single pass.
-
-pub unsafe fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-    noise_helpers_32::get_4d_noise::<Scalar>(noise_type)
-}
-pub unsafe fn get_4d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-    noise_helpers_64::get_4d_noise::<Scalar>(noise_type)
-}
-
-/// Gets a width X height X depth X time sized block of scaled 4d noise
-/// `start_*` can be used to provide an offset in the
-/// coordinates.
-/// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
-
-pub unsafe fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
-    let (mut noise, min, max) = get_4d_noise(noise_type);
-    let dim = noise_type.get_dimensions();
-    scale_noise::<Scalar>(dim.min, dim.max, min, max, &mut noise);
-    noise
-}
+get_noise!(get_1d_noise, get_1d_noise, f32, noise_helpers_32, Scalar);
+get_noise!(get_2d_noise, get_2d_noise, f32, noise_helpers_32, Scalar);
+get_noise!(get_3d_noise, get_3d_noise, f32, noise_helpers_32, Scalar);
+get_noise!(get_4d_noise, get_4d_noise, f32, noise_helpers_32, Scalar);
+get_noise!(get_1d_noise, get_1d_noise_64, f64, noise_helpers_64, Scalar);
+get_noise!(get_2d_noise, get_2d_noise_64, f64, noise_helpers_64, Scalar);
+get_noise!(get_3d_noise, get_3d_noise_64, f64, noise_helpers_64, Scalar);
+get_noise!(get_4d_noise, get_4d_noise_64, f64, noise_helpers_64, Scalar);
+get_noise_scaled!(get_1d_noise, get_1d_scaled_noise, f32, Scalar);
+get_noise_scaled!(get_2d_noise, get_2d_scaled_noise, f32, Scalar);
+get_noise_scaled!(get_3d_noise, get_3d_scaled_noise, f32, Scalar);
+get_noise_scaled!(get_4d_noise, get_4d_scaled_noise, f32, Scalar);

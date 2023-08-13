@@ -453,6 +453,33 @@ macro_rules! turbulence {
     };
 }
 
+macro_rules! get_noise {
+    ($call: ident, $fn_name: ident, $f_type: ty, $mod: ident, $intrinsic: ty) => {
+        /// Gets a width sized block of noise, unscaled.
+        /// `start_x` can be used to provide an offset in the
+        /// coordinates. Results are unscaled, 'min' and 'max' noise values
+        /// are returned so you can scale and transform the noise as you see fit
+        /// in a single pass.
+        pub unsafe fn $fn_name(noise_type: &NoiseType) -> (Vec<$f_type>, $f_type, $f_type) {
+            $mod::$call::<$intrinsic>(noise_type)
+        }
+    };
+}
+macro_rules! get_noise_scaled {
+    ($call: ident, $fn_name: ident, $f_type: ty, $intrinsic: ty) => {
+        /// Gets a width sized block of scaled noise
+        /// `start_x` can be used to provide an offset in the coordinates.
+        /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
+
+        pub unsafe fn $fn_name(noise_type: &NoiseType) -> Vec<$f_type> {
+            let (mut noise, min, max) = $call(noise_type);
+            let dim = noise_type.get_dimensions();
+            scale_noise::<$intrinsic>(dim.min, dim.max, min, max, &mut noise);
+            noise
+        }
+    };
+}
+
 pub mod avx2;
 pub mod scalar;
 pub mod sse2;
