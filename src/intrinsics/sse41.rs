@@ -34,11 +34,8 @@ cellular!("3d", cellular_3d, __m128, F32x4, i32, cell_32, Sse41);
 cellular!("2d", cellular_2d_f64, __m128d, F64x2, i64, cell_64, Sse41);
 cellular!("3d", cellular_3d_f64, __m128d, F64x2, i64, cell_64, Sse41);
 
-/// Get a single value of 1d simplex noise, results
-/// are not scaled.
-pub unsafe fn simplex_1d(x: __m128, seed: i32) -> __m128 {
-    simplex_32::simplex_1d::<Sse41>(F32x4(x), seed).0
-}
+simplex!("1d", simplex_1d, __m128, F32x4, i32, simplex_32, Sse41);
+simplex!("1d", simplex_1d_f64, __m128d, F64x2, i64, simplex_64, Sse41);
 
 /// Get a single value of 1d fractal brownian motion.
 pub unsafe fn fbm_1d(
@@ -71,12 +68,6 @@ pub unsafe fn turbulence_1d(
     seed: i32,
 ) -> __m128 {
     turbulence_32::turbulence_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
-}
-
-/// Get a single value of 1d simplex noise, results
-/// are not scaled.
-pub unsafe fn simplex_1d_f64(x: __m128d, seed: i64) -> __m128d {
-    simplex_64::simplex_1d::<Sse41>(F64x2(x), seed).0
 }
 
 /// Get a single value of 1d fractal brownian motion.
