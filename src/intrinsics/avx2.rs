@@ -65,6 +65,7 @@ ridge!("4d", ridge_4d_f64, __m256d, F64x4, i64, ridge_64, Avx2);
 turbulence!("1d", turbulence_1d, __m256, F32x8, i32, turbulence_32, Avx2);
 turbulence!("2d", turbulence_2d, __m256, F32x8, i32, turbulence_32, Avx2);
 turbulence!("3d", turbulence_3d, __m256, F32x8, i32, turbulence_32, Avx2);
+turbulence!("4d", turbulence_4d, __m256, F32x8, i32, turbulence_32, Avx2);
 turbulence!(
     "1d",
     turbulence_1d_f64,
@@ -86,6 +87,15 @@ turbulence!(
 turbulence!(
     "3d",
     turbulence_3d_f64,
+    __m256d,
+    F64x4,
+    i64,
+    turbulence_64,
+    Avx2
+);
+turbulence!(
+    "4d",
+    turbulence_4d_f64,
     __m256d,
     F64x4,
     i64,
@@ -163,54 +173,6 @@ pub unsafe fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let dim = noise_type.get_dimensions();
     scale_noise::<Avx2>(dim.min, dim.max, min, max, &mut noise);
     noise
-}
-
-/// Get a single value of 4d turbulence.
-pub unsafe fn turbulence_4d(
-    x: __m256,
-    y: __m256,
-    z: __m256,
-    w: __m256,
-    lac: __m256,
-    gain: __m256,
-    octaves: u8,
-    seed: i32,
-) -> __m256 {
-    turbulence_32::turbulence_4d::<Avx2>(
-        F32x8(x),
-        F32x8(y),
-        F32x8(z),
-        F32x8(w),
-        F32x8(lac),
-        F32x8(gain),
-        octaves,
-        seed,
-    )
-    .0
-}
-
-/// Get a single value of 4d turbulence.
-pub unsafe fn turbulence_4d_f64(
-    x: __m256d,
-    y: __m256d,
-    z: __m256d,
-    w: __m256d,
-    lac: __m256d,
-    gain: __m256d,
-    octaves: u8,
-    seed: i64,
-) -> __m256d {
-    turbulence_64::turbulence_4d::<Avx2>(
-        F64x4(x),
-        F64x4(y),
-        F64x4(z),
-        F64x4(w),
-        F64x4(lac),
-        F64x4(gain),
-        octaves,
-        seed,
-    )
-    .0
 }
 
 /// Gets a width X height X depth x time sized block of 4d noise, unscaled,
