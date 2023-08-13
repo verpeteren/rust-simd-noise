@@ -79,6 +79,15 @@ turbulence!(
     Sse41
 );
 turbulence!(
+    "3d",
+    turbulence_3d,
+    __m128,
+    F32x4,
+    i32,
+    turbulence_32,
+    Sse41
+);
+turbulence!(
     "1d",
     turbulence_1d_f64,
     __m128d,
@@ -90,6 +99,15 @@ turbulence!(
 turbulence!(
     "2d",
     turbulence_2d_f64,
+    __m128d,
+    F64x2,
+    i64,
+    turbulence_64,
+    Sse41
+);
+turbulence!(
+    "3d",
+    turbulence_3d_f64,
     __m128d,
     F64x2,
     i64,
@@ -143,50 +161,6 @@ pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let dim = noise_type.get_dimensions();
     scale_noise::<Sse41>(dim.min, dim.max, min, max, &mut noise);
     noise
-}
-
-/// Get a single value of 3d turbulence.
-pub unsafe fn turbulence_3d(
-    x: __m128,
-    y: __m128,
-    z: __m128,
-    lac: __m128,
-    gain: __m128,
-    octaves: u8,
-    seed: i32,
-) -> __m128 {
-    turbulence_32::turbulence_3d::<Sse41>(
-        F32x4(x),
-        F32x4(y),
-        F32x4(z),
-        F32x4(lac),
-        F32x4(gain),
-        octaves,
-        seed,
-    )
-    .0
-}
-
-/// Get a single value of 3d turbulence.
-pub unsafe fn turbulence_3d_f64(
-    x: __m128d,
-    y: __m128d,
-    z: __m128d,
-    lac: __m128d,
-    gain: __m128d,
-    octaves: u8,
-    seed: i64,
-) -> __m128d {
-    turbulence_64::turbulence_3d::<Sse41>(
-        F64x2(x),
-        F64x2(y),
-        F64x2(z),
-        F64x2(lac),
-        F64x2(gain),
-        octaves,
-        seed,
-    )
-    .0
 }
 
 /// Gets a width X height X depth sized block of 3d noise, unscaled,
