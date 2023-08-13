@@ -53,7 +53,9 @@ fbm!("3d", fbm_3d_f64, __m128d, F64x2, i64, fbm_64, Sse2);
 fbm!("4d", fbm_4d_f64, __m128d, F64x2, i64, fbm_64, Sse2);
 
 ridge!("1d", ridge_1d, __m128, F32x4, i32, ridge_32, Sse2);
+ridge!("2d", ridge_2d, __m128, F32x4, i32, ridge_32, Sse2);
 ridge!("1d", ridge_1d_f64, __m128d, F64x2, i64, ridge_64, Sse2);
+ridge!("2d", ridge_2d_f64, __m128d, F64x2, i64, ridge_64, Sse2);
 
 /// Get a single value of 2d turbulence.
 pub unsafe fn turbulence_1d(
@@ -101,17 +103,6 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     noise
 }
 
-/// Get a single value of 2d ridge noise.
-pub unsafe fn ridge_2d(
-    x: __m128,
-    y: __m128,
-    lac: __m128,
-    gain: __m128,
-    octaves: u8,
-    seed: i32,
-) -> __m128 {
-    ridge_32::ridge_2d::<Sse2>(F32x4(x), F32x4(y), F32x4(lac), F32x4(gain), octaves, seed).0
-}
 /// Get a single value of 2d turbulence.
 pub unsafe fn turbulence_2d(
     x: __m128,
@@ -125,17 +116,6 @@ pub unsafe fn turbulence_2d(
         .0
 }
 
-/// Get a single value of 2d ridge noise.
-pub unsafe fn ridge_2d_f64(
-    x: __m128d,
-    y: __m128d,
-    lac: __m128d,
-    gain: __m128d,
-    octaves: u8,
-    seed: i64,
-) -> __m128d {
-    ridge_64::ridge_2d::<Sse2>(F64x2(x), F64x2(y), F64x2(lac), F64x2(gain), octaves, seed).0
-}
 /// Get a single value of 2d turbulence.
 pub unsafe fn turbulence_2d_f64(
     x: __m128d,
