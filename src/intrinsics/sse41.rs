@@ -60,27 +60,24 @@ ridge!("2d", ridge_2d_f64, __m128d, F64x2, i64, ridge_64, Sse41);
 ridge!("3d", ridge_3d_f64, __m128d, F64x2, i64, ridge_64, Sse41);
 ridge!("4d", ridge_4d_f64, __m128d, F64x2, i64, ridge_64, Sse41);
 
-/// Get a single value of 2d turbulence.
-pub unsafe fn turbulence_1d(
-    x: __m128,
-    lacunarity: __m128,
-    gain: __m128,
-    octaves: u8,
-    seed: i32,
-) -> __m128 {
-    turbulence_32::turbulence_1d::<Sse41>(F32x4(x), F32x4(lacunarity), F32x4(gain), octaves, seed).0
-}
-
-/// Get a single value of 2d turbulence.
-pub unsafe fn turbulence_1d_f64(
-    x: __m128d,
-    lacunarity: __m128d,
-    gain: __m128d,
-    octaves: u8,
-    seed: i64,
-) -> __m128d {
-    turbulence_64::turbulence_1d::<Sse41>(F64x2(x), F64x2(lacunarity), F64x2(gain), octaves, seed).0
-}
+turbulence!(
+    "1d",
+    turbulence_1d,
+    __m128,
+    F32x4,
+    i32,
+    turbulence_32,
+    Sse41
+);
+turbulence!(
+    "1d",
+    turbulence_1d_f64,
+    __m128d,
+    F64x2,
+    i64,
+    turbulence_64,
+    Sse41
+);
 
 /// Gets a width sized block of 1d noise, unscaled.
 /// `start_x` can be used to provide an offset in the
