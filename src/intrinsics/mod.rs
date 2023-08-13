@@ -62,8 +62,7 @@ macro_rules! simplex {
             target_feature = "sse4.1",
             target_feature = "avx2"
         ))]
-        /// Get a single value of 1d simplex noise, results
-        /// are not scaled.
+        /// Get a single value of 1d simplex noise, results are not scaled.
         pub unsafe fn $fn_name<S>(x: $f_type, seed: $seed_type) -> $f_type {
             $mod::simplex_1d::<$intrinsic>($transmute_from(x), seed).0
         }
@@ -74,10 +73,26 @@ macro_rules! simplex {
             target_feature = "sse4.1",
             target_feature = "avx2"
         ))]
-        /// Get a single value of 2d simplex noise, results
-        /// are not scaled.
+        /// Get a single value of 2d simplex noise, results are not scaled.
         pub unsafe fn $fn_name<S>(x: $f_type, y: $f_type, seed: $seed_type) -> $f_type {
             $mod::simplex_2d::<$intrinsic>($transmute_from(x), $transmute_from(y), seed).0
+        }
+    };
+    ("3d", $fn_name: ident, $f_type: ty, $transmute_from: ident, $seed_type: ty, $mod: ident, $intrinsic: ty) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 3d simplex noise, results are not scaled.
+        pub unsafe fn $fn_name<S>(x: $f_type, y: $f_type, z: $f_type, seed: $seed_type) -> $f_type {
+            $mod::simplex_3d::<$intrinsic>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                seed,
+            )
+            .0
         }
     };
 }

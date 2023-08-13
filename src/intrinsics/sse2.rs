@@ -38,6 +38,8 @@ simplex!("1d", simplex_1d, __m128, F32x4, i32, simplex_32, Sse2);
 simplex!("1d", simplex_1d_f64, __m128d, F64x2, i64, simplex_64, Sse2);
 simplex!("2d", simplex_2d, __m128, F32x4, i32, simplex_32, Sse2);
 simplex!("2d", simplex_2d_f64, __m128d, F64x2, i64, simplex_64, Sse2);
+simplex!("3d", simplex_3d, __m128, F32x4, i32, simplex_32, Sse2);
+simplex!("3d", simplex_3d_f64, __m128d, F64x2, i64, simplex_64, Sse2);
 
 /// Get a single value of 1d fractal brownian motion.
 pub unsafe fn fbm_1d(
@@ -225,12 +227,6 @@ pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     noise
 }
 
-/// Get a single value of 3d simplex noise, results
-/// are not scaled.
-pub unsafe fn simplex_3d(x: __m128, y: __m128, z: __m128, seed: i32) -> __m128 {
-    simplex_32::simplex_3d::<Sse2>(F32x4(x), F32x4(y), F32x4(z), seed).0
-}
-
 /// Get a single value of 3d fractal brownian motion.
 pub unsafe fn fbm_3d(
     x: __m128,
@@ -295,12 +291,6 @@ pub unsafe fn turbulence_3d(
         seed,
     )
     .0
-}
-
-/// Get a single value of 3d simplex noise, results
-/// are not scaled.
-pub unsafe fn simplex_3d_f64(x: __m128d, y: __m128d, z: __m128d, seed: i64) -> __m128d {
-    simplex_64::simplex_3d::<Sse2>(F64x2(x), F64x2(y), F64x2(z), seed).0
 }
 
 /// Get a single value of 3d fractal brownian motion.
