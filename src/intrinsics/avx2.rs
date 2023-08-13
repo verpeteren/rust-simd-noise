@@ -46,8 +46,10 @@ simplex!("4d", simplex_4d_f64, __m256d, F64x4, i64, simplex_64, Avx2);
 
 fbm!("1d", fbm_1d, __m256, F32x8, i32, fbm_32, Avx2);
 fbm!("2d", fbm_2d, __m256, F32x8, i32, fbm_32, Avx2);
+fbm!("3d", fbm_3d, __m256, F32x8, i32, fbm_32, Avx2);
 fbm!("1d", fbm_1d_f64, __m256d, F64x4, i64, fbm_64, Avx2);
 fbm!("2d", fbm_2d_f64, __m256d, F64x4, i64, fbm_64, Avx2);
+fbm!("3d", fbm_3d_f64, __m256d, F64x4, i64, fbm_64, Avx2);
 
 /// Get a single value of 2d ridge noise.
 pub unsafe fn ridge_1d(
@@ -188,28 +190,6 @@ pub unsafe fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     noise
 }
 
-/// Get a single value of 3d fractal brownian motion.
-pub unsafe fn fbm_3d(
-    x: __m256,
-    y: __m256,
-    z: __m256,
-    lac: __m256,
-    gain: __m256,
-    octaves: u8,
-    seed: i32,
-) -> __m256 {
-    fbm_32::fbm_3d::<Avx2>(
-        F32x8(x),
-        F32x8(y),
-        F32x8(z),
-        F32x8(lac),
-        F32x8(gain),
-        octaves,
-        seed,
-    )
-    .0
-}
-
 /// Get a single value of 3d ridge noise.
 pub unsafe fn ridge_3d(
     x: __m256,
@@ -248,28 +228,6 @@ pub unsafe fn turbulence_3d(
         F32x8(z),
         F32x8(lac),
         F32x8(gain),
-        octaves,
-        seed,
-    )
-    .0
-}
-
-/// Get a single value of 3d fractal brownian motion.
-pub unsafe fn fbm_3d_f64(
-    x: __m256d,
-    y: __m256d,
-    z: __m256d,
-    lac: __m256d,
-    gain: __m256d,
-    octaves: u8,
-    seed: i64,
-) -> __m256d {
-    fbm_64::fbm_3d::<Avx2>(
-        F64x4(x),
-        F64x4(y),
-        F64x4(z),
-        F64x4(lac),
-        F64x4(gain),
         octaves,
         seed,
     )
