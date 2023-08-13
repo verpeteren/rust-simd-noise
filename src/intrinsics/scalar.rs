@@ -25,11 +25,7 @@ cellular!("3d", cellular_3d, f32, F32x1, i32, cell_32, Scalar);
 cellular!("2d", cellular_2d_f64, f64, F64x1, i64, cell_64, Scalar);
 cellular!("3d", cellular_3d_f64, f64, F64x1, i64, cell_64, Scalar);
 
-/// Get a single value of 1d simplex noise, results
-/// are not scaled.
-pub unsafe fn simplex_1d(x: f32, seed: i32) -> f32 {
-    simplex_32::simplex_1d::<Scalar>(F32x1(x), seed).0
-}
+simplex!("1d", simplex_1d, f32, F32x1, i32, simplex_32, Scalar);
 
 /// Get a single value of 1d fractal brownian motion.
 
