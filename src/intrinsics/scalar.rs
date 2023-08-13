@@ -85,9 +85,19 @@ ridge!(
 );
 
 turbulence!("1d", turbulenece_1d, f32, F32x1, i32, turbulence_32, Scalar);
+turbulence!("2d", turbulenece_2d, f32, F32x1, i32, turbulence_32, Scalar);
 turbulence!(
     "1d",
     turbulenece_1d_f64,
+    f64,
+    F64x1,
+    i64,
+    turbulence_64,
+    Scalar
+);
+turbulence!(
+    "2d",
+    turbulenece_2d_f64,
     f64,
     F64x1,
     i64,
@@ -118,41 +128,6 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     let dim = noise_type.get_dimensions();
     scale_noise::<Scalar>(dim.min, dim.max, min, max, &mut noise);
     noise
-}
-
-/// Get a single value of 2d turbulence.
-
-pub unsafe fn turbulence_2d(x: f32, y: f32, lac: f32, gain: f32, octaves: u8, seed: i32) -> f32 {
-    turbulence_32::turbulence_2d::<Scalar>(
-        F32x1(x),
-        F32x1(y),
-        F32x1(lac),
-        F32x1(gain),
-        octaves,
-        seed,
-    )
-    .0
-}
-
-/// Get a single value of 2d turbulence.
-
-pub unsafe fn turbulence_2d_f64(
-    x: f64,
-    y: f64,
-    lac: f64,
-    gain: f64,
-    octaves: u8,
-    seed: i64,
-) -> f64 {
-    turbulence_64::turbulence_2d::<Scalar>(
-        F64x1(x),
-        F64x1(y),
-        F64x1(lac),
-        F64x1(gain),
-        octaves,
-        seed,
-    )
-    .0
 }
 
 /// Gets a width X height sized block of 2d noise, unscaled.

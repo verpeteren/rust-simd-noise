@@ -63,9 +63,19 @@ ridge!("3d", ridge_3d_f64, __m256d, F64x4, i64, ridge_64, Avx2);
 ridge!("4d", ridge_4d_f64, __m256d, F64x4, i64, ridge_64, Avx2);
 
 turbulence!("1d", turbulence_1d, __m256, F32x8, i32, turbulence_32, Avx2);
+turbulence!("2d", turbulence_2d, __m256, F32x8, i32, turbulence_32, Avx2);
 turbulence!(
     "1d",
     turbulence_1d_f64,
+    __m256d,
+    F64x4,
+    i64,
+    turbulence_64,
+    Avx2
+);
+turbulence!(
+    "2d",
+    turbulence_2d_f64,
     __m256d,
     F64x4,
     i64,
@@ -97,31 +107,6 @@ pub unsafe fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     noise
 }
 
-/// Get a single value of 2d turbulence.
-pub unsafe fn turbulence_2d(
-    x: __m256,
-    y: __m256,
-    lac: __m256,
-    gain: __m256,
-    octaves: u8,
-    seed: i32,
-) -> __m256 {
-    turbulence_32::turbulence_2d::<Avx2>(F32x8(x), F32x8(y), F32x8(lac), F32x8(gain), octaves, seed)
-        .0
-}
-
-/// Get a single value of 2d turbulence.
-pub unsafe fn turbulence_2d_f64(
-    x: __m256d,
-    y: __m256d,
-    lac: __m256d,
-    gain: __m256d,
-    octaves: u8,
-    seed: i64,
-) -> __m256d {
-    turbulence_64::turbulence_2d::<Avx2>(F64x4(x), F64x4(y), F64x4(lac), F64x4(gain), octaves, seed)
-        .0
-}
 /// Gets a width X height sized block of 2d noise, unscaled.
 /// `start_x` and `start_y` can be used to provide an offset in the
 /// coordinates. Results are unscaled, 'min' and 'max' noise values
