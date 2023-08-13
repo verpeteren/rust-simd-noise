@@ -121,6 +121,33 @@ macro_rules! simplex {
     };
 }
 
+macro_rules! fbm {
+    ("1d", $fn_name: ident, $f_type: ty, $transmute_from: ident, $seed_type: ty, $mod: ident, $intrinsic: ty) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 1d fractal brownian motion.
+        pub unsafe fn $fn_name(
+            x: $f_type,
+            lacunarity: $f_type,
+            gain: $f_type,
+            octaves: u8,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::fbm_1d::<$intrinsic>(
+                $transmute_from(x),
+                $transmute_from(lacunarity),
+                $transmute_from(gain),
+                octaves,
+                seed,
+            )
+            .0
+        }
+    };
+}
+
 pub mod avx2;
 pub mod scalar;
 pub mod sse2;
