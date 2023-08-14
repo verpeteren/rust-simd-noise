@@ -63,7 +63,7 @@
 //!
 //! // get a block of noise with the sse41 version, using the above settings
 //! unsafe {
-//!     let (noise,min,max) = simdnoise::intrinsics::sse41::get_3d_noise(&noise_setting);
+//!     let (noise,min,max) = simdnoise::intrinsics::sse41::get_3d_noise::<simdeez::sse41::Sse41>(&noise_setting);
 //! }
 //!
 //! // send your own SIMD x,y values to the noise functions directly
@@ -72,7 +72,7 @@
 //!   let x = _mm_set1_ps(5.0);
 //!   let y = _mm_set1_ps(10.0);
 //!   let seed = 42;
-//!   let f : __m128 = simdnoise::intrinsics::sse2::simplex_2d(x,y,seed);
+//!   let f : __m128 = simdnoise::intrinsics::sse2::simplex_2d::<simdeez::sse2::Sse2>(x,y,seed);
 //!
 //!   // avx2 turbulence
 //!   let x = _mm256_set1_ps(5.0);
@@ -80,13 +80,12 @@
 //!   let lacunarity = _mm256_set1_ps(0.5);
 //!   let gain = _mm256_set1_ps(2.0);
 //!   let octaves = 3;
-//!   let f_turbulence : __m256 = simdnoise::intrinsics::avx2::turbulence_2d(x,y,lacunarity,gain,octaves,seed);
+//!   let f_turbulence : __m256 = simdnoise::intrinsics::avx2::turbulence_2d::<simdeez::avx2::Avx2>(x,y,lacunarity,gain,octaves,seed);
 //!
 //! }
 //! ```
 
 extern crate simdeez;
-
 mod dimensional_being;
 pub mod intrinsics;
 pub mod noise;
@@ -96,6 +95,8 @@ mod noise_helpers_32;
 mod noise_helpers_64;
 mod noise_type;
 mod shared;
+
+use simdeez::prelude::*;
 
 use dimensional_being::DimensionalBeing;
 pub use noise::cell2_return_type::Cell2ReturnType;
@@ -109,13 +110,13 @@ pub use noise_type::NoiseType;
 macro_rules! get_1d_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_1d_noise::<S>($setting) }
+            unsafe { avx2::get_1d_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_1d_noise::<S>($setting) }
+            unsafe { sse41::get_1d_noise::<simdeez::sse41::Ss41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_1d_noise::<S>($setting) }
+            unsafe { sse2::get_1d_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_1d_noise::<S>($setting) }
+            unsafe { scalar::get_1d_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -123,7 +124,7 @@ macro_rules! get_1d_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_1d_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_1d_noise::<S>($setting) }
+        unsafe { scalar::get_1d_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -131,13 +132,13 @@ macro_rules! get_1d_noise {
 macro_rules! get_2d_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_2d_noise::<S>($setting) }
+            unsafe { avx2::get_2d_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_2d_noise::<S>($setting) }
+            unsafe { sse41::get_2d_noise::<simdeez::sse41::Sse41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_2d_noise::<S>($setting) }
+            unsafe { sse2::get_2d_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_2d_noise::<S>($setting) }
+            unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -145,7 +146,7 @@ macro_rules! get_2d_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_2d_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_2d_noise::<S>($setting) }
+        unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -153,13 +154,13 @@ macro_rules! get_2d_noise {
 macro_rules! get_3d_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_3d_noise::<S>($setting) }
+            unsafe { avx2::get_3d_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_3d_noise::<S>($setting) }
+            unsafe { sse41::get_3d_noise::<simdeez::sse41::Sse41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_3d_noise::<S>($setting) }
+            unsafe { sse2::get_3d_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_3d_noise::<S>($setting) }
+            unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -167,7 +168,7 @@ macro_rules! get_3d_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_3d_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_3d_noise::<S>($setting) }
+        unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -175,13 +176,13 @@ macro_rules! get_3d_noise {
 macro_rules! get_4d_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_4d_noise::<S>($setting) }
+            unsafe { avx2::get_4d_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_4d_noise::<S>($setting) }
+            unsafe { sse41::get_4d_noise::<simdeez::sse41::Sse41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_4d_noise::<S>($setting) }
+            unsafe { sse2::get_4d_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_4d_noise::<S>($setting) }
+            unsafe { scalar::get_4d_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -189,7 +190,7 @@ macro_rules! get_4d_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_4d_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_4d_noise::<S>($setting) }
+        unsafe { scalar::get_4d_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -197,13 +198,13 @@ macro_rules! get_4d_noise {
 macro_rules! get_1d_scaled_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_1d_scaled_noise::<S>($setting) }
+            unsafe { avx2::get_1d_scaled_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_1d_scaled_noise::<S>($setting) }
+            unsafe { sse41::get_1d_scaled_noise::<simdeez::sse41::Sse41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_1d_scaled_noise::<S>($setting) }
+            unsafe { sse2::get_1d_scaled_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_1d_scaled_noise::<S>($setting) }
+            unsafe { scalar::get_1d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -211,7 +212,7 @@ macro_rules! get_1d_scaled_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_1d_scaled_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_1d_scaled_noise::<S>($setting) }
+        unsafe { scalar::get_1d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -219,13 +220,13 @@ macro_rules! get_1d_scaled_noise {
 macro_rules! get_2d_scaled_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_2d_scaled_noise::<S>($setting) }
+            unsafe { avx2::get_2d_scaled_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_2d_scaled_noise::<S>($setting) }
+            unsafe { sse41::get_2d_scaled_noise::<simdeez::sse41::Sse41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_2d_scaled_noise::<S>($setting) }
+            unsafe { sse2::get_2d_scaled_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_2d_scaled_noise::<S>($setting) }
+            unsafe { scalar::get_2d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -233,7 +234,7 @@ macro_rules! get_2d_scaled_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_2d_scaled_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_2d_scaled_noise::<S>($setting) }
+        unsafe { scalar::get_2d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -241,13 +242,13 @@ macro_rules! get_2d_scaled_noise {
 macro_rules! get_3d_scaled_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_3d_scaled_noise::<S>($setting) }
+            unsafe { avx2::get_3d_scaled_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_3d_scaled_noise::<S>($setting) }
+            unsafe { sse41::get_3d_scaled_noise::<simdeez::sse41::Sse41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_3d_scaled_noise::<S>($setting) }
+            unsafe { sse2::get_3d_scaled_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_3d_scaled_noise::<S>($setting) }
+            unsafe { scalar::get_3d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -255,7 +256,7 @@ macro_rules! get_3d_scaled_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_3d_scaled_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_3d_scaled_noise::<S>($setting) }
+        unsafe { scalar::get_3d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -263,13 +264,13 @@ macro_rules! get_3d_scaled_noise {
 macro_rules! get_4d_scaled_noise {
     ($setting:expr) => {
         if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_4d_scaled_noise::<S>($setting) }
+            unsafe { avx2::get_4d_scaled_noise::<simdeez::avx2::Avx2>($setting) }
         } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_4d_scaled_noise::<S>($setting) }
+            unsafe { sse41::get_4d_scaled_noise::<simdeez::sse41::Sse41>($setting) }
         } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_4d_scaled_noise::<S>($setting) }
+            unsafe { sse2::get_4d_scaled_noise::<simdeez::sse2::Sse2>($setting) }
         } else {
-            unsafe { scalar::get_4d_scaled_noise::<S>($setting) }
+            unsafe { scalar::get_4d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
         }
     };
 }
@@ -277,7 +278,7 @@ macro_rules! get_4d_scaled_noise {
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 macro_rules! get_4d_scaled_noise {
     ($setting:expr) => {
-        unsafe { scalar::get_4d_scaled_noise::<S>($setting) }
+        unsafe { scalar::get_4d_scaled_noise::<simdeez::scalar::Scalar>($setting) }
     };
 }
 
@@ -300,7 +301,39 @@ mod tests {
 
     #[test]
     fn small_dimensions() {
-        let _ = NoiseBuilder::gradient_2d(3, 2).generate();
+        let (scalar_gradient, scalar_w, scalar_h) =
+            NoiseBuilder::gradient_2d(3, 2).generate::<simdeez::scalar::Scalar>();
+        #[cfg(target_feature = "sse2")]
+        let (sse2_gradient, sse2_w, sse2_h) =
+            NoiseBuilder::gradient_2d(3, 2).generate::<simdeez::sse2::Sse2>();
+        #[cfg(target_feature = "sse41")]
+        let (sse41_gradient, sse41_w, sse2_h) =
+            NoiseBuilder::gradient_2d(3, 2).generate::<simdeez::sse41::Sse41>();
+        #[cfg(target_feature = "avx2")]
+        let (avx2_gradient, avx2_w, sse2_h) =
+            NoiseBuilder::gradient_2d(3, 2).generate::<simdeez::avx2::Avx2>();
+        for i in 0..scalar_gradient.len() {
+            #[cfg(target_feature = "sse2.1")]
+            {
+                assert_eq!(scalar_w, sse2_w);
+                assert_eq!(scalar_h, sse2_h);
+                assert_delta!(scalar_gradient[i], sse2_gradient[i], 0.1);
+            }
+
+            #[cfg(target_feature = "sse4.1")]
+            {
+                assert_eq!(scalar_w, sse41_w);
+                assert_eq!(scalar_h, sse41_h);
+                assert_delta!(scalar_gradient[i], sse41_gradient[i], 0.1);
+            }
+
+            #[cfg(target_feature = "avx2")]
+            {
+                assert_eq!(scalar_w, avx2_w);
+                assert_eq!(scalar_h, avx2_h);
+                assert_delta!(scalar_gradient[i], avx2_gradient[i], 0.1);
+            }
+        }
     }
 
     #[test]
@@ -310,17 +343,18 @@ mod tests {
         let scalar_noise = unsafe { scalar::get_4d_scaled_noise(&noise_setting) };
 
         #[cfg(target_feature = "sse2")]
-        let sse2_noise = unsafe { sse2::get_4d_scaled_noise(&noise_setting) };
+        let sse2_noise =
+            unsafe { sse2::get_4d_scaled_noise::<simdeez::sse2::Sse2>(&noise_setting) };
 
         #[cfg(target_feature = "sse4.1")]
-        let sse41_noise = unsafe { sse41::get_4d_scaled_noise(&noise_setting) };
+        let sse41_noise =
+            unsafe { sse41::get_4d_scaled_noise::<simdeez::sse41::Sse41>(&noise_setting) };
 
         #[cfg(target_feature = "avx2")]
-        let avx2_noise = unsafe { avx2::get_4d_scaled_noise(&noise_setting) };
+        let avx2_noise =
+            unsafe { avx2::get_4d_scaled_noise::<simdeez::avx2::Avx2>(&noise_setting) };
 
         for i in 0..scalar_noise.len() {
-            assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
-
             #[cfg(target_feature = "sse2.1")]
             assert_delta!(scalar_noise[i], sse2_noise[i], 0.1);
 
@@ -339,13 +373,16 @@ mod tests {
         let scalar_noise = unsafe { scalar::get_3d_scaled_noise(&noise_setting) };
 
         #[cfg(target_feature = "sse2")]
-        let sse2_noise = unsafe { sse2::get_3d_scaled_noise(&noise_setting) };
+        let sse2_noise =
+            unsafe { sse2::get_3d_scaled_noise::<simdeez::sse2::Sse2>(&noise_setting) };
 
         #[cfg(target_feature = "sse4.1")]
-        let sse41_noise = unsafe { sse41::get_3d_scaled_noise(&noise_setting) };
+        let sse41_noise =
+            unsafe { sse41::get_3d_scaled_noise::<simdeez::sse41::Sse41>(&noise_setting) };
 
         #[cfg(target_feature = "avx2")]
-        let avx2_noise = unsafe { avx2::get_3d_scaled_noise(&noise_setting) };
+        let avx2_noise =
+            unsafe { avx2::get_3d_scaled_noise::<simdeez::avx2::Avx2>(&noise_setting) };
 
         for i in 0..scalar_noise.len() {
             #[cfg(target_feature = "sse2")]
@@ -366,13 +403,16 @@ mod tests {
         let scalar_noise = unsafe { scalar::get_2d_scaled_noise(&noise_setting) };
 
         #[cfg(target_feature = "sse2")]
-        let sse2_noise = unsafe { sse2::get_2d_scaled_noise(&noise_setting) };
+        let sse2_noise =
+            unsafe { sse2::get_2d_scaled_noise::<simdeez::sse2::Sse2>(&noise_setting) };
 
         #[cfg(target_feature = "sse4.1")]
-        let sse41_noise = unsafe { sse41::get_2d_scaled_noise(&noise_setting) };
+        let sse41_noise =
+            unsafe { sse41::get_2d_scaled_noise::<simdeez::sse41::Sse41>(&noise_setting) };
 
         #[cfg(target_feature = "avx2")]
-        let avx2_noise = unsafe { avx2::get_2d_scaled_noise(&noise_setting) };
+        let avx2_noise =
+            unsafe { avx2::get_2d_scaled_noise::<simdeez::avx2::Avx2>(&noise_setting) };
 
         for i in 0..scalar_noise.len() {
             #[cfg(target_feature = "sse2")]
@@ -393,13 +433,16 @@ mod tests {
         let scalar_noise = unsafe { scalar::get_1d_scaled_noise(&noise_setting) };
 
         #[cfg(target_feature = "sse2")]
-        let sse2_noise = unsafe { sse2::get_1d_scaled_noise(&noise_setting) };
+        let sse2_noise =
+            unsafe { sse2::get_1d_scaled_noise::<simdeez::sse2::Sse2>(&noise_setting) };
 
         #[cfg(target_feature = "sse41")]
-        let sse41_noise = unsafe { sse41::get_1d_scaled_noise(&noise_setting) };
+        let sse41_noise =
+            unsafe { sse41::get_1d_scaled_noise::<simdeez::sse41::Sse41>(&noise_setting) };
 
         #[cfg(target_feature = "avx2")]
-        let avx2_noise = unsafe { avx2::get_1d_scaled_noise(&noise_setting) };
+        let avx2_noise =
+            unsafe { avx2::get_1d_scaled_noise::<simdeez::avx2::Avx2>(&noise_setting) };
 
         for i in 0..scalar_noise.len() {
             #[cfg(target_feature = "sse2")]
@@ -420,13 +463,13 @@ mod tests {
         let scalar = unsafe { scalar::get_2d_scaled_noise(&noise_setting) };
 
         #[cfg(target_feature = "sse2")]
-        let sse2 = unsafe { sse2::get_2d_scaled_noise(&noise_setting) };
+        let sse2 = unsafe { sse2::get_2d_scaled_noise::<simdeez::sse2::Sse2>(&noise_setting) };
 
         #[cfg(target_feature = "sse4.1")]
-        let sse41 = unsafe { sse41::get_2d_scaled_noise(&noise_setting) };
+        let sse41 = unsafe { sse41::get_2d_scaled_noise::<simdeez::sse41::Sse41>(&noise_setting) };
 
         #[cfg(target_feature = "avx2")]
-        let avx2 = unsafe { avx2::get_2d_scaled_noise(&noise_setting) };
+        let avx2 = unsafe { avx2::get_2d_scaled_noise::<simdeez::avx2::Avx2>(&noise_setting) };
         for i in 0..scalar.len() {
             #[cfg(target_feature = "sse2")]
             assert_delta!(scalar[i], sse2[i], 0.1);
@@ -445,13 +488,13 @@ mod tests {
         let noise_setting = NoiseBuilder::cellular2_3d(32, 32, 32).wrap();
         let scalar = unsafe { scalar::get_3d_scaled_noise(&noise_setting) };
         #[cfg(target_feature = "sse2")]
-        let sse2 = unsafe { sse2::get_3d_scaled_noise(&noise_setting) };
+        let sse2 = unsafe { sse2::get_3d_scaled_noise::<simdeez::sse2::Sse2>(&noise_setting) };
 
         #[cfg(target_feature = "sse4.1")]
-        let sse41 = unsafe { sse41::get_3d_scaled_noise(&noise_setting) };
+        let sse41 = unsafe { sse41::get_3d_scaled_noise::<simdeez::sse41::Sse41>(&noise_setting) };
 
         #[cfg(target_feature = "avx2")]
-        let avx2 = unsafe { avx2::get_3d_scaled_noise(&noise_setting) };
+        let avx2 = unsafe { avx2::get_3d_scaled_noise::<simdeez::avx2::Avx2>(&noise_setting) };
 
         for i in 0..scalar.len() {
             //#[cfg(target_feature = "sse2")]

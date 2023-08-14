@@ -37,7 +37,7 @@ macro_rules! get_1d_noise_helper_f32 {
     }
     let mut x = S::loadu_ps(&x_arr[0]);
     for _ in 0..width / vector_width {
-        let f = $f(S::mul_ps(x, freq_x) $(,$arg)*);
+        let f = $f((x * freq_x) $(,$arg)*);
         max_s = S::max_ps(max_s, f);
         min_s = S::min_ps(min_s, f);
         S::storeu_ps(result.get_unchecked_mut(i), f);
