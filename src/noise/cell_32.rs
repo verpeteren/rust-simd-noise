@@ -3,7 +3,7 @@ use super::cellular_32::{
 };
 use crate::{CellDistanceFunction, CellReturnType};
 
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 #[inline(always)]
 pub unsafe fn cellular_2d<S: Simd>(

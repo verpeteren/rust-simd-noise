@@ -1,4 +1,4 @@
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 #[inline(always)]
 pub unsafe fn hash_2d<S: Simd>(seed: i64, x: S::Vi64, y: S::Vi64) -> S::Vi64 {

@@ -6,7 +6,7 @@
 use crate::noise::cellular_32::{X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
 use crate::noise::gradient_32::{grad1, grad2, grad3d, grad3d_dot, grad4};
 
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 use std::f32;
 use std::f64;

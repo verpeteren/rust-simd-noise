@@ -1,4 +1,4 @@
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 pub struct Hash3d<S: Simd> {
     // Masks guiding dimension selection

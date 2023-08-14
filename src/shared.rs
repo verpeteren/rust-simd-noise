@@ -1,4 +1,4 @@
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 #[inline(always)]
 pub unsafe fn scale_noise<S: Simd>(

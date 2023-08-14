@@ -1,6 +1,6 @@
 use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4};
 
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 use crate::noise::cellular_32::{X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
 use crate::noise::gradient_64::grad3d_dot;

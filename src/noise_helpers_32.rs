@@ -8,7 +8,7 @@ use crate::noise::ridge_32::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 use crate::noise::turbulence_32::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
 
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 use std::f32;
 

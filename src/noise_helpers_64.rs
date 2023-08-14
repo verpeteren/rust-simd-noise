@@ -1,4 +1,4 @@
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 use super::NoiseType;
 use crate::dimensional_being::DimensionalBeing;

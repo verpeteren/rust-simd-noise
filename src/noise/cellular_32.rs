@@ -5,7 +5,7 @@
 
 use std::f32;
 
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 pub const BIT_10_MASK_32: i32 = 1023;
 pub const BIT_10_MASK_64: i64 = 1023;

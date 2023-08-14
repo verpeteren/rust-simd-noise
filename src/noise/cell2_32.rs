@@ -1,7 +1,7 @@
 use super::cellular_32::{hash_2d, hash_3d, BIT_10_MASK_32, X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
 use crate::{Cell2ReturnType, CellDistanceFunction};
 
-use simdeez::Simd;
+use simdeez::prelude::*;
 
 #[inline(always)]
 pub unsafe fn cellular2_2d<S: Simd>(
