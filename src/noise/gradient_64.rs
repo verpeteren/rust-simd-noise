@@ -26,8 +26,8 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
 pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
     let h = S::and_epi64(S::xor_epi64(hash, S::set1_epi64(seed)), S::set1_epi64(7));
     let mask = S::castepi64_pd(S::cmpgt_epi64(S::set1_epi64(4), h));
-    let x_magnitude = S::blendv_pd(S::set1_pd(2.0), S::set1_pd(1.0), mask);
-    let y_magnitude = S::blendv_pd(S::set1_pd(1.0), S::set1_pd(2.0), mask);
+    let x_magnitude = S::blendv_pd(S::Vf64::set1(2.0), S::Vf64::set1(1.0), mask);
+    let y_magnitude = S::blendv_pd(S::Vf64::set1(1.0), S::Vf64::set1(2.0), mask);
 
     let h_and_1 = S::castepi64_pd(S::cmpeq_epi64(
         S::setzero_epi64(),
@@ -85,11 +85,11 @@ pub unsafe fn grad3d_dot<S: Simd>(
 pub unsafe fn grad3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> [S::Vf64; 3] {
     let h = hash3d::<S>(seed, i, j, k);
 
-    let first = S::set1_pd(1.0) | h.h1;
+    let first = S::Vf64::set1(1.0) | h.h1;
     let mut gx = S::and_pd(h.l8, first);
     let mut gy = S::andnot_pd(h.l8, first);
 
-    let second = S::set1_pd(1.0) | h.h2;
+    let second = S::Vf64::set1(1.0) | h.h2;
     gy = S::blendv_pd(gy, second, h.l4);
     gx = S::blendv_pd(gx, second, S::andnot_pd(h.l4, h.h12_or_14));
     let gz = S::andnot_pd(h.h12_or_14 | h.l4, second);

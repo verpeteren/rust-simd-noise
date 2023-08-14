@@ -10,7 +10,7 @@ pub unsafe fn fbm_1d<S: Simd>(
     octaves: u8,
     seed: i64,
 ) -> S::Vf64 {
-    let mut amp = S::set1_pd(1.0);
+    let mut amp = S::Vf64::set1(1.0);
     let mut result = simplex_1d::<S>(x, seed);
 
     for _ in 1..octaves {
@@ -32,7 +32,7 @@ pub unsafe fn fbm_2d<S: Simd>(
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_2d::<S>(x, y, seed);
-    let mut amp = S::set1_pd(1.0);
+    let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
         x = S::mul_pd(x, lac);
@@ -55,7 +55,7 @@ pub unsafe fn fbm_3d<S: Simd>(
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_3d::<S>(x, y, z, seed);
-    let mut amp = S::set1_pd(1.0);
+    let mut amp = S::Vf64::set1(1.0);
     for _ in 1..octaves {
         x = S::mul_pd(x, lac);
         y = S::mul_pd(y, lac);
@@ -78,7 +78,7 @@ pub unsafe fn fbm_4d<S: Simd>(
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_4d::<S>(x, y, z, w, seed);
-    let mut amp = S::set1_pd(1.0);
+    let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
         x = S::mul_pd(x, lac);
