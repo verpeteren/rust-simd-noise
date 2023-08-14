@@ -14,7 +14,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
     index1: usize,
     seed: i32,
 ) -> S::Vf32 {
-    let mut distance: [S::Vf32; 4] = [S::set1_ps(999999.0); 4];
+    let mut distance: [S::Vf32; 4] = [S::Vf32::set1(999999.0); 4];
 
     let mut xc = S::sub_epi32(S::cvtps_epi32(x), S::set1_epi32(1));
     let mut yc_base = S::sub_epi32(S::cvtps_epi32(y), S::set1_epi32(1));
@@ -32,14 +32,14 @@ pub unsafe fn cellular2_2d<S: Simd>(
             let hash = hash_2d::<S>(seed, xc, yc);
             let mut xd = S::sub_ps(
                 S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
-                S::set1_ps(511.5),
+                S::Vf32::set1(511.5),
             );
             let mut yd = S::sub_ps(
                 S::cvtepi32_ps(S::and_epi32(
                     S::srai_epi32(hash, 10),
                     S::set1_epi32(BIT_10_MASK_32),
                 )),
-                S::set1_ps(511.5),
+                S::Vf32::set1(511.5),
             );
             let inv_mag = S::mul_ps(
                 jitter,
@@ -63,10 +63,10 @@ pub unsafe fn cellular2_2d<S: Simd>(
                 distance[0] = S::min_ps(distance[0], new_distance);
                 i -= 1;
             }
-            ycf = S::add_ps(ycf, S::set1_ps(1.0));
+            ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
         }
-        xcf = S::add_ps(xcf, S::set1_ps(1.0));
+        xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
         xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
     }
 
@@ -91,7 +91,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
     index1: usize,
     seed: i32,
 ) -> S::Vf32 {
-    let mut distance: [S::Vf32; 4] = [S::set1_ps(999999.0); 4];
+    let mut distance: [S::Vf32; 4] = [S::Vf32::set1(999999.0); 4];
 
     let mut xc = S::sub_epi32(S::cvtps_epi32(x), S::set1_epi32(1));
     let mut yc_base = S::sub_epi32(S::cvtps_epi32(y), S::set1_epi32(1));
@@ -115,21 +115,21 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
-                    S::set1_ps(511.5),
+                    S::Vf32::set1(511.5),
                 );
                 let mut yd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
                         S::srai_epi32(hash, 10),
                         S::set1_epi32(BIT_10_MASK_32),
                     )),
-                    S::set1_ps(511.5),
+                    S::Vf32::set1(511.5),
                 );
                 let mut zd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
                         S::srai_epi32(hash, 20),
                         S::set1_epi32(BIT_10_MASK_32),
                     )),
-                    S::set1_ps(511.5),
+                    S::Vf32::set1(511.5),
                 );
                 let inv_mag = S::mul_ps(
                     jitter,
@@ -165,13 +165,13 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     distance[0] = S::min_ps(distance[0], new_distance);
                     i -= 1;
                 }
-                zcf = S::add_ps(ycf, S::set1_ps(1.0));
+                zcf = S::add_ps(ycf, S::Vf32::set1(1.0));
                 zc = S::add_epi32(yc, S::set1_epi32(Z_PRIME_32));
             }
-            ycf = S::add_ps(ycf, S::set1_ps(1.0));
+            ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
             yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
         }
-        xcf = S::add_ps(xcf, S::set1_ps(1.0));
+        xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
         xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
     }
 

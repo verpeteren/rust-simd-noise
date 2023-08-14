@@ -79,7 +79,7 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::V
     // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
     let x0 = S::sub_ps(x, ips);
     // signed distance to the right gradient node
-    let x1 = S::sub_ps(x0, S::set1_ps(1.0));
+    let x1 = S::sub_ps(x0, S::Vf32::set1(1.0));
 
     i0 = S::and_epi32(i0, S::set1_epi32(0xff));
     let gi0 = S::i32gather_epi32(&PERM, i0);
@@ -87,7 +87,7 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::V
 
     // Compute the contribution from the first gradient
     let x20 = S::mul_ps(x0, x0); // x^2_0
-    let t0 = S::sub_ps(S::set1_ps(1.0), x20); // t_0
+    let t0 = S::sub_ps(S::Vf32::set1(1.0), x20); // t_0
     let t20 = S::mul_ps(t0, t0); // t^2_0
     let t40 = S::mul_ps(t20, t20); // t^4_0
     let gx0 = grad1::<S>(seed, gi0);
@@ -96,7 +96,7 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::V
 
     // Compute the contribution from the second gradient
     let x21 = S::mul_ps(x1, x1); // x^2_1
-    let t1 = S::sub_ps(S::set1_ps(1.0), x21); // t_1
+    let t1 = S::sub_ps(S::Vf32::set1(1.0), x21); // t_1
     let t21 = S::mul_ps(t1, t1); // t^2_1
     let t41 = S::mul_ps(t21, t21); // t^4_1
     let gx1 = grad1::<S>(seed, gi1);
@@ -115,10 +115,11 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::V
     // allowing us to scale into [-1, 1]
     const SCALE: f32 = 256.0 / (81.0 * 7.0);
 
-    let value = S::add_ps(n0, n1) * S::set1_ps(SCALE);
-    let derivative =
-        ((t20 * t0 * gx0 * x20 + t21 * t1 * gx1 * x21) * S::set1_ps(-8.0) + t40 * gx0 + t41 * gx1)
-            * S::set1_ps(SCALE);
+    let value = S::add_ps(n0, n1) * S::Vf32::set1(SCALE);
+    let derivative = ((t20 * t0 * gx0 * x20 + t21 * t1 * gx1 * x21) * S::Vf32::set1(-8.0)
+        + t40 * gx0
+        + t41 * gx1)
+        * S::Vf32::set1(SCALE);
     (value, derivative)
 }
 
@@ -147,7 +148,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 ) -> (S::Vf32, [S::Vf32; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
-    let s = S::mul_ps(S::set1_ps(F2_32), S::add_ps(x, y));
+    let s = S::mul_ps(S::Vf32::set1(F2_32), S::add_ps(x, y));
     let ips = S::floor_ps(S::add_ps(x, s));
     let jps = S::floor_ps(S::add_ps(y, s));
 
@@ -155,7 +156,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let i = S::cvtps_epi32(ips);
     let j = S::cvtps_epi32(jps);
 
-    let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::set1_ps(G2_32));
+    let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::Vf32::set1(G2_32));
 
     // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
@@ -166,10 +167,10 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let j1 = S::castps_epi32(S::cmpgt_ps(y0, x0));
 
     // Distances to the second and third points of the enclosing simplex
-    let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G2_32));
-    let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G2_32));
-    let x2 = S::add_ps(S::add_ps(x0, S::set1_ps(-1.0)), S::set1_ps(G22_32));
-    let y2 = S::add_ps(S::add_ps(y0, S::set1_ps(-1.0)), S::set1_ps(G22_32));
+    let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::Vf32::set1(G2_32));
+    let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::Vf32::set1(G2_32));
+    let x2 = S::add_ps(S::add_ps(x0, S::Vf32::set1(-1.0)), S::Vf32::set1(G22_32));
+    let y2 = S::add_ps(S::add_ps(y0, S::Vf32::set1(-1.0)), S::Vf32::set1(G22_32));
 
     let ii = S::and_epi32(i, S::set1_epi32(0xff));
     let jj = S::and_epi32(j, S::set1_epi32(0xff));
@@ -194,9 +195,9 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 
     // Weights associated with the gradients at each corner
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
-    let mut t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::set1_ps(0.5)));
-    let mut t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::set1_ps(0.5)));
-    let mut t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::set1_ps(0.5)));
+    let mut t0 = S::fnmadd_ps(y0, y0, S::fnmadd_ps(x0, x0, S::Vf32::set1(0.5)));
+    let mut t1 = S::fnmadd_ps(y1, y1, S::fnmadd_ps(x1, x1, S::Vf32::set1(0.5)));
+    let mut t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::Vf32::set1(0.5)));
 
     // Zero out negative weights
     t0 &= S::cmpge_ps(t0, S::setzero_ps());
@@ -221,7 +222,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let n2 = t42 * g2;
 
     // Scaling factor found by numerical approximation
-    let scale = S::set1_ps(45.26450774985561631259);
+    let scale = S::Vf32::set1(45.26450774985561631259);
     let value = S::add_ps(n0, S::add_ps(n1, n2)) * scale;
     let derivative = {
         let temp0 = t20 * t0 * g0;
@@ -233,8 +234,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
         let temp2 = t22 * t2 * g2;
         dnoise_dx += temp2 * x2;
         dnoise_dy += temp2 * y2;
-        dnoise_dx *= S::set1_ps(-8.0);
-        dnoise_dy *= S::set1_ps(-8.0);
+        dnoise_dx *= S::Vf32::set1(-8.0);
+        dnoise_dy *= S::Vf32::set1(-8.0);
         dnoise_dx += t40 * gx0 + t41 * gx1 + t42 * gx2;
         dnoise_dy += t40 * gy0 + t41 * gy1 + t42 * gy2;
         dnoise_dx *= scale;
@@ -261,7 +262,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     seed: i32,
 ) -> (S::Vf32, [S::Vf32; 3]) {
     // Find skewed simplex grid coordinates associated with the input coordinates
-    let f = S::mul_ps(S::set1_ps(F3_32), S::add_ps(S::add_ps(x, y), z));
+    let f = S::mul_ps(S::Vf32::set1(F3_32), S::add_ps(S::add_ps(x, y), z));
     let mut x0 = S::fast_floor_ps(S::add_ps(x, f));
     let mut y0 = S::fast_floor_ps(S::add_ps(y, f));
     let mut z0 = S::fast_floor_ps(S::add_ps(z, f));
@@ -272,7 +273,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let k = S::mullo_epi32(S::cvtps_epi32(z0), S::set1_epi32(Z_PRIME_32));
 
     // Compute distance from first simplex vertex to input coordinates
-    let g = S::mul_ps(S::set1_ps(G3_32), S::add_ps(S::add_ps(x0, y0), z0));
+    let g = S::mul_ps(S::Vf32::set1(G3_32), S::add_ps(S::add_ps(x0, y0), z0));
     x0 = S::sub_ps(x, S::sub_ps(x0, g));
     y0 = S::sub_ps(y, S::sub_ps(y0, g));
     z0 = S::sub_ps(z, S::sub_ps(z0, g));
@@ -290,17 +291,17 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let k2 = !(x0_ge_z0 & y0_ge_z0);
 
     // Compute distances from remaining simplex vertices to input coordinates
-    let x1 = S::add_ps(S::sub_ps(x0, i1 & S::set1_ps(1.0)), S::set1_ps(G3_32));
-    let y1 = S::add_ps(S::sub_ps(y0, j1 & S::set1_ps(1.0)), S::set1_ps(G3_32));
-    let z1 = S::add_ps(S::sub_ps(z0, k1 & S::set1_ps(1.0)), S::set1_ps(G3_32));
+    let x1 = S::add_ps(S::sub_ps(x0, i1 & S::Vf32::set1(1.0)), S::Vf32::set1(G3_32));
+    let y1 = S::add_ps(S::sub_ps(y0, j1 & S::Vf32::set1(1.0)), S::Vf32::set1(G3_32));
+    let z1 = S::add_ps(S::sub_ps(z0, k1 & S::Vf32::set1(1.0)), S::Vf32::set1(G3_32));
 
-    let x2 = S::add_ps(S::sub_ps(x0, i2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
-    let y2 = S::add_ps(S::sub_ps(y0, j2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
-    let z2 = S::add_ps(S::sub_ps(z0, k2 & S::set1_ps(1.0)), S::set1_ps(F3_32));
+    let x2 = S::add_ps(S::sub_ps(x0, i2 & S::Vf32::set1(1.0)), S::Vf32::set1(F3_32));
+    let y2 = S::add_ps(S::sub_ps(y0, j2 & S::Vf32::set1(1.0)), S::Vf32::set1(F3_32));
+    let z2 = S::add_ps(S::sub_ps(z0, k2 & S::Vf32::set1(1.0)), S::Vf32::set1(F3_32));
 
-    let x3 = S::add_ps(x0, S::set1_ps(G33_32));
-    let y3 = S::add_ps(y0, S::set1_ps(G33_32));
-    let z3 = S::add_ps(z0, S::set1_ps(G33_32));
+    let x3 = S::add_ps(x0, S::Vf32::set1(G33_32));
+    let y3 = S::add_ps(y0, S::Vf32::set1(G33_32));
+    let z3 = S::add_ps(z0, S::Vf32::set1(G33_32));
 
     // Compute base weight factors associated with each vertex, `0.6 - v . v` where v is the
     // distance to the vertex. Strictly the constant should be 0.5, but 0.6 is thought by Gustavson
@@ -308,28 +309,28 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     //#define SIMDf_NMUL_ADD(a,b,c) = SIMDf_SUB(c, SIMDf_MUL(a,b)
     let mut t0 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(S::set1_ps(0.6), S::mul_ps(x0, x0)),
+            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x0, x0)),
             S::mul_ps(y0, y0),
         ),
         S::mul_ps(z0, z0),
     );
     let mut t1 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(S::set1_ps(0.6), S::mul_ps(x1, x1)),
+            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x1, x1)),
             S::mul_ps(y1, y1),
         ),
         S::mul_ps(z1, z1),
     );
     let mut t2 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(S::set1_ps(0.6), S::mul_ps(x2, x2)),
+            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x2, x2)),
             S::mul_ps(y2, y2),
         ),
         S::mul_ps(z2, z2),
     );
     let mut t3 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(S::set1_ps(0.6), S::mul_ps(x3, x3)),
+            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x3, x3)),
             S::mul_ps(y3, y3),
         ),
         S::mul_ps(z3, z3),
@@ -401,7 +402,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let p2 = S::add_ps(p1, v1);
 
     // Scaling factor found by numerical approximation
-    let scale = S::set1_ps(32.69587493801679);
+    let scale = S::Vf32::set1(32.69587493801679);
     let result = S::add_ps(p2, v0) * scale;
     let derivative = {
         let temp0 = t20 * t0 * g0;
@@ -420,9 +421,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
         dnoise_dx += temp3 * x3;
         dnoise_dy += temp3 * y3;
         dnoise_dz += temp3 * z3;
-        dnoise_dx *= S::set1_ps(-8.0);
-        dnoise_dy *= S::set1_ps(-8.0);
-        dnoise_dz *= S::set1_ps(-8.0);
+        dnoise_dx *= S::Vf32::set1(-8.0);
+        dnoise_dy *= S::Vf32::set1(-8.0);
+        dnoise_dz *= S::Vf32::set1(-8.0);
         let [gx0, gy0, gz0] = grad3d::<S>(seed, i, j, k);
         let [gx1, gy1, gz1] = grad3d::<S>(seed, v1x, v1y, v1z);
         let [gx2, gy2, gz2] = grad3d::<S>(seed, v2x, v2y, v2z);
@@ -456,7 +457,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     //
 
     let s = S::mul_ps(
-        S::set1_ps(F4_32),
+        S::Vf32::set1(F4_32),
         S::add_ps(x, S::add_ps(y, S::add_ps(z, w))),
     );
 
@@ -472,7 +473,7 @@ pub unsafe fn simplex_4d<S: Simd>(
 
     let t = S::mul_ps(
         S::cvtepi32_ps(S::add_epi32(i, S::add_epi32(j, S::add_epi32(k, l)))),
-        S::set1_ps(G4_32),
+        S::Vf32::set1(G4_32),
     );
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
     let y0 = S::sub_ps(y, S::sub_ps(jps, t));
@@ -530,22 +531,22 @@ pub unsafe fn simplex_4d<S: Simd>(
     let cond = S::cmpgt_epi32(rank_w, S::setzero_epi32());
     let l3 = S::and_epi32(S::set1_epi32(1), cond);
 
-    let x1 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i1)), S::set1_ps(G4_32));
-    let y1 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j1)), S::set1_ps(G4_32));
-    let z1 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k1)), S::set1_ps(G4_32));
-    let w1 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l1)), S::set1_ps(G4_32));
-    let x2 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i2)), S::set1_ps(G24_32));
-    let y2 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j2)), S::set1_ps(G24_32));
-    let z2 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k2)), S::set1_ps(G24_32));
-    let w2 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l2)), S::set1_ps(G24_32));
-    let x3 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i3)), S::set1_ps(G34_32));
-    let y3 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j3)), S::set1_ps(G34_32));
-    let z3 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k3)), S::set1_ps(G34_32));
-    let w3 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l3)), S::set1_ps(G34_32));
-    let x4 = S::add_ps(S::sub_ps(x0, S::set1_ps(1.0)), S::set1_ps(G44_32));
-    let y4 = S::add_ps(S::sub_ps(y0, S::set1_ps(1.0)), S::set1_ps(G44_32));
-    let z4 = S::add_ps(S::sub_ps(z0, S::set1_ps(1.0)), S::set1_ps(G44_32));
-    let w4 = S::add_ps(S::sub_ps(w0, S::set1_ps(1.0)), S::set1_ps(G44_32));
+    let x1 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i1)), S::Vf32::set1(G4_32));
+    let y1 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j1)), S::Vf32::set1(G4_32));
+    let z1 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k1)), S::Vf32::set1(G4_32));
+    let w1 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l1)), S::Vf32::set1(G4_32));
+    let x2 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i2)), S::Vf32::set1(G24_32));
+    let y2 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j2)), S::Vf32::set1(G24_32));
+    let z2 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k2)), S::Vf32::set1(G24_32));
+    let w2 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l2)), S::Vf32::set1(G24_32));
+    let x3 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i3)), S::Vf32::set1(G34_32));
+    let y3 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j3)), S::Vf32::set1(G34_32));
+    let z3 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k3)), S::Vf32::set1(G34_32));
+    let w3 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l3)), S::Vf32::set1(G34_32));
+    let x4 = S::add_ps(S::sub_ps(x0, S::Vf32::set1(1.0)), S::Vf32::set1(G44_32));
+    let y4 = S::add_ps(S::sub_ps(y0, S::Vf32::set1(1.0)), S::Vf32::set1(G44_32));
+    let z4 = S::add_ps(S::sub_ps(z0, S::Vf32::set1(1.0)), S::Vf32::set1(G44_32));
+    let w4 = S::add_ps(S::sub_ps(w0, S::Vf32::set1(1.0)), S::Vf32::set1(G44_32));
 
     let ii = S::and_epi32(i, S::set1_epi32(0xff));
     let jj = S::and_epi32(j, S::set1_epi32(0xff));
@@ -584,7 +585,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let t0 = S::sub_ps(
         S::sub_ps(
             S::sub_ps(
-                S::sub_ps(S::set1_ps(0.5), S::mul_ps(x0, x0)),
+                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x0, x0)),
                 S::mul_ps(y0, y0),
             ),
             S::mul_ps(z0, z0),
@@ -594,7 +595,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let t1 = S::sub_ps(
         S::sub_ps(
             S::sub_ps(
-                S::sub_ps(S::set1_ps(0.5), S::mul_ps(x1, x1)),
+                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x1, x1)),
                 S::mul_ps(y1, y1),
             ),
             S::mul_ps(z1, z1),
@@ -604,7 +605,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let t2 = S::sub_ps(
         S::sub_ps(
             S::sub_ps(
-                S::sub_ps(S::set1_ps(0.5), S::mul_ps(x2, x2)),
+                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x2, x2)),
                 S::mul_ps(y2, y2),
             ),
             S::mul_ps(z2, z2),
@@ -614,7 +615,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let t3 = S::sub_ps(
         S::sub_ps(
             S::sub_ps(
-                S::sub_ps(S::set1_ps(0.5), S::mul_ps(x3, x3)),
+                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x3, x3)),
                 S::mul_ps(y3, y3),
             ),
             S::mul_ps(z3, z3),
@@ -624,7 +625,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let t4 = S::sub_ps(
         S::sub_ps(
             S::sub_ps(
-                S::sub_ps(S::set1_ps(0.5), S::mul_ps(x4, x4)),
+                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x4, x4)),
                 S::mul_ps(y4, y4),
             ),
             S::mul_ps(z4, z4),
@@ -662,7 +663,8 @@ pub unsafe fn simplex_4d<S: Simd>(
     n4 = S::andnot_ps(cond, n4);
 
     // Scaling factor found by numerical approximation
-    S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, S::add_ps(n3, n4)))) * S::set1_ps(62.77772078955791)
+    S::add_ps(n0, S::add_ps(n1, S::add_ps(n2, S::add_ps(n3, n4))))
+        * S::Vf32::set1(62.77772078955791)
 }
 
 #[cfg(test)]

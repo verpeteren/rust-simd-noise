@@ -17,8 +17,8 @@ pub unsafe fn scale_noise<S: Simd>(
     if data.len() >= vector_width {
         while i <= data.len() - vector_width {
             let value = S::add_ps(
-                S::mul_ps(S::set1_ps(multiplier), S::loadu_ps(&data[i])),
-                S::set1_ps(offset),
+                S::mul_ps(S::Vf32::set1(multiplier), S::loadu_ps(&data[i])),
+                S::Vf32::set1(offset),
             );
             S::storeu_ps(data.get_unchecked_mut(i), value);
             i += vector_width;

@@ -16,11 +16,11 @@ macro_rules! get_1d_noise_helper_f32 {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {
  {
     let dim = $Setting.get_dimensions();
-    let freq_x = S::set1_ps($Setting.freq_x);
+    let freq_x = S::Vf32::set1($Setting.freq_x);
     let start_x = dim.x;
     let width = dim.width;
-    let mut min_s = S::set1_ps(f32::MAX);
-    let mut max_s = S::set1_ps(f32::MIN);
+    let mut min_s = S::Vf32::set1(f32::MAX);
+    let mut max_s = S::Vf32::set1(f32::MIN);
 
     let mut min = f32::MAX;
     let mut max = f32::MIN;
@@ -42,7 +42,7 @@ macro_rules! get_1d_noise_helper_f32 {
         min_s = S::min_ps(min_s, f);
         S::storeu_ps(result.get_unchecked_mut(i), f);
         i += vector_width;
-        x = S::add_ps(x, S::set1_ps(vector_width as f32));
+        x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
     }
     if remainder != 0 {
         let f = $f(S::mul_ps(x, freq_x) $(,$arg)*);
@@ -75,21 +75,21 @@ macro_rules! get_1d_noise_helper_f32 {
 macro_rules! get_2d_noise_helper_f32 {
     ($Setting:expr,$f:expr $(,$arg:expr)*)=> {{
     let dim = $Setting.get_dimensions();
-    let freq_x = S::set1_ps($Setting.freq_x);
-    let freq_y = S::set1_ps($Setting.freq_y);
+    let freq_x = S::Vf32::set1($Setting.freq_x);
+    let freq_y = S::Vf32::set1($Setting.freq_y);
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
     let height = dim.height;
 
-    let mut min_s = S::set1_ps(f32::MAX);
-    let mut max_s = S::set1_ps(f32::MIN);
+    let mut min_s = S::Vf32::set1(f32::MAX);
+    let mut max_s = S::Vf32::set1(f32::MIN);
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
     let mut result = Vec::with_capacity(width * height);
     result.set_len(width * height);
-    let mut y = S::set1_ps(start_y);
+    let mut y = S::Vf32::set1(start_y);
     let mut i = 0;
     let vector_width = S::VF32_WIDTH;
     let remainder = width % vector_width;
@@ -106,7 +106,7 @@ macro_rules! get_2d_noise_helper_f32 {
             min_s = S::min_ps(min_s, f);
             S::storeu_ps(result.get_unchecked_mut(i), f);
             i += vector_width;
-            x = S::add_ps(x, S::set1_ps(vector_width as f32));
+            x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
         }
         if remainder != 0 {
             let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y) $(,$arg)*);
@@ -122,7 +122,7 @@ macro_rules! get_2d_noise_helper_f32 {
                 i += 1;
             }
         }
-        y = S::add_ps(y, S::set1_ps(1.0));
+        y = S::add_ps(y, S::Vf32::set1(1.0));
     }
     for i in 0..vector_width {
         if min_s[i] < min {
@@ -140,9 +140,9 @@ macro_rules! get_2d_noise_helper_f32 {
 macro_rules! get_3d_noise_helper_f32 {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {{
     let dim = $Setting.get_dimensions();
-    let freq_x = S::set1_ps($Setting.freq_x);
-    let freq_y = S::set1_ps($Setting.freq_y);
-    let freq_z = S::set1_ps($Setting.freq_z);
+    let freq_x = S::Vf32::set1($Setting.freq_x);
+    let freq_y = S::Vf32::set1($Setting.freq_y);
+    let freq_z = S::Vf32::set1($Setting.freq_z);
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -150,8 +150,8 @@ macro_rules! get_3d_noise_helper_f32 {
     let start_z = dim.z;
     let depth = dim.depth;
 
-    let mut min_s = S::set1_ps(f32::MAX);
-    let mut max_s = S::set1_ps(f32::MIN);
+    let mut min_s = S::Vf32::set1(f32::MAX);
+    let mut max_s = S::Vf32::set1(f32::MIN);
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
@@ -166,9 +166,9 @@ macro_rules! get_3d_noise_helper_f32 {
         x_arr[i] = start_x + i as f32;
     }
 
-    let mut z = S::set1_ps(start_z);
+    let mut z = S::Vf32::set1(start_z);
     for _ in 0..depth {
-        let mut y = S::set1_ps(start_y);
+        let mut y = S::Vf32::set1(start_y);
         for _ in 0..height {
             let mut x = S::loadu_ps(&x_arr[0]);
             for _ in 0..width / vector_width {
@@ -177,7 +177,7 @@ macro_rules! get_3d_noise_helper_f32 {
                 min_s = S::min_ps(min_s, f);
                 S::storeu_ps(result.get_unchecked_mut(i), f);
                 i += vector_width;
-                x = S::add_ps(x, S::set1_ps(vector_width as f32));
+                x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
             }
             if remainder != 0 {
             let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z) $(,$arg)*);
@@ -193,9 +193,9 @@ macro_rules! get_3d_noise_helper_f32 {
                     i += 1;
                 }
             }
-            y = S::add_ps(y, S::set1_ps(1.0));
+            y = S::add_ps(y, S::Vf32::set1(1.0));
         }
-        z = S::add_ps(z, S::set1_ps(1.0));
+        z = S::add_ps(z, S::Vf32::set1(1.0));
     }
     for i in 0..vector_width {
         if min_s[i] < min {
@@ -212,10 +212,10 @@ macro_rules! get_3d_noise_helper_f32 {
 macro_rules! get_4d_noise_helper_f32 {
     ($Setting:expr,$f:expr $(,$arg:expr)*) => {{
     let dim = $Setting.get_dimensions();
-    let freq_x = S::set1_ps($Setting.freq_x);
-    let freq_y = S::set1_ps($Setting.freq_y);
-    let freq_z = S::set1_ps($Setting.freq_z);
-    let freq_w = S::set1_ps($Setting.freq_w);
+    let freq_x = S::Vf32::set1($Setting.freq_x);
+    let freq_y = S::Vf32::set1($Setting.freq_y);
+    let freq_z = S::Vf32::set1($Setting.freq_z);
+    let freq_w = S::Vf32::set1($Setting.freq_w);
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -225,8 +225,8 @@ macro_rules! get_4d_noise_helper_f32 {
     let start_w = dim.w;
     let time = dim.time;
 
-    let mut min_s = S::set1_ps(f32::MAX);
-    let mut max_s = S::set1_ps(f32::MIN);
+    let mut min_s = S::Vf32::set1(f32::MAX);
+    let mut max_s = S::Vf32::set1(f32::MIN);
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
@@ -240,11 +240,11 @@ macro_rules! get_4d_noise_helper_f32 {
     for i in (0..vector_width).rev() {
         x_arr[i] = start_x + i as f32;
     }
-    let mut w = S::set1_ps(start_w);
+    let mut w = S::Vf32::set1(start_w);
     for _ in 0..time {
-        let mut z = S::set1_ps(start_z);
+        let mut z = S::Vf32::set1(start_z);
         for _ in 0..depth {
-            let mut y = S::set1_ps(start_y);
+            let mut y = S::Vf32::set1(start_y);
             for _ in 0..height {
                 let mut x = S::loadu_ps(&x_arr[0]);
                 for _ in 0..width / vector_width {
@@ -253,7 +253,7 @@ macro_rules! get_4d_noise_helper_f32 {
                     min_s = S::min_ps(min_s, f);
                     S::storeu_ps(result.get_unchecked_mut(i), f);
                     i += vector_width;
-                    x = S::add_ps(x, S::set1_ps(vector_width as f32));
+                    x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
                 }
                 if remainder != 0 {
                     let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z), S::mul_ps(w, freq_w) $(,$arg)*);
@@ -270,11 +270,11 @@ macro_rules! get_4d_noise_helper_f32 {
                         i += 1;
                     }
                 }
-                y = S::add_ps(y, S::set1_ps(1.0));
+                y = S::add_ps(y, S::Vf32::set1(1.0));
             }
-            z = S::add_ps(z, S::set1_ps(1.0));
+            z = S::add_ps(z, S::Vf32::set1(1.0));
         }
-        w = S::add_ps(w, S::set1_ps(1.0));
+        w = S::add_ps(w, S::Vf32::set1(1.0));
     }
     for i in 0..vector_width {
         if min_s[i] < min {
@@ -295,24 +295,24 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Fbm(s) => get_1d_noise_helper_f32!(
             s,
             fbm_1d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Ridge(s) => get_1d_noise_helper_f32!(
             s,
             ridge_1d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Turbulence(s) => get_1d_noise_helper_f32!(
             s,
             turbulence_1d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
@@ -340,24 +340,24 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Fbm(s) => get_2d_noise_helper_f32!(
             s,
             fbm_2d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Ridge(s) => get_2d_noise_helper_f32!(
             s,
             ridge_2d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Turbulence(s) => get_2d_noise_helper_f32!(
             s,
             turbulence_2d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
@@ -369,7 +369,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             cellular_2d::<S>,
             s.distance_function,
             s.return_type,
-            S::set1_ps(s.jitter),
+            S::Vf32::set1(s.jitter),
             s.get_dimensions().seed
         ),
         NoiseType::Cellular2(s) => get_2d_noise_helper_f32!(
@@ -377,7 +377,7 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             cellular2_2d::<S>,
             s.distance_function,
             s.return_type,
-            S::set1_ps(s.jitter),
+            S::Vf32::set1(s.jitter),
             s.index0,
             s.index1,
             s.get_dimensions().seed
@@ -397,24 +397,24 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Fbm(s) => get_3d_noise_helper_f32!(
             s,
             fbm_3d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Ridge(s) => get_3d_noise_helper_f32!(
             s,
             ridge_3d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Turbulence(s) => get_3d_noise_helper_f32!(
             s,
             turbulence_3d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
@@ -426,7 +426,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             cellular_3d::<S>,
             s.distance_function,
             s.return_type,
-            S::set1_ps(s.jitter),
+            S::Vf32::set1(s.jitter),
             s.get_dimensions().seed
         ),
         NoiseType::Cellular2(s) => get_3d_noise_helper_f32!(
@@ -434,7 +434,7 @@ pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
             cellular2_3d::<S>,
             s.distance_function,
             s.return_type,
-            S::set1_ps(s.jitter),
+            S::Vf32::set1(s.jitter),
             s.index0,
             s.index1,
             s.get_dimensions().seed
@@ -449,24 +449,24 @@ pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Fbm(s) => get_4d_noise_helper_f32!(
             s,
             fbm_4d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Ridge(s) => get_4d_noise_helper_f32!(
             s,
             ridge_4d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
         NoiseType::Turbulence(s) => get_4d_noise_helper_f32!(
             s,
             turbulence_4d::<S>,
-            S::set1_ps(s.lacunarity),
-            S::set1_ps(s.gain),
+            S::Vf32::set1(s.lacunarity),
+            S::Vf32::set1(s.gain),
             s.octaves,
             s.get_dimensions().seed
         ),
