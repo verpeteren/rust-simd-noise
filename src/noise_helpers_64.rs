@@ -28,7 +28,7 @@ macro_rules! get_1d_noise_helper_f64  {
     let mut result: Vec<f64> = Vec::with_capacity(width);
     result.set_len(width);
     let mut i = 0;
-    let vector_width = S::VF64_WIDTH;
+    let vector_width = S::Vf64::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -91,7 +91,7 @@ macro_rules! get_2d_noise_helper_f64 {
     result.set_len(width * height);
     let mut y = S::Vf64::set1(start_y);
     let mut i = 0;
-    let vector_width = S::VF64_WIDTH;
+    let vector_width = S::Vf64::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -158,7 +158,7 @@ macro_rules! get_3d_noise_helper_f64 {
     let mut result = Vec::with_capacity(width * height * depth);
     result.set_len(width * height * depth);
     let mut i = 0;
-    let vector_width = S::VF64_WIDTH;
+    let vector_width = S::Vf64::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
@@ -233,7 +233,7 @@ macro_rules! get_4d_noise_helper_f64 {
     let mut result = Vec::with_capacity(width * height * depth * time);
     result.set_len(width * height * depth * time);
     let mut i = 0;
-    let vector_width = S::VF64_WIDTH;
+    let vector_width = S::Vf64::WIDTH;
     let remainder = width % vector_width;
     let mut x_arr = Vec::with_capacity(vector_width);
     x_arr.set_len(vector_width);
