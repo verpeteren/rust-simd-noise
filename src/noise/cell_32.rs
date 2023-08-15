@@ -45,7 +45,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             );
                             let mut xd2 = S::mul_ps(xd, xd);
                             let inv_mag =
-                                S::mul_ps(jitter, S::rsqrt_ps(S::add_ps(xd2, S::mul_ps(yd, yd))));
+                                S::mul_ps(jitter, S::add_ps(xd2, S::mul_ps(yd, yd)).rsqrt());
                             xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
                             xd2 = S::mul_ps(xd, xd);
@@ -78,7 +78,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             );
                             let inv_mag = S::mul_ps(
                                 jitter,
-                                S::rsqrt_ps(S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd))),
+                                S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd)).rsqrt(),
                             );
                             xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
@@ -112,7 +112,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             );
                             let inv_mag = S::mul_ps(
                                 jitter,
-                                S::rsqrt_ps(S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd))),
+                                S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd)).rsqrt(),
                             );
                             xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
@@ -156,7 +156,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             );
                             let inv_mag = S::mul_ps(
                                 jitter,
-                                S::rsqrt_ps(S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd))),
+                                S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd)).rsqrt(),
                             );
                             xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
@@ -194,7 +194,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             );
                             let inv_mag = S::mul_ps(
                                 jitter,
-                                S::rsqrt_ps(S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd))),
+                                S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd)).rsqrt(),
                             );
                             xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
@@ -232,7 +232,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             );
                             let inv_mag = S::mul_ps(
                                 jitter,
-                                S::rsqrt_ps(S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd))),
+                                S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd)).rsqrt(),
                             );
                             xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
@@ -314,10 +314,11 @@ pub unsafe fn cellular_3d<S: Simd>(
                 );
                 let inv_mag = S::mul_ps(
                     jitter,
-                    S::rsqrt_ps(S::add_ps(
+                    S::add_ps(
                         S::mul_ps(xd, xd),
                         S::add_ps(S::mul_ps(yd, yd), S::mul_ps(zd, zd)),
-                    )),
+                    )
+                    .rsqrt(),
                 );
                 xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                 yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
