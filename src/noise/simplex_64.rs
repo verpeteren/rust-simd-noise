@@ -117,8 +117,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
     let s = S::mul_pd(S::Vf64::set1(F2_64), S::add_pd(x, y));
-    let ips = S::floor_pd(S::add_pd(x, s));
-    let jps = S::floor_pd(S::add_pd(y, s));
+    let ips = S::add_pd(x, s).floor();
+    let jps = S::add_pd(y, s).floor();
 
     // Integer coordinates for the base vertex of the triangle
     let i = S::cvtpd_epi64(ips);
@@ -424,10 +424,10 @@ pub unsafe fn simplex_4d<S: Simd>(
         S::add_pd(x, S::add_pd(y, S::add_pd(z, w))),
     );
 
-    let ipd = S::floor_pd(S::add_pd(x, s));
-    let jpd = S::floor_pd(S::add_pd(y, s));
-    let kpd = S::floor_pd(S::add_pd(z, s));
-    let lpd = S::floor_pd(S::add_pd(w, s));
+    let ipd = S::add_pd(x, s).floor();
+    let jpd = S::add_pd(y, s).floor();
+    let kpd = S::add_pd(z, s).floor();
+    let lpd = S::add_pd(w, s).floor();
 
     let i = S::cvtpd_epi64(ipd);
     let j = S::cvtpd_epi64(jpd);
