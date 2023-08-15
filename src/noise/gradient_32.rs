@@ -8,7 +8,7 @@ use simdeez::prelude::*;
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
-    let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(15));
+    let h = S::and_epi32((S::set1_epi32(seed), hash) ^ S::set1_epi32(15));
     let v = S::cvtepi32_ps(S::and_epi32(h, S::set1_epi32(7)));
 
     let h_and_8 = S::castepi32_ps(S::cmpeq_epi32(
@@ -24,7 +24,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 /// are more consistent between directions.
 #[inline(always)]
 pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
-    let h = S::and_epi32(S::xor_epi32(hash, S::set1_epi32(seed)), S::set1_epi32(7));
+    let h = S::and_epi32((hash ^ S::set1_epi32(seed)), S::set1_epi32(7));
     let mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
     let x_magnitude = S::blendv_ps(S::Vf32::set1(2.0), S::Vf32::set1(1.0), mask);
     let y_magnitude = S::blendv_ps(S::Vf32::set1(1.0), S::Vf32::set1(2.0), mask);
@@ -110,7 +110,7 @@ pub unsafe fn grad4<S: Simd>(
     z: S::Vf32,
     t: S::Vf32,
 ) -> S::Vf32 {
-    let h = S::and_epi32(S::xor_epi32(S::set1_epi32(seed), hash), S::set1_epi32(31));
+    let h = S::and_epi32((S::set1_epi32(seed) ^ hash), S::set1_epi32(31));
     let mut mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(24), h));
     let u = S::blendv_ps(y, x, mask);
     mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(16), h));
