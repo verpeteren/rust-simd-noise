@@ -72,7 +72,7 @@ const PERM: [i32; 512] = [
 #[inline(always)]
 pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
     // Gradients are selected deterministically based on the whole part of `x`
-    let ips = S::fast_floor_ps(x);
+    let ips = x.fast_floor();
     let mut i0 = S::cvtps_epi32(ips);
     let i1 = S::and_epi32(S::add_epi32(i0, S::set1_epi32(1)), S::set1_epi32(0xff));
 
@@ -263,9 +263,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
 ) -> (S::Vf32, [S::Vf32; 3]) {
     // Find skewed simplex grid coordinates associated with the input coordinates
     let f = S::mul_ps(S::Vf32::set1(F3_32), S::add_ps(S::add_ps(x, y), z));
-    let mut x0 = S::fast_floor_ps(S::add_ps(x, f));
-    let mut y0 = S::fast_floor_ps(S::add_ps(y, f));
-    let mut z0 = S::fast_floor_ps(S::add_ps(z, f));
+    let mut x0 = S::add_ps(x, f).fast_floor();
+    let mut y0 = S::add_ps(y, f).fast_floor();
+    let mut z0 = S::add_ps(z, f).fast_floor();
 
     // Integer grid coordinates
     let i = S::mullo_epi32(S::cvtps_epi32(x0), S::set1_epi32(X_PRIME_32));
