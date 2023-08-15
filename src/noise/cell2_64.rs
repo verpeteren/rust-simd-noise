@@ -76,7 +76,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
         Cell2ReturnType::Distance2Add => S::add_pd(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Sub => S::sub_pd(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Mul => S::mul_pd(distance[index0], distance[index1]),
-        Cell2ReturnType::Distance2Div => S::div_pd(distance[index0], distance[index1]),
+        Cell2ReturnType::Distance2Div => distance[index0] / distance[index1],
     }
 }
 
@@ -181,6 +181,6 @@ pub unsafe fn cellular2_3d<S: Simd>(
         Cell2ReturnType::Distance2Add => S::add_pd(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Sub => S::sub_pd(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Mul => S::mul_pd(distance[index0], distance[index1]),
-        Cell2ReturnType::Distance2Div => S::div_pd(distance[index0], distance[index1]),
+        Cell2ReturnType::Distance2Div => distance[index0] / distance[index1],
     }
 }
