@@ -40,7 +40,7 @@ const PERM64: [i64; 512] = [
 #[inline(always)]
 pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
     // Gradients are selected deterministically based on the whole part of `x`
-    let ips = S::fast_floor_pd(x);
+    let ips = x.fast_floor();
     let mut i0 = S::cvtpd_epi64(ips);
     let i1 = S::and_epi64(S::add_epi64(i0, S::set1_epi64(1)), S::set1_epi64(0xff));
 
@@ -231,9 +231,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
 ) -> (S::Vf64, [S::Vf64; 3]) {
     // Find skewed simplex grid coordinates associated with the input coordinates
     let f = S::mul_pd(S::Vf64::set1(F3_64), S::add_pd(S::add_pd(x, y), z));
-    let mut x0 = S::fast_floor_pd(S::add_pd(x, f));
-    let mut y0 = S::fast_floor_pd(S::add_pd(y, f));
-    let mut z0 = S::fast_floor_pd(S::add_pd(z, f));
+    let mut x0 = S::add_pd(x, f).fast_floor();
+    let mut y0 = S::add_pd(y, f).fast_floor();
+    let mut z0 = S::add_pd(z, f).fast_floor();
 
     // Integer grid coordinates
     let i = S::mullo_epi64(S::cvtpd_epi64(x0), S::set1_epi64(X_PRIME_64));
