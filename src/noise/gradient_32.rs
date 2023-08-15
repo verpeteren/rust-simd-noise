@@ -86,7 +86,7 @@ pub unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> 
     let h = hash3d::<S>(seed, i, j, k);
 
     let first = S::Vf32::set1(1.0) | h.h1;
-    let mut gx = S::and_ps(h.l8, first);
+    let mut gx = h.l8 & first;
     let mut gy = S::andnot_ps(h.l8, first);
 
     let second = S::Vf32::set1(1.0) | h.h2;
