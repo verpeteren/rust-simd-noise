@@ -66,7 +66,7 @@ pub unsafe fn grad3d_dot<S: Simd>(
     let h = hash3d::<S>(seed, i, j, k);
     let u = S::blendv_ps(y, x, h.l8);
     let v = S::blendv_ps(S::blendv_ps(z, x, h.h12_or_14), y, h.l4);
-    let result = S::add_ps(S::xor_ps(u, h.h1), S::xor_ps(v, h.h2));
+    let result = S::add_ps((u ^ h.h1), (v ^ h.h2));
     debug_assert_eq!(
         result[0],
         {
