@@ -42,8 +42,8 @@ pub unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> 
     hash = S::xor_epi32(S::srai_epi32(hash, 13), hash);
     let hasha13 = S::and_epi32(hash, S::set1_epi32(13));
     Hash3d::new(
-        S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(8))),
-        S::castepi32_ps(S::cmplt_epi32(hasha13, S::set1_epi32(2))),
+        S::castepi32_ps(hasha13 < S::set1_epi32(8)),
+        S::castepi32_ps(hasha13 < S::set1_epi32(2)),
         S::castepi32_ps(S::cmpeq_epi32(S::set1_epi32(12), hasha13)),
         S::castepi32_ps(S::slli_epi32(hash, 31)),
         S::castepi32_ps(S::slli_epi32(S::and_epi32(hash, S::set1_epi32(2)), 30)),
