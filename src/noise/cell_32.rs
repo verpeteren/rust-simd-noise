@@ -83,7 +83,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                             yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
 
-                            let new_distance = S::add_ps(S::abs_ps(xd), S::abs_ps(yd));
+                            let new_distance = S::add_ps(xd.abs(), yd.abs());
                             distance = S::min_ps(new_distance, distance);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
@@ -119,7 +119,7 @@ pub unsafe fn cellular_2d<S: Simd>(
 
                             let new_distance = {
                                 let euc = S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd));
-                                let man = S::add_ps(S::abs_ps(xd), S::abs_ps(yd));
+                                let man = S::add_ps(xd.abs(), yd.abs());
                                 S::add_ps(euc, man)
                             };
                             distance = S::min_ps(new_distance, distance);
@@ -201,7 +201,7 @@ pub unsafe fn cellular_2d<S: Simd>(
 
                             let new_cell_value =
                                 S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), S::cvtepi32_ps(hash));
-                            let new_distance = S::add_ps(S::abs_ps(xd), S::abs_ps(yd));
+                            let new_distance = S::add_ps(xd.abs(), yd.abs());
                             let closer = S::cmplt_ps(new_distance, distance);
                             distance = S::min_ps(new_distance, distance);
                             cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
@@ -241,7 +241,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), S::cvtepi32_ps(hash));
                             let new_distance = {
                                 let euc = S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd));
-                                let man = S::add_ps(S::abs_ps(xd), S::abs_ps(yd));
+                                let man = S::add_ps(xd.abs(), yd.abs());
                                 S::add_ps(euc, man)
                             };
                             let closer = S::cmplt_ps(new_distance, distance);
@@ -332,14 +332,14 @@ pub unsafe fn cellular_3d<S: Simd>(
                         S::add_ps(S::mul_ps(yd, yd), S::mul_ps(zd, zd)),
                     ),
                     CellDistanceFunction::Manhattan => {
-                        S::add_ps(S::add_ps(S::abs_ps(xd), S::abs_ps(yd)), S::abs_ps(zd))
+                        S::add_ps(S::add_ps(xd.abs(), yd.abs()), zd.abs())
                     }
                     CellDistanceFunction::Natural => {
                         let euc = S::add_ps(
                             S::mul_ps(xd, xd),
                             S::add_ps(S::mul_ps(yd, yd), S::mul_ps(zd, zd)),
                         );
-                        let man = S::add_ps(S::add_ps(S::abs_ps(xd), S::abs_ps(yd)), S::abs_ps(zd));
+                        let man = S::add_ps(S::add_ps(xd.abs(), yd.abs()), zd.abs());
                         S::add_ps(euc, man)
                     }
                 };

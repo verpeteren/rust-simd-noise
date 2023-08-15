@@ -11,12 +11,12 @@ pub unsafe fn turbulence_1d<S: Simd>(
     seed: i32,
 ) -> S::Vf32 {
     let mut amp = S::Vf32::set1(1.0);
-    let mut result = S::abs_ps(simplex_1d::<S>(x, seed));
+    let mut result = simplex_1d::<S>(x, seed).abs();
 
     for _ in 1..octaves {
         x = S::mul_ps(x, lacunarity);
         amp = S::mul_ps(amp, gain);
-        result = S::add_ps(result, S::abs_ps(simplex_1d::<S>(x, seed)));
+        result = S::add_ps(result, simplex_1d::<S>(x, seed).abs());
     }
 
     result
@@ -31,7 +31,7 @@ pub unsafe fn turbulence_2d<S: Simd>(
     octaves: u8,
     seed: i32,
 ) -> S::Vf32 {
-    let mut result = S::abs_ps(simplex_2d::<S>(x, y, seed));
+    let mut result = simplex_2d::<S>(x, y, seed).abs();
 
     let mut amp = S::Vf32::set1(1.0);
 
@@ -41,7 +41,7 @@ pub unsafe fn turbulence_2d<S: Simd>(
         amp = S::mul_ps(amp, gain);
         result = S::add_ps(
             result,
-            S::abs_ps(S::mul_ps(simplex_2d::<S>(x, y, seed), amp)),
+            S::mul_ps(simplex_2d::<S>(x, y, seed), amp).abs(),
         );
     }
 
@@ -58,7 +58,7 @@ pub unsafe fn turbulence_3d<S: Simd>(
     octaves: u8,
     seed: i32,
 ) -> S::Vf32 {
-    let mut result = S::abs_ps(simplex_3d::<S>(x, y, z, seed));
+    let mut result = simplex_3d::<S>(x, y, z, seed).abs();
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
@@ -68,7 +68,7 @@ pub unsafe fn turbulence_3d<S: Simd>(
         amp = S::mul_ps(amp, gain);
         result = S::add_ps(
             result,
-            S::abs_ps(S::mul_ps(simplex_3d::<S>(x, y, z, seed), amp)),
+            S::mul_ps(simplex_3d::<S>(x, y, z, seed), amp).abs(),
         );
     }
 
@@ -86,7 +86,7 @@ pub unsafe fn turbulence_4d<S: Simd>(
     octaves: u8,
     seed: i32,
 ) -> S::Vf32 {
-    let mut result = S::abs_ps(simplex_4d::<S>(x, y, z, w, seed));
+    let mut result = simplex_4d::<S>(x, y, z, w, seed).abs();
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
@@ -97,7 +97,7 @@ pub unsafe fn turbulence_4d<S: Simd>(
         amp = S::mul_ps(amp, gain);
         result = S::add_ps(
             result,
-            S::abs_ps(S::mul_ps(simplex_4d::<S>(x, y, z, w, seed), amp)),
+            S::mul_ps(simplex_4d::<S>(x, y, z, w, seed), amp).abs(),
         );
     }
 
