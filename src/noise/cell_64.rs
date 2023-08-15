@@ -49,7 +49,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yd = S::add_pd(S::mul_pd(yd, inv_mag), ycf);
                             xd2 = S::mul_pd(xd, xd);
                             let new_distance = S::add_pd(xd2, S::mul_pd(yd, yd));
-                            distance = S::min_pd(new_distance, distance);
+                            distance = new_distance.min(distance);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
                             yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
@@ -83,7 +83,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yd = S::add_pd(S::mul_pd(yd, inv_mag), ycf);
 
                             let new_distance = S::add_pd(S::abs_pd(xd), S::abs_pd(yd));
-                            distance = S::min_pd(new_distance, distance);
+                            distance = new_distance.min(distance);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
                             yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
@@ -121,7 +121,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 let man = S::add_pd(S::abs_pd(xd), S::abs_pd(yd));
                                 S::add_pd(euc, man)
                             };
-                            distance = S::min_pd(new_distance, distance);
+                            distance = new_distance.min(distance);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
                             yc = S::add_epi64(yc, S::set1_epi64(Y_PRIME_64));
@@ -164,7 +164,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), S::cvtepi64_pd(hash));
                             let new_distance = S::add_pd(S::mul_pd(xd, xd), S::mul_pd(yd, yd));
                             let closer = S::cmplt_pd(new_distance, distance);
-                            distance = S::min_pd(new_distance, distance);
+                            distance = new_distance.min(distance);
                             cell_value = S::blendv_pd(cell_value, new_cell_value, closer);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
@@ -202,7 +202,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), S::cvtepi64_pd(hash));
                             let new_distance = S::add_pd(S::abs_pd(xd), S::abs_pd(yd));
                             let closer = S::cmplt_pd(new_distance, distance);
-                            distance = S::min_pd(new_distance, distance);
+                            distance = new_distance.min(distance);
                             cell_value = S::blendv_pd(cell_value, new_cell_value, closer);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
@@ -244,7 +244,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::add_pd(euc, man)
                             };
                             let closer = S::cmplt_pd(new_distance, distance);
-                            distance = S::min_pd(new_distance, distance);
+                            distance = new_distance.min(distance);
                             cell_value = S::blendv_pd(cell_value, new_cell_value, closer);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
@@ -342,7 +342,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                     }
                 };
                 let closer = S::cmplt_pd(new_distance, distance);
-                distance = S::min_pd(new_distance, distance);
+                distance = new_distance.min(distance);
                 cell_value = S::blendv_pd(cell_value, new_cell_value, closer);
                 zcf = S::add_pd(ycf, S::Vf64::set1(1.0));
                 zc = S::add_epi64(yc, S::set1_epi64(Z_PRIME_64));

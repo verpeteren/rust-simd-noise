@@ -39,7 +39,7 @@ macro_rules! get_1d_noise_helper_f64  {
     for _ in 0..width / vector_width {
         let f = $f(S::mul_pd(x, freq_x) $(,$arg)*);
         max_s = max_s.max(f);
-        min_s = S::min_pd(min_s, f);
+        min_s = min_s.min(f);
         S::storeu_pd(result.get_unchecked_mut(i), f);
         i += vector_width;
         x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
@@ -103,7 +103,7 @@ macro_rules! get_2d_noise_helper_f64 {
         for _ in 0..width / vector_width {
             let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y) $(,$arg)*);
             max_s = max_s.max(f);
-            min_s = S::min_pd(min_s, f);
+            min_s = min_s.min(f);
             S::storeu_pd(result.get_unchecked_mut(i), f);
             i += vector_width;
             x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
@@ -174,7 +174,7 @@ macro_rules! get_3d_noise_helper_f64 {
             for _ in 0..width / vector_width {
                 let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y), S::mul_pd(z, freq_z) $(,$arg)*);
                 max_s = max_s.max(f);
-                min_s = S::min_pd(min_s, f);
+                min_s = min_s.min(f);
                 S::storeu_pd(result.get_unchecked_mut(i), f);
                 i += vector_width;
                 x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
@@ -250,7 +250,7 @@ macro_rules! get_4d_noise_helper_f64 {
                 for _ in 0..width / vector_width {
                     let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y), S::mul_pd(z, freq_z), S::mul_pd(w, freq_w) $(,$arg)*);
                     max_s = max_s.max(f);
-                    min_s = S::min_pd(min_s, f);
+                    min_s = min_s.min(f);
                     S::storeu_pd(result.get_unchecked_mut(i), f);
                     i += vector_width;
                     x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
