@@ -251,8 +251,8 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let x0_ge_z0 = S::cmpge_pd(x0, z0);
 
     let i1 = x0_ge_y0 & x0_ge_z0;
-    let j1 = S::andnot_pd(x0_ge_y0, y0_ge_z0);
-    let k1 = S::andnot_pd(x0_ge_z0, !y0_ge_z0);
+    let j1 = x0_ge_y0.and_not(y0_ge_z0);
+    let k1 = x0_ge_z0.and_not(!y0_ge_z0);
 
     let i2 = x0_ge_y0 | x0_ge_z0;
     let j2 = (!x0_ge_y0) | y0_ge_z0;
@@ -620,15 +620,15 @@ pub unsafe fn simplex_4d<S: Simd>(
 
     //if ti < 0 then 0 else ni
     let mut cond = S::cmplt_pd(t0, S::setzero_pd());
-    n0 = S::andnot_pd(cond, n0);
+    n0 = cond.and_not(n0);
     cond = S::cmplt_pd(t1, S::setzero_pd());
-    n1 = S::andnot_pd(cond, n1);
+    n1 = cond.and_not(n1);
     cond = S::cmplt_pd(t2, S::setzero_pd());
-    n2 = S::andnot_pd(cond, n2);
+    n2 = cond.and_now(n2);
     cond = S::cmplt_pd(t3, S::setzero_pd());
-    n3 = S::andnot_pd(cond, n3);
+    n3 = cond.and_not(n3);
     cond = S::cmplt_pd(t4, S::setzero_pd());
-    n4 = S::andnot_pd(cond, n4);
+    n4 = cond.and_not(n4);
 
     S::add_pd(n0, S::add_pd(n1, S::add_pd(n2, S::add_pd(n3, n4))))
         * S::Vf64::set1(62.77772078955791)

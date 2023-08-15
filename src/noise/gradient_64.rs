@@ -87,12 +87,12 @@ pub unsafe fn grad3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> 
 
     let first = S::Vf64::set1(1.0) | h.h1;
     let mut gx = h.l8 & first;
-    let mut gy = S::andnot_pd(h.l8, first);
+    let mut gy = h.l8.and_not(first);
 
     let second = S::Vf64::set1(1.0) | h.h2;
     gy = S::blendv_pd(gy, second, h.l4);
-    gx = S::blendv_pd(gx, second, S::andnot_pd(h.l4, h.h12_or_14));
-    let gz = S::andnot_pd(h.h12_or_14 | h.l4, second);
+    gx = S::blendv_pd(gx, second, h.l4.and_not(h.h12_or_14));
+    let gz = (h.h12_or_14 | h.l4).and_not(second);
     debug_assert_eq!(
         gx[0].abs() + gy[0].abs() + gz[0].abs(),
         2.0,
