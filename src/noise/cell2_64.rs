@@ -60,7 +60,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
             };
             let mut i = index1;
             while i > 0 {
-                distance[i] = S::max_pd(S::min_pd(distance[i], new_distance), distance[i - 1]);
+                distance[i] = S::min_pd(distance[i], new_distance).max(distance[i - 1]);
                 distance[0] = S::min_pd(distance[0], new_distance);
                 i -= 1;
             }
@@ -163,7 +163,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 };
                 let mut i = index1;
                 while i > 0 {
-                    distance[i] = S::max_pd(S::min_pd(distance[i], new_distance), distance[i - 1]);
+                    distance[i] = S::min_pd(distance[i], new_distance).max(distance[i - 1]);
                     distance[0] = S::min_pd(distance[0], new_distance);
                     i -= 1;
                 }
