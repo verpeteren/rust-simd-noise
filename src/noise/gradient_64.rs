@@ -8,7 +8,7 @@ use simdeez::prelude::*;
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
-    let h = S::and_epi64(S::xor_epi64(S::set1_epi64(seed), hash), S::set1_epi64(15));
+    let h = S::and_epi64((S::set1_epi64(seed) ^ hash), S::set1_epi64(15));
     let v = S::cvtepi64_pd(S::and_epi64(h, S::set1_epi64(7)));
 
     let h_and_8 = S::castepi64_pd(S::cmpeq_epi64(
@@ -24,7 +24,7 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
 /// are more consistent between directions.
 #[inline(always)]
 pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
-    let h = S::and_epi64(S::xor_epi64(hash, S::set1_epi64(seed)), S::set1_epi64(7));
+    let h = S::and_epi64((hash ^ S::set1_epi64(seed)), S::set1_epi64(7));
     let mask = S::castepi64_pd(S::cmpgt_epi64(S::set1_epi64(4), h));
     let x_magnitude = S::blendv_pd(S::Vf64::set1(2.0), S::Vf64::set1(1.0), mask);
     let y_magnitude = S::blendv_pd(S::Vf64::set1(1.0), S::Vf64::set1(2.0), mask);
@@ -110,7 +110,7 @@ pub unsafe fn grad4<S: Simd>(
     z: S::Vf64,
     t: S::Vf64,
 ) -> S::Vf64 {
-    let h = S::and_epi64(S::xor_epi64(S::set1_epi64(seed), hash), S::set1_epi64(31));
+    let h = S::and_epi64((S::set1_epi64(seed) ^ hash), S::set1_epi64(31));
     let mut mask = S::castepi64_pd(S::cmpgt_epi64(S::set1_epi64(24), h));
     let u = S::blendv_pd(y, x, mask);
     mask = S::castepi64_pd(S::cmpgt_epi64(S::set1_epi64(16), h));
