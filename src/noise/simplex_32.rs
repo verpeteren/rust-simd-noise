@@ -149,8 +149,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
     let s = S::mul_ps(S::Vf32::set1(F2_32), S::add_ps(x, y));
-    let ips = S::floor_ps(S::add_ps(x, s));
-    let jps = S::floor_ps(S::add_ps(y, s));
+    let ips = S::add_ps(x, s).floor();
+    let jps = S::add_ps(y, s).floor();
 
     // Integer coordinates for the base vertex of the triangle
     let i = S::cvtps_epi32(ips);
@@ -461,10 +461,10 @@ pub unsafe fn simplex_4d<S: Simd>(
         S::add_ps(x, S::add_ps(y, S::add_ps(z, w))),
     );
 
-    let ips = S::floor_ps(S::add_ps(x, s));
-    let jps = S::floor_ps(S::add_ps(y, s));
-    let kps = S::floor_ps(S::add_ps(z, s));
-    let lps = S::floor_ps(S::add_ps(w, s));
+    let ips = S::add_ps(x, s).floor();
+    let jps = S::add_ps(y, s).floor();
+    let kps = S::add_ps(z, s).floor();
+    let lps = S::add_ps(w, s).floor();
 
     let i = S::cvtps_epi32(ips);
     let j = S::cvtps_epi32(jps);
