@@ -487,22 +487,22 @@ pub unsafe fn simplex_4d<S: Simd>(
 
     let cond = S::castps_epi32(S::cmpgt_ps(x0, y0));
     rank_x = S::add_epi32(rank_x, S::and_epi32(cond, S::set1_epi32(1)));
-    rank_y = S::add_epi32(rank_y, S::andnot_epi32(cond, S::set1_epi32(1)));
+    rank_y = S::add_epi32(rank_y, cond.and_not(S::set1_epi32(1)));
     let cond = S::castps_epi32(S::cmpgt_ps(x0, z0));
     rank_x = S::add_epi32(rank_x, S::and_epi32(cond, S::set1_epi32(1)));
-    rank_z = S::add_epi32(rank_z, S::andnot_epi32(cond, S::set1_epi32(1)));
+    rank_z = S::add_epi32(rank_z, cond.and_not(S::set1_epi32(1)));
     let cond = S::castps_epi32(S::cmpgt_ps(x0, w0));
     rank_x = S::add_epi32(rank_x, S::and_epi32(cond, S::set1_epi32(1)));
-    rank_w = S::add_epi32(rank_w, S::andnot_epi32(cond, S::set1_epi32(1)));
+    rank_w = S::add_epi32(rank_w, cond.and_not(S::set1_epi32(1)));
     let cond = S::castps_epi32(S::cmpgt_ps(y0, z0));
     rank_y = S::add_epi32(rank_y, S::and_epi32(cond, S::set1_epi32(1)));
-    rank_z = S::add_epi32(rank_z, S::andnot_epi32(cond, S::set1_epi32(1)));
+    rank_z = S::add_epi32(rank_z, cond.and_not(S::set1_epi32(1)));
     let cond = S::castps_epi32(S::cmpgt_ps(y0, w0));
     rank_y = S::add_epi32(rank_y, S::and_epi32(cond, S::set1_epi32(1)));
-    rank_w = S::add_epi32(rank_w, S::andnot_epi32(cond, S::set1_epi32(1)));
+    rank_w = S::add_epi32(rank_w, cond.and_not(S::set1_epi32(1)));
     let cond = S::castps_epi32(S::cmpgt_ps(z0, w0));
     rank_z = S::add_epi32(rank_z, S::and_epi32(cond, S::set1_epi32(1)));
-    rank_w = S::add_epi32(rank_w, S::andnot_epi32(cond, S::set1_epi32(1)));
+    rank_w = S::add_epi32(rank_w, cond.and_not(S::set1_epi32(1)));
 
     let cond = S::cmpgt_epi32(rank_x, S::set1_epi32(2));
     let i1 = S::and_epi32(S::set1_epi32(1), cond);
