@@ -59,8 +59,8 @@ pub unsafe fn cellular2_2d<S: Simd>(
             };
             let mut i = index1;
             while i > 0 {
-                distance[i] = S::min_ps(distance[i], new_distance).max(distance[i - 1]);
-                distance[0] = S::min_ps(distance[0], new_distance);
+                distance[i] = distance[i].min(new_distance).max(distance[i - 1]);
+                distance[0] = distance[0].min(new_distance);
                 i -= 1;
             }
             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
@@ -136,7 +136,8 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     S::add_ps(
                         S::mul_ps(xd, xd),
                         S::add_ps(S::mul_ps(yd, yd), S::mul_ps(zd, zd)),
-                    ).rsqrt(),
+                    )
+                    .rsqrt(),
                 );
                 xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
                 yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
@@ -161,8 +162,8 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 };
                 let mut i = index1;
                 while i > 0 {
-                    distance[i] = S::min_ps(distance[i], new_distance).max(distance[i - 1]);
-                    distance[0] = S::min_ps(distance[0], new_distance);
+                    distance[i] = distance[i].min(new_distance).max(distance[i - 1]);
+                    distance[0] = distance[0].min(new_distance);
                     i -= 1;
                 }
                 zcf = S::add_ps(ycf, S::Vf32::set1(1.0));
