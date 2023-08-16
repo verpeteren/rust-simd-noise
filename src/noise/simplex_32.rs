@@ -73,7 +73,7 @@ const PERM: [i32; 512] = [
 pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
-    let mut i0 = S::cvtps_epi32(ips);
+    let mut i0 = ips.cast_i32();
     let i1 = S::and_epi32(S::add_epi32(i0, S::Vi32::set1(1)), S::Vi32::set1(0xff));
 
     // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
@@ -153,8 +153,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let jps = S::add_ps(y, s).floor();
 
     // Integer coordinates for the base vertex of the triangle
-    let i = S::cvtps_epi32(ips);
-    let j = S::cvtps_epi32(jps);
+    let i = ips.cast_i32();
+    let j = jps.cast_i32();
 
     let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::Vf32::set1(G2_32));
 
@@ -268,9 +268,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let mut z0 = S::add_ps(z, f).fast_floor();
 
     // Integer grid coordinates
-    let i = S::mullo_epi32(S::cvtps_epi32(x0), S::Vi32::set1(X_PRIME_32));
-    let j = S::mullo_epi32(S::cvtps_epi32(y0), S::Vi32::set1(Y_PRIME_32));
-    let k = S::mullo_epi32(S::cvtps_epi32(z0), S::Vi32::set1(Z_PRIME_32));
+    let i = S::mullo_epi32(x0.cast_i32(), S::Vi32::set1(X_PRIME_32));
+    let j = S::mullo_epi32(y0.cast_i32(), S::Vi32::set1(Y_PRIME_32));
+    let k = S::mullo_epi32(z0.cast_i32(), S::Vi32::set1(Z_PRIME_32));
 
     // Compute distance from first simplex vertex to input coordinates
     let g = S::mul_ps(S::Vf32::set1(G3_32), S::add_ps(S::add_ps(x0, y0), z0));
@@ -466,10 +466,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let kps = S::add_ps(z, s).floor();
     let lps = S::add_ps(w, s).floor();
 
-    let i = S::cvtps_epi32(ips);
-    let j = S::cvtps_epi32(jps);
-    let k = S::cvtps_epi32(kps);
-    let l = S::cvtps_epi32(lps);
+    let i = ips.cast_i32();
+    let j = jps.cast_i32();
+    let k = kps.cast_i32();
+    let l = lps.cast_i32();
 
     let t = S::mul_ps(
         S::cvtepi32_ps(S::add_epi32(i, S::add_epi32(j, S::add_epi32(k, l)))),
