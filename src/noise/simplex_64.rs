@@ -619,15 +619,15 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut n4 = S::mul_pd(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
 
     //if ti < 0 then 0 else ni
-    let mut cond = S::cmplt_pd(t0, S::setzero_pd());
+    let mut cond = t0.cmp_lt(S::setzero_pd());
     n0 = cond.and_not(n0);
-    cond = S::cmplt_pd(t1, S::setzero_pd());
+    cond = t1.cmp_lt(S::setzero_pd());
     n1 = cond.and_not(n1);
-    cond = S::cmplt_pd(t2, S::setzero_pd());
+    cond = t2.cmp_lt(S::setzero_pd());
     n2 = cond.and_now(n2);
-    cond = S::cmplt_pd(t3, S::setzero_pd());
+    cond = t3.cmp_lt(S::setzero_pd());
     n3 = cond.and_not(n3);
-    cond = S::cmplt_pd(t4, S::setzero_pd());
+    cond = t4.cmp_lt(S::setzero_pd());
     n4 = cond.and_not(n4);
 
     S::add_pd(n0, S::add_pd(n1, S::add_pd(n2, S::add_pd(n3, n4))))
