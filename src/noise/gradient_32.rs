@@ -9,7 +9,7 @@ use simdeez::prelude::*;
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
     let h = S::and_epi32((S::Vi32::set1(seed), hash) ^ S::Vi32::set1(15));
-    let v = S::cvtepi32_ps(S::and_epi32(h, S::Vi32::set1(7)));
+    let v = S::and_epi32(h, S::Vi32::set1(7)).cast_f32();
 
     let h_and_8 = S::castepi32_ps(S::and_epi32(h, S::Vi32::set1(8)).cmp_eq(S::setzero_epi32()));
     S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_8)

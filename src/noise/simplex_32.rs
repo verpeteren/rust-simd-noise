@@ -156,7 +156,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let i = ips.cast_i32();
     let j = jps.cast_i32();
 
-    let t = S::mul_ps(S::cvtepi32_ps(S::add_epi32(i, j)), S::Vf32::set1(G2_32));
+    let t = S::mul_ps(S::add_epi32(i, j).cast_f32(), S::Vf32::set1(G2_32));
 
     // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
@@ -167,8 +167,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let j1 = S::castps_epi32(S::cmpgt_ps(y0, x0));
 
     // Distances to the second and third points of the enclosing simplex
-    let x1 = S::add_ps(S::add_ps(x0, S::cvtepi32_ps(i1)), S::Vf32::set1(G2_32));
-    let y1 = S::add_ps(S::add_ps(y0, S::cvtepi32_ps(j1)), S::Vf32::set1(G2_32));
+    let x1 = S::add_ps(S::add_ps(x0, i1.cast_f32()), S::Vf32::set1(G2_32));
+    let y1 = S::add_ps(S::add_ps(y0, j1.cast_f32()), S::Vf32::set1(G2_32));
     let x2 = S::add_ps(S::add_ps(x0, S::Vf32::set1(-1.0)), S::Vf32::set1(G22_32));
     let y2 = S::add_ps(S::add_ps(y0, S::Vf32::set1(-1.0)), S::Vf32::set1(G22_32));
 
@@ -472,7 +472,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let l = lps.cast_i32();
 
     let t = S::mul_ps(
-        S::cvtepi32_ps(S::add_epi32(i, S::add_epi32(j, S::add_epi32(k, l)))),
+        S::add_epi32(i, S::add_epi32(j, S::add_epi32(k, l))).cast_f32(),
         S::Vf32::set1(G4_32),
     );
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
@@ -531,18 +531,18 @@ pub unsafe fn simplex_4d<S: Simd>(
     let cond = S::cmpgt_epi32(rank_w, S::setzero_epi32());
     let l3 = S::and_epi32(S::Vi32::set1(1), cond);
 
-    let x1 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i1)), S::Vf32::set1(G4_32));
-    let y1 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j1)), S::Vf32::set1(G4_32));
-    let z1 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k1)), S::Vf32::set1(G4_32));
-    let w1 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l1)), S::Vf32::set1(G4_32));
-    let x2 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i2)), S::Vf32::set1(G24_32));
-    let y2 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j2)), S::Vf32::set1(G24_32));
-    let z2 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k2)), S::Vf32::set1(G24_32));
-    let w2 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l2)), S::Vf32::set1(G24_32));
-    let x3 = S::add_ps(S::sub_ps(x0, S::cvtepi32_ps(i3)), S::Vf32::set1(G34_32));
-    let y3 = S::add_ps(S::sub_ps(y0, S::cvtepi32_ps(j3)), S::Vf32::set1(G34_32));
-    let z3 = S::add_ps(S::sub_ps(z0, S::cvtepi32_ps(k3)), S::Vf32::set1(G34_32));
-    let w3 = S::add_ps(S::sub_ps(w0, S::cvtepi32_ps(l3)), S::Vf32::set1(G34_32));
+    let x1 = S::add_ps(S::sub_ps(x0, i1.cast_f32()), S::Vf32::set1(G4_32));
+    let y1 = S::add_ps(S::sub_ps(y0, j1.cast_f32()), S::Vf32::set1(G4_32));
+    let z1 = S::add_ps(S::sub_ps(z0, k1.cast_f32()), S::Vf32::set1(G4_32));
+    let w1 = S::add_ps(S::sub_ps(w0, l1.cast_f32()), S::Vf32::set1(G4_32));
+    let x2 = S::add_ps(S::sub_ps(x0, i2.cast_f32()), S::Vf32::set1(G24_32));
+    let y2 = S::add_ps(S::sub_ps(y0, j2.cast_f32()), S::Vf32::set1(G24_32));
+    let z2 = S::add_ps(S::sub_ps(z0, k2.cast_f32()), S::Vf32::set1(G24_32));
+    let w2 = S::add_ps(S::sub_ps(w0, l2.cast_f32()), S::Vf32::set1(G24_32));
+    let x3 = S::add_ps(S::sub_ps(x0, i3.cast_f32()), S::Vf32::set1(G34_32));
+    let y3 = S::add_ps(S::sub_ps(y0, j3.cast_f32()), S::Vf32::set1(G34_32));
+    let z3 = S::add_ps(S::sub_ps(z0, k3.cast_f32()), S::Vf32::set1(G34_32));
+    let w3 = S::add_ps(S::sub_ps(w0, l3.cast_f32()), S::Vf32::set1(G34_32));
     let x4 = S::add_ps(S::sub_ps(x0, S::Vf32::set1(1.0)), S::Vf32::set1(G44_32));
     let y4 = S::add_ps(S::sub_ps(y0, S::Vf32::set1(1.0)), S::Vf32::set1(G44_32));
     let z4 = S::add_ps(S::sub_ps(z0, S::Vf32::set1(1.0)), S::Vf32::set1(G44_32));
