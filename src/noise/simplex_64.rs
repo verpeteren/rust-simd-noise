@@ -41,7 +41,7 @@ const PERM64: [i64; 512] = [
 pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
-    let mut i0 = S::cvtpd_epi64(ips);
+    let mut i0 = ips.cast_i64();
     let i1 = S::and_epi64(S::add_epi64(i0, S::Vi64::set1(1)), S::Vi64::set1(0xff));
 
     // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
@@ -121,8 +121,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let jps = S::add_pd(y, s).floor();
 
     // Integer coordinates for the base vertex of the triangle
-    let i = S::cvtpd_epi64(ips);
-    let j = S::cvtpd_epi64(jps);
+    let i = ips.cast_i64();
+    let j = jps.cast_i64();
 
     let t = S::mul_pd(S::cvtepi64_pd(S::add_epi64(i, j)), S::Vf64::set1(G2_64));
 
@@ -236,9 +236,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let mut z0 = S::add_pd(z, f).fast_floor();
 
     // Integer grid coordinates
-    let i = S::mullo_epi64(S::cvtpd_epi64(x0), S::Vi64::set1(X_PRIME_64));
-    let j = S::mullo_epi64(S::cvtpd_epi64(y0), S::Vi64::set1(Y_PRIME_64));
-    let k = S::mullo_epi64(S::cvtpd_epi64(z0), S::Vi64::set1(Z_PRIME_64));
+    let i = S::mullo_epi64(x0.cast_i64(), S::Vi64::set1(X_PRIME_64));
+    let j = S::mullo_epi64(y0.cast_i64(), S::Vi64::set1(Y_PRIME_64));
+    let k = S::mullo_epi64(z0.cast_i64(), S::Vi64::set1(Z_PRIME_64));
 
     // Compute distance from first simplex vertex to input coordinates
     let g = S::mul_pd(S::Vf64::set1(G3_64), S::add_pd(S::add_pd(x0, y0), z0));
@@ -429,10 +429,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let kpd = S::add_pd(z, s).floor();
     let lpd = S::add_pd(w, s).floor();
 
-    let i = S::cvtpd_epi64(ipd);
-    let j = S::cvtpd_epi64(jpd);
-    let k = S::cvtpd_epi64(kpd);
-    let l = S::cvtpd_epi64(lpd);
+    let i = ipd.cast_i64();
+    let j = jpd.cast_i64();
+    let k = kpd.cast_i64();
+    let l = lpd.cast_i64();
 
     let t = S::mul_pd(
         S::cvtepi64_pd(S::add_epi64(i, S::add_epi64(j, S::add_epi64(k, l)))),
