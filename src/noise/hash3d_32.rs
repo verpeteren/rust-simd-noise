@@ -39,7 +39,7 @@ pub unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> 
         S::mullo_epi32(S::mullo_epi32(hash, hash), S::Vi32::set1(60493)),
         hash,
     );
-    hash = S::srai_epi32(hash, 13) ^ hash;
+    hash = (hash >> 13) ^ hash;
     let hasha13 = S::and_epi32(hash, S::Vi32::set1(13));
     Hash3d::new(
         S::castepi32_ps(hasha13 < S::Vi32::set1(8)),

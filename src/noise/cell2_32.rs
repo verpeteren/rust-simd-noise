@@ -36,7 +36,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
             );
             let mut yd = S::sub_ps(
                 S::cvtepi32_ps(S::and_epi32(
-                    S::srai_epi32(hash, 10),
+                    (hash >> 10),
                     S::Vi32::set1(BIT_10_MASK_32),
                 )),
                 S::Vf32::set1(511.5),
@@ -119,14 +119,14 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 );
                 let mut yd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
-                        S::srai_epi32(hash, 10),
+                        (hash >> 10),
                         S::Vi32::set1(BIT_10_MASK_32),
                     )),
                     S::Vf32::set1(511.5),
                 );
                 let mut zd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
-                        S::srai_epi32(hash, 20),
+                        (hash >> 20),
                         S::Vi32::set1(BIT_10_MASK_32),
                     )),
                     S::Vf32::set1(511.5),
