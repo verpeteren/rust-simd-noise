@@ -11,10 +11,7 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
     let h = S::and_epi64((S::Vi64::set1(seed) ^ hash), S::Vi64::set1(15));
     let v = S::cvtepi64_pd(S::and_epi64(h, S::Vi64::set1(7)));
 
-    let h_and_8 = S::castepi64_pd(S::cmpeq_epi64(
-        S::setzero_epi64(),
-        S::and_epi64(h, S::Vi64::set1(8)),
-    ));
+    let h_and_8 = S::castepi64_pd(S::and_epi64(h, S::Vi64::set1(8)).cmp_eq(S::setzero_epi64()));
     S::blendv_pd(S::sub_pd(S::setzero_pd(), v), v, h_and_8)
 }
 
@@ -29,14 +26,8 @@ pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
     let x_magnitude = S::blendv_pd(S::Vf64::set1(2.0), S::Vf64::set1(1.0), mask);
     let y_magnitude = S::blendv_pd(S::Vf64::set1(1.0), S::Vf64::set1(2.0), mask);
 
-    let h_and_1 = S::castepi64_pd(S::cmpeq_epi64(
-        S::setzero_epi64(),
-        S::and_epi64(h, S::Vi64::set1(1)),
-    ));
-    let h_and_2 = S::castepi64_pd(S::cmpeq_epi64(
-        S::setzero_epi64(),
-        S::and_epi64(h, S::Vi64::set1(2)),
-    ));
+    let h_and_1 = S::castepi64_pd(S::and_epi64(h, S::Vi64::set1(1)).cmp_eq(S::setzero_epi64()));
+    let h_and_2 = S::castepi64_pd(S::and_epi64(h, S::Vi64::set1(2)).cmp_eq(S::setzero_epi64()));
 
     let gx = S::blendv_pd(
         S::sub_pd(S::setzero_pd(), x_magnitude),
@@ -118,18 +109,9 @@ pub unsafe fn grad4<S: Simd>(
     mask = S::castepi64_pd(S::cmpgt_epi64(S::Vi64::set1(8), h));
     let w = S::blendv_pd(t, z, mask);
 
-    let h_and_1 = S::castepi64_pd(S::cmpeq_epi64(
-        S::setzero_epi64(),
-        S::and_epi64(h, S::Vi64::set1(1)),
-    ));
-    let h_and_2 = S::castepi64_pd(S::cmpeq_epi64(
-        S::setzero_epi64(),
-        S::and_epi64(h, S::Vi64::set1(2)),
-    ));
-    let h_and_4 = S::castepi64_pd(S::cmpeq_epi64(
-        S::setzero_epi64(),
-        S::and_epi64(h, S::Vi64::set1(4)),
-    ));
+    let h_and_1 = S::castepi64_pd(S::and_epi64(h, S::Vi64::set1(1)).cmp_eq(S::setzero_epi64()));
+    let h_and_2 = S::castepi64_pd(S::and_epi64(h, S::Vi64::set1(2)).cmp_eq(S::setzero_epi64()));
+    let h_and_4 = S::castepi64_pd(S::and_epi64(h, S::Vi64::set1(4)).cmp_eq(S::setzero_epi64()));
 
     S::add_pd(
         S::blendv_pd(S::sub_pd(S::setzero_pd(), u), u, h_and_1),
