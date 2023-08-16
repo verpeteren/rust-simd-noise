@@ -651,15 +651,15 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut n4 = S::mul_ps(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
 
     // Discard contributions whose base weight factors are negative
-    let mut cond = S::cmplt_ps(t0, S::setzero_ps());
+    let mut cond = t0.cmp_lt(S::setzero_ps());
     n0 = cond.and_not(n0);
-    cond = S::cmplt_ps(t1, S::setzero_ps());
+    cond = t1.cmp_lt(S::setzero_ps());
     n1 = cond.and_not(n1);
-    cond = S::cmplt_ps(t2, S::setzero_ps());
+    cond = t2.cmp_lt(S::setzero_ps());
     n2 = cond.and_not(n2);
-    cond = S::cmplt_ps(t3, S::setzero_ps());
+    cond = t3.cmp_lt(S::setzero_ps());
     n3 = cond.and_not(n3);
-    cond = S::cmplt_ps(t4, S::setzero_ps());
+    cond = t4.cmp_lt(S::setzero_ps());
     n4 = cond.and_not(n4);
 
     // Scaling factor found by numerical approximation
