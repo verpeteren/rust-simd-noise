@@ -36,10 +36,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
                 S::Vf64::set1(511.5),
             );
             let mut yd = S::sub_pd(
-                S::cvtepi64_pd(S::and_epi64(
-                    S::srai_epi64(hash, 10),
-                    S::Vi64::set1(BIT_10_MASK_64),
-                )),
+                S::cvtepi64_pd(S::and_epi64((hash >> 10), S::Vi64::set1(BIT_10_MASK_64))),
                 S::Vf64::set1(511.5),
             );
             let inv_mag = S::mul_pd(
@@ -119,17 +116,11 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     S::Vf64::set1(511.5),
                 );
                 let mut yd = S::sub_pd(
-                    S::cvtepi64_pd(S::and_epi64(
-                        S::srai_epi64(hash, 10),
-                        S::Vi64::set1(BIT_10_MASK_64),
-                    )),
+                    S::cvtepi64_pd(S::and_epi64((hash >> 10), S::Vi64::set1(BIT_10_MASK_64))),
                     S::Vf64::set1(511.5),
                 );
                 let mut zd = S::sub_pd(
-                    S::cvtepi64_pd(S::and_epi64(
-                        S::srai_epi64(hash, 20),
-                        S::Vi64::set1(BIT_10_MASK_64),
-                    )),
+                    S::cvtepi64_pd(S::and_epi64((hash >> 20), S::Vi64::set1(BIT_10_MASK_64))),
                     S::Vf64::set1(511.5),
                 );
                 let inv_mag = S::mul_pd(
