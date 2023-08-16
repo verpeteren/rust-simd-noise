@@ -124,7 +124,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let i = ips.cast_i64();
     let j = jps.cast_i64();
 
-    let t = S::mul_pd(S::cvtepi64_pd(S::add_epi64(i, j)), S::Vf64::set1(G2_64));
+    let t = S::mul_pd(S::add_epi64(i, j).cast_f64(), S::Vf64::set1(G2_64));
 
     // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_pd(x, S::sub_pd(ips, t));
@@ -135,8 +135,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let j1 = S::castpd_epi64(S::cmpgt_pd(y0, x0));
 
     // Distances to the second and third points of the enclosing simplex
-    let x1 = S::add_pd(S::add_pd(x0, S::cvtepi64_pd(i1)), S::Vf64::set1(G2_64));
-    let y1 = S::add_pd(S::add_pd(y0, S::cvtepi64_pd(j1)), S::Vf64::set1(G2_64));
+    let x1 = S::add_pd(S::add_pd(x0, i1.cast_f64()), S::Vf64::set1(G2_64));
+    let y1 = S::add_pd(S::add_pd(y0, j1.cast_f64()), S::Vf64::set1(G2_64));
     let x2 = S::add_pd(S::add_pd(x0, S::Vf64::set1(-1.0)), S::Vf64::set1(G22_64));
     let y2 = S::add_pd(S::add_pd(y0, S::Vf64::set1(-1.0)), S::Vf64::set1(G22_64));
 
@@ -435,7 +435,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let l = lpd.cast_i64();
 
     let t = S::mul_pd(
-        S::cvtepi64_pd(S::add_epi64(i, S::add_epi64(j, S::add_epi64(k, l)))),
+        (S::add_epi64(i, S::add_epi64(j, S::add_epi64(k, l)))).cast_f64(),
         S::Vf64::set1(G4_64),
     );
     let x0 = S::sub_pd(x, S::sub_pd(ipd, t));
@@ -494,18 +494,18 @@ pub unsafe fn simplex_4d<S: Simd>(
     let cond = S::cmpgt_epi64(rank_w, S::setzero_epi64());
     let l3 = S::and_epi64(S::Vi64::set1(1), cond);
 
-    let x1 = S::add_pd(S::sub_pd(x0, S::cvtepi64_pd(i1)), S::Vf64::set1(G4_64));
-    let y1 = S::add_pd(S::sub_pd(y0, S::cvtepi64_pd(j1)), S::Vf64::set1(G4_64));
-    let z1 = S::add_pd(S::sub_pd(z0, S::cvtepi64_pd(k1)), S::Vf64::set1(G4_64));
-    let w1 = S::add_pd(S::sub_pd(w0, S::cvtepi64_pd(l1)), S::Vf64::set1(G4_64));
-    let x2 = S::add_pd(S::sub_pd(x0, S::cvtepi64_pd(i2)), S::Vf64::set1(G24_64));
-    let y2 = S::add_pd(S::sub_pd(y0, S::cvtepi64_pd(j2)), S::Vf64::set1(G24_64));
-    let z2 = S::add_pd(S::sub_pd(z0, S::cvtepi64_pd(k2)), S::Vf64::set1(G24_64));
-    let w2 = S::add_pd(S::sub_pd(w0, S::cvtepi64_pd(l2)), S::Vf64::set1(G24_64));
-    let x3 = S::add_pd(S::sub_pd(x0, S::cvtepi64_pd(i3)), S::Vf64::set1(G34_64));
-    let y3 = S::add_pd(S::sub_pd(y0, S::cvtepi64_pd(j3)), S::Vf64::set1(G34_64));
-    let z3 = S::add_pd(S::sub_pd(z0, S::cvtepi64_pd(k3)), S::Vf64::set1(G34_64));
-    let w3 = S::add_pd(S::sub_pd(w0, S::cvtepi64_pd(l3)), S::Vf64::set1(G34_64));
+    let x1 = S::add_pd(S::sub_pd(x0, i1.cast_f64()), S::Vf64::set1(G4_64));
+    let y1 = S::add_pd(S::sub_pd(y0, j1.cast_f64()), S::Vf64::set1(G4_64));
+    let z1 = S::add_pd(S::sub_pd(z0, k1.cast_f64()), S::Vf64::set1(G4_64));
+    let w1 = S::add_pd(S::sub_pd(w0, l1.cast_f64()), S::Vf64::set1(G4_64));
+    let x2 = S::add_pd(S::sub_pd(x0, i2.cast_f64()), S::Vf64::set1(G24_64));
+    let y2 = S::add_pd(S::sub_pd(y0, j2.cast_f64()), S::Vf64::set1(G24_64));
+    let z2 = S::add_pd(S::sub_pd(z0, k2.cast_f64()), S::Vf64::set1(G24_64));
+    let w2 = S::add_pd(S::sub_pd(w0, l2.cast_f64()), S::Vf64::set1(G24_64));
+    let x3 = S::add_pd(S::sub_pd(x0, i3.cast_f64()), S::Vf64::set1(G34_64));
+    let y3 = S::add_pd(S::sub_pd(y0, j3.cast_f64()), S::Vf64::set1(G34_64));
+    let z3 = S::add_pd(S::sub_pd(z0, k3.cast_f64()), S::Vf64::set1(G34_64));
+    let w3 = S::add_pd(S::sub_pd(w0, l3.cast_f64()), S::Vf64::set1(G34_64));
     let x4 = S::add_pd(S::sub_pd(x0, S::Vf64::set1(1.0)), S::Vf64::set1(G44_64));
     let y4 = S::add_pd(S::sub_pd(y0, S::Vf64::set1(1.0)), S::Vf64::set1(G44_64));
     let z4 = S::add_pd(S::sub_pd(z0, S::Vf64::set1(1.0)), S::Vf64::set1(G44_64));

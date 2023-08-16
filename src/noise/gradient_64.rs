@@ -9,7 +9,7 @@ use simdeez::prelude::*;
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
     let h = S::and_epi64((S::Vi64::set1(seed) ^ hash), S::Vi64::set1(15));
-    let v = S::cvtepi64_pd(S::and_epi64(h, S::Vi64::set1(7)));
+    let v = (S::and_epi64(h, S::Vi64::set1(7))).cast_f64();
 
     let h_and_8 = S::castepi64_pd(S::and_epi64(h, S::Vi64::set1(8)).cmp_eq(S::setzero_epi64()));
     S::blendv_pd(S::sub_pd(S::setzero_pd(), v), v, h_and_8)
