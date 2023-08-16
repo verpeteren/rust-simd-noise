@@ -15,14 +15,14 @@ pub unsafe fn cellular_2d<S: Simd>(
     seed: i32,
 ) -> S::Vf32 {
     let mut distance = S::Vf32::set1(999999.0);
-    let mut xc = S::sub_epi32(S::cvtps_epi32(x), S::set1_epi32(1));
-    let mut yc_base = S::sub_epi32(S::cvtps_epi32(y), S::set1_epi32(1));
+    let mut xc = S::sub_epi32(S::cvtps_epi32(x), S::Vi32::set1(1));
+    let mut yc_base = S::sub_epi32(S::cvtps_epi32(y), S::Vi32::set1(1));
 
     let mut xcf = S::sub_ps(S::cvtepi32_ps(xc), x);
     let ycf_base = S::sub_ps(S::cvtepi32_ps(yc_base), y);
 
-    xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME_32));
-    yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME_32));
+    xc = S::mullo_epi32(xc, S::Vi32::set1(X_PRIME_32));
+    yc_base = S::mullo_epi32(yc_base, S::Vi32::set1(Y_PRIME_32));
     match return_type {
         CellReturnType::Distance => {
             match distance_function {
@@ -33,13 +33,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32))),
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK_32),
+                                    S::Vi32::set1(BIT_10_MASK_32),
                                 )),
                                 S::Vf32::set1(511.5),
                             );
@@ -53,10 +53,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
+                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
+                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -66,13 +66,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32))),
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK_32),
+                                    S::Vi32::set1(BIT_10_MASK_32),
                                 )),
                                 S::Vf32::set1(511.5),
                             );
@@ -87,10 +87,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
+                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
+                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -100,13 +100,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32))),
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK_32),
+                                    S::Vi32::set1(BIT_10_MASK_32),
                                 )),
                                 S::Vf32::set1(511.5),
                             );
@@ -125,10 +125,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
+                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
+                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
                     }
                 }
             }
@@ -144,13 +144,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32))),
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK_32),
+                                    S::Vi32::set1(BIT_10_MASK_32),
                                 )),
                                 S::Vf32::set1(511.5),
                             );
@@ -169,10 +169,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
+                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
+                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -182,13 +182,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32))),
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK_32),
+                                    S::Vi32::set1(BIT_10_MASK_32),
                                 )),
                                 S::Vf32::set1(511.5),
                             );
@@ -207,10 +207,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
+                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
+                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -220,13 +220,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
+                                S::cvtepi32_ps(S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32))),
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
                                 S::cvtepi32_ps(S::and_epi32(
                                     S::srai_epi32(hash, 10),
-                                    S::set1_epi32(BIT_10_MASK_32),
+                                    S::Vi32::set1(BIT_10_MASK_32),
                                 )),
                                 S::Vf32::set1(511.5),
                             );
@@ -249,10 +249,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
+                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
+                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
                     }
                 }
             }
@@ -274,17 +274,17 @@ pub unsafe fn cellular_3d<S: Simd>(
     let mut distance = S::Vf32::set1(999999.0);
     let mut cell_value = S::setzero_ps();
 
-    let mut xc = S::sub_epi32(S::cvtps_epi32(x), S::set1_epi32(1));
-    let mut yc_base = S::sub_epi32(S::cvtps_epi32(y), S::set1_epi32(1));
-    let mut zc_base = S::sub_epi32(S::cvtps_epi32(z), S::set1_epi32(1));
+    let mut xc = S::sub_epi32(S::cvtps_epi32(x), S::Vi32::set1(1));
+    let mut yc_base = S::sub_epi32(S::cvtps_epi32(y), S::Vi32::set1(1));
+    let mut zc_base = S::sub_epi32(S::cvtps_epi32(z), S::Vi32::set1(1));
 
     let mut xcf = S::sub_ps(S::cvtepi32_ps(xc), x);
     let ycf_base = S::sub_ps(S::cvtepi32_ps(yc_base), y);
     let zcf_base = S::sub_ps(S::cvtepi32_ps(zc_base), z);
 
-    xc = S::mullo_epi32(xc, S::set1_epi32(X_PRIME_32));
-    yc_base = S::mullo_epi32(yc_base, S::set1_epi32(Y_PRIME_32));
-    zc_base = S::mullo_epi32(zc_base, S::set1_epi32(Z_PRIME_32));
+    xc = S::mullo_epi32(xc, S::Vi32::set1(X_PRIME_32));
+    yc_base = S::mullo_epi32(yc_base, S::Vi32::set1(Y_PRIME_32));
+    zc_base = S::mullo_epi32(zc_base, S::Vi32::set1(Z_PRIME_32));
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -295,20 +295,20 @@ pub unsafe fn cellular_3d<S: Simd>(
             for _z in 0..3 {
                 let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_ps(
-                    S::cvtepi32_ps(S::and_epi32(hash, S::set1_epi32(BIT_10_MASK_32))),
+                    S::cvtepi32_ps(S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32))),
                     S::Vf32::set1(511.5),
                 );
                 let mut yd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
                         S::srai_epi32(hash, 10),
-                        S::set1_epi32(BIT_10_MASK_32),
+                        S::Vi32::set1(BIT_10_MASK_32),
                     )),
                     S::Vf32::set1(511.5),
                 );
                 let mut zd = S::sub_ps(
                     S::cvtepi32_ps(S::and_epi32(
                         S::srai_epi32(hash, 20),
-                        S::set1_epi32(BIT_10_MASK_32),
+                        S::Vi32::set1(BIT_10_MASK_32),
                     )),
                     S::Vf32::set1(511.5),
                 );
@@ -347,13 +347,13 @@ pub unsafe fn cellular_3d<S: Simd>(
                 distance = new_distance.min(distance);
                 cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
                 zcf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                zc = S::add_epi32(yc, S::set1_epi32(Z_PRIME_32));
+                zc = S::add_epi32(yc, S::Vi32::set1(Z_PRIME_32));
             }
             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-            yc = S::add_epi32(yc, S::set1_epi32(Y_PRIME_32));
+            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
         }
         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-        xc = S::add_epi32(xc, S::set1_epi32(X_PRIME_32));
+        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
     }
 
     match return_type {

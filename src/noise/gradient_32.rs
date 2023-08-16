@@ -8,12 +8,12 @@ use simdeez::prelude::*;
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
-    let h = S::and_epi32((S::set1_epi32(seed), hash) ^ S::set1_epi32(15));
-    let v = S::cvtepi32_ps(S::and_epi32(h, S::set1_epi32(7)));
+    let h = S::and_epi32((S::Vi32::set1(seed), hash) ^ S::Vi32::set1(15));
+    let v = S::cvtepi32_ps(S::and_epi32(h, S::Vi32::set1(7)));
 
     let h_and_8 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(8)),
+        S::and_epi32(h, S::Vi32::set1(8)),
     ));
     S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_8)
 }
@@ -24,18 +24,18 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 /// are more consistent between directions.
 #[inline(always)]
 pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
-    let h = S::and_epi32((hash ^ S::set1_epi32(seed)), S::set1_epi32(7));
-    let mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(4), h));
+    let h = S::and_epi32((hash ^ S::Vi32::set1(seed)), S::Vi32::set1(7));
+    let mask = S::castepi32_ps(S::cmpgt_epi32(S::Vi32::set1(4), h));
     let x_magnitude = S::blendv_ps(S::Vf32::set1(2.0), S::Vf32::set1(1.0), mask);
     let y_magnitude = S::blendv_ps(S::Vf32::set1(1.0), S::Vf32::set1(2.0), mask);
 
     let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(1)),
+        S::and_epi32(h, S::Vi32::set1(1)),
     ));
     let h_and_2 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(2)),
+        S::and_epi32(h, S::Vi32::set1(2)),
     ));
 
     let gx = S::blendv_ps(
@@ -110,25 +110,25 @@ pub unsafe fn grad4<S: Simd>(
     z: S::Vf32,
     t: S::Vf32,
 ) -> S::Vf32 {
-    let h = S::and_epi32((S::set1_epi32(seed) ^ hash), S::set1_epi32(31));
-    let mut mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(24), h));
+    let h = S::and_epi32((S::Vi32::set1(seed) ^ hash), S::Vi32::set1(31));
+    let mut mask = S::castepi32_ps(S::cmpgt_epi32(S::Vi32::set1(24), h));
     let u = S::blendv_ps(y, x, mask);
-    mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(16), h));
+    mask = S::castepi32_ps(S::cmpgt_epi32(S::Vi32::set1(16), h));
     let v = S::blendv_ps(z, y, mask);
-    mask = S::castepi32_ps(S::cmpgt_epi32(S::set1_epi32(8), h));
+    mask = S::castepi32_ps(S::cmpgt_epi32(S::Vi32::set1(8), h));
     let w = S::blendv_ps(t, z, mask);
 
     let h_and_1 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(1)),
+        S::and_epi32(h, S::Vi32::set1(1)),
     ));
     let h_and_2 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(2)),
+        S::and_epi32(h, S::Vi32::set1(2)),
     ));
     let h_and_4 = S::castepi32_ps(S::cmpeq_epi32(
         S::setzero_epi32(),
-        S::and_epi32(h, S::set1_epi32(4)),
+        S::and_epi32(h, S::Vi32::set1(4)),
     ));
 
     S::add_ps(
