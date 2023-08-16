@@ -42,14 +42,14 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::V
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
     let mut i0 = S::cvtpd_epi64(ips);
-    let i1 = S::and_epi64(S::add_epi64(i0, S::set1_epi64(1)), S::set1_epi64(0xff));
+    let i1 = S::and_epi64(S::add_epi64(i0, S::Vi64::set1(1)), S::Vi64::set1(0xff));
 
     // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
     let x0 = S::sub_pd(x, ips);
     // signed distance to the right gradient node
     let x1 = S::sub_pd(x0, S::Vf64::set1(1.0));
 
-    i0 = S::and_epi64(i0, S::set1_epi64(0xff));
+    i0 = S::and_epi64(i0, S::Vi64::set1(0xff));
     let gi0 = S::i64gather_epi64(&PERM64, i0);
     let gi1 = S::i64gather_epi64(&PERM64, i1);
 
@@ -140,8 +140,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let x2 = S::add_pd(S::add_pd(x0, S::Vf64::set1(-1.0)), S::Vf64::set1(G22_64));
     let y2 = S::add_pd(S::add_pd(y0, S::Vf64::set1(-1.0)), S::Vf64::set1(G22_64));
 
-    let ii = S::and_epi64(i, S::set1_epi64(0xff));
-    let jj = S::and_epi64(j, S::set1_epi64(0xff));
+    let ii = S::and_epi64(i, S::Vi64::set1(0xff));
+    let jj = S::and_epi64(j, S::Vi64::set1(0xff));
 
     let gi0 = S::i64gather_epi64(&PERM64, S::add_epi64(ii, S::i64gather_epi64(&PERM64, jj)));
 
@@ -156,8 +156,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let gi2 = S::i64gather_epi64(
         &PERM64,
         S::add_epi64(
-            S::sub_epi64(ii, S::set1_epi64(-1)),
-            S::i64gather_epi64(&PERM64, S::sub_epi64(jj, S::set1_epi64(-1))),
+            S::sub_epi64(ii, S::Vi64::set1(-1)),
+            S::i64gather_epi64(&PERM64, S::sub_epi64(jj, S::Vi64::set1(-1))),
         ),
     );
 
@@ -236,9 +236,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let mut z0 = S::add_pd(z, f).fast_floor();
 
     // Integer grid coordinates
-    let i = S::mullo_epi64(S::cvtpd_epi64(x0), S::set1_epi64(X_PRIME_64));
-    let j = S::mullo_epi64(S::cvtpd_epi64(y0), S::set1_epi64(Y_PRIME_64));
-    let k = S::mullo_epi64(S::cvtpd_epi64(z0), S::set1_epi64(Z_PRIME_64));
+    let i = S::mullo_epi64(S::cvtpd_epi64(x0), S::Vi64::set1(X_PRIME_64));
+    let j = S::mullo_epi64(S::cvtpd_epi64(y0), S::Vi64::set1(Y_PRIME_64));
+    let k = S::mullo_epi64(S::cvtpd_epi64(z0), S::Vi64::set1(Z_PRIME_64));
 
     // Compute distance from first simplex vertex to input coordinates
     let g = S::mul_pd(S::Vf64::set1(G3_64), S::add_pd(S::add_pd(x0, y0), z0));
@@ -330,38 +330,38 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
 
     let v1x = S::add_epi64(
         i,
-        S::and_epi64(S::castpd_epi64(i1), S::set1_epi64(X_PRIME_64)),
+        S::and_epi64(S::castpd_epi64(i1), S::Vi64::set1(X_PRIME_64)),
     );
     let v1y = S::add_epi64(
         j,
-        S::and_epi64(S::castpd_epi64(j1), S::set1_epi64(Y_PRIME_64)),
+        S::and_epi64(S::castpd_epi64(j1), S::Vi64::set1(Y_PRIME_64)),
     );
     let v1z = S::add_epi64(
         k,
-        S::and_epi64(S::castpd_epi64(k1), S::set1_epi64(Z_PRIME_64)),
+        S::and_epi64(S::castpd_epi64(k1), S::Vi64::set1(Z_PRIME_64)),
     );
     let g1 = grad3d_dot::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
     let v1 = t41 * g1;
 
     let v2x = S::add_epi64(
         i,
-        S::and_epi64(S::castpd_epi64(i2), S::set1_epi64(X_PRIME_64)),
+        S::and_epi64(S::castpd_epi64(i2), S::Vi64::set1(X_PRIME_64)),
     );
     let v2y = S::add_epi64(
         j,
-        S::and_epi64(S::castpd_epi64(j2), S::set1_epi64(Y_PRIME_64)),
+        S::and_epi64(S::castpd_epi64(j2), S::Vi64::set1(Y_PRIME_64)),
     );
     let v2z = S::add_epi64(
         k,
-        S::and_epi64(S::castpd_epi64(k2), S::set1_epi64(Z_PRIME_64)),
+        S::and_epi64(S::castpd_epi64(k2), S::Vi64::set1(Z_PRIME_64)),
     );
     let g2 = grad3d_dot::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
     let v2 = t42 * g2;
 
     //SIMDf v3 = SIMDf_MASK(n3, SIMDf_MUL(SIMDf_MUL(t3, t3), FUNC(GradCoord)(seed, SIMDi_ADD(i, SIMDi_NUM(xPrime)), SIMDi_ADD(j, SIMDi_NUM(yPrime)), SIMDi_ADD(k, SIMDi_NUM(zPrime)), x3, y3, z3)));
-    let v3x = S::add_epi64(i, S::set1_epi64(X_PRIME_64));
-    let v3y = S::add_epi64(j, S::set1_epi64(Y_PRIME_64));
-    let v3z = S::add_epi64(k, S::set1_epi64(Z_PRIME_64));
+    let v3x = S::add_epi64(i, S::Vi64::set1(X_PRIME_64));
+    let v3y = S::add_epi64(j, S::Vi64::set1(Y_PRIME_64));
+    let v3z = S::add_epi64(k, S::Vi64::set1(Z_PRIME_64));
     //define SIMDf_MASK(m,a) SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),a)
     let g3 = grad3d_dot::<S>(seed, v3x, v3y, v3z, x3, y3, z3);
     let v3 = t43 * g3;
@@ -449,50 +449,50 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut rank_w = S::setzero_epi64();
 
     let cond = S::castpd_epi64(S::cmpgt_pd(x0, y0));
-    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::set1_epi64(1)));
-    rank_y = S::add_epi64(rank_y, cond.and_not(S::set1_epi64(1)));
+    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_y = S::add_epi64(rank_y, cond.and_not(S::Vi64::set1(1)));
     let cond = S::castpd_epi64(S::cmpgt_pd(x0, z0));
-    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::set1_epi64(1)));
-    rank_z = S::add_epi64(rank_z, cond.and_not(S::set1_epi64(1)));
+    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_z = S::add_epi64(rank_z, cond.and_not(S::Vi64::set1(1)));
     let cond = S::castpd_epi64(S::cmpgt_pd(x0, w0));
-    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::set1_epi64(1)));
-    rank_w = S::add_epi64(rank_w, cond.and_not(S::set1_epi64(1)));
+    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
     let cond = S::castpd_epi64(S::cmpgt_pd(y0, z0));
-    rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::set1_epi64(1)));
-    rank_z = S::add_epi64(rank_z, cond.and_not(S::set1_epi64(1)));
+    rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_z = S::add_epi64(rank_z, cond.and_not(S::Vi64::set1(1)));
     let cond = S::castpd_epi64(S::cmpgt_pd(y0, w0));
-    rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::set1_epi64(1)));
-    rank_w = S::add_epi64(rank_w, cond.and_not(S::set1_epi64(1)));
+    rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
     let cond = S::castpd_epi64(S::cmpgt_pd(z0, w0));
-    rank_z = S::add_epi64(rank_z, S::and_epi64(cond, S::set1_epi64(1)));
-    rank_w = S::add_epi64(rank_w, cond.and_not(S::set1_epi64(1)));
+    rank_z = S::add_epi64(rank_z, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
 
-    let cond = S::cmpgt_epi64(rank_x, S::set1_epi64(2));
-    let i1 = S::and_epi64(S::set1_epi64(1), cond);
-    let cond = S::cmpgt_epi64(rank_y, S::set1_epi64(2));
-    let j1 = S::and_epi64(S::set1_epi64(1), cond);
-    let cond = S::cmpgt_epi64(rank_z, S::set1_epi64(2));
-    let k1 = S::and_epi64(S::set1_epi64(1), cond);
-    let cond = S::cmpgt_epi64(rank_w, S::set1_epi64(2));
-    let l1 = S::and_epi64(S::set1_epi64(1), cond);
+    let cond = S::cmpgt_epi64(rank_x, S::Vi64::set1(2));
+    let i1 = S::and_epi64(S::Vi64::set1(1), cond);
+    let cond = S::cmpgt_epi64(rank_y, S::Vi64::set1(2));
+    let j1 = S::and_epi64(S::Vi64::set1(1), cond);
+    let cond = S::cmpgt_epi64(rank_z, S::Vi64::set1(2));
+    let k1 = S::and_epi64(S::Vi64::set1(1), cond);
+    let cond = S::cmpgt_epi64(rank_w, S::Vi64::set1(2));
+    let l1 = S::and_epi64(S::Vi64::set1(1), cond);
 
-    let cond = S::cmpgt_epi64(rank_x, S::set1_epi64(1));
-    let i2 = S::and_epi64(S::set1_epi64(1), cond);
-    let cond = S::cmpgt_epi64(rank_y, S::set1_epi64(1));
-    let j2 = S::and_epi64(S::set1_epi64(1), cond);
-    let cond = S::cmpgt_epi64(rank_z, S::set1_epi64(1));
-    let k2 = S::and_epi64(S::set1_epi64(1), cond);
-    let cond = S::cmpgt_epi64(rank_w, S::set1_epi64(1));
-    let l2 = S::and_epi64(S::set1_epi64(1), cond);
+    let cond = S::cmpgt_epi64(rank_x, S::Vi64::set1(1));
+    let i2 = S::and_epi64(S::Vi64::set1(1), cond);
+    let cond = S::cmpgt_epi64(rank_y, S::Vi64::set1(1));
+    let j2 = S::and_epi64(S::Vi64::set1(1), cond);
+    let cond = S::cmpgt_epi64(rank_z, S::Vi64::set1(1));
+    let k2 = S::and_epi64(S::Vi64::set1(1), cond);
+    let cond = S::cmpgt_epi64(rank_w, S::Vi64::set1(1));
+    let l2 = S::and_epi64(S::Vi64::set1(1), cond);
 
     let cond = S::cmpgt_epi64(rank_x, S::setzero_epi64());
-    let i3 = S::and_epi64(S::set1_epi64(1), cond);
+    let i3 = S::and_epi64(S::Vi64::set1(1), cond);
     let cond = S::cmpgt_epi64(rank_y, S::setzero_epi64());
-    let j3 = S::and_epi64(S::set1_epi64(1), cond);
+    let j3 = S::and_epi64(S::Vi64::set1(1), cond);
     let cond = S::cmpgt_epi64(rank_z, S::setzero_epi64());
-    let k3 = S::and_epi64(S::set1_epi64(1), cond);
+    let k3 = S::and_epi64(S::Vi64::set1(1), cond);
     let cond = S::cmpgt_epi64(rank_w, S::setzero_epi64());
-    let l3 = S::and_epi64(S::set1_epi64(1), cond);
+    let l3 = S::and_epi64(S::Vi64::set1(1), cond);
 
     let x1 = S::add_pd(S::sub_pd(x0, S::cvtepi64_pd(i1)), S::Vf64::set1(G4_64));
     let y1 = S::add_pd(S::sub_pd(y0, S::cvtepi64_pd(j1)), S::Vf64::set1(G4_64));
@@ -511,10 +511,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let z4 = S::add_pd(S::sub_pd(z0, S::Vf64::set1(1.0)), S::Vf64::set1(G44_64));
     let w4 = S::add_pd(S::sub_pd(w0, S::Vf64::set1(1.0)), S::Vf64::set1(G44_64));
 
-    let ii = S::and_epi64(i, S::set1_epi64(0xff));
-    let jj = S::and_epi64(j, S::set1_epi64(0xff));
-    let kk = S::and_epi64(k, S::set1_epi64(0xff));
-    let ll = S::and_epi64(l, S::set1_epi64(0xff));
+    let ii = S::and_epi64(i, S::Vi64::set1(0xff));
+    let jj = S::and_epi64(j, S::Vi64::set1(0xff));
+    let kk = S::and_epi64(k, S::Vi64::set1(0xff));
+    let ll = S::and_epi64(l, S::Vi64::set1(0xff));
 
     let lp = S::i64gather_epi64(&PERM64, ll);
     let kp = S::i64gather_epi64(&PERM64, S::add_epi64(kk, lp));
@@ -536,18 +536,18 @@ pub unsafe fn simplex_4d<S: Simd>(
     let jp = S::i64gather_epi64(&PERM64, S::add_epi64(S::add_epi64(jj, j3), kp));
     let gi3 = S::i64gather_epi64(&PERM64, S::add_epi64(S::add_epi64(ii, i3), jp));
 
-    let lp = S::i64gather_epi64(&PERM64, S::add_epi64(ll, S::set1_epi64(1)));
+    let lp = S::i64gather_epi64(&PERM64, S::add_epi64(ll, S::Vi64::set1(1)));
     let kp = S::i64gather_epi64(
         &PERM64,
-        S::add_epi64(S::add_epi64(kk, S::set1_epi64(1)), lp),
+        S::add_epi64(S::add_epi64(kk, S::Vi64::set1(1)), lp),
     );
     let jp = S::i64gather_epi64(
         &PERM64,
-        S::add_epi64(S::add_epi64(jj, S::set1_epi64(1)), kp),
+        S::add_epi64(S::add_epi64(jj, S::Vi64::set1(1)), kp),
     );
     let gi4 = S::i64gather_epi64(
         &PERM64,
-        S::add_epi64(S::add_epi64(ii, S::set1_epi64(1)), jp),
+        S::add_epi64(S::add_epi64(ii, S::Vi64::set1(1)), jp),
     );
 
     let t0 = S::sub_pd(

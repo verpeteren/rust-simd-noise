@@ -34,21 +34,21 @@ pub unsafe fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> 
     // I don't know what values the Hash3d fields should hold or what magic number are needed for the bit shifts.
     unimplemented!();
     /*
-    let mut hash = i ^ S::set1_epi64(seed);
+    let mut hash = i ^ S::Vi64::set1(seed);
     hash = j ^ hash;
     hash = k ^ hash;
     hash = S::mullo_epi64(
-        S::mullo_epi64(S::mullo_epi64(hash, hash), S::set1_epi64(60493)),
+        S::mullo_epi64(S::mullo_epi64(hash, hash), S::Vi64::set1(60493)),
         hash,
     );
     hash = S::srai_epi64(hash, 13) ^ hash;
-    let hasha13 = S::and_epi64(hash, S::set1_epi64(13));
+    let hasha13 = S::and_epi64(hash, S::Vi64::set1(13));
     Hash3d::new(
-        S::castepi64_pd(S::cmplt_epi64(hasha13, S::set1_epi64(8))),
-        S::castepi64_pd(S::cmplt_epi64(hasha13, S::set1_epi64(2))),
-        S::castepi64_pd(S::cmpeq_epi64(S::set1_epi64(12), hasha13)),
+        S::castepi64_pd(S::cmplt_epi64(hasha13, S::Vi64::set1(8))),
+        S::castepi64_pd(S::cmplt_epi64(hasha13, S::Vi64::set1(2))),
+        S::castepi64_pd(S::cmpeq_epi64(S::Vi64::set1(12), hasha13)),
         S::castepi64_pd(S::slli_epi64(hash, 31)),
-        S::castepi64_pd(S::slli_epi64(S::and_epi64(hash, S::set1_epi64(2)), 30)),
+        S::castepi64_pd(S::slli_epi64(S::and_epi64(hash, S::Vi64::set1(2)), 30)),
     )
     */
 }
