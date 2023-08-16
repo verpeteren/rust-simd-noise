@@ -11,14 +11,14 @@ pub unsafe fn ridge_1d<S: Simd>(
     seed: i64,
 ) -> S::Vf64 {
     let mut amp = S::Vf64::set1(1.0);
-    let mut result = S::sub_pd(S::Vf64::set1(1.0), S::abs_pd(simplex_1d::<S>(x, seed)));
+    let mut result = S::sub_pd(S::Vf64::set1(1.0), simplex_1d::<S>(x, seed).abs());
 
     for _ in 1..octaves {
         x = S::mul_pd(x, lacunarity);
         amp = S::mul_pd(amp, gain);
         result = S::add_pd(
             result,
-            S::sub_pd(S::Vf64::set1(1.0), S::abs_pd(simplex_1d::<S>(x, seed))),
+            S::sub_pd(S::Vf64::set1(1.0), simplex_1d::<S>(x, seed).abs()),
         );
     }
 
@@ -34,7 +34,7 @@ pub unsafe fn ridge_2d<S: Simd>(
     octaves: u8,
     seed: i64,
 ) -> S::Vf64 {
-    let mut result = S::sub_pd(S::Vf64::set1(1.0), S::abs_pd(simplex_2d::<S>(x, y, seed)));
+    let mut result = S::sub_pd(S::Vf64::set1(1.0), simplex_2d::<S>(x, y, seed).abs());
     let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
@@ -43,11 +43,7 @@ pub unsafe fn ridge_2d<S: Simd>(
         amp = S::mul_pd(amp, gain);
         result = S::add_pd(
             result,
-            S::fnmadd_pd(
-                S::abs_pd(simplex_2d::<S>(x, y, seed)),
-                amp,
-                S::Vf64::set1(1.0),
-            ),
+            S::fnmadd_pd(simplex_2d::<S>(x, y, seed).abs(), amp, S::Vf64::set1(1.0)),
         );
     }
 
@@ -64,10 +60,7 @@ pub unsafe fn ridge_3d<S: Simd>(
     octaves: u8,
     seed: i64,
 ) -> S::Vf64 {
-    let mut result = S::sub_pd(
-        S::Vf64::set1(1.0),
-        S::abs_pd(simplex_3d::<S>(x, y, z, seed)),
-    );
+    let mut result = S::sub_pd(S::Vf64::set1(1.0), simplex_3d::<S>(x, y, z, seed).abs());
     let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
@@ -78,7 +71,7 @@ pub unsafe fn ridge_3d<S: Simd>(
         result = S::add_pd(
             result,
             S::fnmadd_pd(
-                S::abs_pd(simplex_3d::<S>(x, y, z, seed)),
+                simplex_3d::<S>(x, y, z, seed).abs(),
                 amp,
                 S::Vf64::set1(1.0),
             ),
@@ -99,10 +92,7 @@ pub unsafe fn ridge_4d<S: Simd>(
     octaves: u8,
     seed: i64,
 ) -> S::Vf64 {
-    let mut result = S::sub_pd(
-        S::Vf64::set1(1.0),
-        S::abs_pd(simplex_4d::<S>(x, y, z, w, seed)),
-    );
+    let mut result = S::sub_pd(S::Vf64::set1(1.0), simplex_4d::<S>(x, y, z, w, seed).abs());
     let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
@@ -115,7 +105,7 @@ pub unsafe fn ridge_4d<S: Simd>(
             result,
             S::sub_pd(
                 S::Vf64::set1(1.0),
-                S::abs_pd(S::mul_pd(simplex_4d::<S>(x, y, z, w, seed), amp)),
+                S::mul_pd(simplex_4d::<S>(x, y, z, w, seed), amp).abs(),
             ),
         );
     }

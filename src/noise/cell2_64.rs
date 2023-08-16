@@ -51,10 +51,10 @@ pub unsafe fn cellular2_2d<S: Simd>(
 
             let new_distance = match distance_function {
                 CellDistanceFunction::Euclidean => S::add_pd(S::mul_pd(xd, xd), S::mul_pd(yd, yd)),
-                CellDistanceFunction::Manhattan => S::add_pd(S::abs_pd(xd), S::abs_pd(yd)),
+                CellDistanceFunction::Manhattan => S::add_pd(xd.abs(), yd.abs()),
                 CellDistanceFunction::Natural => {
                     let euc = S::add_pd(S::mul_pd(xd, xd), S::mul_pd(yd, yd));
-                    let man = S::add_pd(S::abs_pd(xd), S::abs_pd(yd));
+                    let man = S::add_pd(xd.abs(), yd.abs());
                     S::add_pd(euc, man)
                 }
             };
@@ -150,14 +150,14 @@ pub unsafe fn cellular2_3d<S: Simd>(
                         S::add_pd(S::mul_pd(yd, yd), S::mul_pd(zd, zd)),
                     ),
                     CellDistanceFunction::Manhattan => {
-                        S::add_pd(S::add_pd(S::abs_pd(xd), S::abs_pd(yd)), S::abs_pd(zd))
+                        S::add_pd(S::add_pd(xd.abs(), yd.abs()), zd.abs())
                     }
                     CellDistanceFunction::Natural => {
                         let euc = S::add_pd(
                             S::mul_pd(xd, xd),
                             S::add_pd(S::mul_pd(yd, yd), S::mul_pd(zd, zd)),
                         );
-                        let man = S::add_pd(S::add_pd(S::abs_pd(xd), S::abs_pd(yd)), S::abs_pd(zd));
+                        let man = S::add_pd(S::add_pd(xd.abs(), yd.abs()), zd.abs());
                         S::add_pd(euc, man)
                     }
                 };
