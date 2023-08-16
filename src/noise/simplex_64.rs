@@ -132,7 +132,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 
     let i1 = S::castpd_epi64(S::cmpge_pd(x0, y0));
 
-    let j1 = S::castpd_epi64(S::cmpgt_pd(y0, x0));
+    let j1 = S::castpd_epi64(y0.cmp_gt(x0));
 
     // Distances to the second and third points of the enclosing simplex
     let x1 = S::add_pd(S::add_pd(x0, i1.cast_f64()), S::Vf64::set1(G2_64));
@@ -448,22 +448,22 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut rank_z = S::setzero_epi64();
     let mut rank_w = S::setzero_epi64();
 
-    let cond = S::castpd_epi64(S::cmpgt_pd(x0, y0));
+    let cond = S::castpd_epi64(x0.cmp_gt(y0));
     rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
     rank_y = S::add_epi64(rank_y, cond.and_not(S::Vi64::set1(1)));
-    let cond = S::castpd_epi64(S::cmpgt_pd(x0, z0));
+    let cond = S::castpd_epi64(x0.cmp_gt(z0));
     rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
     rank_z = S::add_epi64(rank_z, cond.and_not(S::Vi64::set1(1)));
-    let cond = S::castpd_epi64(S::cmpgt_pd(x0, w0));
+    let cond = S::castpd_epi64(x0.cmp_gt(w0));
     rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
     rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
-    let cond = S::castpd_epi64(S::cmpgt_pd(y0, z0));
+    let cond = S::castpd_epi64(y0.cmp_gt(z0));
     rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::Vi64::set1(1)));
     rank_z = S::add_epi64(rank_z, cond.and_not(S::Vi64::set1(1)));
-    let cond = S::castpd_epi64(S::cmpgt_pd(y0, w0));
+    let cond = S::castpd_epi64(y0.cmp_gt(w0));
     rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::Vi64::set1(1)));
     rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
-    let cond = S::castpd_epi64(S::cmpgt_pd(z0, w0));
+    let cond = S::castpd_epi64(z0.cmp_gt(w0));
     rank_z = S::add_epi64(rank_z, S::and_epi64(cond, S::Vi64::set1(1)));
     rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
 
