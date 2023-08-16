@@ -37,10 +37,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
-                                S::and_epi32(
-                                    (hash >> 10),
-                                    S::Vi32::set1(BIT_10_MASK_32),
-                                ).cast_f32(),
+                                S::and_epi32((hash >> 10), S::Vi32::set1(BIT_10_MASK_32))
+                                    .cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
                             let mut xd2 = S::mul_ps(xd, xd);
@@ -70,10 +68,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
-                                S::and_epi32(
-                                    (hash >> 10),
-                                    S::Vi32::set1(BIT_10_MASK_32),
-                                ).cast_f32(),
+                                S::and_epi32((hash >> 10), S::Vi32::set1(BIT_10_MASK_32))
+                                    .cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
                             let inv_mag = S::mul_ps(
@@ -104,10 +100,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
-                                S::and_epi32(
-                                    (hash >> 10),
-                                    S::Vi32::set1(BIT_10_MASK_32),
-                                ).cast_f32(),
+                                S::and_epi32((hash >> 10), S::Vi32::set1(BIT_10_MASK_32))
+                                    .cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
                             let inv_mag = S::mul_ps(
@@ -144,14 +138,12 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_ps(
-                                S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32).cast_f32(),
+                                S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
-                                S::and_epi32(
-                                    (hash >> 10),
-                                    S::Vi32::set1(BIT_10_MASK_32),
-                                ).cast_f32(),
+                                S::and_epi32((hash >> 10), S::Vi32::set1(BIT_10_MASK_32))
+                                    .cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
                             let inv_mag = S::mul_ps(
@@ -186,10 +178,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
-                                S::and_epi32(
-                                    (hash >> 10),
-                                    S::Vi32::set1(BIT_10_MASK_32),
-                                ).cast_f32(),
+                                S::and_epi32((hash >> 10), S::Vi32::set1(BIT_10_MASK_32))
+                                    .cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
                             let inv_mag = S::mul_ps(
@@ -224,10 +214,8 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf32::set1(511.5),
                             );
                             let mut yd = S::sub_ps(
-                                S::and_epi32(
-                                    (hash >> 10),
-                                    S::Vi32::set1(BIT_10_MASK_32),
-                                ).cast_f32(),
+                                S::and_epi32((hash >> 10), S::Vi32::set1(BIT_10_MASK_32))
+                                    .cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
                             let inv_mag = S::mul_ps(
@@ -318,8 +306,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                 yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
                 zd = S::add_ps(S::mul_ps(zd, inv_mag), zcf);
 
-                let new_cell_value =
-                    S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), hash.cast_f32());
+                let new_cell_value = S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), hash.cast_f32());
                 let new_distance = match distance_function {
                     CellDistanceFunction::Euclidean => S::add_ps(
                         S::mul_ps(xd, xd),
