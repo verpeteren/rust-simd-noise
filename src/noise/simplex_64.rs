@@ -42,14 +42,14 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::V
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
     let mut i0 = ips.cast_i64();
-    let i1 = S::and_epi64(S::add_epi64(i0, S::Vi64::set1(1)), S::Vi64::set1(0xff));
+    let i1 = (S::add_epi64(i0, S::Vi64::set1(1)) & S::Vi64::set1(0xff));
 
     // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
     let x0 = S::sub_pd(x, ips);
     // signed distance to the right gradient node
     let x1 = S::sub_pd(x0, S::Vf64::set1(1.0));
 
-    i0 = S::and_epi64(i0, S::Vi64::set1(0xff));
+    i0 = (i0 & S::Vi64::set1(0xff));
     let gi0 = S::i64gather_epi64(&PERM64, i0);
     let gi1 = S::i64gather_epi64(&PERM64, i1);
 
@@ -140,8 +140,8 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let x2 = S::add_pd(S::add_pd(x0, S::Vf64::set1(-1.0)), S::Vf64::set1(G22_64));
     let y2 = S::add_pd(S::add_pd(y0, S::Vf64::set1(-1.0)), S::Vf64::set1(G22_64));
 
-    let ii = S::and_epi64(i, S::Vi64::set1(0xff));
-    let jj = S::and_epi64(j, S::Vi64::set1(0xff));
+    let ii = (i & S::Vi64::set1(0xff));
+    let jj = (j & S::Vi64::set1(0xff));
 
     let gi0 = S::i64gather_epi64(&PERM64, S::add_epi64(ii, S::i64gather_epi64(&PERM64, jj)));
 
@@ -328,15 +328,15 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let g0 = grad3d_dot::<S>(seed, i, j, k, x0, y0, z0);
     let v0 = t40 * g0;
 
-    let v1x = S::add_epi64(i, S::and_epi64(i1.cast_i64(), S::Vi64::set1(X_PRIME_64)));
-    let v1y = S::add_epi64(j, S::and_epi64(j1.cast_i64(), S::Vi64::set1(Y_PRIME_64)));
-    let v1z = S::add_epi64(k, S::and_epi64(k1.cast_i64(), S::Vi64::set1(Z_PRIME_64)));
+    let v1x = S::add_epi64(i, (i1.cast_i64() & S::Vi64::set1(X_PRIME_64)));
+    let v1y = S::add_epi64(j, (j1.cast_i64() & S::Vi64::set1(Y_PRIME_64)));
+    let v1z = S::add_epi64(k, (k1.cast_i64() & S::Vi64::set1(Z_PRIME_64)));
     let g1 = grad3d_dot::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
     let v1 = t41 * g1;
 
-    let v2x = S::add_epi64(i, S::and_epi64(i2.cast_i64(), S::Vi64::set1(X_PRIME_64)));
-    let v2y = S::add_epi64(j, S::and_epi64(j2.cast_i64(), S::Vi64::set1(Y_PRIME_64)));
-    let v2z = S::add_epi64(k, S::and_epi64(k2.cast_i64(), S::Vi64::set1(Z_PRIME_64)));
+    let v2x = S::add_epi64(i, (i2.cast_i64() & S::Vi64::set1(X_PRIME_64)));
+    let v2y = S::add_epi64(j, (j2.cast_i64() & S::Vi64::set1(Y_PRIME_64)));
+    let v2z = S::add_epi64(k, (k2.cast_i64() & S::Vi64::set1(Z_PRIME_64)));
     let g2 = grad3d_dot::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
     let v2 = t42 * g2;
 
@@ -431,50 +431,50 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut rank_w = S::setzero_epi64();
 
     let cond = (x0.cmp_gt(y0)).cast_i64();
-    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_x = S::add_epi64(rank_x, (cond & S::Vi64::set1(1)));
     rank_y = S::add_epi64(rank_y, cond.and_not(S::Vi64::set1(1)));
     let cond = (x0.cmp_gt(z0)).cast_i64();
-    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_x = S::add_epi64(rank_x, (cond & S::Vi64::set1(1)));
     rank_z = S::add_epi64(rank_z, cond.and_not(S::Vi64::set1(1)));
     let cond = (x0.cmp_gt(w0)).cast_i64();
-    rank_x = S::add_epi64(rank_x, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_x = S::add_epi64(rank_x, (cond & S::Vi64::set1(1)));
     rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
     let cond = (y0.cmp_gt(z0)).cast_i64();
-    rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_y = S::add_epi64(rank_y, (cond & S::Vi64::set1(1)));
     rank_z = S::add_epi64(rank_z, cond.and_not(S::Vi64::set1(1)));
     let cond = (y0.cmp_gt(w0)).cast_i64();
-    rank_y = S::add_epi64(rank_y, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_y = S::add_epi64(rank_y, (cond & S::Vi64::set1(1)));
     rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
     let cond = (z0.cmp_gt(w0)).cast_i64();
-    rank_z = S::add_epi64(rank_z, S::and_epi64(cond, S::Vi64::set1(1)));
+    rank_z = S::add_epi64(rank_z, (cond & S::Vi64::set1(1)));
     rank_w = S::add_epi64(rank_w, cond.and_not(S::Vi64::set1(1)));
 
     let cond = rank_x.cmp_gt(S::Vi64::set1(2));
-    let i1 = S::and_epi64(S::Vi64::set1(1), cond);
+    let i1 = (S::Vi64::set1(1) & cond);
     let cond = rank_y.cmp_gt(S::Vi64::set1(2));
-    let j1 = S::and_epi64(S::Vi64::set1(1), cond);
+    let j1 = (S::Vi64::set1(1) & cond);
     let cond = rank_z.cmp_gt(S::Vi64::set1(2));
-    let k1 = S::and_epi64(S::Vi64::set1(1), cond);
+    let k1 = (S::Vi64::set1(1) & cond);
     let cond = rank_w.cmp_gt(S::Vi64::set1(2));
-    let l1 = S::and_epi64(S::Vi64::set1(1), cond);
+    let l1 = (S::Vi64::set1(1) & cond);
 
     let cond = rank_x.cmp_gt(S::Vi64::set1(1));
-    let i2 = S::and_epi64(S::Vi64::set1(1), cond);
+    let i2 = (S::Vi64::set1(1) & cond);
     let cond = rank_y.cmp_gt(S::Vi64::set1(1));
-    let j2 = S::and_epi64(S::Vi64::set1(1), cond);
+    let j2 = (S::Vi64::set1(1) & cond);
     let cond = rank_z.cmp_gt(S::Vi64::set1(1));
-    let k2 = S::and_epi64(S::Vi64::set1(1), cond);
+    let k2 = (S::Vi64::set1(1) & cond);
     let cond = rank_w.cmp_gt(S::Vi64::set1(1));
-    let l2 = S::and_epi64(S::Vi64::set1(1), cond);
+    let l2 = (S::Vi64::set1(1) & cond);
 
     let cond = rank_x.cmp_gt(S::setzero_epi64());
-    let i3 = S::and_epi64(S::Vi64::set1(1), cond);
+    let i3 = (S::Vi64::set1(1) & cond);
     let cond = rank_y.cmp_gt(S::setzero_epi64());
-    let j3 = S::and_epi64(S::Vi64::set1(1), cond);
+    let j3 = (S::Vi64::set1(1) & cond);
     let cond = rank_z.cmp_gt(S::setzero_epi64());
-    let k3 = S::and_epi64(S::Vi64::set1(1), cond);
+    let k3 = (S::Vi64::set1(1) & cond);
     let cond = rank_w.cmp_gt(S::setzero_epi64());
-    let l3 = S::and_epi64(S::Vi64::set1(1), cond);
+    let l3 = (S::Vi64::set1(1) & cond);
 
     let x1 = S::add_pd(S::sub_pd(x0, i1.cast_f64()), S::Vf64::set1(G4_64));
     let y1 = S::add_pd(S::sub_pd(y0, j1.cast_f64()), S::Vf64::set1(G4_64));
@@ -493,10 +493,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let z4 = S::add_pd(S::sub_pd(z0, S::Vf64::set1(1.0)), S::Vf64::set1(G44_64));
     let w4 = S::add_pd(S::sub_pd(w0, S::Vf64::set1(1.0)), S::Vf64::set1(G44_64));
 
-    let ii = S::and_epi64(i, S::Vi64::set1(0xff));
-    let jj = S::and_epi64(j, S::Vi64::set1(0xff));
-    let kk = S::and_epi64(k, S::Vi64::set1(0xff));
-    let ll = S::and_epi64(l, S::Vi64::set1(0xff));
+    let ii = (i & S::Vi64::set1(0xff));
+    let jj = (j & S::Vi64::set1(0xff));
+    let kk = (k & S::Vi64::set1(0xff));
+    let ll = (l & S::Vi64::set1(0xff));
 
     let lp = S::i64gather_epi64(&PERM64, ll);
     let kp = S::i64gather_epi64(&PERM64, S::add_epi64(kk, lp));

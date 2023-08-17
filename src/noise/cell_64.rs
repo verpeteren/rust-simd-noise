@@ -32,14 +32,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_pd(
-                                (S::and_epi64(hash, S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (S::and_epi64(
-                                    (hash >> 10),
-                                    S::Vi64::set1(BIT_10_MASK_64),
-                                )).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut xd2 = S::mul_pd(xd, xd);
@@ -65,14 +62,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_pd(
-                                (S::and_epi64(hash, S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (S::and_epi64(
-                                    (hash >> 10),
-                                    S::Vi64::set1(BIT_10_MASK_64),
-                                )).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -99,14 +93,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_pd(
-                                (S::and_epi64(hash, S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (S::and_epi64(
-                                    (hash >> 10),
-                                    S::Vi64::set1(BIT_10_MASK_64),
-                                )).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -143,14 +134,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_pd(
-                                (S::and_epi64(hash, S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (S::and_epi64(
-                                    (hash >> 10),
-                                    S::Vi64::set1(BIT_10_MASK_64),
-                                )).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -181,14 +169,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_pd(
-                                (S::and_epi64(hash, S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (S::and_epi64(
-                                    (hash >> 10),
-                                    S::Vi64::set1(BIT_10_MASK_64),
-                                )).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -219,14 +204,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
                             let mut xd = S::sub_pd(
-                                S::and_epi64(hash, S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
+                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (S::and_epi64(
-                                    (hash >> 10),
-                                    S::Vi64::set1(BIT_10_MASK_64),
-                                )).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -294,21 +276,15 @@ pub unsafe fn cellular_3d<S: Simd>(
             for _z in 0..3 {
                 let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_pd(
-                    (S::and_epi64(hash, S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                    (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                     S::Vf64::set1(511.5),
                 );
                 let mut yd = S::sub_pd(
-                    (S::and_epi64(
-                        (hash >> 10),
-                        S::Vi64::set1(BIT_10_MASK_64),
-                    )).cast_f64(),
+                    (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                     S::Vf64::set1(511.5),
                 );
                 let mut zd = S::sub_pd(
-                    (S::and_epi64(
-                        (hash >> 20),
-                        S::Vi64::set1(BIT_10_MASK_64),
-                    )).cast_f64(),
+                    (((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
                     S::Vf64::set1(511.5),
                 );
                 let inv_mag = S::mul_pd(
@@ -323,8 +299,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                 yd = S::add_pd(S::mul_pd(yd, inv_mag), ycf);
                 zd = S::add_pd(S::mul_pd(zd, inv_mag), zcf);
 
-                let new_cell_value =
-                    S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), hash.cast_f64());
+                let new_cell_value = S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), hash.cast_f64());
                 let new_distance = match distance_function {
                     CellDistanceFunction::Euclidean => S::add_pd(
                         S::mul_pd(xd, xd),
