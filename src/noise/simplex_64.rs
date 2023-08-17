@@ -168,9 +168,9 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let mut t2 = S::fnmadd_pd(y2, y2, S::fnmadd_pd(x2, x2, S::Vf64::set1(0.5)));
 
     // Zero out negative weights
-    t0 &= t0.cmp_ge(S::setzero_pd());
-    t1 &= t1.cmp_ge(S::setzero_pd());
-    t2 &= t2.cmp_ge(S::setzero_pd());
+    t0 &= t0.cmp_ge(S::Vf64::zeroes());
+    t1 &= t1.cmp_ge(S::Vf64::zeroes());
+    t2 &= t2.cmp_ge(S::Vf64::zeroes());
 
     let t20 = S::mul_pd(t0, t0);
     let t40 = S::mul_pd(t20, t20);
@@ -305,10 +305,10 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     );
 
     // Zero out negative weights
-    t0 &= t0.cmp_ge(S::setzero_pd());
-    t1 &= t1.cmp_ge(S::setzero_pd());
-    t2 &= t2.cmp_ge(S::setzero_pd());
-    t3 &= t3.cmp_ge(S::setzero_pd());
+    t0 &= t0.cmp_ge(S::Vf64::zeroes());
+    t1 &= t1.cmp_ge(S::Vf64::zeroes());
+    t2 &= t2.cmp_ge(S::Vf64::zeroes());
+    t3 &= t3.cmp_ge(S::Vf64::zeroes());
 
     // Square each weight
     let t20 = t0 * t0;
@@ -601,15 +601,15 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut n4 = S::mul_pd(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
 
     //if ti < 0 then 0 else ni
-    let mut cond = t0.cmp_lt(S::setzero_pd());
+    let mut cond = t0.cmp_lt(S::Vf64::zeroes());
     n0 = cond.and_not(n0);
-    cond = t1.cmp_lt(S::setzero_pd());
+    cond = t1.cmp_lt(S::Vf64::zeroes());
     n1 = cond.and_not(n1);
-    cond = t2.cmp_lt(S::setzero_pd());
+    cond = t2.cmp_lt(S::Vf64::zeroes());
     n2 = cond.and_now(n2);
-    cond = t3.cmp_lt(S::setzero_pd());
+    cond = t3.cmp_lt(S::Vf64::zeroes());
     n3 = cond.and_not(n3);
-    cond = t4.cmp_lt(S::setzero_pd());
+    cond = t4.cmp_lt(S::Vf64::zeroes());
     n4 = cond.and_not(n4);
 
     S::add_pd(n0, S::add_pd(n1, S::add_pd(n2, S::add_pd(n3, n4))))
