@@ -303,7 +303,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                 let new_distance = match distance_function {
                     CellDistanceFunction::Euclidean => (
                         S::mul_pd(xd, xd) +
-                        (S::mul_pd(yd, yd) + S::mul_pd(zd, zd)),
+                        (S::mul_pd(yd, yd) + S::mul_pd(zd, zd))
                     ),
                     CellDistanceFunction::Manhattan => {
                         ((xd.abs() + yd.abs()) + zd.abs())
