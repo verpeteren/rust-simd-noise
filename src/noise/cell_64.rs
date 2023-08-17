@@ -36,7 +36,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let mut xd2 = S::mul_pd(xd, xd);
@@ -66,7 +66,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -97,7 +97,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -138,7 +138,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -173,7 +173,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -208,7 +208,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
                             let inv_mag = S::mul_pd(
@@ -280,11 +280,11 @@ pub unsafe fn cellular_3d<S: Simd>(
                     S::Vf64::set1(511.5),
                 );
                 let mut yd = S::sub_pd(
-                    (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                    (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                     S::Vf64::set1(511.5),
                 );
                 let mut zd = S::sub_pd(
-                    (((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64),)).cast_f64(),
+                    (((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
                     S::Vf64::set1(511.5),
                 );
                 let inv_mag = S::mul_pd(
@@ -311,7 +311,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                     CellDistanceFunction::Natural => {
                         let euc = (
                             S::mul_pd(xd, xd) +
-                            (S::mul_pd(yd, yd) + S::mul_pd(zd, zd)),
+                            (S::mul_pd(yd, yd) + S::mul_pd(zd, zd))
                         );
                         let man = ((xd.abs() + yd.abs()) + zd.abs());
                         euc + man

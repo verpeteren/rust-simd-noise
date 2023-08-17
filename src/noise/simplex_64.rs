@@ -147,13 +147,13 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 
     let gi1 = S::i64gather_epi64(
         &PERM64,
-        (S::sub_epi64(ii, i1) + S::i64gather_epi64(&PERM64, S::sub_epi64(jj, j1)),),
+        (S::sub_epi64(ii, i1) + S::i64gather_epi64(&PERM64, S::sub_epi64(jj, j1))),
     );
 
     let gi2 = S::i64gather_epi64(
         &PERM64,
         (S::sub_epi64(ii, S::Vi64::set1(-1))
-            + S::i64gather_epi64(&PERM64, S::sub_epi64(jj, S::Vi64::set1(-1))),),
+            + S::i64gather_epi64(&PERM64, S::sub_epi64(jj, S::Vi64::set1(-1)))),
     );
 
     // Weights associated with the gradients at each corner
@@ -471,7 +471,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let x1 = S::sub_pd(x0, i1.cast_f64())+ S::Vf64::set1(G4_64);
     let y1 = S::sub_pd(y0, j1.cast_f64())+ S::Vf64::set1(G4_64);
     let z1 = S::sub_pd(z0, k1.cast_f64())+ S::Vf64::set1(G4_64);
-    let w1 = S::sub_pd(w0, l1.cast_f64())+ S::Vf64::set1(G4_64)
+    let w1 = S::sub_pd(w0, l1.cast_f64())+ S::Vf64::set1(G4_64);
     let x2 = S::sub_pd(x0, i2.cast_f64())+ S::Vf64::set1(G24_64);
     let y2 = S::sub_pd(y0, j2.cast_f64())+ S::Vf64::set1(G24_64);
     let z2 = S::sub_pd(z0, k2.cast_f64())+ S::Vf64::set1(G24_64);

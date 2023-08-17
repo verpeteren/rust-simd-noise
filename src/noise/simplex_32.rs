@@ -179,13 +179,13 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 
     let gi1 = S::i32gather_epi32(
         &PERM,
-        (S::sub_epi32(ii, i1) + S::i32gather_epi32(&PERM, S::sub_epi32(jj, j1)),),
+        (S::sub_epi32(ii, i1) + S::i32gather_epi32(&PERM, S::sub_epi32(jj, j1))),
     );
 
     let gi2 = S::i32gather_epi32(
         &PERM,
         (S::sub_epi32(ii, S::Vi32::set1(-1))
-            + S::i32gather_epi32(&PERM, S::sub_epi32(jj, S::Vi32::set1(-1))),),
+            + S::i32gather_epi32(&PERM, S::sub_epi32(jj, S::Vi32::set1(-1)))),
     );
 
     // Weights associated with the gradients at each corner

@@ -35,7 +35,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
                 S::Vf32::set1(511.5),
             );
             let mut yd = S::sub_ps(
-                ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32),).cast_f32(),
+                ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                 S::Vf32::set1(511.5),
             );
             let inv_mag = S::mul_ps(jitter, (S::mul_ps(xd, xd) + S::mul_ps(yd, yd)).rsqrt());
@@ -112,16 +112,16 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     S::Vf32::set1(511.5),
                 );
                 let mut yd = S::sub_ps(
-                    ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32),).cast_f32(),
+                    ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                     S::Vf32::set1(511.5),
                 );
                 let mut zd = S::sub_ps(
-                    ((hash >> 20) & S::Vi32::set1(BIT_10_MASK_32),).cast_f32(),
+                    ((hash >> 20) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                     S::Vf32::set1(511.5),
                 );
                 let inv_mag = S::mul_ps(
                     jitter,
-                    (S::mul_ps(xd, xd) + (S::mul_ps(yd, yd) + S::mul_ps(zd, zd)),).rsqrt(),
+                    (S::mul_ps(xd, xd) + (S::mul_ps(yd, yd) + S::mul_ps(zd, zd))).rsqrt(),
                 );
                 xd = S::mul_ps(xd, inv_mag) + xcf;
                 yd = S::mul_ps(yd, inv_mag) + ycf;
