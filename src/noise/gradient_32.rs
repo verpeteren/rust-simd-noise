@@ -12,7 +12,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
     let v = (h & S::Vi32::set1(7)).cast_f32();
 
     let h_and_8 = ((h & S::Vi32::set1(8)).cmp_eq(S::setzero_epi32())).cast_f32();
-    S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_8)
+    h_and_8.blendv(S::sub_ps(S::setzero_ps(), v), v)
 }
 
 /// Generates a random gradient vector where one component is ±1 and the other is ±2.
@@ -23,22 +23,18 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
     let h = ((hash ^ S::Vi32::set1(seed)) & S::Vi32::set1(7));
     let mask = (S::Vi32::set1(4).cmp_gt(h)).cast_f32();
-    let x_magnitude = S::blendv_ps(S::Vf32::set1(2.0), S::Vf32::set1(1.0), mask);
-    let y_magnitude = S::blendv_ps(S::Vf32::set1(1.0), S::Vf32::set1(2.0), mask);
+    let x_magnitude = mask.blendv(S::Vf32::set1(2.0), S::Vf32::set1(1.0));
+    let y_magnitude = mask.blendv(S::Vf32::set1(1.0), S::Vf32::set1(2.0));
 
     let h_and_1 = ((h & S::Vi32::set1(1)).cmp_eq(S::setzero_epi32())).cast_f32();
     let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::setzero_epi32())).cast_f32();
 
-    let gx = S::blendv_ps(
-        S::sub_ps(S::setzero_ps(), x_magnitude),
-        x_magnitude,
-        S::blendv_ps(h_and_2, h_and_1, mask),
-    );
-    let gy = S::blendv_ps(
-        S::sub_ps(S::setzero_ps(), y_magnitude),
-        y_magnitude,
-        S::blendv_ps(h_and_1, h_and_2, mask),
-    );
+    let gx = mask
+        .blendv(h_and_2, h_and_1)
+        .blendv(S::sub_ps(S::setzero_ps(), x_magnitude), x_magnitude);
+    let gy = mask
+        .blendv(h_and_1, h_and_2)
+        .blendv(S::sub_ps(S::setzero_ps(), y_magnitude), y_magnitude);
     [gx, gy]
 }
 
@@ -55,8 +51,8 @@ pub unsafe fn grad3d_dot<S: Simd>(
     z: S::Vf32,
 ) -> S::Vf32 {
     let h = hash3d::<S>(seed, i, j, k);
-    let u = S::blendv_ps(y, x, h.l8);
-    let v = S::blendv_ps(S::blendv_ps(z, x, h.h12_or_14), y, h.l4);
+    let u = h.l8.blendv(y, x);
+    let v = h.l4.blendv(h.h12_or_14.blendv(z, x), y);
     let result = S::add_ps((u ^ h.h1), (v ^ h.h2));
     debug_assert_eq!(
         result[0],
@@ -81,8 +77,8 @@ pub unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> 
     let mut gy = h.l8.and_not(first);
 
     let second = S::Vf32::set1(1.0) | h.h2;
-    gy = S::blendv_ps(gy, second, h.l4);
-    gx = S::blendv_ps(gx, second, h.l4.and_not(h.h12_or_14));
+    gy = h.l4.blendv(gy, second);
+    gx = h.l4.and_not(h.h12_or_14).blendv(gx, second);
     let gz = (h.h12_or_14 | h.l4).and_not(second);
     debug_assert_eq!(
         gx[0].abs() + gy[0].abs() + gz[0].abs(),
@@ -103,21 +99,21 @@ pub unsafe fn grad4<S: Simd>(
 ) -> S::Vf32 {
     let h = ((S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(31));
     let mut mask = (S::Vi32::set1(24).cmp_gt(h)).cast_f32();
-    let u = S::blendv_ps(y, x, mask);
+    let u = mask.blendv(y, x);
     mask = (S::Vi32::set1(16).cmp_gt(h)).cast_f32();
-    let v = S::blendv_ps(z, y, mask);
+    let v = mask.blendv(z, y);
     mask = (S::Vi32::set1(8).cmp_gt(h)).cast_f32();
-    let w = S::blendv_ps(t, z, mask);
+    let w = mask.blendv(t, z);
 
     let h_and_1 = ((h & S::Vi32::set1(1)).cmp_eq(S::setzero_epi32())).cast_f32();
     let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::setzero_epi32())).cast_f32();
     let h_and_4 = ((h & S::Vi32::set1(4)).cmp_eq(S::setzero_epi32())).cast_f32();
 
     S::add_ps(
-        S::blendv_ps(S::sub_ps(S::setzero_ps(), u), u, h_and_1),
+        h_and_1.blendv(S::sub_ps(S::setzero_ps(), u), u),
         S::add_ps(
-            S::blendv_ps(S::sub_ps(S::setzero_ps(), v), v, h_and_2),
-            S::blendv_ps(S::sub_ps(S::setzero_ps(), w), w, h_and_4),
+            h_and_2.blendv(S::sub_ps(S::setzero_ps(), v), v),
+            h_and_4.blendv(S::sub_ps(S::setzero_ps(), w), w),
         ),
     )
 }

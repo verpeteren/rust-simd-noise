@@ -154,7 +154,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             let new_distance = S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd));
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
-                            cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
+                            cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
                             yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
@@ -189,7 +189,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             let new_distance = S::add_ps(xd.abs(), yd.abs());
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
-                            cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
+                            cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
                             yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
@@ -228,7 +228,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             };
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
-                            cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
+                            cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
                             yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
@@ -320,7 +320,7 @@ pub unsafe fn cellular_3d<S: Simd>(
                 };
                 let closer = new_distance.cmp_lt(distance);
                 distance = new_distance.min(distance);
-                cell_value = S::blendv_ps(cell_value, new_cell_value, closer);
+                cell_value = closer.blendv(cell_value, new_cell_value);
                 zcf = S::add_ps(ycf, S::Vf32::set1(1.0));
                 zc = S::add_epi32(yc, S::Vi32::set1(Z_PRIME_32));
             }
