@@ -44,11 +44,11 @@ pub unsafe fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> 
     hash = (hash >> 13) ^ hash;
     let hasha13 = S::and_epi64(hash, S::Vi64::set1(13));
     Hash3d::new(
-        S::castepi64_pd(S::cmplt_epi64(hasha13, S::Vi64::set1(8))),
-        S::castepi64_pd(S::cmplt_epi64(hasha13, S::Vi64::set1(2))),
-        S::castepi64_pd(hasha13.cmp_eq( S::Vi64::set1(12))),
-        S::castepi64_pd(S::slli_epi64(hash, 31)),
-        S::castepi64_pd(S::slli_epi64(S::and_epi64(hash, S::Vi64::set1(2)), 30)),
+        (S::cmplt_epi64(hasha13, S::Vi64::set1(8))).cast_f64(),
+        (S::cmplt_epi64(hasha13, S::Vi64::set1(2))).cast_f64(),
+        (hasha13.cmp_eq( S::Vi64::set1(12))).cast_f64(),
+        (S::slli_epi64(hash, 31)).cast_f64(),
+        (S::slli_epi64(S::and_epi64(hash, S::Vi64::set1(2)), 30)).cast_f64(),
     )
     */
 }
