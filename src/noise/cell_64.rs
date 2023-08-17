@@ -48,7 +48,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             let new_distance = xd2 + S::mul_pd(yd, yd);
                             distance = new_distance.min(distance);
 
-                            ycf = ycf ++ S::Vf64::set1(1.0);
+                            ycf = ycf + S::Vf64::set1(1.0);
                             yc = yc + S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = xcf + S::Vf64::set1(1.0);
