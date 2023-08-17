@@ -23,8 +23,8 @@ pub unsafe fn cellular2_2d<S: Simd>(
     let mut xcf = S::sub_pd(xc.cast_f64(), x);
     let ycf_base = S::sub_pd(yc_base.cast_f64(), y);
 
-    xc = S::mullo_epi64(xc, S::Vi64::set1(X_PRIME_64));
-    yc_base = S::mullo_epi64(yc_base, S::Vi64::set1(Y_PRIME_64));
+    xc = xc * S::Vi64::set1(X_PRIME_64);
+    yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -96,9 +96,9 @@ pub unsafe fn cellular2_3d<S: Simd>(
     let ycf_base = S::sub_pd(yc_base.cast_f64(), y);
     let zcf_base = S::sub_pd(zc_base.cast_f64(), z);
 
-    xc = S::mullo_epi64(xc, S::Vi64::set1(X_PRIME_64));
-    yc_base = S::mullo_epi64(yc_base, S::Vi64::set1(Y_PRIME_64));
-    zc_base = S::mullo_epi64(zc_base, S::Vi64::set1(Z_PRIME_64));
+    xc = xc * S::Vi64::set1(X_PRIME_64);
+    yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
+    zc_base = zc_base * S::Vi64::set1(Z_PRIME_64);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;

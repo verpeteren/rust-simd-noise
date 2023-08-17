@@ -37,9 +37,8 @@ pub unsafe fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> 
     let mut hash = i ^ S::Vi64::set1(seed);
     hash = j ^ hash;
     hash = k ^ hash;
-    hash = S::mullo_epi64(
-        S::mullo_epi64(S::mullo_epi64(hash, hash), S::Vi64::set1(60493)),
-        hash,
+    hash = (
+        ((hash * hash), S::Vi64::set1(60493)) * hash
     );
     hash = (hash >> 13) ^ hash;
     let hasha13 = (hash & S::Vi64::set1(13));
