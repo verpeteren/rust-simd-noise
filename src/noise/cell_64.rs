@@ -49,10 +49,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
-                            yc = S::add_epi64(yc, S::Vi64::set1(Y_PRIME_64));
+                            yc = yc + S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = S::add_pd(xcf, S::Vf64::set1(1.0));
-                        xc = S::add_epi64(xc, S::Vi64::set1(X_PRIME_64));
+                        xc = c + S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -80,10 +80,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
-                            yc = S::add_epi64(yc, S::Vi64::set1(Y_PRIME_64));
+                            yc = yc, S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = S::add_pd(xcf, S::Vf64::set1(1.0));
-                        xc = S::add_epi64(xc, S::Vi64::set1(X_PRIME_64));
+                        xc = xc + S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -115,10 +115,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
-                            yc = S::add_epi64(yc, S::Vi64::set1(Y_PRIME_64));
+                            yc = yc + S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = S::add_pd(xcf, S::Vf64::set1(1.0));
-                        xc = S::add_epi64(xc, S::Vi64::set1(X_PRIME_64));
+                        xc = xc + S::Vi64::set1(X_PRIME_64);
                     }
                 }
             }
@@ -156,10 +156,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
-                            yc = S::add_epi64(yc, S::Vi64::set1(Y_PRIME_64));
+                            yc = yc + S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = S::add_pd(xcf, S::Vf64::set1(1.0));
-                        xc = S::add_epi64(xc, S::Vi64::set1(X_PRIME_64));
+                        xc = xc + S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -191,10 +191,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
-                            yc = S::add_epi64(yc, S::Vi64::set1(Y_PRIME_64));
+                            yc = yc + S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = S::add_pd(xcf, S::Vf64::set1(1.0));
-                        xc = S::add_epi64(xc, S::Vi64::set1(X_PRIME_64));
+                        xc = xc + S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -230,10 +230,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
-                            yc = S::add_epi64(yc, S::Vi64::set1(Y_PRIME_64));
+                            yc = yc + S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = S::add_pd(xcf, S::Vf64::set1(1.0));
-                        xc = S::add_epi64(xc, S::Vi64::set1(X_PRIME_64));
+                        xc = xc + S::Vi64::set1(X_PRIME_64);
                     }
                 }
             }
@@ -321,13 +321,13 @@ pub unsafe fn cellular_3d<S: Simd>(
                 distance = new_distance.min(distance);
                 cell_value = closer.blendv(cell_value, new_cell_value);
                 zcf = S::add_pd(ycf, S::Vf64::set1(1.0));
-                zc = S::add_epi64(yc, S::Vi64::set1(Z_PRIME_64));
+                zc = yc + S::Vi64::set1(Z_PRIME_64);
             }
             ycf = S::add_pd(ycf, S::Vf64::set1(1.0));
-            yc = S::add_epi64(yc, S::Vi64::set1(Y_PRIME_64));
+            yc = yc + S::Vi64::set1(Y_PRIME_64);
         }
         xcf = S::add_pd(xcf, S::Vf64::set1(1.0));
-        xc = S::add_epi64(xc, S::Vi64::set1(X_PRIME_64));
+        xc = xc + S::Vi64::set1(X_PRIME_64);
     }
 
     match return_type {
