@@ -52,7 +52,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yc = yc + S::Vi64::set1(Y_PRIME_64);
                         }
                         xcf = xcf + S::Vf64::set1(1.0);
-                        xc = c + S::Vi64::set1(X_PRIME_64);
+                        xc = xc + S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Manhattan => {
