@@ -425,10 +425,10 @@ pub unsafe fn simplex_4d<S: Simd>(
     let z0 = S::sub_pd(z, S::sub_pd(kpd, t));
     let w0 = S::sub_pd(w, S::sub_pd(lpd, t));
 
-    let mut rank_x = S::setzero_epi64();
-    let mut rank_y = S::setzero_epi64();
-    let mut rank_z = S::setzero_epi64();
-    let mut rank_w = S::setzero_epi64();
+    let mut rank_x = S::Vi64::zeroes();
+    let mut rank_y = S::Vi64::zeroes();
+    let mut rank_z = S::Vi64::zeroes();
+    let mut rank_w = S::Vi64::zeroes();
 
     let cond = (x0.cmp_gt(y0)).cast_i64();
     rank_x = S::add_epi64(rank_x, (cond & S::Vi64::set1(1)));
@@ -467,13 +467,13 @@ pub unsafe fn simplex_4d<S: Simd>(
     let cond = rank_w.cmp_gt(S::Vi64::set1(1));
     let l2 = (S::Vi64::set1(1) & cond);
 
-    let cond = rank_x.cmp_gt(S::setzero_epi64());
+    let cond = rank_x.cmp_gt(S::Vi64::zeroes());
     let i3 = (S::Vi64::set1(1) & cond);
-    let cond = rank_y.cmp_gt(S::setzero_epi64());
+    let cond = rank_y.cmp_gt(S::Vi64::zeroes());
     let j3 = (S::Vi64::set1(1) & cond);
-    let cond = rank_z.cmp_gt(S::setzero_epi64());
+    let cond = rank_z.cmp_gt(S::Vi64::zeroes());
     let k3 = (S::Vi64::set1(1) & cond);
-    let cond = rank_w.cmp_gt(S::setzero_epi64());
+    let cond = rank_w.cmp_gt(S::Vi64::zeroes());
     let l3 = (S::Vi64::set1(1) & cond);
 
     let x1 = S::add_pd(S::sub_pd(x0, i1.cast_f64()), S::Vf64::set1(G4_64));
