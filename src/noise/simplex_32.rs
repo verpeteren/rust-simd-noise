@@ -74,7 +74,7 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::V
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
     let mut i0 = ips.cast_i32();
-    let i1 = S::add_epi32(i0, S::Vi32::set1(1)) & S::Vi32::set1(0xff);
+    let i1 = (i0 + S::Vi32::set1(1)) & S::Vi32::set1(0xff);
 
     // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
     let x0 = S::sub_ps(x, ips);
@@ -156,7 +156,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let i = ips.cast_i32();
     let j = jps.cast_i32();
 
-    let t = S::mul_ps(S::add_epi32(i, j).cast_f32(), S::Vf32::set1(G2_32));
+    let t = S::mul_ps((i + j).cast_f32(), S::Vf32::set1(G2_32));
 
     // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
@@ -175,22 +175,17 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let ii = i & S::Vi32::set1(0xff);
     let jj = j & S::Vi32::set1(0xff);
 
-    let gi0 = S::i32gather_epi32(&PERM, S::add_epi32(ii, S::i32gather_epi32(&PERM, jj)));
+    let gi0 = S::i32gather_epi32(&PERM, (ii + S::i32gather_epi32(&PERM, jj)));
 
     let gi1 = S::i32gather_epi32(
         &PERM,
-        S::add_epi32(
-            S::sub_epi32(ii, i1),
-            S::i32gather_epi32(&PERM, S::sub_epi32(jj, j1)),
-        ),
+        (S::sub_epi32(ii, i1) + S::i32gather_epi32(&PERM, S::sub_epi32(jj, j1)),),
     );
 
     let gi2 = S::i32gather_epi32(
         &PERM,
-        S::add_epi32(
-            S::sub_epi32(ii, S::Vi32::set1(-1)),
-            S::i32gather_epi32(&PERM, S::sub_epi32(jj, S::Vi32::set1(-1))),
-        ),
+        (S::sub_epi32(ii, S::Vi32::set1(-1))
+            + S::i32gather_epi32(&PERM, S::sub_epi32(jj, S::Vi32::set1(-1))),),
     );
 
     // Weights associated with the gradients at each corner
@@ -360,22 +355,22 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let g0 = grad3d_dot::<S>(seed, i, j, k, x0, y0, z0);
     let v0 = t40 * g0;
 
-    let v1x = S::add_epi32(i, (i1.cast_i32() & S::Vi32::set1(X_PRIME_32)));
-    let v1y = S::add_epi32(j, (j1.cast_i32() & S::Vi32::set1(Y_PRIME_32)));
-    let v1z = S::add_epi32(k, (k1.cast_i32() & S::Vi32::set1(Z_PRIME_32)));
+    let v1x = i + (i1.cast_i32() & S::Vi32::set1(X_PRIME_32));
+    let v1y = j + (j1.cast_i32() & S::Vi32::set1(Y_PRIME_32));
+    let v1z = k + (k1.cast_i32() & S::Vi32::set1(Z_PRIME_32));
     let g1 = grad3d_dot::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
     let v1 = t41 * g1;
 
-    let v2x = S::add_epi32(i, (i2.cast_i32() & S::Vi32::set1(X_PRIME_32)));
-    let v2y = S::add_epi32(j, (j2.cast_i32() & S::Vi32::set1(Y_PRIME_32)));
-    let v2z = S::add_epi32(k, (k2.cast_i32() & S::Vi32::set1(Z_PRIME_32)));
+    let v2x = i + (i2.cast_i32() & S::Vi32::set1(X_PRIME_32));
+    let v2y = j + (j2.cast_i32() & S::Vi32::set1(Y_PRIME_32));
+    let v2z = k + (k2.cast_i32() & S::Vi32::set1(Z_PRIME_32));
     let g2 = grad3d_dot::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
     let v2 = t42 * g2;
 
     //SIMDf v3 = SIMDf_MASK(n3, SIMDf_MUL(SIMDf_MUL(t3, t3), FUNC(GradCoord)(seed, SIMDi_ADD(i, SIMDi_NUM(xPrime)), SIMDi_ADD(j, SIMDi_NUM(yPrime)), SIMDi_ADD(k, SIMDi_NUM(zPrime)), x3, y3, z3)));
-    let v3x = S::add_epi32(i, S::Vi32::set1(X_PRIME_32));
-    let v3y = S::add_epi32(j, S::Vi32::set1(Y_PRIME_32));
-    let v3z = S::add_epi32(k, S::Vi32::set1(Z_PRIME_32));
+    let v3x = i + S::Vi32::set1(X_PRIME_32);
+    let v3y = j + S::Vi32::set1(Y_PRIME_32);
+    let v3z = k + S::Vi32::set1(Z_PRIME_32);
     //define SIMDf_MASK(m,a) SIMDf_AND(SIMDf_CAST_TO_FLOAT(m),a)
     let g3 = grad3d_dot::<S>(seed, v3x, v3y, v3z, x3, y3, z3);
     let v3 = t43 * g3;
@@ -453,10 +448,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let k = kps.cast_i32();
     let l = lps.cast_i32();
 
-    let t = S::mul_ps(
-        S::add_epi32(i, S::add_epi32(j, S::add_epi32(k, l))).cast_f32(),
-        S::Vf32::set1(G4_32),
-    );
+    let t = S::mul_ps((i + j + k + l).cast_f32(), S::Vf32::set1(G4_32));
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
     let y0 = S::sub_ps(y, S::sub_ps(jps, t));
     let z0 = S::sub_ps(z, S::sub_ps(kps, t));
@@ -468,23 +460,23 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut rank_w = S::Vi32::zeroes();
 
     let cond = (x0.cmp_gt(y0)).cast_i32();
-    rank_x = S::add_epi32(rank_x, (cond & S::Vi32::set1(1)));
-    rank_y = S::add_epi32(rank_y, cond.and_not(S::Vi32::set1(1)));
+    rank_x = rank_x + (cond & S::Vi32::set1(1));
+    rank_y = (rank_y + cond.and_not(S::Vi32::set1(1)));
     let cond = (x0.cmp_gt(z0)).cast_i32();
-    rank_x = S::add_epi32(rank_x, (cond & S::Vi32::set1(1)));
-    rank_z = S::add_epi32(rank_z, cond.and_not(S::Vi32::set1(1)));
+    rank_x = (rank_x + (cond & S::Vi32::set1(1)));
+    rank_z = (rank_z + cond.and_not(S::Vi32::set1(1)));
     let cond = (x0.cmp_gt(w0)).cast_i32();
-    rank_x = S::add_epi32(rank_x, (cond & S::Vi32::set1(1)));
-    rank_w = S::add_epi32(rank_w, cond.and_not(S::Vi32::set1(1)));
+    rank_x = (rank_x + (cond & S::Vi32::set1(1)));
+    rank_w = (rank_w + cond.and_not(S::Vi32::set1(1)));
     let cond = (y0.cmp_gt(z0)).cast_i32();
-    rank_y = S::add_epi32(rank_y, cond & S::Vi32::set1(1));
-    rank_z = S::add_epi32(rank_z, cond.and_not(S::Vi32::set1(1)));
+    rank_y = (rank_y + cond & S::Vi32::set1(1));
+    rank_z = (rank_z + cond.and_not(S::Vi32::set1(1)));
     let cond = (y0.cmp_gt(w0)).cast_i32();
-    rank_y = S::add_epi32(rank_y, (cond & S::Vi32::set1(1)));
-    rank_w = S::add_epi32(rank_w, cond.and_not(S::Vi32::set1(1)));
+    rank_y = (rank_y + (cond & S::Vi32::set1(1)));
+    rank_w = (rank_w + cond.and_not(S::Vi32::set1(1)));
     let cond = (z0.cmp_gt(w0)).cast_i32();
-    rank_z = S::add_epi32(rank_z, (cond & S::Vi32::set1(1)));
-    rank_w = S::add_epi32(rank_w, cond.and_not(S::Vi32::set1(1)));
+    rank_z = (rank_z + (cond & S::Vi32::set1(1)));
+    rank_w = (rank_w + cond.and_not(S::Vi32::set1(1)));
 
     let cond = rank_x.cmp_gt(S::Vi32::set1(2));
     let i1 = S::Vi32::set1(1) & cond;
@@ -536,29 +528,29 @@ pub unsafe fn simplex_4d<S: Simd>(
     let ll = l & S::Vi32::set1(0xff);
 
     let lp = S::i32gather_epi32(&PERM, ll);
-    let kp = S::i32gather_epi32(&PERM, S::add_epi32(kk, lp));
-    let jp = S::i32gather_epi32(&PERM, S::add_epi32(jj, kp));
-    let gi0 = S::i32gather_epi32(&PERM, S::add_epi32(ii, jp));
+    let kp = S::i32gather_epi32(&PERM, (kk + lp));
+    let jp = S::i32gather_epi32(&PERM, (jj + kp));
+    let gi0 = S::i32gather_epi32(&PERM, (ii + jp));
 
-    let lp = S::i32gather_epi32(&PERM, S::add_epi32(ll, l1));
-    let kp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(kk, k1), lp));
-    let jp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(jj, j1), kp));
-    let gi1 = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(ii, i1), jp));
+    let lp = S::i32gather_epi32(&PERM, (ll + l1));
+    let kp = S::i32gather_epi32(&PERM, ((kk + k1) + lp));
+    let jp = S::i32gather_epi32(&PERM, ((jj + j1) + kp));
+    let gi1 = S::i32gather_epi32(&PERM, ((ii + i1) + jp));
 
-    let lp = S::i32gather_epi32(&PERM, S::add_epi32(ll, l2));
-    let kp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(kk, k2), lp));
-    let jp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(jj, j2), kp));
-    let gi2 = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(ii, i2), jp));
+    let lp = S::i32gather_epi32(&PERM, (ll + l2));
+    let kp = S::i32gather_epi32(&PERM, ((kk + k2) + lp));
+    let jp = S::i32gather_epi32(&PERM, ((jj + j2) + kp));
+    let gi2 = S::i32gather_epi32(&PERM, ((ii + i2) + jp));
 
-    let lp = S::i32gather_epi32(&PERM, S::add_epi32(ll, l3));
-    let kp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(kk, k3), lp));
-    let jp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(jj, j3), kp));
-    let gi3 = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(ii, i3), jp));
+    let lp = S::i32gather_epi32(&PERM, (ll + l3));
+    let kp = S::i32gather_epi32(&PERM, ((kk + k3) + lp));
+    let jp = S::i32gather_epi32(&PERM, ((jj + j3) + kp));
+    let gi3 = S::i32gather_epi32(&PERM, ((ii + i3) + jp));
 
-    let lp = S::i32gather_epi32(&PERM, S::add_epi32(ll, S::Vi32::set1(1)));
-    let kp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(kk, S::Vi32::set1(1)), lp));
-    let jp = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(jj, S::Vi32::set1(1)), kp));
-    let gi4 = S::i32gather_epi32(&PERM, S::add_epi32(S::add_epi32(ii, S::Vi32::set1(1)), jp));
+    let lp = S::i32gather_epi32(&PERM, (ll + S::Vi32::set1(1)));
+    let kp = S::i32gather_epi32(&PERM, ((kk + S::Vi32::set1(1)) + lp));
+    let jp = S::i32gather_epi32(&PERM, ((jj + S::Vi32::set1(1)) + kp));
+    let gi4 = S::i32gather_epi32(&PERM, ((ii + S::Vi32::set1(1)) + jp));
 
     //
     // Compute base weight factors associated with each vertex

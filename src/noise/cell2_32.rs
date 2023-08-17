@@ -61,10 +61,10 @@ pub unsafe fn cellular2_2d<S: Simd>(
                 i -= 1;
             }
             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+            yc = yc + S::Vi32::set1(Y_PRIME_32);
         }
         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+        xc = xc + S::Vi32::set1(X_PRIME_32);
     }
 
     match return_type {
@@ -158,13 +158,13 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     i -= 1;
                 }
                 zcf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                zc = S::add_epi32(yc, S::Vi32::set1(Z_PRIME_32));
+                zc = yc + S::Vi32::set1(Z_PRIME_32);
             }
             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+            yc = yc + S::Vi32::set1(Y_PRIME_32);
         }
         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+        xc = xc + S::Vi32::set1(X_PRIME_32);
     }
 
     match return_type {

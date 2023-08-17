@@ -50,10 +50,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+                            yc = yc + S::Vi32::set1(Y_PRIME_32);
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+                        xc = xc + S::Vi32::set1(X_PRIME_32);
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -81,10 +81,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+                            yc = yc + S::Vi32::set1(Y_PRIME_32);
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+                        xc = xc + S::Vi32::set1(X_PRIME_32);
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -116,10 +116,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+                            yc = yc + S::Vi32::set1(Y_PRIME_32);
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+                        xc = xc + S::Vi32::set1(X_PRIME_32);
                     }
                 }
             }
@@ -157,10 +157,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+                            yc = yc + S::Vi32::set1(Y_PRIME_32);
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+                        xc = xc + S::Vi32::set1(X_PRIME_32);
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -192,10 +192,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+                            yc = yc + S::Vi32::set1(Y_PRIME_32);
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+                        xc = xc + S::Vi32::set1(X_PRIME_32);
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -231,10 +231,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
                             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+                            yc = yc + S::Vi32::set1(Y_PRIME_32);
                         }
                         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-                        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+                        xc = xc + S::Vi32::set1(X_PRIME_32);
                     }
                 }
             }
@@ -322,13 +322,13 @@ pub unsafe fn cellular_3d<S: Simd>(
                 distance = new_distance.min(distance);
                 cell_value = closer.blendv(cell_value, new_cell_value);
                 zcf = S::add_ps(ycf, S::Vf32::set1(1.0));
-                zc = S::add_epi32(yc, S::Vi32::set1(Z_PRIME_32));
+                zc = yc + S::Vi32::set1(Z_PRIME_32);
             }
             ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
-            yc = S::add_epi32(yc, S::Vi32::set1(Y_PRIME_32));
+            yc = yc + S::Vi32::set1(Y_PRIME_32);
         }
         xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
-        xc = S::add_epi32(xc, S::Vi32::set1(X_PRIME_32));
+        xc = xc + S::Vi32::set1(X_PRIME_32);
     }
 
     match return_type {
