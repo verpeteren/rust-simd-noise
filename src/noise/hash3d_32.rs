@@ -40,12 +40,12 @@ pub unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> 
         hash,
     );
     hash = (hash >> 13) ^ hash;
-    let hasha13 = S::and_epi32(hash, S::Vi32::set1(13));
+    let hasha13 = hash & S::Vi32::set1(13);
     Hash3d::new(
         (hasha13 < S::Vi32::set1(8)).cast_f32(),
         (hasha13 < S::Vi32::set1(2)).cast_f32(),
         (hasha13).cmp_eq(S::Vi32::set1(12)).cast_f32(),
         (hash << 31).cast_f32(),
-        (S::and_epi32(hash, S::Vi32::set1(2)) << 30).cast_f32(),
+        ((hash & S::Vi32::set1(2)) << 30).cast_f32(),
     )
 }

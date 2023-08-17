@@ -31,14 +31,11 @@ pub unsafe fn cellular2_2d<S: Simd>(
         for _y in 0..3 {
             let hash = hash_2d::<S>(seed, xc, yc);
             let mut xd = S::sub_ps(
-                S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
+                (hash & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                 S::Vf32::set1(511.5),
             );
             let mut yd = S::sub_ps(
-                S::and_epi32(
-                    (hash >> 10),
-                    S::Vi32::set1(BIT_10_MASK_32),
-                ).cast_f32(),
+                ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32),).cast_f32(),
                 S::Vf32::set1(511.5),
             );
             let inv_mag = S::mul_ps(
@@ -114,21 +111,15 @@ pub unsafe fn cellular2_3d<S: Simd>(
             for _z in 0..3 {
                 let hash = hash_3d::<S>(seed, xc, yc, zc);
                 let mut xd = S::sub_ps(
-                    S::and_epi32(hash, S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
+                    (hash & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                     S::Vf32::set1(511.5),
                 );
                 let mut yd = S::sub_ps(
-                    S::and_epi32(
-                        (hash >> 10),
-                        S::Vi32::set1(BIT_10_MASK_32),
-                    ).cast_f32(),
+                    ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32),).cast_f32(),
                     S::Vf32::set1(511.5),
                 );
                 let mut zd = S::sub_ps(
-                    S::and_epi32(
-                        (hash >> 20),
-                        S::Vi32::set1(BIT_10_MASK_32),
-                    ).cast_f32(),
+                    ((hash >> 20) & S::Vi32::set1(BIT_10_MASK_32),).cast_f32(),
                     S::Vf32::set1(511.5),
                 );
                 let inv_mag = S::mul_ps(
