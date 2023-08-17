@@ -126,7 +126,7 @@ pub unsafe fn cellular_2d<S: Simd>(
             distance
         }
         CellReturnType::CellValue => {
-            let mut cell_value = S::setzero_ps();
+            let mut cell_value = S::Vf32::zeroes();
             match distance_function {
                 CellDistanceFunction::Euclidean => {
                     for _x in 0..3 {
@@ -254,7 +254,7 @@ pub unsafe fn cellular_3d<S: Simd>(
     seed: i32,
 ) -> S::Vf32 {
     let mut distance = S::Vf32::set1(999999.0);
-    let mut cell_value = S::setzero_ps();
+    let mut cell_value = S::Vf32::zeroes();
 
     let mut xc = S::sub_epi32(x.cast_i32(), S::Vi32::set1(1));
     let mut yc_base = S::sub_epi32(y.cast_i32(), S::Vi32::set1(1));

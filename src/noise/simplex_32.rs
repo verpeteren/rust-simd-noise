@@ -200,9 +200,9 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let mut t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::Vf32::set1(0.5)));
 
     // Zero out negative weights
-    t0 &= t0.cmp_ge(S::setzero_ps());
-    t1 &= t1.cmp_ge(S::setzero_ps());
-    t2 &= t2.cmp_ge(S::setzero_ps());
+    t0 &= t0.cmp_ge(S::Vf32::zeroes());
+    t1 &= t1.cmp_ge(S::Vf32::zeroes());
+    t2 &= t2.cmp_ge(S::Vf32::zeroes());
 
     let t20 = S::mul_ps(t0, t0);
     let t40 = S::mul_ps(t20, t20);
@@ -337,10 +337,10 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     );
 
     // Zero out negative weights
-    t0 &= t0.cmp_ge(S::setzero_ps());
-    t1 &= t1.cmp_ge(S::setzero_ps());
-    t2 &= t2.cmp_ge(S::setzero_ps());
-    t3 &= t3.cmp_ge(S::setzero_ps());
+    t0 &= t0.cmp_ge(S::Vf32::zeroes());
+    t1 &= t1.cmp_ge(S::Vf32::zeroes());
+    t2 &= t2.cmp_ge(S::Vf32::zeroes());
+    t3 &= t3.cmp_ge(S::Vf32::zeroes());
 
     // Square each weight
     let t20 = t0 * t0;
@@ -633,15 +633,15 @@ pub unsafe fn simplex_4d<S: Simd>(
     let mut n4 = S::mul_ps(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
 
     // Discard contributions whose base weight factors are negative
-    let mut cond = t0.cmp_lt(S::setzero_ps());
+    let mut cond = t0.cmp_lt(S::Vf32::zeroes());
     n0 = cond.and_not(n0);
-    cond = t1.cmp_lt(S::setzero_ps());
+    cond = t1.cmp_lt(S::Vf32::zeroes());
     n1 = cond.and_not(n1);
-    cond = t2.cmp_lt(S::setzero_ps());
+    cond = t2.cmp_lt(S::Vf32::zeroes());
     n2 = cond.and_not(n2);
-    cond = t3.cmp_lt(S::setzero_ps());
+    cond = t3.cmp_lt(S::Vf32::zeroes());
     n3 = cond.and_not(n3);
-    cond = t4.cmp_lt(S::setzero_ps());
+    cond = t4.cmp_lt(S::Vf32::zeroes());
     n4 = cond.and_not(n4);
 
     // Scaling factor found by numerical approximation
