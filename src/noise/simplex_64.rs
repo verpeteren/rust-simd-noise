@@ -606,7 +606,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     cond = t1.cmp_lt(S::Vf64::zeroes());
     n1 = cond.and_not(n1);
     cond = t2.cmp_lt(S::Vf64::zeroes());
-    n2 = cond.and_now(n2);
+    n2 = cond.and_not(n2);
     cond = t3.cmp_lt(S::Vf64::zeroes());
     n3 = cond.and_not(n3);
     cond = t4.cmp_lt(S::Vf64::zeroes());
