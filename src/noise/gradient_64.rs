@@ -22,7 +22,7 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
 #[inline(always)]
 pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
     let h = S::and_epi64((hash ^ S::Vi64::set1(seed)), S::Vi64::set1(7));
-    let mask = (S::cmpgt_epi64(S::Vi64::set1(4), h)).cast_f64();
+    let mask = (S::Vi64::set1(4).cmp_gt(h)).cast_f64();
     let x_magnitude = S::blendv_pd(S::Vf64::set1(2.0), S::Vf64::set1(1.0), mask);
     let y_magnitude = S::blendv_pd(S::Vf64::set1(1.0), S::Vf64::set1(2.0), mask);
 
@@ -102,11 +102,11 @@ pub unsafe fn grad4<S: Simd>(
     t: S::Vf64,
 ) -> S::Vf64 {
     let h = S::and_epi64((S::Vi64::set1(seed) ^ hash), S::Vi64::set1(31));
-    let mut mask = (S::cmpgt_epi64(S::Vi64::set1(24), h)).cast_f64();
+    let mut mask = (S::Vi64::set1(24).cmp_gt(h)).cast_f64();
     let u = S::blendv_pd(y, x, mask);
-    mask = (S::cmpgt_epi64(S::Vi64::set1(16), h)).cast_f64();
+    mask = (S::Vi64::set1(16).cmp_gt(h)).cast_f64();
     let v = S::blendv_pd(z, y, mask);
-    mask = (S::cmpgt_epi64(S::Vi64::set1(8), h)).cast_f64();
+    mask = (S::Vi64::set1(8).cmp_gt(h)).cast_f64();
     let w = S::blendv_pd(t, z, mask);
 
     let h_and_1 = (S::and_epi64(h, S::Vi64::set1(1)).cmp_eq(S::setzero_epi64())).cast_f64();
