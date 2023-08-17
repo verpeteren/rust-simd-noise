@@ -35,7 +35,7 @@ macro_rules! get_1d_noise_helper_f32 {
     for i in (0..vector_width).rev() {
         x_arr[i] = start_x + i as f32;
     }
-    let mut x = S::loadu_ps(&x_arr[0]);
+    let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
     for _ in 0..width / vector_width {
         let f = $f((x * freq_x) $(,$arg)*);
         max_s = max_s.max(f);
@@ -99,7 +99,7 @@ macro_rules! get_2d_noise_helper_f32 {
         x_arr[i] = start_x + i as f32;
     }
     for _ in 0..height {
-        let mut x = S::loadu_ps(&x_arr[0]);
+        let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
         for _ in 0..width / vector_width {
             let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y) $(,$arg)*);
             max_s = max_s.max(f);
@@ -170,7 +170,7 @@ macro_rules! get_3d_noise_helper_f32 {
     for _ in 0..depth {
         let mut y = S::Vf32::set1(start_y);
         for _ in 0..height {
-            let mut x = S::loadu_ps(&x_arr[0]);
+            let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
             for _ in 0..width / vector_width {
                 let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z) $(,$arg)*);
                 max_s = max_s.max(f);
@@ -246,7 +246,7 @@ macro_rules! get_4d_noise_helper_f32 {
         for _ in 0..depth {
             let mut y = S::Vf32::set1(start_y);
             for _ in 0..height {
-                let mut x = S::loadu_ps(&x_arr[0]);
+                let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
                 for _ in 0..width / vector_width {
                     let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z), S::mul_ps(w, freq_w) $(,$arg)*);
                     max_s = max_s.max(f);
