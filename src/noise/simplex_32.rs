@@ -486,31 +486,31 @@ pub unsafe fn simplex_4d<S: Simd>(
     rank_z = S::add_epi32(rank_z, S::and_epi32(cond, S::Vi32::set1(1)));
     rank_w = S::add_epi32(rank_w, cond.and_not(S::Vi32::set1(1)));
 
-    let cond = S::cmpgt_epi32(rank_x, S::Vi32::set1(2));
+    let cond = rank_x.cmp_gt(S::Vi32::set1(2));
     let i1 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_y, S::Vi32::set1(2));
+    let cond = rank_y.cmp_gt(S::Vi32::set1(2));
     let j1 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_z, S::Vi32::set1(2));
+    let cond = rank_z.cmp_gt(S::Vi32::set1(2));
     let k1 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_w, S::Vi32::set1(2));
+    let cond = rank_w.cmp_gt(S::Vi32::set1(2));
     let l1 = S::and_epi32(S::Vi32::set1(1), cond);
 
-    let cond = S::cmpgt_epi32(rank_x, S::Vi32::set1(1));
+    let cond = rank_x.cmp_gt(S::Vi32::set1(1));
     let i2 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_y, S::Vi32::set1(1));
+    let cond = rank_y.cmp_gt(S::Vi32::set1(1));
     let j2 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_z, S::Vi32::set1(1));
+    let cond = rank_z.cmp_gt(S::Vi32::set1(1));
     let k2 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_w, S::Vi32::set1(1));
+    let cond = rank_w.cmp_gt(S::Vi32::set1(1));
     let l2 = S::and_epi32(S::Vi32::set1(1), cond);
 
-    let cond = S::cmpgt_epi32(rank_x, S::setzero_epi32());
+    let cond = rank_x.cmp_gt(S::setzero_epi32());
     let i3 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_y, S::setzero_epi32());
+    let cond = rank_y.cmp_gt(S::setzero_epi32());
     let j3 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_z, S::setzero_epi32());
+    let cond = rank_z.cmp_gt(S::setzero_epi32());
     let k3 = S::and_epi32(S::Vi32::set1(1), cond);
-    let cond = S::cmpgt_epi32(rank_w, S::setzero_epi32());
+    let cond = rank_w.cmp_gt(S::setzero_epi32());
     let l3 = S::and_epi32(S::Vi32::set1(1), cond);
 
     let x1 = S::add_ps(S::sub_ps(x0, i1.cast_f32()), S::Vf32::set1(G4_32));

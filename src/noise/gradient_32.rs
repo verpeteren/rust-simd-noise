@@ -22,7 +22,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 #[inline(always)]
 pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
     let h = S::and_epi32((hash ^ S::Vi32::set1(seed)), S::Vi32::set1(7));
-    let mask = (S::cmpgt_epi32(S::Vi32::set1(4), h)).cast_f32();
+    let mask = (S::Vi32::set1(4).cmp_gt(h)).cast_f32();
     let x_magnitude = S::blendv_ps(S::Vf32::set1(2.0), S::Vf32::set1(1.0), mask);
     let y_magnitude = S::blendv_ps(S::Vf32::set1(1.0), S::Vf32::set1(2.0), mask);
 
@@ -102,11 +102,11 @@ pub unsafe fn grad4<S: Simd>(
     t: S::Vf32,
 ) -> S::Vf32 {
     let h = S::and_epi32((S::Vi32::set1(seed) ^ hash), S::Vi32::set1(31));
-    let mut mask = (S::cmpgt_epi32(S::Vi32::set1(24), h)).cast_f32();
+    let mut mask = (S::Vi32::set1(24).cmp_gt(h)).cast_f32();
     let u = S::blendv_ps(y, x, mask);
-    mask = (S::cmpgt_epi32(S::Vi32::set1(16), h)).cast_f32();
+    mask = (S::Vi32::set1(16).cmp_gt(h)).cast_f32();
     let v = S::blendv_ps(z, y, mask);
-    mask = (S::cmpgt_epi32(S::Vi32::set1(8), h)).cast_f32();
+    mask = (S::Vi32::set1(8).cmp_gt(h)).cast_f32();
     let w = S::blendv_ps(t, z, mask);
 
     let h_and_1 = (S::and_epi32(h, S::Vi32::set1(1)).cmp_eq(S::setzero_epi32())).cast_f32();
