@@ -111,5 +111,5 @@ pub unsafe fn grad4<S: Simd>(
 
     (h_and_1.blendv(S::sub_ps(S::Vf32::zeroes(), u), u)
         + (h_and_2.blendv(S::sub_ps(S::Vf32::zeroes(), v), v)
-            + h_and_4.blendv(S::sub_ps(S::Vf32::zeroes(), w), w)),)
+            + h_and_4.blendv(S::sub_ps(S::Vf32::zeroes(), w), w)))
 }
