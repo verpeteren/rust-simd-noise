@@ -38,20 +38,17 @@ pub unsafe fn cellular2_2d<S: Simd>(
                 ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32),).cast_f32(),
                 S::Vf32::set1(511.5),
             );
-            let inv_mag = S::mul_ps(
-                jitter,
-                S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd)).rsqrt(),
-            );
-            xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
-            yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
+            let inv_mag = S::mul_ps(jitter, (S::mul_ps(xd, xd) + S::mul_ps(yd, yd)).rsqrt());
+            xd = S::mul_ps(xd, inv_mag) + xcf;
+            yd = S::mul_ps(yd, inv_mag) + ycf;
 
             let new_distance = match distance_function {
-                CellDistanceFunction::Euclidean => S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd)),
-                CellDistanceFunction::Manhattan => S::add_ps(xd.abs(), yd.abs()),
+                CellDistanceFunction::Euclidean => S::mul_ps(xd, xd) + S::mul_ps(yd, yd),
+                CellDistanceFunction::Manhattan => xd.abs() + yd.abs(),
                 CellDistanceFunction::Natural => {
-                    let euc = S::add_ps(S::mul_ps(xd, xd), S::mul_ps(yd, yd));
-                    let man = S::add_ps(xd.abs(), yd.abs());
-                    S::add_ps(euc, man)
+                    let euc = S::mul_ps(xd, xd) + S::mul_ps(yd, yd);
+                    let man = xd.abs() + yd.abs();
+                    euc + man
                 }
             };
             let mut i = index1;
@@ -60,16 +57,16 @@ pub unsafe fn cellular2_2d<S: Simd>(
                 distance[0] = distance[0].min(new_distance);
                 i -= 1;
             }
-            ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
+            ycf = ycf + S::Vf32::set1(1.0);
             yc = yc + S::Vi32::set1(Y_PRIME_32);
         }
-        xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
+        xcf = xcf + S::Vf32::set1(1.0);
         xc = xc + S::Vi32::set1(X_PRIME_32);
     }
 
     match return_type {
         Cell2ReturnType::Distance2 => distance[index1],
-        Cell2ReturnType::Distance2Add => S::add_ps(distance[index0], distance[index1]),
+        Cell2ReturnType::Distance2Add => distance[index0] + distance[index1],
         Cell2ReturnType::Distance2Sub => S::sub_ps(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Mul => S::mul_ps(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Div => distance[index0] / distance[index1],
@@ -124,31 +121,21 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 );
                 let inv_mag = S::mul_ps(
                     jitter,
-                    S::add_ps(
-                        S::mul_ps(xd, xd),
-                        S::add_ps(S::mul_ps(yd, yd), S::mul_ps(zd, zd)),
-                    )
-                    .rsqrt(),
+                    (S::mul_ps(xd, xd) + (S::mul_ps(yd, yd) + S::mul_ps(zd, zd)),).rsqrt(),
                 );
-                xd = S::add_ps(S::mul_ps(xd, inv_mag), xcf);
-                yd = S::add_ps(S::mul_ps(yd, inv_mag), ycf);
-                zd = S::add_ps(S::mul_ps(zd, inv_mag), zcf);
+                xd = S::mul_ps(xd, inv_mag) + xcf;
+                yd = S::mul_ps(yd, inv_mag) + ycf;
+                zd = S::mul_ps(zd, inv_mag) + zcf;
 
                 let new_distance = match distance_function {
-                    CellDistanceFunction::Euclidean => S::add_ps(
-                        S::mul_ps(xd, xd),
-                        S::add_ps(S::mul_ps(yd, yd), S::mul_ps(zd, zd)),
-                    ),
-                    CellDistanceFunction::Manhattan => {
-                        S::add_ps(S::add_ps(xd.abs(), yd.abs()), zd.abs())
+                    CellDistanceFunction::Euclidean => {
+                        (S::mul_ps(xd, xd) + (S::mul_ps(yd, yd) + S::mul_ps(zd, zd)))
                     }
+                    CellDistanceFunction::Manhattan => ((xd.abs() + yd.abs()) + zd.abs()),
                     CellDistanceFunction::Natural => {
-                        let euc = S::add_ps(
-                            S::mul_ps(xd, xd),
-                            S::add_ps(S::mul_ps(yd, yd), S::mul_ps(zd, zd)),
-                        );
-                        let man = S::add_ps(S::add_ps(xd.abs(), yd.abs()), zd.abs());
-                        S::add_ps(euc, man)
+                        let euc = (S::mul_ps(xd, xd) + (S::mul_ps(yd, yd) + S::mul_ps(zd, zd)));
+                        let man = ((xd.abs() + yd.abs()) + zd.abs());
+                        euc + man
                     }
                 };
                 let mut i = index1;
@@ -157,19 +144,19 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     distance[0] = distance[0].min(new_distance);
                     i -= 1;
                 }
-                zcf = S::add_ps(ycf, S::Vf32::set1(1.0));
+                zcf = ycf + S::Vf32::set1(1.0);
                 zc = yc + S::Vi32::set1(Z_PRIME_32);
             }
-            ycf = S::add_ps(ycf, S::Vf32::set1(1.0));
+            ycf = ycf + S::Vf32::set1(1.0);
             yc = yc + S::Vi32::set1(Y_PRIME_32);
         }
-        xcf = S::add_ps(xcf, S::Vf32::set1(1.0));
+        xcf = xcf + S::Vf32::set1(1.0);
         xc = xc + S::Vi32::set1(X_PRIME_32);
     }
 
     match return_type {
         Cell2ReturnType::Distance2 => distance[index1],
-        Cell2ReturnType::Distance2Add => S::add_ps(distance[index0], distance[index1]),
+        Cell2ReturnType::Distance2Add => distance[index0] + distance[index1],
         Cell2ReturnType::Distance2Sub => S::sub_ps(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Mul => S::mul_ps(distance[index0], distance[index1]),
         Cell2ReturnType::Distance2Div => distance[index0] / distance[index1],

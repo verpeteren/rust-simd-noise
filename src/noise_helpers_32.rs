@@ -42,7 +42,7 @@ macro_rules! get_1d_noise_helper_f32 {
         min_s = min_s.min(f);
         f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
         i += vector_width;
-        x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
+        x = x + S::Vf32::set1(vector_width as f32);
     }
     if remainder != 0 {
         let f = $f(S::mul_ps(x, freq_x) $(,$arg)*);
@@ -106,7 +106,7 @@ macro_rules! get_2d_noise_helper_f32 {
             min_s = min_s.min(f);
             f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
             i += vector_width;
-            x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
+            x = x + S::Vf32::set1(vector_width as f32);
         }
         if remainder != 0 {
             let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y) $(,$arg)*);
@@ -122,7 +122,7 @@ macro_rules! get_2d_noise_helper_f32 {
                 i += 1;
             }
         }
-        y = S::add_ps(y, S::Vf32::set1(1.0));
+        y = y + S::Vf32::set1(1.0);
     }
     for i in 0..vector_width {
         if min_s[i] < min {
@@ -177,7 +177,7 @@ macro_rules! get_3d_noise_helper_f32 {
                 min_s = min_s.min(f);
                 f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
                 i += vector_width;
-                x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
+                x = x + S::Vf32::set1(vector_width as f32);
             }
             if remainder != 0 {
             let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z) $(,$arg)*);
@@ -193,9 +193,9 @@ macro_rules! get_3d_noise_helper_f32 {
                     i += 1;
                 }
             }
-            y = S::add_ps(y, S::Vf32::set1(1.0));
+            y = y + S::Vf32::set1(1.0);
         }
-        z = S::add_ps(z, S::Vf32::set1(1.0));
+        z = z + S::Vf32::set1(1.0);
     }
     for i in 0..vector_width {
         if min_s[i] < min {
@@ -253,7 +253,7 @@ macro_rules! get_4d_noise_helper_f32 {
                     min_s = min_s.min(f);
                     f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
                     i += vector_width;
-                    x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
+                    x = x + S::Vf32::set1(vector_width as f32);
                 }
                 if remainder != 0 {
                     let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z), S::mul_ps(w, freq_w) $(,$arg)*);
@@ -270,11 +270,11 @@ macro_rules! get_4d_noise_helper_f32 {
                         i += 1;
                     }
                 }
-                y = S::add_ps(y, S::Vf32::set1(1.0));
+                y = y + S::Vf32::set1(1.0);
             }
-            z = S::add_ps(z, S::Vf32::set1(1.0));
+            z = z + S::Vf32::set1(1.0);
         }
-        w = S::add_ps(w, S::Vf32::set1(1.0));
+        w = w + S::Vf32::set1(1.0);
     }
     for i in 0..vector_width {
         if min_s[i] < min {

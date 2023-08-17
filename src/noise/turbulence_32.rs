@@ -16,7 +16,7 @@ pub unsafe fn turbulence_1d<S: Simd>(
     for _ in 1..octaves {
         x = S::mul_ps(x, lacunarity);
         amp = S::mul_ps(amp, gain);
-        result = S::add_ps(result, simplex_1d::<S>(x, seed).abs());
+        result = result + simplex_1d::<S>(x, seed).abs();
     }
 
     result
@@ -39,10 +39,7 @@ pub unsafe fn turbulence_2d<S: Simd>(
         x = S::mul_ps(x, lac);
         y = S::mul_ps(y, lac);
         amp = S::mul_ps(amp, gain);
-        result = S::add_ps(
-            result,
-            S::mul_ps(simplex_2d::<S>(x, y, seed), amp).abs(),
-        );
+        result = result + S::mul_ps(simplex_2d::<S>(x, y, seed), amp).abs();
     }
 
     result
@@ -66,10 +63,7 @@ pub unsafe fn turbulence_3d<S: Simd>(
         y = S::mul_ps(y, lac);
         z = S::mul_ps(z, lac);
         amp = S::mul_ps(amp, gain);
-        result = S::add_ps(
-            result,
-            S::mul_ps(simplex_3d::<S>(x, y, z, seed), amp).abs(),
-        );
+        result = result + S::mul_ps(simplex_3d::<S>(x, y, z, seed), amp).abs();
     }
 
     result
@@ -95,10 +89,7 @@ pub unsafe fn turbulence_4d<S: Simd>(
         z = S::mul_ps(z, lac);
         w = S::mul_ps(w, lac);
         amp = S::mul_ps(amp, gain);
-        result = S::add_ps(
-            result,
-            S::mul_ps(simplex_4d::<S>(x, y, z, w, seed), amp).abs(),
-        );
+        result = result + S::mul_ps(simplex_4d::<S>(x, y, z, w, seed), amp).abs();
     }
 
     result
