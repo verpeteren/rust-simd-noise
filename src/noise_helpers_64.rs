@@ -35,7 +35,7 @@ macro_rules! get_1d_noise_helper_f64  {
     for i in (0..vector_width).rev() {
         x_arr[i] = start_x + i as f64;
     }
-    let mut x = S::loadu_pd(&x_arr[0]);
+    let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
     for _ in 0..width / vector_width {
         let f = $f(S::mul_pd(x, freq_x) $(,$arg)*);
         max_s = max_s.max(f);
@@ -99,7 +99,7 @@ macro_rules! get_2d_noise_helper_f64 {
         x_arr[i] = start_x + i as f64;
     }
     for _ in 0..height {
-        let mut x = S::loadu_pd(&x_arr[0]);
+        let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
         for _ in 0..width / vector_width {
             let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y) $(,$arg)*);
             max_s = max_s.max(f);
@@ -170,7 +170,7 @@ macro_rules! get_3d_noise_helper_f64 {
     for _ in 0..depth {
         let mut y = S::Vf64::set1(start_y);
         for _ in 0..height {
-            let mut x = S::loadu_pd(&x_arr[0]);
+            let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
             for _ in 0..width / vector_width {
                 let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y), S::mul_pd(z, freq_z) $(,$arg)*);
                 max_s = max_s.max(f);
@@ -246,7 +246,7 @@ macro_rules! get_4d_noise_helper_f64 {
         for _ in 0..depth {
             let mut y = S::Vf64::set1(start_y);
             for _ in 0..height {
-                let mut x = S::loadu_pd(&x_arr[0]);
+                let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
                 for _ in 0..width / vector_width {
                     let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y), S::mul_pd(z, freq_z), S::mul_pd(w, freq_w) $(,$arg)*);
                     max_s = max_s.max(f);
