@@ -8,7 +8,7 @@ use simdeez::prelude::*;
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
-    let h = S::and_epi32((S::Vi32::set1(seed), hash) ^ S::Vi32::set1(15));
+    let h = S::and_epi32((S::Vi32::set1(seed) ^ hash), S::Vi32::set1(15));
     let v = S::and_epi32(h, S::Vi32::set1(7)).cast_f32();
 
     let h_and_8 = (S::and_epi32(h, S::Vi32::set1(8)).cmp_eq(S::setzero_epi32())).cast_f32();
