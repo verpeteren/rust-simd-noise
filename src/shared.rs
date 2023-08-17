@@ -20,7 +20,7 @@ pub unsafe fn scale_noise<S: Simd>(
                 S::mul_ps(S::Vf32::set1(multiplier), S::loadu_ps(&data[i])),
                 S::Vf32::set1(offset),
             );
-            S::storeu_ps(data.get_unchecked_mut(i), value);
+            value.copy_to_ptr_unaligned(data.get_unchecked_mut(i));
             i += vector_width;
         }
     }

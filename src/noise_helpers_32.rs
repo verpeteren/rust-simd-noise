@@ -40,7 +40,7 @@ macro_rules! get_1d_noise_helper_f32 {
         let f = $f((x * freq_x) $(,$arg)*);
         max_s = max_s.max(f);
         min_s = min_s.min(f);
-        S::storeu_ps(result.get_unchecked_mut(i), f);
+        f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
         i += vector_width;
         x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
     }
@@ -104,7 +104,7 @@ macro_rules! get_2d_noise_helper_f32 {
             let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y) $(,$arg)*);
             max_s = max_s.max(f);
             min_s = min_s.min(f);
-            S::storeu_ps(result.get_unchecked_mut(i), f);
+            f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
             i += vector_width;
             x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
         }
@@ -175,7 +175,7 @@ macro_rules! get_3d_noise_helper_f32 {
                 let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z) $(,$arg)*);
                 max_s = max_s.max(f);
                 min_s = min_s.min(f);
-                S::storeu_ps(result.get_unchecked_mut(i), f);
+                f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
                 i += vector_width;
                 x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
             }
@@ -251,7 +251,7 @@ macro_rules! get_4d_noise_helper_f32 {
                     let f = $f(S::mul_ps(x, freq_x), S::mul_ps(y, freq_y), S::mul_ps(z, freq_z), S::mul_ps(w, freq_w) $(,$arg)*);
                     max_s = max_s.max(f);
                     min_s = min_s.min(f);
-                    S::storeu_ps(result.get_unchecked_mut(i), f);
+                    f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
                     i += vector_width;
                     x = S::add_ps(x, S::Vf32::set1(vector_width as f32));
                 }
