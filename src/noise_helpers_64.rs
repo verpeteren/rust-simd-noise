@@ -42,7 +42,7 @@ macro_rules! get_1d_noise_helper_f64  {
         min_s = min_s.min(f);
         f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
         i += vector_width;
-        x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
+        x = x + S::Vf64::set1(vector_width as f64);
     }
     if remainder != 0 {
         let f = $f(S::mul_pd(x, freq_x) $(,$arg)*);
@@ -106,7 +106,7 @@ macro_rules! get_2d_noise_helper_f64 {
             min_s = min_s.min(f);
             f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
             i += vector_width;
-            x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
+            x = x + S::Vf64::set1(vector_width as f64);
         }
         if remainder != 0 {
             let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y) $(,$arg)*);
@@ -122,7 +122,7 @@ macro_rules! get_2d_noise_helper_f64 {
                 i += 1;
             }
         }
-        y = S::add_pd(y, S::Vf64::set1(1.0));
+        y = y + S::Vf64::set1(1.0);
     }
     for i in 0..vector_width {
         if min_s[i] < min {
@@ -177,7 +177,7 @@ macro_rules! get_3d_noise_helper_f64 {
                 min_s = min_s.min(f);
                 f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
                 i += vector_width;
-                x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
+                x = x + S::Vf64::set1(vector_width as f64);
             }
             if remainder != 0 {
             let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y), S::mul_pd(z, freq_z) $(,$arg)*);
@@ -193,9 +193,9 @@ macro_rules! get_3d_noise_helper_f64 {
                     i += 1;
                 }
             }
-            y = S::add_pd(y, S::Vf64::set1(1.0));
+            y = y + S::Vf64::set1(1.0);
         }
-        z = S::add_pd(z, S::Vf64::set1(1.0));
+        z = z + S::Vf64::set1(1.0);
     }
     for i in 0..vector_width {
         if min_s[i] < min {
@@ -253,7 +253,7 @@ macro_rules! get_4d_noise_helper_f64 {
                     min_s = min_s.min(f);
                     f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
                     i += vector_width;
-                    x = S::add_pd(x, S::Vf64::set1(vector_width as f64));
+                    x = x + S::Vf64::set1(vector_width as f64);
                 }
                 if remainder != 0 {
                     let f = $f(S::mul_pd(x, freq_x), S::mul_pd(y, freq_y), S::mul_pd(z, freq_z), S::mul_pd(w, freq_w) $(,$arg)*);
@@ -270,11 +270,11 @@ macro_rules! get_4d_noise_helper_f64 {
                         i += 1;
                     }
                 }
-                y = S::add_pd(y, S::Vf64::set1(1.0));
+                y = y + S::Vf64::set1(1.0);
             }
-            z = S::add_pd(z, S::Vf64::set1(1.0));
+            z = z + S::Vf64::set1(1.0);
         }
-        w = S::add_pd(w, S::Vf64::set1(1.0));
+        w = w + S::Vf64::set1(1.0);
     }
     for i in 0..vector_width {
         if min_s[i] < min {

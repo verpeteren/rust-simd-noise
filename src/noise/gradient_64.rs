@@ -53,7 +53,7 @@ pub unsafe fn grad3d_dot<S: Simd>(
     let h = hash3d::<S>(seed, i, j, k);
     let u = h.l8.blendv(y, x);
     let v = h.l4.blendv(h.h12_or_14.blendv(z, x), y);
-    let result = S::add_pd((u ^ h.h1), (v ^ h.h2));
+    let result = (u ^ h.h1) + (v ^ h.h2);
     debug_assert_eq!(
         result[0],
         {
@@ -109,11 +109,7 @@ pub unsafe fn grad4<S: Simd>(
     let h_and_2 = ((h & S::Vi64::set1(2)).cmp_eq(S::Vi64::zeroes())).cast_f64();
     let h_and_4 = ((h & S::Vi64::set1(4)).cmp_eq(S::Vi64::zeroes())).cast_f64();
 
-    S::add_pd(
-        h_and_1.blendv(S::sub_pd(S::Vf64::zeroes(), u), u),
-        S::add_pd(
-            h_and_2.blendv(S::sub_pd(S::Vf64::zeroes(), v), v),
-            h_and_4.blendv(S::sub_pd(S::Vf64::zeroes(), w), w),
-        ),
-    )
+    h_and_1.blendv(S::sub_pd(S::Vf64::zeroes(), u), u)
+        + (h_and_2.blendv(S::sub_pd(S::Vf64::zeroes(), v), v)
+            + h_and_4.blendv(S::sub_pd(S::Vf64::zeroes(), w), w),)
 }
