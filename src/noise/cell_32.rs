@@ -21,8 +21,8 @@ pub unsafe fn cellular_2d<S: Simd>(
     let mut xcf = S::sub_ps(xc.cast_f32(), x);
     let ycf_base = S::sub_ps(yc_base.cast_f32(), y);
 
-    xc = S::mullo_epi32(xc, S::Vi32::set1(X_PRIME_32));
-    yc_base = S::mullo_epi32(yc_base, S::Vi32::set1(Y_PRIME_32));
+    xc = xc * S::Vi32::set1(X_PRIME_32);
+    yc_base = yc_base * S::Vi32::set1(Y_PRIME_32);
     match return_type {
         CellReturnType::Distance => {
             match distance_function {
@@ -264,9 +264,9 @@ pub unsafe fn cellular_3d<S: Simd>(
     let ycf_base = S::sub_ps(yc_base.cast_f32(), y);
     let zcf_base = S::sub_ps(zc_base.cast_f32(), z);
 
-    xc = S::mullo_epi32(xc, S::Vi32::set1(X_PRIME_32));
-    yc_base = S::mullo_epi32(yc_base, S::Vi32::set1(Y_PRIME_32));
-    zc_base = S::mullo_epi32(zc_base, S::Vi32::set1(Z_PRIME_32));
+    xc = xc * S::Vi32::set1(X_PRIME_32);
+    yc_base = yc_base * S::Vi32::set1(Y_PRIME_32);
+    zc_base = zc_base * S::Vi32::set1(Z_PRIME_32);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;

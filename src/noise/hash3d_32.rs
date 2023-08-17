@@ -35,10 +35,7 @@ pub unsafe fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> 
     let mut hash = i ^ S::Vi32::set1(seed);
     hash = j ^ hash;
     hash = k ^ hash;
-    hash = S::mullo_epi32(
-        S::mullo_epi32(S::mullo_epi32(hash, hash), S::Vi32::set1(60493)),
-        hash,
-    );
+    hash = ((hash * hash) * S::Vi32::set1(60493)) * hash;
     hash = (hash >> 13) ^ hash;
     let hasha13 = hash & S::Vi32::set1(13);
     Hash3d::new(

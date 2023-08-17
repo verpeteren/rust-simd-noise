@@ -263,9 +263,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let mut z0 = (z + f).fast_floor();
 
     // Integer grid coordinates
-    let i = S::mullo_epi32(x0.cast_i32(), S::Vi32::set1(X_PRIME_32));
-    let j = S::mullo_epi32(y0.cast_i32(), S::Vi32::set1(Y_PRIME_32));
-    let k = S::mullo_epi32(z0.cast_i32(), S::Vi32::set1(Z_PRIME_32));
+    let i = x0.cast_i32() * S::Vi32::set1(X_PRIME_32);
+    let j = y0.cast_i32() * S::Vi32::set1(Y_PRIME_32);
+    let k = z0.cast_i32() * S::Vi32::set1(Z_PRIME_32);
 
     // Compute distance from first simplex vertex to input coordinates
     let g = S::mul_ps(S::Vf32::set1(G3_32), ((x0 + y0) + z0));

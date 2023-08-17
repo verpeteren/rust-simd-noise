@@ -28,10 +28,7 @@ pub const Z_PRIME_64: i64 = 6971;
 pub unsafe fn hash_2d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32) -> S::Vi32 {
     let mut hash = x ^ S::Vi32::set1(seed);
     hash = y ^ hash;
-    S::mullo_epi32(
-        S::mullo_epi32(S::mullo_epi32(hash, hash), S::Vi32::set1(60493)),
-        hash,
-    )
+    ((hash * hash) * S::Vi32::set1(60493)) * hash
 }
 
 #[inline(always)]
@@ -39,8 +36,5 @@ pub unsafe fn hash_3d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32, z: S::Vi32) ->
     let mut hash = x ^ S::Vi32::set1(seed);
     hash = y ^ hash;
     hash = z ^ hash;
-    S::mullo_epi32(
-        S::mullo_epi32(S::mullo_epi32(hash, hash), S::Vi32::set1(60493)),
-        hash,
-    )
+    ((hash * hash) * S::Vi32::set1(60493)) * hash
 }
