@@ -147,13 +147,12 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 
     let gi1 = S::i64gather_epi64(
         &PERM64,
-        (S::sub_epi64(ii, i1) + S::i64gather_epi64(&PERM64, S::sub_epi64(jj, j1))),
+        ((ii - i1) + S::i64gather_epi64(&PERM64, (jj - j1))),
     );
 
     let gi2 = S::i64gather_epi64(
         &PERM64,
-        (S::sub_epi64(ii, S::Vi64::set1(-1))
-            + S::i64gather_epi64(&PERM64, S::sub_epi64(jj, S::Vi64::set1(-1)))),
+        ((ii - S::Vi64::set1(-1)) + S::i64gather_epi64(&PERM64, (jj - S::Vi64::set1(-1)))),
     );
 
     // Weights associated with the gradients at each corner

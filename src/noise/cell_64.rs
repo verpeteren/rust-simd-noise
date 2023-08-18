@@ -14,8 +14,8 @@ pub unsafe fn cellular_2d<S: Simd>(
     seed: i64,
 ) -> S::Vf64 {
     let mut distance = S::Vf64::set1(999999.0);
-    let mut xc = S::sub_epi64(x.cast_i64(), S::Vi64::set1(1));
-    let mut yc_base = S::sub_epi64(y.cast_i64(), S::Vi64::set1(1));
+    let mut xc = x.cast_i64() - S::Vi64::set1(1);
+    let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
 
     let mut xcf = S::sub_pd(xc.cast_f64(), x);
     let ycf_base = S::sub_pd(yc_base.cast_f64(), y);
@@ -236,9 +236,9 @@ pub unsafe fn cellular_3d<S: Simd>(
     let mut distance = S::Vf64::set1(999999.0);
     let mut cell_value = S::Vf64::zeroes();
 
-    let mut xc = S::sub_epi64(x.cast_i64(), S::Vi64::set1(1));
-    let mut yc_base = S::sub_epi64(y.cast_i64(), S::Vi64::set1(1));
-    let mut zc_base = S::sub_epi64(z.cast_i64(), S::Vi64::set1(1));
+    let mut xc = x.cast_i64() - S::Vi64::set1(1);
+    let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
+    let mut zc_base = z.cast_i64() - S::Vi64::set1(1);
 
     let mut xcf = S::sub_pd(xc.cast_f64(), x);
     let ycf_base = S::sub_pd(yc_base.cast_f64(), y);
