@@ -17,8 +17,8 @@ pub unsafe fn cellular_2d<S: Simd>(
     let mut xc = x.cast_i64() - S::Vi64::set1(1);
     let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
 
-    let mut xcf = S::sub_pd(xc.cast_f64(), x);
-    let ycf_base = S::sub_pd(yc_base.cast_f64(), y);
+    let mut xcf = xc.cast_f64() - x;
+    let ycf_base = yc_base.cast_f64() - y;
 
     xc = xc * S::Vi64::set1(X_PRIME_64);
     yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
@@ -31,14 +31,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut yc = yc_base;
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = S::sub_pd(
-                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
-                            let mut yd = S::sub_pd(
-                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
+                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
+                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
                             let mut xd2 = xd * xd;
                             let inv_mag = (jitter * (xd2 + (yd * yd)).rsqrt());
                             xd = (xd * inv_mag) + xcf;
@@ -60,14 +56,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut yc = yc_base;
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = S::sub_pd(
-                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
-                            let mut yd = S::sub_pd(
-                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
+                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
+                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
                             let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
@@ -88,14 +80,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut yc = yc_base;
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = S::sub_pd(
-                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
-                            let mut yd = S::sub_pd(
-                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
+                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
+                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
                             let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
@@ -126,14 +114,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut yc = yc_base;
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = S::sub_pd(
-                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
-                            let mut yd = S::sub_pd(
-                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
+                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
+                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
                             let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
@@ -157,14 +141,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut yc = yc_base;
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = S::sub_pd(
-                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
-                            let mut yd = S::sub_pd(
-                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
+                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
+                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
                             let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
@@ -188,14 +168,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                         let mut yc = yc_base;
                         for _y in 0..3 {
                             let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = S::sub_pd(
-                                (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
-                            let mut yd = S::sub_pd(
-                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                                S::Vf64::set1(511.5),
-                            );
+                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
+                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                                - S::Vf64::set1(511.5);
                             let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
@@ -240,9 +216,9 @@ pub unsafe fn cellular_3d<S: Simd>(
     let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
     let mut zc_base = z.cast_i64() - S::Vi64::set1(1);
 
-    let mut xcf = S::sub_pd(xc.cast_f64(), x);
-    let ycf_base = S::sub_pd(yc_base.cast_f64(), y);
-    let zcf_base = S::sub_pd(zc_base.cast_f64(), z);
+    let mut xcf = xc.cast_f64() - x;
+    let ycf_base = yc_base.cast_f64() - y;
+    let zcf_base = zc_base.cast_f64() - z;
 
     xc = xc * S::Vi64::set1(X_PRIME_64);
     yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
@@ -256,18 +232,12 @@ pub unsafe fn cellular_3d<S: Simd>(
             let mut zc = zc_base;
             for _z in 0..3 {
                 let hash = hash_3d::<S>(seed, xc, yc, zc);
-                let mut xd = S::sub_pd(
-                    (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                    S::Vf64::set1(511.5),
-                );
-                let mut yd = S::sub_pd(
-                    ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                    S::Vf64::set1(511.5),
-                );
-                let mut zd = S::sub_pd(
-                    ((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
-                    S::Vf64::set1(511.5),
-                );
+                let mut xd =
+                    (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64() - S::Vf64::set1(511.5);
+                let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                    - S::Vf64::set1(511.5);
+                let mut zd = ((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                    - S::Vf64::set1(511.5);
                 let inv_mag = jitter * ((xd * xd) + ((yd * yd) + (zd * zd))).rsqrt();
                 xd = (xd * inv_mag) + xcf;
                 yd = (yd * inv_mag) + ycf;

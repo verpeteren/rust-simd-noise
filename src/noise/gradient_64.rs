@@ -12,7 +12,7 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
     let v = (h & S::Vi64::set1(7)).cast_f64();
 
     let h_and_8 = ((h & S::Vi64::set1(8)).cmp_eq(S::Vi64::zeroes())).cast_f64();
-    h_and_8.blendv(S::sub_pd(S::Vf64::zeroes(), v), v)
+    h_and_8.blendv(S::Vf64::zeroes() - v, v)
 }
 
 /// Generates a random gradient vector where one component is ±1 and the other is ±2.
@@ -31,10 +31,10 @@ pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
 
     let gx = mask
         .blendv(h_and_2, h_and_1)
-        .blendv(S::sub_pd(S::Vf64::zeroes(), x_magnitude), x_magnitude);
+        .blendv(S::Vf64::zeroes() - x_magnitude, x_magnitude);
     let gy = mask
         .blendv(h_and_1, h_and_2)
-        .blendv(S::sub_pd(S::Vf64::zeroes(), y_magnitude), y_magnitude);
+        .blendv(S::Vf64::zeroes() - y_magnitude, y_magnitude);
     [gx, gy]
 }
 
@@ -109,7 +109,6 @@ pub unsafe fn grad4<S: Simd>(
     let h_and_2 = ((h & S::Vi64::set1(2)).cmp_eq(S::Vi64::zeroes())).cast_f64();
     let h_and_4 = ((h & S::Vi64::set1(4)).cmp_eq(S::Vi64::zeroes())).cast_f64();
 
-    h_and_1.blendv(S::sub_pd(S::Vf64::zeroes(), u), u)
-        + (h_and_2.blendv(S::sub_pd(S::Vf64::zeroes(), v), v)
-            + h_and_4.blendv(S::sub_pd(S::Vf64::zeroes(), w), w))
+    h_and_1.blendv(S::Vf64::zeroes() - u, u)
+        + (h_and_2.blendv(S::Vf64::zeroes() - v, v) + h_and_4.blendv(S::Vf64::zeroes() - w, w))
 }
