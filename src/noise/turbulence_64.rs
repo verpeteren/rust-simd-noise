@@ -14,8 +14,8 @@ pub unsafe fn turbulence_1d<S: Simd>(
     let mut result = simplex_1d::<S>(x, seed).abs();
 
     for _ in 1..octaves {
-        x = S::mul_pd(x, lacunarity);
-        amp = S::mul_pd(amp, gain);
+        x = x * lacunarity;
+        amp = amp * gain;
         result = result + simplex_1d::<S>(x, seed).abs();
     }
 
@@ -36,10 +36,10 @@ pub unsafe fn turbulence_2d<S: Simd>(
     let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
-        x = S::mul_pd(x, lac);
-        y = S::mul_pd(y, lac);
-        amp = S::mul_pd(amp, gain);
-        result = result + S::mul_pd(simplex_2d::<S>(x, y, seed), amp).abs();
+        x = x * lac;
+        y = y * lac;
+        amp = amp * gain;
+        result = result + (simplex_2d::<S>(x, y, seed) * amp).abs();
     }
 
     result
@@ -59,11 +59,11 @@ pub unsafe fn turbulence_3d<S: Simd>(
     let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
-        x = S::mul_pd(x, lac);
-        y = S::mul_pd(y, lac);
-        z = S::mul_pd(z, lac);
-        amp = S::mul_pd(amp, gain);
-        result = result + S::mul_pd(simplex_3d::<S>(x, y, z, seed), amp).abs();
+        x = x * lac;
+        y = y * lac;
+        z = z * lac;
+        amp = amp * gain;
+        result = result + (simplex_3d::<S>(x, y, z, seed) * amp).abs();
     }
 
     result
@@ -84,12 +84,12 @@ pub unsafe fn turbulence_4d<S: Simd>(
     let mut amp = S::Vf64::set1(1.0);
 
     for _ in 1..octaves {
-        x = S::mul_pd(x, lac);
-        y = S::mul_pd(y, lac);
-        z = S::mul_pd(z, lac);
-        w = S::mul_pd(w, lac);
-        amp = S::mul_pd(amp, gain);
-        result = result + S::mul_pd(simplex_4d::<S>(x, y, z, w, seed), amp).abs();
+        x = x * lac;
+        y = y * lac;
+        z = z * lac;
+        w = w * lac;
+        amp = amp * gain;
+        result = result + (simplex_4d::<S>(x, y, z, w, seed) * amp).abs();
     }
 
     result

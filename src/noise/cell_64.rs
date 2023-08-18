@@ -36,16 +36,15 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
-                            let mut xd2 = S::mul_pd(xd, xd);
-                            let inv_mag =
-                                S::mul_pd(jitter, (xd2 + S::mul_pd(yd, yd)).rsqrt());
-                            xd = S::mul_pd(xd, inv_mag) + xcf;
-                            yd = S::mul_pd(yd, inv_mag) + ycf;
-                            xd2 = S::mul_pd(xd, xd);
-                            let new_distance = xd2 + S::mul_pd(yd, yd);
+                            let mut xd2 = xd * xd;
+                            let inv_mag = (jitter * (xd2 + (yd * yd)).rsqrt());
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
+                            xd2 = (xd * xd);
+                            let new_distance = xd2 + (yd * yd);
                             distance = new_distance.min(distance);
 
                             ycf = ycf + S::Vf64::set1(1.0);
@@ -66,17 +65,14 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
-                            let inv_mag = S::mul_pd(
-                                jitter,
-                                (S::mul_pd(xd, xd) + S::mul_pd(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_pd(xd, inv_mag) + xcf;
-                            yd = S::mul_pd(yd, inv_mag) + ycf;
+                            let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
-                            let new_distance = xd.abs()  + yd.abs();
+                            let new_distance = xd.abs() + yd.abs();
                             distance = new_distance.min(distance);
 
                             ycf = ycf + S::Vf64::set1(1.0);
@@ -97,18 +93,15 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
-                            let inv_mag = S::mul_pd(
-                                jitter,
-                                (S::mul_pd(xd, xd)  + S::mul_pd(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_pd(xd, inv_mag) + xcf;
-                            yd = S::mul_pd(yd, inv_mag) + ycf;
+                            let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
                             let new_distance = {
-                                let euc = (S::mul_pd(xd, xd) + S::mul_pd(yd, yd));
+                                let euc = ((xd * xd) + (yd * yd));
                                 let man = xd.abs() + yd.abs();
                                 euc + man
                             };
@@ -138,19 +131,15 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
-                            let inv_mag = S::mul_pd(
-                                jitter,
-                                (S::mul_pd(xd, xd) + S::mul_pd(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_pd(xd, inv_mag) + xcf;
-                            yd = S::mul_pd(yd, inv_mag) + ycf;
+                            let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
-                            let new_cell_value =
-                                S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), hash.cast_f64());
-                            let new_distance = (S::mul_pd(xd, xd) + S::mul_pd(yd, yd));
+                            let new_cell_value = (S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64());
+                            let new_distance = (xd * xd) + (yd * yd);
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
                             cell_value = closer.blendv(cell_value, new_cell_value);
@@ -173,18 +162,14 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
-                            let inv_mag = S::mul_pd(
-                                jitter,
-                                (S::mul_pd(xd, xd) + S::mul_pd(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_pd(xd, inv_mag) + xcf;
-                            yd = S::mul_pd(yd, inv_mag) + ycf;
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
-                            let new_cell_value =
-                                S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), hash.cast_f64());
+                            let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
                             let new_distance = xd.abs() + yd.abs();
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
@@ -208,20 +193,16 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 S::Vf64::set1(511.5),
                             );
                             let mut yd = S::sub_pd(
-                                (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                                 S::Vf64::set1(511.5),
                             );
-                            let inv_mag = S::mul_pd(
-                                jitter,
-                                (S::mul_pd(xd, xd) + S::mul_pd(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_pd(xd, inv_mag) + xcf;
-                            yd = S::mul_pd(yd, inv_mag) + ycf;
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
-                            let new_cell_value =
-                                S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), hash.cast_f64());
+                            let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
                             let new_distance = {
-                                let euc = (S::mul_pd(xd, xd) + S::mul_pd(yd, yd));
+                                let euc = (xd * xd) + (yd * yd);
                                 let man = xd.abs() + yd.abs();
                                 euc + man
                             };
@@ -280,39 +261,24 @@ pub unsafe fn cellular_3d<S: Simd>(
                     S::Vf64::set1(511.5),
                 );
                 let mut yd = S::sub_pd(
-                    (((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                    ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                     S::Vf64::set1(511.5),
                 );
                 let mut zd = S::sub_pd(
-                    (((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64))).cast_f64(),
+                    ((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64(),
                     S::Vf64::set1(511.5),
                 );
-                let inv_mag = S::mul_pd(
-                    jitter,
-                    (
-                        S::mul_pd(xd, xd)+
-                        (S::mul_pd(yd, yd) + S::mul_pd(zd, zd))
-                    )
-                    .rsqrt(),
-                );
-                xd = S::mul_pd(xd, inv_mag) + xcf;
-                yd = S::mul_pd(yd, inv_mag) + ycf;
-                zd = S::mul_pd(zd, inv_mag) + zcf;
+                let inv_mag = jitter * ((xd * xd) + ((yd * yd) + (zd * zd))).rsqrt();
+                xd = (xd * inv_mag) + xcf;
+                yd = (yd * inv_mag) + ycf;
+                zd = (zd * inv_mag) + zcf;
 
-                let new_cell_value = S::mul_pd(S::Vf64::set1(HASH_2_FLOAT_64), hash.cast_f64());
+                let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
                 let new_distance = match distance_function {
-                    CellDistanceFunction::Euclidean => (
-                        S::mul_pd(xd, xd) +
-                        (S::mul_pd(yd, yd) + S::mul_pd(zd, zd))
-                    ),
-                    CellDistanceFunction::Manhattan => {
-                        ((xd.abs() + yd.abs()) + zd.abs())
-                    }
+                    CellDistanceFunction::Euclidean => (xd * xd) + ((yd * yd) + (zd * zd)),
+                    CellDistanceFunction::Manhattan => ((xd.abs() + yd.abs()) + zd.abs()),
                     CellDistanceFunction::Natural => {
-                        let euc = (
-                            S::mul_pd(xd, xd) +
-                            (S::mul_pd(yd, yd) + S::mul_pd(zd, zd))
-                        );
+                        let euc = (xd * xd) + ((yd * yd) + (zd * zd));
                         let man = ((xd.abs() + yd.abs()) + zd.abs());
                         euc + man
                     }

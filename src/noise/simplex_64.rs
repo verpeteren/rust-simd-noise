@@ -54,21 +54,21 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::V
     let gi1 = S::i64gather_epi64(&PERM64, i1);
 
     // Compute the contribution from the first gradient
-    let x20 = S::mul_pd(x0, x0); // x^2_0
+    let x20 = x0 * x0; // x^2_0
     let t0 = S::sub_pd(S::Vf64::set1(1.0), x20); // t_0
-    let t20 = S::mul_pd(t0, t0); // t^2_0
-    let t40 = S::mul_pd(t20, t20); // t^4_0
+    let t20 = t0 * t0; // t^2_0
+    let t40 = t20 * t20; // t^4_0
     let gx0 = grad1::<S>(seed, gi0);
-    let n0 = S::mul_pd(t40, gx0 * x0);
+    let n0 = t40 * gx0 * x0;
     // n0 = (1 - x0^2)^4 * x0 * grad
 
     // Compute the contribution from the second gradient
-    let x21 = S::mul_pd(x1, x1); // x^2_1
+    let x21 = x1 * x1; // x^2_1
     let t1 = S::sub_pd(S::Vf64::set1(1.0), x21); // t_1
-    let t21 = S::mul_pd(t1, t1); // t^2_1
-    let t41 = S::mul_pd(t21, t21); // t^4_1
+    let t21 = t1 * t1; // t^2_1
+    let t41 = t21 * t21; // t^4_1
     let gx1 = grad1::<S>(seed, gi1);
-    let n1 = S::mul_pd(t41, gx1 * x1);
+    let n1 = t41 * gx1 * x1;
 
     // n0 + n1 =
     //    grad0 * x0 * (1 - x0^2)^4
@@ -116,7 +116,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 ) -> (S::Vf64, [S::Vf64; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
-    let s = S::mul_pd(S::Vf64::set1(F2_64), (x + y));
+    let s = S::Vf64::set1(F2_64) * (x + y);
     let ips = (x + s).floor();
     let jps = (y + s).floor();
 
@@ -124,7 +124,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let i = ips.cast_i64();
     let j = jps.cast_i64();
 
-    let t = S::mul_pd((i + j).cast_f64(), S::Vf64::set1(G2_64));
+    let t = (i + j).cast_f64() * S::Vf64::set1(G2_64);
 
     // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_pd(x, S::sub_pd(ips, t));
@@ -167,12 +167,12 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     t1 &= t1.cmp_ge(S::Vf64::zeroes());
     t2 &= t2.cmp_ge(S::Vf64::zeroes());
 
-    let t20 = S::mul_pd(t0, t0);
-    let t40 = S::mul_pd(t20, t20);
-    let t21 = S::mul_pd(t1, t1);
-    let t41 = S::mul_pd(t21, t21);
-    let t22 = S::mul_pd(t2, t2);
-    let t42 = S::mul_pd(t22, t22);
+    let t20 = t0 * t0;
+    let t40 = t20 * t20;
+    let t21 = t1 * t1;
+    let t41 = t21 * t21;
+    let t22 = t2 * t2;
+    let t42 = t22 * t22;
 
     let [gx0, gy0] = grad2::<S>(seed, gi0);
     let g0 = gx0 * x0 + gy0 * y0;
@@ -225,7 +225,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     seed: i64,
 ) -> (S::Vf64, [S::Vf64; 3]) {
     // Find skewed simplex grid coordinates associated with the input coordinates
-    let f = S::mul_pd(S::Vf64::set1(F3_64), ((x + y) + z));
+    let f = S::Vf64::set1(F3_64) * ((x + y) + z);
     let mut x0 = (x + f).fast_floor();
     let mut y0 = (y + f).fast_floor();
     let mut z0 = (z + f).fast_floor();
@@ -236,7 +236,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let k = z0.cast_i64() * S::Vi64::set1(Z_PRIME_64);
 
     // Compute distance from first simplex vertex to input coordinates
-    let g = S::mul_pd(S::Vf64::set1(G3_64), ((x0 + y0) + z0));
+    let g = S::Vf64::set1(G3_64) * (x0 + y0 + z0);
     x0 = S::sub_pd(x, S::sub_pd(x0, g));
     y0 = S::sub_pd(y, S::sub_pd(y0, g));
     z0 = S::sub_pd(z, S::sub_pd(z0, g));
@@ -271,32 +271,20 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     // to give visually better results at the cost of subtle discontinuities.
     //#define SIMDf_NMUL_ADD(a,b,c) = SIMDf_SUB(c, SIMDf_MUL(a,b)
     let mut t0 = S::sub_pd(
-        S::sub_pd(
-            S::sub_pd(S::Vf64::set1(0.6), S::mul_pd(x0, x0)),
-            S::mul_pd(y0, y0),
-        ),
-        S::mul_pd(z0, z0),
+        S::sub_pd(S::sub_pd(S::Vf64::set1(0.6), x0 * x0), y0 * y0),
+        z0 * z0,
     );
     let mut t1 = S::sub_pd(
-        S::sub_pd(
-            S::sub_pd(S::Vf64::set1(0.6), S::mul_pd(x1, x1)),
-            S::mul_pd(y1, y1),
-        ),
-        S::mul_pd(z1, z1),
+        S::sub_pd(S::sub_pd(S::Vf64::set1(0.6), x1 * x1), y1 * y1),
+        z1 * z1,
     );
     let mut t2 = S::sub_pd(
-        S::sub_pd(
-            S::sub_pd(S::Vf64::set1(0.6), S::mul_pd(x2, x2)),
-            S::mul_pd(y2, y2),
-        ),
-        S::mul_pd(z2, z2),
+        S::sub_pd(S::sub_pd(S::Vf64::set1(0.6), x2 * x2), y2 * y2),
+        z2 * z2,
     );
     let mut t3 = S::sub_pd(
-        S::sub_pd(
-            S::sub_pd(S::Vf64::set1(0.6), S::mul_pd(x3, x3)),
-            S::mul_pd(y3, y3),
-        ),
-        S::mul_pd(z3, z3),
+        S::sub_pd(S::sub_pd(S::Vf64::set1(0.6), x3 * x3), y3 * y3),
+        z3 * z3,
     );
 
     // Zero out negative weights
@@ -396,10 +384,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     w: S::Vf64,
     seed: i64,
 ) -> S::Vf64 {
-    let s = S::mul_pd(
-        S::Vf64::set1(F4_64),
-        (x + (y + (z + w))),
-    );
+    let s = S::Vf64::set1(F4_64) * (x + y + z + w);
 
     let ipd = (x + s).floor();
     let jpd = (y + s).floor();
@@ -411,7 +396,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let k = kpd.cast_i64();
     let l = lpd.cast_i64();
 
-    let t = S::mul_pd((i + (j + (k + l))).cast_f64(), S::Vf64::set1(G4_64));
+    let t = (i + j + k + l).cast_f64() * S::Vf64::set1(G4_64);
     let x0 = S::sub_pd(x, S::sub_pd(ipd, t));
     let y0 = S::sub_pd(y, S::sub_pd(jpd, t));
     let z0 = S::sub_pd(z, S::sub_pd(kpd, t));
@@ -468,22 +453,22 @@ pub unsafe fn simplex_4d<S: Simd>(
     let cond = rank_w.cmp_gt(S::Vi64::zeroes());
     let l3 = (S::Vi64::set1(1) & cond);
 
-    let x1 = S::sub_pd(x0, i1.cast_f64())+ S::Vf64::set1(G4_64);
-    let y1 = S::sub_pd(y0, j1.cast_f64())+ S::Vf64::set1(G4_64);
-    let z1 = S::sub_pd(z0, k1.cast_f64())+ S::Vf64::set1(G4_64);
-    let w1 = S::sub_pd(w0, l1.cast_f64())+ S::Vf64::set1(G4_64);
-    let x2 = S::sub_pd(x0, i2.cast_f64())+ S::Vf64::set1(G24_64);
-    let y2 = S::sub_pd(y0, j2.cast_f64())+ S::Vf64::set1(G24_64);
-    let z2 = S::sub_pd(z0, k2.cast_f64())+ S::Vf64::set1(G24_64);
-    let w2 = S::sub_pd(w0, l2.cast_f64())+ S::Vf64::set1(G24_64);
-    let x3 = S::sub_pd(x0, i3.cast_f64())+ S::Vf64::set1(G34_64);
-    let y3 = S::sub_pd(y0, j3.cast_f64())+ S::Vf64::set1(G34_64);
-    let z3 = S::sub_pd(z0, k3.cast_f64())+ S::Vf64::set1(G34_64);
-    let w3 = S::sub_pd(w0, l3.cast_f64())+ S::Vf64::set1(G34_64);
-    let x4 = S::sub_pd(x0, S::Vf64::set1(1.0))+ S::Vf64::set1(G44_64);
-    let y4 = S::sub_pd(y0, S::Vf64::set1(1.0))+ S::Vf64::set1(G44_64);
-    let z4 = S::sub_pd(z0, S::Vf64::set1(1.0))+ S::Vf64::set1(G44_64);
-    let w4 = S::sub_pd(w0, S::Vf64::set1(1.0))+ S::Vf64::set1(G44_64);
+    let x1 = S::sub_pd(x0, i1.cast_f64()) + S::Vf64::set1(G4_64);
+    let y1 = S::sub_pd(y0, j1.cast_f64()) + S::Vf64::set1(G4_64);
+    let z1 = S::sub_pd(z0, k1.cast_f64()) + S::Vf64::set1(G4_64);
+    let w1 = S::sub_pd(w0, l1.cast_f64()) + S::Vf64::set1(G4_64);
+    let x2 = S::sub_pd(x0, i2.cast_f64()) + S::Vf64::set1(G24_64);
+    let y2 = S::sub_pd(y0, j2.cast_f64()) + S::Vf64::set1(G24_64);
+    let z2 = S::sub_pd(z0, k2.cast_f64()) + S::Vf64::set1(G24_64);
+    let w2 = S::sub_pd(w0, l2.cast_f64()) + S::Vf64::set1(G24_64);
+    let x3 = S::sub_pd(x0, i3.cast_f64()) + S::Vf64::set1(G34_64);
+    let y3 = S::sub_pd(y0, j3.cast_f64()) + S::Vf64::set1(G34_64);
+    let z3 = S::sub_pd(z0, k3.cast_f64()) + S::Vf64::set1(G34_64);
+    let w3 = S::sub_pd(w0, l3.cast_f64()) + S::Vf64::set1(G34_64);
+    let x4 = S::sub_pd(x0, S::Vf64::set1(1.0)) + S::Vf64::set1(G44_64);
+    let y4 = S::sub_pd(y0, S::Vf64::set1(1.0)) + S::Vf64::set1(G44_64);
+    let z4 = S::sub_pd(z0, S::Vf64::set1(1.0)) + S::Vf64::set1(G44_64);
+    let w4 = S::sub_pd(w0, S::Vf64::set1(1.0)) + S::Vf64::set1(G44_64);
 
     let ii = (i & S::Vi64::set1(0xff));
     let jj = (j & S::Vi64::set1(0xff));
@@ -517,71 +502,56 @@ pub unsafe fn simplex_4d<S: Simd>(
 
     let t0 = S::sub_pd(
         S::sub_pd(
-            S::sub_pd(
-                S::sub_pd(S::Vf64::set1(0.5), S::mul_pd(x0, x0)),
-                S::mul_pd(y0, y0),
-            ),
-            S::mul_pd(z0, z0),
+            S::sub_pd(S::sub_pd(S::Vf64::set1(0.5), x0 * x0), y0 * y0),
+            z0 * z0,
         ),
-        S::mul_pd(w0, w0),
+        w0 * w0,
     );
     let t1 = S::sub_pd(
         S::sub_pd(
-            S::sub_pd(
-                S::sub_pd(S::Vf64::set1(0.5), S::mul_pd(x1, x1)),
-                S::mul_pd(y1, y1),
-            ),
-            S::mul_pd(z1, z1),
+            S::sub_pd(S::sub_pd(S::Vf64::set1(0.5), x1 * x1), y1 * y1),
+            z1 * z1,
         ),
-        S::mul_pd(w1, w1),
+        w1 * w1,
     );
     let t2 = S::sub_pd(
         S::sub_pd(
-            S::sub_pd(
-                S::sub_pd(S::Vf64::set1(0.5), S::mul_pd(x2, x2)),
-                S::mul_pd(y2, y2),
-            ),
-            S::mul_pd(z2, z2),
+            S::sub_pd(S::sub_pd(S::Vf64::set1(0.5), x2 * x2), y2 * y2),
+            z2 * z2,
         ),
-        S::mul_pd(w2, w2),
+        w2 * w2,
     );
     let t3 = S::sub_pd(
         S::sub_pd(
-            S::sub_pd(
-                S::sub_pd(S::Vf64::set1(0.5), S::mul_pd(x3, x3)),
-                S::mul_pd(y3, y3),
-            ),
-            S::mul_pd(z3, z3),
+            S::sub_pd(S::sub_pd(S::Vf64::set1(0.5), x3 * x3), y3 * y3),
+            z3 * z3,
         ),
-        S::mul_pd(w3, w3),
+        w3 * w3,
     );
     let t4 = S::sub_pd(
         S::sub_pd(
-            S::sub_pd(
-                S::sub_pd(S::Vf64::set1(0.5), S::mul_pd(x4, x4)),
-                S::mul_pd(y4, y4),
-            ),
-            S::mul_pd(z4, z4),
+            S::sub_pd(S::sub_pd(S::Vf64::set1(0.5), x4 * x4), y4 * y4),
+            z4 * z4,
         ),
-        S::mul_pd(w4, w4),
+        w4 * w4,
     );
     //ti*ti*ti*ti
-    let mut t0q = S::mul_pd(t0, t0);
-    t0q = S::mul_pd(t0q, t0q);
-    let mut t1q = S::mul_pd(t1, t1);
-    t1q = S::mul_pd(t1q, t1q);
-    let mut t2q = S::mul_pd(t2, t2);
-    t2q = S::mul_pd(t2q, t2q);
-    let mut t3q = S::mul_pd(t3, t3);
-    t3q = S::mul_pd(t3q, t3q);
-    let mut t4q = S::mul_pd(t4, t4);
-    t4q = S::mul_pd(t4q, t4q);
+    let mut t0q = t0 * t0;
+    t0q = t0q * t0q;
+    let mut t1q = t1 * t1;
+    t1q = t1q * t1q;
+    let mut t2q = t2 * t2;
+    t2q = t2q * t2q;
+    let mut t3q = t3 * t3;
+    t3q = t3q * t3q;
+    let mut t4q = t4 * t4;
+    t4q = t4q * t4q;
 
-    let mut n0 = S::mul_pd(t0q, grad4::<S>(seed, gi0, x0, y0, z0, w0));
-    let mut n1 = S::mul_pd(t1q, grad4::<S>(seed, gi1, x1, y1, z1, w1));
-    let mut n2 = S::mul_pd(t2q, grad4::<S>(seed, gi2, x2, y2, z2, w2));
-    let mut n3 = S::mul_pd(t3q, grad4::<S>(seed, gi3, x3, y3, z3, w3));
-    let mut n4 = S::mul_pd(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
+    let mut n0 = t0q * grad4::<S>(seed, gi0, x0, y0, z0, w0);
+    let mut n1 = t1q * grad4::<S>(seed, gi1, x1, y1, z1, w1);
+    let mut n2 = t2q * grad4::<S>(seed, gi2, x2, y2, z2, w2);
+    let mut n3 = t3q * grad4::<S>(seed, gi3, x3, y3, z3, w3);
+    let mut n4 = t4q * grad4::<S>(seed, gi4, x4, y4, z4, w4);
 
     //if ti < 0 then 0 else ni
     let mut cond = t0.cmp_lt(S::Vf64::zeroes());
@@ -595,8 +565,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     cond = t4.cmp_lt(S::Vf64::zeroes());
     n4 = cond.and_not(n4);
 
-    (n0 + (n1 + (n2 +  (n3 + n4))))
-        * S::Vf64::set1(62.77772078955791)
+    (n0 + (n1 + (n2 + (n3 + n4)))) * S::Vf64::set1(62.77772078955791)
 }
 
 #[cfg(test)]
