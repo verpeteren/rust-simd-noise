@@ -15,8 +15,8 @@ pub unsafe fn cellular_2d<S: Simd>(
     seed: i32,
 ) -> S::Vf32 {
     let mut distance = S::Vf32::set1(999999.0);
-    let mut xc = S::sub_epi32(x.cast_i32(), S::Vi32::set1(1));
-    let mut yc_base = S::sub_epi32(y.cast_i32(), S::Vi32::set1(1));
+    let mut xc = x.cast_i32() - S::Vi32::set1(1);
+    let mut yc_base = y.cast_i32() - S::Vi32::set1(1);
 
     let mut xcf = S::sub_ps(xc.cast_f32(), x);
     let ycf_base = S::sub_ps(yc_base.cast_f32(), y);
@@ -237,9 +237,9 @@ pub unsafe fn cellular_3d<S: Simd>(
     let mut distance = S::Vf32::set1(999999.0);
     let mut cell_value = S::Vf32::zeroes();
 
-    let mut xc = S::sub_epi32(x.cast_i32(), S::Vi32::set1(1));
-    let mut yc_base = S::sub_epi32(y.cast_i32(), S::Vi32::set1(1));
-    let mut zc_base = S::sub_epi32(z.cast_i32(), S::Vi32::set1(1));
+    let mut xc = x.cast_i32() - S::Vi32::set1(1);
+    let mut yc_base = y.cast_i32() - S::Vi32::set1(1);
+    let mut zc_base = z.cast_i32() - S::Vi32::set1(1);
 
     let mut xcf = S::sub_ps(xc.cast_f32(), x);
     let ycf_base = S::sub_ps(yc_base.cast_f32(), y);
