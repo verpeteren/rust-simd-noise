@@ -86,21 +86,21 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::V
     let gi1 = S::i32gather_epi32(&PERM, i1);
 
     // Compute the contribution from the first gradient
-    let x20 = S::mul_ps(x0, x0); // x^2_0
+    let x20 = x0 * x0; // x^2_0
     let t0 = S::sub_ps(S::Vf32::set1(1.0), x20); // t_0
-    let t20 = S::mul_ps(t0, t0); // t^2_0
-    let t40 = S::mul_ps(t20, t20); // t^4_0
+    let t20 = t0 * t0; // t^2_0
+    let t40 = t20 * t20; // t^4_0
     let gx0 = grad1::<S>(seed, gi0);
-    let n0 = S::mul_ps(t40, gx0 * x0);
+    let n0 = t40 * gx0 * x0;
     // n0 = (1 - x0^2)^4 * x0 * grad
 
     // Compute the contribution from the second gradient
-    let x21 = S::mul_ps(x1, x1); // x^2_1
+    let x21 = x1 * x1; // x^2_1
     let t1 = S::sub_ps(S::Vf32::set1(1.0), x21); // t_1
-    let t21 = S::mul_ps(t1, t1); // t^2_1
-    let t41 = S::mul_ps(t21, t21); // t^4_1
+    let t21 = t1 * t1; // t^2_1
+    let t41 = t21 * t21; // t^4_1
     let gx1 = grad1::<S>(seed, gi1);
-    let n1 = S::mul_ps(t41, gx1 * x1);
+    let n1 = t41 * gx1 * x1;
 
     // n0 + n1 =
     //    grad0 * x0 * (1 - x0^2)^4
@@ -148,7 +148,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 ) -> (S::Vf32, [S::Vf32; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
-    let s = S::mul_ps(S::Vf32::set1(F2_32), (x + y));
+    let s = S::Vf32::set1(F2_32) * (x + y);
     let ips = (x + s).floor();
     let jps = (y + s).floor();
 
@@ -156,7 +156,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let i = ips.cast_i32();
     let j = jps.cast_i32();
 
-    let t = S::mul_ps((i + j).cast_f32(), S::Vf32::set1(G2_32));
+    let t = (i + j).cast_f32() * S::Vf32::set1(G2_32);
 
     // Unskewed distances to the first point of the enclosing simplex
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
@@ -199,12 +199,12 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     t1 &= t1.cmp_ge(S::Vf32::zeroes());
     t2 &= t2.cmp_ge(S::Vf32::zeroes());
 
-    let t20 = S::mul_ps(t0, t0);
-    let t40 = S::mul_ps(t20, t20);
-    let t21 = S::mul_ps(t1, t1);
-    let t41 = S::mul_ps(t21, t21);
-    let t22 = S::mul_ps(t2, t2);
-    let t42 = S::mul_ps(t22, t22);
+    let t20 = t0 * t0;
+    let t40 = t20 * t20;
+    let t21 = t1 * t1;
+    let t41 = t21 * t21;
+    let t22 = t2 * t2;
+    let t42 = t22 * t22;
 
     let [gx0, gy0] = grad2::<S>(seed, gi0);
     let g0 = gx0 * x0 + gy0 * y0;
@@ -257,7 +257,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     seed: i32,
 ) -> (S::Vf32, [S::Vf32; 3]) {
     // Find skewed simplex grid coordinates associated with the input coordinates
-    let f = S::mul_ps(S::Vf32::set1(F3_32), ((x + y) + z));
+    let f = S::Vf32::set1(F3_32) * ((x + y) + z);
     let mut x0 = (x + f).fast_floor();
     let mut y0 = (y + f).fast_floor();
     let mut z0 = (z + f).fast_floor();
@@ -268,7 +268,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let k = z0.cast_i32() * S::Vi32::set1(Z_PRIME_32);
 
     // Compute distance from first simplex vertex to input coordinates
-    let g = S::mul_ps(S::Vf32::set1(G3_32), ((x0 + y0) + z0));
+    let g = S::Vf32::set1(G3_32) * ((x0 + y0) + z0);
     x0 = S::sub_ps(x, S::sub_ps(x0, g));
     y0 = S::sub_ps(y, S::sub_ps(y0, g));
     z0 = S::sub_ps(z, S::sub_ps(z0, g));
@@ -303,32 +303,20 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     // to give visually better results at the cost of subtle discontinuities.
     //#define SIMDf_NMUL_ADD(a,b,c) = SIMDf_SUB(c, SIMDf_MUL(a,b)
     let mut t0 = S::sub_ps(
-        S::sub_ps(
-            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x0, x0)),
-            S::mul_ps(y0, y0),
-        ),
-        S::mul_ps(z0, z0),
+        S::sub_ps(S::sub_ps(S::Vf32::set1(0.6), x0 * x0), y0 * y0),
+        z0 * z0,
     );
     let mut t1 = S::sub_ps(
-        S::sub_ps(
-            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x1, x1)),
-            S::mul_ps(y1, y1),
-        ),
-        S::mul_ps(z1, z1),
+        S::sub_ps(S::sub_ps(S::Vf32::set1(0.6), x1 * x1), y1 * y1),
+        (z1 * z1),
     );
     let mut t2 = S::sub_ps(
-        S::sub_ps(
-            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x2, x2)),
-            S::mul_ps(y2, y2),
-        ),
-        S::mul_ps(z2, z2),
+        S::sub_ps(S::sub_ps(S::Vf32::set1(0.6), (x2 * x2)), (y2 * y2)),
+        (z2 * z2),
     );
     let mut t3 = S::sub_ps(
-        S::sub_ps(
-            S::sub_ps(S::Vf32::set1(0.6), S::mul_ps(x3, x3)),
-            S::mul_ps(y3, y3),
-        ),
-        S::mul_ps(z3, z3),
+        S::sub_ps(S::sub_ps(S::Vf32::set1(0.6), (x3 * x3)), (y3 * y3)),
+        (z3 * z3),
     );
 
     // Zero out negative weights
@@ -433,7 +421,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     // vertex of the simplex
     //
 
-    let s = S::mul_ps(S::Vf32::set1(F4_32), x + y + z + w);
+    let s = S::Vf32::set1(F4_32) * (x + y + z + w);
 
     let ips = (x + s).floor();
     let jps = (y + s).floor();
@@ -445,7 +433,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let k = kps.cast_i32();
     let l = lps.cast_i32();
 
-    let t = S::mul_ps((i + j + k + l).cast_f32(), S::Vf32::set1(G4_32));
+    let t = (i + j + k + l).cast_f32() * S::Vf32::set1(G4_32);
     let x0 = S::sub_ps(x, S::sub_ps(ips, t));
     let y0 = S::sub_ps(y, S::sub_ps(jps, t));
     let z0 = S::sub_ps(z, S::sub_ps(kps, t));
@@ -555,71 +543,56 @@ pub unsafe fn simplex_4d<S: Simd>(
 
     let t0 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(
-                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x0, x0)),
-                S::mul_ps(y0, y0),
-            ),
-            S::mul_ps(z0, z0),
+            S::sub_ps(S::sub_ps(S::Vf32::set1(0.5), (x0 * x0)), (y0 * y0)),
+            (z0 * z0),
         ),
-        S::mul_ps(w0, w0),
+        (w0 * w0),
     );
     let t1 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(
-                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x1, x1)),
-                S::mul_ps(y1, y1),
-            ),
-            S::mul_ps(z1, z1),
+            S::sub_ps(S::sub_ps(S::Vf32::set1(0.5), (x1 * x1)), (y1 * y1)),
+            (z1 * z1),
         ),
-        S::mul_ps(w1, w1),
+        (w1 * w1),
     );
     let t2 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(
-                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x2, x2)),
-                S::mul_ps(y2, y2),
-            ),
-            S::mul_ps(z2, z2),
+            S::sub_ps(S::sub_ps(S::Vf32::set1(0.5), (x2 * x2)), (y2 * y2)),
+            (z2 * z2),
         ),
-        S::mul_ps(w2, w2),
+        (w2 * w2),
     );
     let t3 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(
-                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x3, x3)),
-                S::mul_ps(y3, y3),
-            ),
-            S::mul_ps(z3, z3),
+            S::sub_ps(S::sub_ps(S::Vf32::set1(0.5), (x3 * x3)), (y3 * y3)),
+            (z3 * z3),
         ),
-        S::mul_ps(w3, w3),
+        (w3 * w3),
     );
     let t4 = S::sub_ps(
         S::sub_ps(
-            S::sub_ps(
-                S::sub_ps(S::Vf32::set1(0.5), S::mul_ps(x4, x4)),
-                S::mul_ps(y4, y4),
-            ),
-            S::mul_ps(z4, z4),
+            S::sub_ps(S::sub_ps(S::Vf32::set1(0.5), (x4 * x4)), (y4 * y4)),
+            (z4 * z4),
         ),
-        S::mul_ps(w4, w4),
+        (w4 * w4),
     );
     // Cube each weight
-    let mut t0q = S::mul_ps(t0, t0);
-    t0q = S::mul_ps(t0q, t0q);
-    let mut t1q = S::mul_ps(t1, t1);
-    t1q = S::mul_ps(t1q, t1q);
-    let mut t2q = S::mul_ps(t2, t2);
-    t2q = S::mul_ps(t2q, t2q);
-    let mut t3q = S::mul_ps(t3, t3);
-    t3q = S::mul_ps(t3q, t3q);
-    let mut t4q = S::mul_ps(t4, t4);
-    t4q = S::mul_ps(t4q, t4q);
+    let mut t0q = t0 * t0;
+    t0q = t0q * t0q;
+    let mut t1q = t1 * t1;
+    t1q = t1q * t1q;
+    let mut t2q = t2 * t2;
+    t2q = t2q * t2q;
+    let mut t3q = t3 * t3;
+    t3q = t3q * t3q;
+    let mut t4q = t4 * t4;
+    t4q = t4q * t4q;
 
-    let mut n0 = S::mul_ps(t0q, grad4::<S>(seed, gi0, x0, y0, z0, w0));
-    let mut n1 = S::mul_ps(t1q, grad4::<S>(seed, gi1, x1, y1, z1, w1));
-    let mut n2 = S::mul_ps(t2q, grad4::<S>(seed, gi2, x2, y2, z2, w2));
-    let mut n3 = S::mul_ps(t3q, grad4::<S>(seed, gi3, x3, y3, z3, w3));
-    let mut n4 = S::mul_ps(t4q, grad4::<S>(seed, gi4, x4, y4, z4, w4));
+    let mut n0 = t0q * grad4::<S>(seed, gi0, x0, y0, z0, w0);
+    let mut n1 = t1q * grad4::<S>(seed, gi1, x1, y1, z1, w1);
+    let mut n2 = t2q * grad4::<S>(seed, gi2, x2, y2, z2, w2);
+    let mut n3 = t3q * grad4::<S>(seed, gi3, x3, y3, z3, w3);
+    let mut n4 = t4q * grad4::<S>(seed, gi4, x4, y4, z4, w4);
 
     // Discard contributions whose base weight factors are negative
     let mut cond = t0.cmp_lt(S::Vf32::zeroes());

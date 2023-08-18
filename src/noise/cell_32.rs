@@ -40,13 +40,12 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
-                            let mut xd2 = S::mul_ps(xd, xd);
-                            let inv_mag =
-                                S::mul_ps(jitter, (xd2 + S::mul_ps(yd, yd)).rsqrt());
-                            xd = S::mul_ps(xd, inv_mag) + xcf;
-                            yd = S::mul_ps(yd, inv_mag) + ycf;
-                            xd2 = S::mul_ps(xd, xd);
-                            let new_distance = xd2 + S::mul_ps(yd, yd);
+                            let mut xd2 = xd * xd;
+                            let inv_mag = jitter * (xd2 + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
+                            xd2 = xd * xd;
+                            let new_distance = xd2 + (yd * yd);
                             distance = new_distance.min(distance);
 
                             ycf = ycf + S::Vf32::set1(1.0);
@@ -70,12 +69,9 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
-                            let inv_mag = S::mul_ps(
-                                jitter,
-                                (S::mul_ps(xd, xd) + S::mul_ps(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_ps(xd, inv_mag) + xcf;
-                            yd = S::mul_ps(yd, inv_mag) + ycf;
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
                             let new_distance = (xd.abs() + yd.abs());
                             distance = new_distance.min(distance);
@@ -101,15 +97,12 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
-                            let inv_mag = S::mul_ps(
-                                jitter,
-                                (S::mul_ps(xd, xd) + S::mul_ps(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_ps(xd, inv_mag) + xcf;
-                            yd = S::mul_ps(yd, inv_mag) + ycf;
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
                             let new_distance = {
-                                let euc = S::mul_ps(xd, xd) + S::mul_ps(yd, yd);
+                                let euc = (xd * xd) + (yd * yd);
                                 let man = xd.abs() + yd.abs();
                                 euc + man
                             };
@@ -142,16 +135,12 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
-                            let inv_mag = S::mul_ps(
-                                jitter,
-                                (S::mul_ps(xd, xd) + S::mul_ps(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_ps(xd, inv_mag) + xcf;
-                            yd = S::mul_ps(yd, inv_mag) + ycf;
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
-                            let new_cell_value =
-                                S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), hash.cast_f32());
-                            let new_distance = S::mul_ps(xd, xd) + S::mul_ps(yd, yd);
+                            let new_cell_value = S::Vf32::set1(HASH_2_FLOAT_32) * hash.cast_f32();
+                            let new_distance = (xd * xd) + (yd * yd);
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
                             cell_value = closer.blendv(cell_value, new_cell_value);
@@ -177,15 +166,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
-                            let inv_mag = S::mul_ps(
-                                jitter,
-                                (S::mul_ps(xd, xd)+ S::mul_ps(yd, yd)).rsqrt(),
-                            );
-                            xd = (S::mul_ps(xd, inv_mag) + xcf);
-                            yd = (S::mul_ps(yd, inv_mag) + ycf);
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
-                            let new_cell_value =
-                                S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), hash.cast_f32());
+                            let new_cell_value = S::Vf32::set1(HASH_2_FLOAT_32) * hash.cast_f32();
                             let new_distance = (xd.abs() + yd.abs());
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
@@ -212,17 +197,13 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                                 S::Vf32::set1(511.5),
                             );
-                            let inv_mag = S::mul_ps(
-                                jitter,
-                                (S::mul_ps(xd, xd) + S::mul_ps(yd, yd)).rsqrt(),
-                            );
-                            xd = S::mul_ps(xd, inv_mag) + xcf;
-                            yd = S::mul_ps(yd, inv_mag) + ycf;
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+                            xd = (xd * inv_mag) + xcf;
+                            yd = (yd * inv_mag) + ycf;
 
-                            let new_cell_value =
-                                S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), hash.cast_f32());
+                            let new_cell_value = S::Vf32::set1(HASH_2_FLOAT_32) * hash.cast_f32();
                             let new_distance = {
-                                let euc = (S::mul_ps(xd, xd) + S::mul_ps(yd, yd));
+                                let euc = (xd * xd) + (yd * yd);
                                 let man = xd.abs() + yd.abs();
                                 euc + man
                             };
@@ -288,32 +269,17 @@ pub unsafe fn cellular_3d<S: Simd>(
                     ((hash >> 20) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32(),
                     S::Vf32::set1(511.5),
                 );
-                let inv_mag = S::mul_ps(
-                    jitter,
-                    (
-                        S::mul_ps(xd, xd) +
-                        (S::mul_ps(yd, yd)+ S::mul_ps(zd, zd))
-                    )
-                    .rsqrt(),
-                );
-                xd = S::mul_ps(xd, inv_mag) + xcf;
-                yd = S::mul_ps(yd, inv_mag) + ycf;
-                zd = S::mul_ps(zd, inv_mag) + zcf;
+                let inv_mag = jitter * ((xd * xd) + ((yd * yd) + (zd * zd))).rsqrt();
+                xd = (xd * inv_mag) + xcf;
+                yd = (yd * inv_mag) + ycf;
+                zd = (zd * inv_mag) + zcf;
 
-                let new_cell_value = S::mul_ps(S::Vf32::set1(HASH_2_FLOAT_32), hash.cast_f32());
+                let new_cell_value = S::Vf32::set1(HASH_2_FLOAT_32) * hash.cast_f32();
                 let new_distance = match distance_function {
-                    CellDistanceFunction::Euclidean => (
-                        S::mul_ps(xd, xd) +
-                        (S::mul_ps(yd, yd) + S::mul_ps(zd, zd))
-                    ),
-                    CellDistanceFunction::Manhattan => {
-                        ((xd.abs() + yd.abs()) + zd.abs())
-                    }
+                    CellDistanceFunction::Euclidean => (xd * xd) + ((yd * yd) + (zd * zd)),
+                    CellDistanceFunction::Manhattan => ((xd.abs() + yd.abs()) + zd.abs()),
                     CellDistanceFunction::Natural => {
-                        let euc = (
-                            S::mul_ps(xd, xd) +
-                            (S::mul_ps(yd, yd) + S::mul_ps(zd, zd))
-                        );
+                        let euc = (xd * xd) + ((yd * yd) + (zd * zd));
                         let man = ((xd.abs() + yd.abs()) + zd.abs());
                         euc + man
                     }

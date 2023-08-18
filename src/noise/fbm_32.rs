@@ -14,8 +14,8 @@ pub unsafe fn fbm_1d<S: Simd>(
     let mut result = simplex_1d::<S>(x, seed);
 
     for _ in 1..octaves {
-        x = S::mul_ps(x, lacunarity);
-        amp = S::mul_ps(amp, gain);
+        x = x * lacunarity;
+        amp = amp * gain;
         result = result + simplex_1d::<S>(x, seed);
     }
 
@@ -35,10 +35,10 @@ pub unsafe fn fbm_2d<S: Simd>(
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
-        x = S::mul_ps(x, lac);
-        y = S::mul_ps(y, lac);
-        amp = S::mul_ps(amp, gain);
-        result = S::mul_ps(simplex_2d::<S>(x, y, seed), amp) + result;
+        x = x * lac;
+        y = y * lac;
+        amp = amp * gain;
+        result = (simplex_2d::<S>(x, y, seed) * amp) + result;
     }
 
     result
@@ -58,11 +58,11 @@ pub unsafe fn fbm_3d<S: Simd>(
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
-        x = S::mul_ps(x, lac);
-        y = S::mul_ps(y, lac);
-        z = S::mul_ps(z, lac);
-        amp = S::mul_ps(amp, gain);
-        result = S::mul_ps(simplex_3d::<S>(x, y, z, seed), amp) + result;
+        x = x * lac;
+        y = y * lac;
+        z = z * lac;
+        amp = amp * gain;
+        result = (simplex_3d::<S>(x, y, z, seed) * amp) + result;
     }
 
     result
@@ -83,12 +83,12 @@ pub unsafe fn fbm_4d<S: Simd>(
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
-        x = S::mul_ps(x, lac);
-        y = S::mul_ps(y, lac);
-        z = S::mul_ps(z, lac);
-        w = S::mul_ps(w, lac);
-        amp = S::mul_ps(amp, gain);
-        result = result + S::mul_ps(simplex_4d::<S>(x, y, z, w, seed), amp);
+        x = x * lac;
+        y = y * lac;
+        z = z * lac;
+        w = w * lac;
+        amp = amp * gain;
+        result = result + (simplex_4d::<S>(x, y, z, w, seed) * amp);
     }
 
     result

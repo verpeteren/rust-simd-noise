@@ -16,10 +16,8 @@ pub unsafe fn scale_noise<S: Simd>(
     let mut i = 0;
     if data.len() >= vector_width {
         while i <= data.len() - vector_width {
-            let value = S::mul_ps(
-                S::Vf32::set1(multiplier),
-                S::Vf32::load_from_ptr_unaligned(&data[i]),
-            ) + S::Vf32::set1(offset);
+            let value = (S::Vf32::set1(multiplier) * S::Vf32::load_from_ptr_unaligned(&data[i]))
+                + S::Vf32::set1(offset);
             value.copy_to_ptr_unaligned(data.get_unchecked_mut(i));
             i += vector_width;
         }
