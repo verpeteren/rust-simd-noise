@@ -12,7 +12,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
     let v = (h & S::Vi32::set1(7)).cast_f32();
 
     let h_and_8 = ((h & S::Vi32::set1(8)).cmp_eq(S::Vi32::zeroes())).cast_f32();
-    h_and_8.blendv(S::sub_ps(S::Vf32::zeroes(), v), v)
+    h_and_8.blendv(S::Vf32::zeroes() - v, v)
 }
 
 /// Generates a random gradient vector where one component is ±1 and the other is ±2.
@@ -31,10 +31,10 @@ pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
 
     let gx = mask
         .blendv(h_and_2, h_and_1)
-        .blendv(S::sub_ps(S::Vf32::zeroes(), x_magnitude), x_magnitude);
+        .blendv(S::Vf32::zeroes() - x_magnitude, x_magnitude);
     let gy = mask
         .blendv(h_and_1, h_and_2)
-        .blendv(S::sub_ps(S::Vf32::zeroes(), y_magnitude), y_magnitude);
+        .blendv(S::Vf32::zeroes() - y_magnitude, y_magnitude);
     [gx, gy]
 }
 
@@ -109,7 +109,7 @@ pub unsafe fn grad4<S: Simd>(
     let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::Vi32::zeroes())).cast_f32();
     let h_and_4 = ((h & S::Vi32::set1(4)).cmp_eq(S::Vi32::zeroes())).cast_f32();
 
-    h_and_1.blendv(S::sub_ps(S::Vf32::zeroes(), u), u)
-        + h_and_2.blendv(S::sub_ps(S::Vf32::zeroes(), v), v)
-            + h_and_4.blendv(S::sub_ps(S::Vf32::zeroes(), w), w)
+    h_and_1.blendv(S::Vf32::zeroes() - u, u)
+        + h_and_2.blendv(S::Vf32::zeroes() - v, v)
+        + h_and_4.blendv(S::Vf32::zeroes() - w, w)
 }
