@@ -162,7 +162,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let x0 = x - ips - t;
     let y0 = y - jps - t;
 
-    let i1 = (x0.cmp_ge(y0)).cast_i32();
+    let i1 = (x0.cmp_gte(y0)).cast_i32();
 
     let j1 = (y0.cmp_gt(x0)).cast_i32();
 
@@ -191,9 +191,9 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let mut t2 = S::fnmadd_ps(y2, y2, S::fnmadd_ps(x2, x2, S::Vf32::set1(0.5)));
 
     // Zero out negative weights
-    t0 &= t0.cmp_ge(S::Vf32::zeroes());
-    t1 &= t1.cmp_ge(S::Vf32::zeroes());
-    t2 &= t2.cmp_ge(S::Vf32::zeroes());
+    t0 &= t0.cmp_gte(S::Vf32::zeroes());
+    t1 &= t1.cmp_gte(S::Vf32::zeroes());
+    t2 &= t2.cmp_gte(S::Vf32::zeroes());
 
     let t20 = t0 * t0;
     let t40 = t20 * t20;
@@ -269,9 +269,9 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     y0 = y - y0 - g;
     z0 = z - z0 - g;
 
-    let x0_ge_y0 = x0.cmp_ge(y0);
-    let y0_ge_z0 = y0.cmp_ge(z0);
-    let x0_ge_z0 = x0.cmp_ge(z0);
+    let x0_ge_y0 = x0.cmp_gte(y0);
+    let y0_ge_z0 = y0.cmp_gte(z0);
+    let x0_ge_z0 = x0.cmp_gte(z0);
 
     let i1 = x0_ge_y0 & x0_ge_z0;
     let j1 = x0_ge_y0.and_not(y0_ge_z0);
@@ -304,10 +304,10 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let mut t3 = S::Vf32::set1(0.6) - (x3 * x3) - (y3 * y3) - (z3 * z3);
 
     // Zero out negative weights
-    t0 &= t0.cmp_ge(S::Vf32::zeroes());
-    t1 &= t1.cmp_ge(S::Vf32::zeroes());
-    t2 &= t2.cmp_ge(S::Vf32::zeroes());
-    t3 &= t3.cmp_ge(S::Vf32::zeroes());
+    t0 &= t0.cmp_gte(S::Vf32::zeroes());
+    t1 &= t1.cmp_gte(S::Vf32::zeroes());
+    t2 &= t2.cmp_gte(S::Vf32::zeroes());
+    t3 &= t3.cmp_gte(S::Vf32::zeroes());
 
     // Square each weight
     let t20 = t0 * t0;
