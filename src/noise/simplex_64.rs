@@ -42,14 +42,14 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::V
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
     let mut i0 = ips.cast_i64();
-    let i1 = ((i0 + S::Vi64::set1(1)) & S::Vi64::set1(0xff));
+    let i1 = (i0 + S::Vi64::set1(1)) & S::Vi64::set1(0xff);
 
     // the fractional part of x, i.e. the distance to the left gradient node. 0 ≤ x0 < 1.
     let x0 = x - ips;
     // signed distance to the right gradient node
     let x1 = x0 - S::Vf64::set1(1.0);
 
-    i0 = (i0 & S::Vi64::set1(0xff));
+    i0 = i0 & S::Vi64::set1(0xff);
     let gi0 = S::i64gather_epi64(&PERM64, i0);
     let gi1 = S::i64gather_epi64(&PERM64, i1);
 
@@ -137,22 +137,22 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     // Distances to the second and third points of the enclosing simplex
     let x1 = (x0 + i1.cast_f64()) + S::Vf64::set1(G2_64);
     let y1 = (y0 + j1.cast_f64()) + S::Vf64::set1(G2_64);
-    let x2 = ((x0 + S::Vf64::set1(-1.0)) + S::Vf64::set1(G22_64));
-    let y2 = ((y0 + S::Vf64::set1(-1.0)) + S::Vf64::set1(G22_64));
+    let x2 = (x0 + S::Vf64::set1(-1.0)) + S::Vf64::set1(G22_64);
+    let y2 = (y0 + S::Vf64::set1(-1.0)) + S::Vf64::set1(G22_64);
 
-    let ii = (i & S::Vi64::set1(0xff));
-    let jj = (j & S::Vi64::set1(0xff));
+    let ii = i & S::Vi64::set1(0xff);
+    let jj = j & S::Vi64::set1(0xff);
 
-    let gi0 = S::i64gather_epi64(&PERM64, (ii + S::i64gather_epi64(&PERM64, jj)));
+    let gi0 = S::i64gather_epi64(&PERM64, ii + S::i64gather_epi64(&PERM64, jj));
 
     let gi1 = S::i64gather_epi64(
         &PERM64,
-        ((ii - i1) + S::i64gather_epi64(&PERM64, (jj - j1))),
+        (ii - i1) + S::i64gather_epi64(&PERM64, jj - j1),
     );
 
     let gi2 = S::i64gather_epi64(
         &PERM64,
-        ((ii - S::Vi64::set1(-1)) + S::i64gather_epi64(&PERM64, (jj - S::Vi64::set1(-1)))),
+        ii - S::Vi64::set1(-1) + S::i64gather_epi64(&PERM64, jj - S::Vi64::set1(-1)),
     );
 
     // Weights associated with the gradients at each corner
@@ -162,7 +162,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let mut t2 = S::fnmadd_pd(y2, y2, S::fnmadd_pd(x2, x2, S::Vf64::set1(0.5)));
 
     // Zero out negative weights
-    t0 &= t0.cmp_ge(S::Vf64::zeroes());
+    t0 &= t0.cmpge(S::Vf64::zeroes());
     t1 &= t1.cmp_ge(S::Vf64::zeroes());
     t2 &= t2.cmp_ge(S::Vf64::zeroes());
 
@@ -298,15 +298,15 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
     let g0 = grad3d_dot::<S>(seed, i, j, k, x0, y0, z0);
     let v0 = t40 * g0;
 
-    let v1x = (i + (i1.cast_i64() & S::Vi64::set1(X_PRIME_64)));
-    let v1y = (j + (j1.cast_i64() & S::Vi64::set1(Y_PRIME_64)));
-    let v1z = (k + (k1.cast_i64() & S::Vi64::set1(Z_PRIME_64)));
+    let v1x = i + (i1.cast_i64() & S::Vi64::set1(X_PRIME_64));
+    let v1y = j + (j1.cast_i64() & S::Vi64::set1(Y_PRIME_64));
+    let v1z = k + (k1.cast_i64() & S::Vi64::set1(Z_PRIME_64));
     let g1 = grad3d_dot::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
     let v1 = t41 * g1;
 
-    let v2x = (i + (i2.cast_i64() & S::Vi64::set1(X_PRIME_64)));
-    let v2y = (j + (j2.cast_i64() & S::Vi64::set1(Y_PRIME_64)));
-    let v2z = (k + (k2.cast_i64() & S::Vi64::set1(Z_PRIME_64)));
+    let v2x = i + (i2.cast_i64() & S::Vi64::set1(X_PRIME_64));
+    let v2y = j + (j2.cast_i64() & S::Vi64::set1(Y_PRIME_64));
+    let v2z = k + (k2.cast_i64() & S::Vi64::set1(Z_PRIME_64));
     let g2 = grad3d_dot::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
     let v2 = t42 * g2;
 
@@ -414,31 +414,31 @@ pub unsafe fn simplex_4d<S: Simd>(
     rank_w = rank_w + cond.and_not(S::Vi64::set1(1));
 
     let cond = rank_x.cmp_gt(S::Vi64::set1(2));
-    let i1 = (S::Vi64::set1(1) & cond);
+    let i1 = S::Vi64::set1(1) & cond;
     let cond = rank_y.cmp_gt(S::Vi64::set1(2));
-    let j1 = (S::Vi64::set1(1) & cond);
+    let j1 = S::Vi64::set1(1) & cond;
     let cond = rank_z.cmp_gt(S::Vi64::set1(2));
-    let k1 = (S::Vi64::set1(1) & cond);
+    let k1 = S::Vi64::set1(1) & cond;
     let cond = rank_w.cmp_gt(S::Vi64::set1(2));
-    let l1 = (S::Vi64::set1(1) & cond);
+    let l1 = S::Vi64::set1(1) & cond;
 
     let cond = rank_x.cmp_gt(S::Vi64::set1(1));
-    let i2 = (S::Vi64::set1(1) & cond);
+    let i2 = S::Vi64::set1(1) & cond;
     let cond = rank_y.cmp_gt(S::Vi64::set1(1));
-    let j2 = (S::Vi64::set1(1) & cond);
+    let j2 = S::Vi64::set1(1) & cond;
     let cond = rank_z.cmp_gt(S::Vi64::set1(1));
-    let k2 = (S::Vi64::set1(1) & cond);
+    let k2 = S::Vi64::set1(1) & cond;
     let cond = rank_w.cmp_gt(S::Vi64::set1(1));
-    let l2 = (S::Vi64::set1(1) & cond);
+    let l2 = S::Vi64::set1(1) & cond;
 
     let cond = rank_x.cmp_gt(S::Vi64::zeroes());
-    let i3 = (S::Vi64::set1(1) & cond);
+    let i3 = S::Vi64::set1(1) & cond;
     let cond = rank_y.cmp_gt(S::Vi64::zeroes());
-    let j3 = (S::Vi64::set1(1) & cond);
+    let j3 = S::Vi64::set1(1) & cond;
     let cond = rank_z.cmp_gt(S::Vi64::zeroes());
-    let k3 = (S::Vi64::set1(1) & cond);
+    let k3 = S::Vi64::set1(1) & cond;
     let cond = rank_w.cmp_gt(S::Vi64::zeroes());
-    let l3 = (S::Vi64::set1(1) & cond);
+    let l3 = S::Vi64::set1(1) & cond;
 
     let x1 = x0 - i1.cast_f64() + S::Vf64::set1(G4_64);
     let y1 = y0 - j1.cast_f64() + S::Vf64::set1(G4_64);
@@ -457,35 +457,35 @@ pub unsafe fn simplex_4d<S: Simd>(
     let z4 = z0 - S::Vf64::set1(1.0) + S::Vf64::set1(G44_64);
     let w4 = w0 - S::Vf64::set1(1.0) + S::Vf64::set1(G44_64);
 
-    let ii = (i & S::Vi64::set1(0xff));
-    let jj = (j & S::Vi64::set1(0xff));
-    let kk = (k & S::Vi64::set1(0xff));
-    let ll = (l & S::Vi64::set1(0xff));
+    let ii = i & S::Vi64::set1(0xff);
+    let jj = j & S::Vi64::set1(0xff);
+    let kk = k & S::Vi64::set1(0xff);
+    let ll = l & S::Vi64::set1(0xff);
 
     let lp = S::i64gather_epi64(&PERM64, ll);
-    let kp = S::i64gather_epi64(&PERM64, (kk + lp));
-    let jp = S::i64gather_epi64(&PERM64, (jj + kp));
-    let gi0 = S::i64gather_epi64(&PERM64, (ii + jp));
+    let kp = S::i64gather_epi64(&PERM64, kk + lp);
+    let jp = S::i64gather_epi64(&PERM64, jj + kp);
+    let gi0 = S::i64gather_epi64(&PERM64, ii + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, (ll + l1));
-    let kp = S::i64gather_epi64(&PERM64, ((kk + k1) + lp));
-    let jp = S::i64gather_epi64(&PERM64, ((jj + j1) + kp));
-    let gi1 = S::i64gather_epi64(&PERM64, ((ii + i1) + jp));
+    let lp = S::i64gather_epi64(&PERM64, ll + l1);
+    let kp = S::i64gather_epi64(&PERM64, kk + k1 + lp);
+    let jp = S::i64gather_epi64(&PERM64, jj + j1 + kp);
+    let gi1 = S::i64gather_epi64(&PERM64,ii + i1 + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, (ll + l2));
-    let kp = S::i64gather_epi64(&PERM64, ((kk + k2) + lp));
-    let jp = S::i64gather_epi64(&PERM64, ((jj + j2) + kp));
-    let gi2 = S::i64gather_epi64(&PERM64, ((ii + i2) + jp));
+    let lp = S::i64gather_epi64(&PERM64, ll + l2);
+    let kp = S::i64gather_epi64(&PERM64, kk + k2 + lp);
+    let jp = S::i64gather_epi64(&PERM64, jj + j2 + kp);
+    let gi2 = S::i64gather_epi64(&PERM64, ii + i2 + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, (ll + l3));
-    let kp = S::i64gather_epi64(&PERM64, ((kk + k3) + lp));
-    let jp = S::i64gather_epi64(&PERM64, ((jj + j3) + kp));
-    let gi3 = S::i64gather_epi64(&PERM64, ((ii + i3) + jp));
+    let lp = S::i64gather_epi64(&PERM64, ll + l3);
+    let kp = S::i64gather_epi64(&PERM64, kk + k3 + lp);
+    let jp = S::i64gather_epi64(&PERM64, jj + j3 + kp);
+    let gi3 = S::i64gather_epi64(&PERM64, ii + i3 + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, (ll + S::Vi64::set1(1)));
-    let kp = S::i64gather_epi64(&PERM64, ((kk + S::Vi64::set1(1)) + lp));
-    let jp = S::i64gather_epi64(&PERM64, ((jj + S::Vi64::set1(1)) + kp));
-    let gi4 = S::i64gather_epi64(&PERM64, ((ii + S::Vi64::set1(1)) + jp));
+    let lp = S::i64gather_epi64(&PERM64, ll + S::Vi64::set1(1));
+    let kp = S::i64gather_epi64(&PERM64, kk + S::Vi64::set1(1) + lp);
+    let jp = S::i64gather_epi64(&PERM64, jj + S::Vi64::set1(1) + kp);
+    let gi4 = S::i64gather_epi64(&PERM64, ii + S::Vi64::set1(1) + jp);
 
     let t0 = S::Vf64::set1(0.5) - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0);
     let t1 = S::Vf64::set1(0.5) - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1);

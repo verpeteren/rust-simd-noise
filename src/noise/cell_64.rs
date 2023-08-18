@@ -36,10 +36,10 @@ pub unsafe fn cellular_2d<S: Simd>(
                             let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
                                 - S::Vf64::set1(511.5);
                             let mut xd2 = xd * xd;
-                            let inv_mag = (jitter * (xd2 + (yd * yd)).rsqrt());
+                            let inv_mag = jitter * (xd2 + (yd * yd)).rsqrt();
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
-                            xd2 = (xd * xd);
+                            xd2 = xd * xd;
                             let new_distance = xd2 + (yd * yd);
                             distance = new_distance.min(distance);
 
@@ -60,7 +60,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 - S::Vf64::set1(511.5);
                             let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
                                 - S::Vf64::set1(511.5);
-                            let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
 
@@ -84,12 +84,12 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 - S::Vf64::set1(511.5);
                             let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
                                 - S::Vf64::set1(511.5);
-                            let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
 
                             let new_distance = {
-                                let euc = ((xd * xd) + (yd * yd));
+                                let euc = (xd * xd) + (yd * yd);
                                 let man = xd.abs() + yd.abs();
                                 euc + man
                             };
@@ -118,11 +118,11 @@ pub unsafe fn cellular_2d<S: Simd>(
                                 - S::Vf64::set1(511.5);
                             let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
                                 - S::Vf64::set1(511.5);
-                            let inv_mag = (jitter * ((xd * xd) + (yd * yd)).rsqrt());
+                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
 
-                            let new_cell_value = (S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64());
+                            let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
                             let new_distance = (xd * xd) + (yd * yd);
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
@@ -245,11 +245,11 @@ pub unsafe fn cellular_3d<S: Simd>(
 
                 let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
                 let new_distance = match distance_function {
-                    CellDistanceFunction::Euclidean => (xd * xd) + ((yd * yd) + (zd * zd)),
-                    CellDistanceFunction::Manhattan => ((xd.abs() + yd.abs()) + zd.abs()),
+                    CellDistanceFunction::Euclidean => (xd * xd) + (yd * yd) + (zd * zd),
+                    CellDistanceFunction::Manhattan => xd.abs() + yd.abs() + zd.abs(),
                     CellDistanceFunction::Natural => {
-                        let euc = (xd * xd) + ((yd * yd) + (zd * zd));
-                        let man = ((xd.abs() + yd.abs()) + zd.abs());
+                        let euc = (xd * xd) + (yd * yd) + (zd * zd);
+                        let man = xd.abs() + yd.abs() + zd.abs();
                         euc + man
                     }
                 };

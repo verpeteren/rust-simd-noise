@@ -8,7 +8,7 @@ use simdeez::prelude::*;
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
-    let h = ((S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(15));
+    let h = (S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(15);
     let v = (h & S::Vi32::set1(7)).cast_f32();
 
     let h_and_8 = ((h & S::Vi32::set1(8)).cmp_eq(S::Vi32::zeroes())).cast_f32();
@@ -21,7 +21,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 /// are more consistent between directions.
 #[inline(always)]
 pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
-    let h = ((hash ^ S::Vi32::set1(seed)) & S::Vi32::set1(7));
+    let h = (hash ^ S::Vi32::set1(seed)) & S::Vi32::set1(7);
     let mask = (S::Vi32::set1(4).cmp_gt(h)).cast_f32();
     let x_magnitude = mask.blendv(S::Vf32::set1(2.0), S::Vf32::set1(1.0));
     let y_magnitude = mask.blendv(S::Vf32::set1(1.0), S::Vf32::set1(2.0));
@@ -53,7 +53,7 @@ pub unsafe fn grad3d_dot<S: Simd>(
     let h = hash3d::<S>(seed, i, j, k);
     let u = h.l8.blendv(y, x);
     let v = h.l4.blendv(h.h12_or_14.blendv(z, x), y);
-    let result = ((u ^ h.h1) + (v ^ h.h2));
+    let result = (u ^ h.h1) + (v ^ h.h2);
     debug_assert_eq!(
         result[0],
         {
@@ -97,7 +97,7 @@ pub unsafe fn grad4<S: Simd>(
     z: S::Vf32,
     t: S::Vf32,
 ) -> S::Vf32 {
-    let h = ((S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(31));
+    let h = (S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(31);
     let mut mask = (S::Vi32::set1(24).cmp_gt(h)).cast_f32();
     let u = mask.blendv(y, x);
     mask = (S::Vi32::set1(16).cmp_gt(h)).cast_f32();
@@ -109,7 +109,7 @@ pub unsafe fn grad4<S: Simd>(
     let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::Vi32::zeroes())).cast_f32();
     let h_and_4 = ((h & S::Vi32::set1(4)).cmp_eq(S::Vi32::zeroes())).cast_f32();
 
-    (h_and_1.blendv(S::sub_ps(S::Vf32::zeroes(), u), u)
-        + (h_and_2.blendv(S::sub_ps(S::Vf32::zeroes(), v), v)
-            + h_and_4.blendv(S::sub_ps(S::Vf32::zeroes(), w), w)))
+    h_and_1.blendv(S::sub_ps(S::Vf32::zeroes(), u), u)
+        + h_and_2.blendv(S::sub_ps(S::Vf32::zeroes(), v), v)
+            + h_and_4.blendv(S::sub_ps(S::Vf32::zeroes(), w), w)
 }

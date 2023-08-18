@@ -73,7 +73,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             xd = (xd * inv_mag) + xcf;
                             yd = (yd * inv_mag) + ycf;
 
-                            let new_distance = (xd.abs() + yd.abs());
+                            let new_distance = xd.abs() + yd.abs();
                             distance = new_distance.min(distance);
 
                             ycf = ycf + S::Vf32::set1(1.0);
@@ -171,7 +171,7 @@ pub unsafe fn cellular_2d<S: Simd>(
                             yd = (yd * inv_mag) + ycf;
 
                             let new_cell_value = S::Vf32::set1(HASH_2_FLOAT_32) * hash.cast_f32();
-                            let new_distance = (xd.abs() + yd.abs());
+                            let new_distance = xd.abs() + yd.abs();
                             let closer = new_distance.cmp_lt(distance);
                             distance = new_distance.min(distance);
                             cell_value = closer.blendv(cell_value, new_cell_value);
@@ -277,10 +277,10 @@ pub unsafe fn cellular_3d<S: Simd>(
                 let new_cell_value = S::Vf32::set1(HASH_2_FLOAT_32) * hash.cast_f32();
                 let new_distance = match distance_function {
                     CellDistanceFunction::Euclidean => (xd * xd) + ((yd * yd) + (zd * zd)),
-                    CellDistanceFunction::Manhattan => ((xd.abs() + yd.abs()) + zd.abs()),
+                    CellDistanceFunction::Manhattan => (xd.abs() + yd.abs()) + zd.abs(),
                     CellDistanceFunction::Natural => {
                         let euc = (xd * xd) + ((yd * yd) + (zd * zd));
-                        let man = ((xd.abs() + yd.abs()) + zd.abs());
+                        let man = xd.abs() + yd.abs() + zd.abs();
                         euc + man
                     }
                 };

@@ -40,7 +40,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
 
             let new_distance = match distance_function {
                 CellDistanceFunction::Euclidean => (xd * xd) + (yd * yd),
-                CellDistanceFunction::Manhattan => (xd.abs() + yd.abs()),
+                CellDistanceFunction::Manhattan => xd.abs() + yd.abs(),
                 CellDistanceFunction::Natural => {
                     let euc = (xd * xd) + (yd * yd);
                     let man = xd.abs() + yd.abs();
@@ -119,7 +119,7 @@ pub unsafe fn cellular2_3d<S: Simd>(
                     CellDistanceFunction::Manhattan => xd.abs() + yd.abs() + zd.abs(),
                     CellDistanceFunction::Natural => {
                         let euc = (xd * xd) + ((yd * yd) + (zd * zd));
-                        let man = ((xd.abs() + yd.abs()) + zd.abs());
+                        let man = (xd.abs() + yd.abs()) + zd.abs();
                         euc + man
                     }
                 };

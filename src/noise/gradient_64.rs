@@ -8,7 +8,7 @@ use simdeez::prelude::*;
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
-    let h = ((S::Vi64::set1(seed) ^ hash) & S::Vi64::set1(15));
+    let h = (S::Vi64::set1(seed) ^ hash) & S::Vi64::set1(15);
     let v = (h & S::Vi64::set1(7)).cast_f64();
 
     let h_and_8 = ((h & S::Vi64::set1(8)).cmp_eq(S::Vi64::zeroes())).cast_f64();
@@ -21,7 +21,7 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
 /// are more consistent between directions.
 #[inline(always)]
 pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
-    let h = ((hash ^ S::Vi64::set1(seed)) & S::Vi64::set1(7));
+    let h = (hash ^ S::Vi64::set1(seed)) & S::Vi64::set1(7);
     let mask = (S::Vi64::set1(4).cmp_gt(h)).cast_f64();
     let x_magnitude = mask.blendv(S::Vf64::set1(2.0), S::Vf64::set1(1.0));
     let y_magnitude = mask.blendv(S::Vf64::set1(1.0), S::Vf64::set1(2.0));
@@ -97,7 +97,7 @@ pub unsafe fn grad4<S: Simd>(
     z: S::Vf64,
     t: S::Vf64,
 ) -> S::Vf64 {
-    let h = ((S::Vi64::set1(seed) ^ hash) & S::Vi64::set1(31));
+    let h = (S::Vi64::set1(seed) ^ hash) & S::Vi64::set1(31);
     let mut mask = (S::Vi64::set1(24).cmp_gt(h)).cast_f64();
     let u = mask.blendv(y, x);
     mask = (S::Vi64::set1(16).cmp_gt(h)).cast_f64();

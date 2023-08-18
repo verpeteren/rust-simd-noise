@@ -125,11 +125,11 @@ pub unsafe fn cellular2_3d<S: Simd>(
                 zd = (zd * inv_mag) + zcf;
 
                 let new_distance = match distance_function {
-                    CellDistanceFunction::Euclidean => ((xd * xd) + ((yd * yd) + (zd * zd))),
-                    CellDistanceFunction::Manhattan => ((xd.abs() + yd.abs()) + zd.abs()),
+                    CellDistanceFunction::Euclidean => (xd * xd) + ((yd * yd) + (zd * zd)),
+                    CellDistanceFunction::Manhattan => (xd.abs() + yd.abs()) + zd.abs(),
                     CellDistanceFunction::Natural => {
                         let euc = (xd * xd) + ((yd * yd) + (zd * zd));
-                        let man = ((xd.abs() + yd.abs()) + zd.abs());
+                        let man = (xd.abs() + yd.abs()) + zd.abs();
                         euc + man
                     }
                 };

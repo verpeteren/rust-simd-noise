@@ -167,21 +167,21 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let j1 = (y0.cmp_gt(x0)).cast_i32();
 
     // Distances to the second and third points of the enclosing simplex
-    let x1 = ((x0 + i1.cast_f32()) + S::Vf32::set1(G2_32));
-    let y1 = ((y0 + j1.cast_f32()) + S::Vf32::set1(G2_32));
-    let x2 = ((x0 + S::Vf32::set1(-1.0)) + S::Vf32::set1(G22_32));
-    let y2 = ((y0 + S::Vf32::set1(-1.0)) + S::Vf32::set1(G22_32));
+    let x1 = (x0 + i1.cast_f32()) + S::Vf32::set1(G2_32);
+    let y1 = (y0 + j1.cast_f32()) + S::Vf32::set1(G2_32);
+    let x2 = (x0 + S::Vf32::set1(-1.0)) + S::Vf32::set1(G22_32);
+    let y2 = (y0 + S::Vf32::set1(-1.0)) + S::Vf32::set1(G22_32);
 
     let ii = i & S::Vi32::set1(0xff);
     let jj = j & S::Vi32::set1(0xff);
 
-    let gi0 = S::i32gather_epi32(&PERM, (ii + S::i32gather_epi32(&PERM, jj)));
+    let gi0 = S::i32gather_epi32(&PERM, ii + S::i32gather_epi32(&PERM, jj));
 
-    let gi1 = S::i32gather_epi32(&PERM, ((ii - i1) + S::i32gather_epi32(&PERM, (jj - j1))));
+    let gi1 = S::i32gather_epi32(&PERM, (ii - i1) + S::i32gather_epi32(&PERM, jj - j1));
 
     let gi2 = S::i32gather_epi32(
         &PERM,
-        ((ii - S::Vi32::set1(-1)) + S::i32gather_epi32(&PERM, (jj - S::Vi32::set1(-1)))),
+        (ii - S::Vi32::set1(-1)) + S::i32gather_epi32(&PERM, jj - S::Vi32::set1(-1)),
     );
 
     // Weights associated with the gradients at each corner
@@ -442,22 +442,22 @@ pub unsafe fn simplex_4d<S: Simd>(
 
     let cond = (x0.cmp_gt(y0)).cast_i32();
     rank_x = rank_x + (cond & S::Vi32::set1(1));
-    rank_y = (rank_y + cond.and_not(S::Vi32::set1(1)));
+    rank_y = rank_y + cond.and_not(S::Vi32::set1(1));
     let cond = (x0.cmp_gt(z0)).cast_i32();
-    rank_x = (rank_x + (cond & S::Vi32::set1(1)));
-    rank_z = (rank_z + cond.and_not(S::Vi32::set1(1)));
+    rank_x = rank_x + (cond & S::Vi32::set1(1));
+    rank_z = rank_z + cond.and_not(S::Vi32::set1(1));
     let cond = (x0.cmp_gt(w0)).cast_i32();
-    rank_x = (rank_x + (cond & S::Vi32::set1(1)));
-    rank_w = (rank_w + cond.and_not(S::Vi32::set1(1)));
+    rank_x = rank_x + (cond & S::Vi32::set1(1));
+    rank_w = rank_w + cond.and_not(S::Vi32::set1(1));
     let cond = (y0.cmp_gt(z0)).cast_i32();
-    rank_y = (rank_y + cond & S::Vi32::set1(1));
-    rank_z = (rank_z + cond.and_not(S::Vi32::set1(1)));
+    rank_y = rank_y + cond & S::Vi32::set1(1);
+    rank_z = rank_z + cond.and_not(S::Vi32::set1(1));
     let cond = (y0.cmp_gt(w0)).cast_i32();
-    rank_y = (rank_y + (cond & S::Vi32::set1(1)));
-    rank_w = (rank_w + cond.and_not(S::Vi32::set1(1)));
+    rank_y = rank_y + (cond & S::Vi32::set1(1));
+    rank_w = rank_w + cond.and_not(S::Vi32::set1(1));
     let cond = (z0.cmp_gt(w0)).cast_i32();
-    rank_z = (rank_z + (cond & S::Vi32::set1(1)));
-    rank_w = (rank_w + cond.and_not(S::Vi32::set1(1)));
+    rank_z = rank_z + (cond & S::Vi32::set1(1));
+    rank_w = rank_w + cond.and_not(S::Vi32::set1(1));
 
     let cond = rank_x.cmp_gt(S::Vi32::set1(2));
     let i1 = S::Vi32::set1(1) & cond;
@@ -509,29 +509,29 @@ pub unsafe fn simplex_4d<S: Simd>(
     let ll = l & S::Vi32::set1(0xff);
 
     let lp = S::i32gather_epi32(&PERM, ll);
-    let kp = S::i32gather_epi32(&PERM, (kk + lp));
-    let jp = S::i32gather_epi32(&PERM, (jj + kp));
-    let gi0 = S::i32gather_epi32(&PERM, (ii + jp));
+    let kp = S::i32gather_epi32(&PERM, kk + lp);
+    let jp = S::i32gather_epi32(&PERM, jj + kp);
+    let gi0 = S::i32gather_epi32(&PERM, ii + jp);
 
-    let lp = S::i32gather_epi32(&PERM, (ll + l1));
-    let kp = S::i32gather_epi32(&PERM, ((kk + k1) + lp));
-    let jp = S::i32gather_epi32(&PERM, ((jj + j1) + kp));
-    let gi1 = S::i32gather_epi32(&PERM, ((ii + i1) + jp));
+    let lp = S::i32gather_epi32(&PERM, ll + l1);
+    let kp = S::i32gather_epi32(&PERM, kk + k1 + lp);
+    let jp = S::i32gather_epi32(&PERM, jj + j1 + kp);
+    let gi1 = S::i32gather_epi32(&PERM, ii + i1 + jp);
 
-    let lp = S::i32gather_epi32(&PERM, (ll + l2));
-    let kp = S::i32gather_epi32(&PERM, ((kk + k2) + lp));
-    let jp = S::i32gather_epi32(&PERM, ((jj + j2) + kp));
-    let gi2 = S::i32gather_epi32(&PERM, ((ii + i2) + jp));
+    let lp = S::i32gather_epi32(&PERM, ll + l2);
+    let kp = S::i32gather_epi32(&PERM, kk + k2 + lp);
+    let jp = S::i32gather_epi32(&PERM, jj + j2 + kp);
+    let gi2 = S::i32gather_epi32(&PERM, ii + i2 + jp);
 
-    let lp = S::i32gather_epi32(&PERM, (ll + l3));
-    let kp = S::i32gather_epi32(&PERM, ((kk + k3) + lp));
-    let jp = S::i32gather_epi32(&PERM, ((jj + j3) + kp));
-    let gi3 = S::i32gather_epi32(&PERM, ((ii + i3) + jp));
+    let lp = S::i32gather_epi32(&PERM, ll + l3);
+    let kp = S::i32gather_epi32(&PERM, kk + k3 + lp);
+    let jp = S::i32gather_epi32(&PERM, jj + j3 + kp);
+    let gi3 = S::i32gather_epi32(&PERM, ii + i3 + jp);
 
-    let lp = S::i32gather_epi32(&PERM, (ll + S::Vi32::set1(1)));
-    let kp = S::i32gather_epi32(&PERM, ((kk + S::Vi32::set1(1)) + lp));
-    let jp = S::i32gather_epi32(&PERM, ((jj + S::Vi32::set1(1)) + kp));
-    let gi4 = S::i32gather_epi32(&PERM, ((ii + S::Vi32::set1(1)) + jp));
+    let lp = S::i32gather_epi32(&PERM, ll + S::Vi32::set1(1));
+    let kp = S::i32gather_epi32(&PERM, kk + S::Vi32::set1(1) + lp);
+    let jp = S::i32gather_epi32(&PERM, jj + S::Vi32::set1(1) + kp);
+    let gi4 = S::i32gather_epi32(&PERM, ii + S::Vi32::set1(1) + jp);
 
     //
     // Compute base weight factors associated with each vertex
