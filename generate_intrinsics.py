@@ -25,6 +25,12 @@ intrinsics = [
 def generate_intrinsic_tests()-> List[str]:
     codes = [
 """
+use simdeez::prelude::*;
+use simdeez::scalar::*;
+use simdeez::sse2::*;
+use simdeez::sse41::*
+use simdeez::avx2::*;
+
 use core::arch::x86_64::__m256;
 use simdnoise::intrinsics::{avx2, scalar, sse2, sse41};
 use simdnoise::{NoiseType, TurbulenceSettings, RidgeSettings, FbmSettings, CellularSettings, Cellular2Settings, GradientSettings, SimplexSettings, Settings, NoiseDimensions, CellDistanceFunction, CellReturnType, Cell2ReturnType};
@@ -66,6 +72,7 @@ use helpers::{BIN_PATH, read_from_file_f32, save_to_file_f32, read_from_file_f64
             for dimension in dimensions:
                 dims = dim_lookup[dimension]
                 for intrinsic in intrinsics:
+                    engine = f"simdeez::{intrinsic}::{intrinsic.capitalize()}"
                     for float_type in float_types:
                         if float_type == '64' and noise_type in ['cellular', 'cellular2']:
                             # we skip these due to overflow errors
@@ -89,7 +96,7 @@ unsafe fn do_{fn_name}() -> Vec<f{float_type}>{{
         .with_seed(1337)
         {option}
         .wrap();
-    let (noise, _min, _max) = {intrinsic}::get_{dimension}d_noise{variant}(&noise_type);
+    let (noise, _min, _max) = {intrinsic}::get_{dimension}d_noise{variant}::<{engine}>(&noise_type);
     noise
 }}
 

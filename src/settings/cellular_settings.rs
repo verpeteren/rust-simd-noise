@@ -1,3 +1,5 @@
+use simdeez::prelude::*;
+
 use crate::dimensional_being::DimensionalBeing;
 use crate::intrinsics::{avx2, scalar, sse2, sse41};
 pub use crate::noise::cell2_return_type::Cell2ReturnType;
@@ -79,7 +81,7 @@ impl Settings for CellularSettings {
         NoiseType::Cellular(self)
     }
 
-    fn generate(self) -> (Vec<f32>, f32, f32) {
+    fn generate<S: Simd>(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
             2 => get_2d_noise!(&NoiseType::Cellular(self)),
@@ -92,7 +94,7 @@ impl Settings for CellularSettings {
         //todo
     }
 
-    fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
+    fn generate_scaled<S: Simd>(self, min: f32, max: f32) -> Vec<f32> {
         let d = self.dim.dim;
         let mut new_self = self;
         new_self.dim.min = min;
