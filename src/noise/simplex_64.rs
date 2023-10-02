@@ -189,7 +189,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let n2 = t42 * g2;
 
     // Scaling factor found by numerical approximation
-    let scale = S::set1_pd(45.26450774985561631259);
+    let scale = S::set1_pd(45.232012178628814);
     let value = S::add_pd(n0, S::add_pd(n1, n2)) * scale;
     let derivative = {
         let temp0 = t20 * t0 * g0;
