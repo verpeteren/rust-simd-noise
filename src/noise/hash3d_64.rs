@@ -33,6 +33,7 @@ pub unsafe fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> 
     // The codeblock below is just the 64 bit SIMD instructions with the 32 bit magic numbers.
     // I don't know what values the Hash3d fields should hold or what magic number are needed for the bit shifts.
     unimplemented!();
+    /*
     let mut hash = S::xor_epi64(i, S::set1_epi64(seed));
     hash = S::xor_epi64(j, hash);
     hash = S::xor_epi64(k, hash);
@@ -49,4 +50,5 @@ pub unsafe fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> 
         S::castepi64_pd(S::slli_epi64(hash, 31)),
         S::castepi64_pd(S::slli_epi64(S::and_epi64(hash, S::set1_epi64(2)), 30)),
     )
+    */
 }
