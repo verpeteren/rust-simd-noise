@@ -3,7 +3,7 @@ use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 use simdeez::prelude::*;
 
 #[inline(always)]
-pub unsafe fn ridge_1d<S: Simd>(
+pub fn ridge_1d<S: Simd>(
     mut x: S::Vf32,
     lacunarity: S::Vf32,
     gain: S::Vf32,
@@ -23,7 +23,7 @@ pub unsafe fn ridge_1d<S: Simd>(
 }
 
 #[inline(always)]
-pub unsafe fn ridge_2d<S: Simd>(
+pub fn ridge_2d<S: Simd>(
     mut x: S::Vf32,
     mut y: S::Vf32,
     lac: S::Vf32,
@@ -38,14 +38,15 @@ pub unsafe fn ridge_2d<S: Simd>(
         x = x * lac;
         y = y * lac;
         amp = amp * gain;
-        result = result + S::Vf32::neg_mul_add(simplex_2d::<S>(x, y, seed).abs(), amp, S::Vf32::set1(1.0));
+        result = result
+            + S::Vf32::neg_mul_add(simplex_2d::<S>(x, y, seed).abs(), amp, S::Vf32::set1(1.0));
     }
 
     result
 }
 
 #[inline(always)]
-pub unsafe fn ridge_3d<S: Simd>(
+pub fn ridge_3d<S: Simd>(
     mut x: S::Vf32,
     mut y: S::Vf32,
     mut z: S::Vf32,
@@ -74,7 +75,7 @@ pub unsafe fn ridge_3d<S: Simd>(
 }
 
 #[inline(always)]
-pub unsafe fn ridge_4d<S: Simd>(
+pub fn ridge_4d<S: Simd>(
     mut x: S::Vf32,
     mut y: S::Vf32,
     mut z: S::Vf32,

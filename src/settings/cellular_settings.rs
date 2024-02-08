@@ -2,11 +2,13 @@ use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
 use crate::intrinsics::{avx2, scalar, sse2, sse41};
-pub use crate::noise::cell2_return_type::Cell2ReturnType;
+use crate::noise::cell_32::{cellular_2d, cellular_3d};
+use crate::noise::cell_64::{cellular_2d as cellular_2d_f64, cellular_3d as cellular_3d_f64};
 pub use crate::noise::cell_distance_function::CellDistanceFunction;
 pub use crate::noise::cell_return_type::CellReturnType;
-pub use crate::noise_builder::NoiseBuilder;
 pub use crate::noise_dimensions::NoiseDimensions;
+use crate::noise_helpers_32::Sample32;
+use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 
 use super::Settings;
@@ -76,6 +78,22 @@ impl Settings for CellularSettings {
         unimplemented!()
     }
 
+    fn get_freq_x(&self) -> f32 {
+        self.freq_x
+    }
+
+    fn get_freq_y(&self) -> f32 {
+        self.freq_y
+    }
+
+    fn get_freq_z(&self) -> f32 {
+        self.freq_z
+    }
+
+    fn get_freq_w(&self) -> f32 {
+        unimplemented!()
+    }
+
     fn wrap(self) -> NoiseType {
         self.validate();
         NoiseType::Cellular(self)
@@ -104,6 +122,80 @@ impl Settings for CellularSettings {
             3 => get_3d_scaled_noise!(&NoiseType::Cellular(new_self)),
             _ => panic!("not implemented"),
         }
+    }
+}
+
+impl<S: Simd> Sample32<S> for CellularSettings {
+    #[inline(always)]
+    fn sample_1d(&self, x: S::Vf32) -> S::Vf32 {
+        unimplemented!()
+    }
+
+    #[inline(always)]
+    fn sample_2d(&self, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+        cellular_2d::<S>(
+            x,
+            y,
+            self.distance_function,
+            self.return_type,
+            S::Vf32::set1(self.jitter),
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
+        cellular_3d::<S>(
+            x,
+            y,
+            z,
+            self.distance_function,
+            self.return_type,
+            S::Vf32::set1(self.jitter),
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32 {
+        unimplemented!()
+    }
+}
+
+impl<S: Simd> Sample64<S> for CellularSettings {
+    #[inline(always)]
+    fn sample_1d(&self, x: S::Vf64) -> S::Vf64 {
+        unimplemented!()
+    }
+
+    #[inline(always)]
+    fn sample_2d(&self, x: S::Vf64, y: S::Vf64) -> S::Vf64 {
+        cellular_2d_f64::<S>(
+            x,
+            y,
+            self.distance_function,
+            self.return_type,
+            S::Vf64::set1(self.jitter.into()),
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> S::Vf64 {
+        cellular_3d_f64::<S>(
+            x,
+            y,
+            z,
+            self.distance_function,
+            self.return_type,
+            S::Vf64::set1(self.jitter.into()),
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64 {
+        unimplemented!()
     }
 }
 

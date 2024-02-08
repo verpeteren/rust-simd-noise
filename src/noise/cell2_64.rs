@@ -5,7 +5,7 @@ use crate::{Cell2ReturnType, CellDistanceFunction};
 use simdeez::prelude::*;
 
 #[inline(always)]
-pub unsafe fn cellular2_2d<S: Simd>(
+pub fn cellular2_2d<S: Simd>(
     x: S::Vf64,
     y: S::Vf64,
     distance_function: CellDistanceFunction,
@@ -70,7 +70,7 @@ pub unsafe fn cellular2_2d<S: Simd>(
 }
 
 #[inline(always)]
-pub unsafe fn cellular2_3d<S: Simd>(
+pub fn cellular2_3d<S: Simd>(
     x: S::Vf64,
     y: S::Vf64,
     z: S::Vf64,

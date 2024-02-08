@@ -28,7 +28,7 @@ where
 /// Compute hash values used by `grad3d` and `grad3d_dot`
 
 #[inline(always)]
-pub unsafe fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> Hash3d<S> {
+pub fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> Hash3d<S> {
     // This 64 bit variant is not implemented.
     // The codeblock below is just the 64 bit SIMD instructions with the 32 bit magic numbers.
     // I don't know what values the Hash3d fields should hold or what magic number are needed for the bit shifts.

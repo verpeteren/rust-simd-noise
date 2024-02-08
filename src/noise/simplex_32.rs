@@ -71,7 +71,7 @@ const PERM: [i32; 512] = [
 
 /// Like `simplex_1d`, but also computes the derivative
 #[inline(always)]
-pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
+pub fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
     let mut i0 = ips.cast_i32();
@@ -128,7 +128,7 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::V
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
+pub fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
     simplex_1d_deriv::<S>(x, seed).0
 }
 
@@ -136,17 +136,13 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf32, seed: i32) -> S::Vf32 {
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 {
+pub fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 {
     simplex_2d_deriv::<S>(x, y, seed).0
 }
 
 /// Like `simplex_2d`, but also computes the derivative
 #[inline(always)]
-pub unsafe fn simplex_2d_deriv<S: Simd>(
-    x: S::Vf32,
-    y: S::Vf32,
-    seed: i32,
-) -> (S::Vf32, [S::Vf32; 2]) {
+pub fn simplex_2d_deriv<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> (S::Vf32, [S::Vf32; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
     let s = S::Vf32::set1(F2_32) * (x + y);
@@ -241,13 +237,13 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32) -> S::Vf32 {
+pub fn simplex_3d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, seed: i32) -> S::Vf32 {
     simplex_3d_deriv::<S>(x, y, z, seed).0
 }
 
 /// Like `simplex_3d`, but also computes the derivative
 #[inline(always)]
-pub unsafe fn simplex_3d_deriv<S: Simd>(
+pub fn simplex_3d_deriv<S: Simd>(
     x: S::Vf32,
     y: S::Vf32,
     z: S::Vf32,
@@ -394,13 +390,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_4d<S: Simd>(
-    x: S::Vf32,
-    y: S::Vf32,
-    z: S::Vf32,
-    w: S::Vf32,
-    seed: i32,
-) -> S::Vf32 {
+pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed: i32) -> S::Vf32 {
     //
     // Determine which simplex these points lie in, and compute the distance along each axis to each
     // vertex of the simplex

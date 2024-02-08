@@ -7,7 +7,7 @@ use simdeez::prelude::*;
 /// This differs from Gustavson's well-known implementation in that gradients can be zero, and the
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
-pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
+pub fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
     let h = (S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(15);
     let v = (h & S::Vi32::set1(7)).cast_f32();
 
@@ -20,7 +20,7 @@ pub unsafe fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 /// This differs from Gustavson's gradients by having a constant magnitude, providing results that
 /// are more consistent between directions.
 #[inline(always)]
-pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
+pub fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
     let h = (hash ^ S::Vi32::set1(seed)) & S::Vi32::set1(7);
     let mask = (S::Vi32::set1(4).cmp_gt(h)).cast_f32();
     let x_magnitude = mask.blendv(S::Vf32::set1(2.0), S::Vf32::set1(1.0));
@@ -41,7 +41,7 @@ pub unsafe fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
 /// Generates a random gradient vector from the origin towards the midpoint of an edge of a
 /// double-unit cube and computes its dot product with [x, y, z]
 #[inline(always)]
-pub unsafe fn grad3d_dot<S: Simd>(
+pub fn grad3d_dot<S: Simd>(
     seed: i32,
     i: S::Vi32,
     j: S::Vi32,
@@ -69,7 +69,7 @@ pub unsafe fn grad3d_dot<S: Simd>(
 ///
 /// This is a separate function because it's slower than `grad3d_dot` and only needed when computing
 /// derivatives.
-pub unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> [S::Vf32; 3] {
+pub fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> [S::Vf32; 3] {
     let h = hash3d::<S>(seed, i, j, k);
 
     let first = S::Vf32::set1(1.0) | h.h1;
@@ -89,7 +89,7 @@ pub unsafe fn grad3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> 
 }
 
 #[inline(always)]
-pub unsafe fn grad4<S: Simd>(
+pub fn grad4<S: Simd>(
     seed: i32,
     hash: S::Vi32,
     x: S::Vf32,

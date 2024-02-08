@@ -2,11 +2,13 @@ use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
 use crate::intrinsics::{avx2, scalar, sse2, sse41};
-pub use crate::noise::cell2_return_type::Cell2ReturnType;
-pub use crate::noise::cell_distance_function::CellDistanceFunction;
-pub use crate::noise::cell_return_type::CellReturnType;
-pub use crate::noise_builder::NoiseBuilder;
+use crate::noise::fbm_32::{fbm_1d, fbm_2d, fbm_3d, fbm_4d};
+use crate::noise::fbm_64::{
+    fbm_1d as fbm_1d_f64, fbm_2d as fbm_2d_f64, fbm_3d as fbm_3d_f64, fbm_4d as fbm_4d_f64,
+};
 pub use crate::noise_dimensions::NoiseDimensions;
+use crate::noise_helpers_32::Sample32;
+use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 
 use super::{Settings, SimplexSettings};
@@ -82,6 +84,22 @@ impl Settings for FbmSettings {
         self
     }
 
+    fn get_freq_x(&self) -> f32 {
+        self.freq_x
+    }
+
+    fn get_freq_y(&self) -> f32 {
+        self.freq_y
+    }
+
+    fn get_freq_z(&self) -> f32 {
+        self.freq_z
+    }
+
+    fn get_freq_w(&self) -> f32 {
+        self.freq_w
+    }
+
     fn wrap(self) -> NoiseType {
         self.validate();
         NoiseType::Fbm(self)
@@ -131,6 +149,110 @@ impl SimplexSettings for FbmSettings {
     fn with_octaves(&mut self, octaves: u8) -> &mut FbmSettings {
         self.octaves = octaves;
         self
+    }
+}
+
+impl<S: Simd> Sample32<S> for FbmSettings {
+    #[inline(always)]
+    fn sample_1d(&self, x: S::Vf32) -> S::Vf32 {
+        fbm_1d::<S>(
+            x,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_2d(&self, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+        fbm_2d::<S>(
+            x,
+            y,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
+        fbm_3d::<S>(
+            x,
+            y,
+            z,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32 {
+        fbm_4d::<S>(
+            x,
+            y,
+            z,
+            w,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+}
+
+impl<S: Simd> Sample64<S> for FbmSettings {
+    #[inline(always)]
+    fn sample_1d(&self, x: S::Vf64) -> S::Vf64 {
+        fbm_1d_f64::<S>(
+            x,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_2d(&self, x: S::Vf64, y: S::Vf64) -> S::Vf64 {
+        fbm_2d_f64::<S>(
+            x,
+            y,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> S::Vf64 {
+        fbm_3d_f64::<S>(
+            x,
+            y,
+            z,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64 {
+        fbm_4d_f64::<S>(
+            x,
+            y,
+            z,
+            w,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
     }
 }
 

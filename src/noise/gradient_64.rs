@@ -7,7 +7,7 @@ use simdeez::prelude::*;
 /// This differs from Gustavson's well-known implementation in that gradients can be zero, and the
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
-pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
+pub fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
     let h = (S::Vi64::set1(seed) ^ hash) & S::Vi64::set1(15);
     let v = (h & S::Vi64::set1(7)).cast_f64();
 
@@ -20,7 +20,7 @@ pub unsafe fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
 /// This differs from Gustavson's gradients by having a constant magnitude, providing results that
 /// are more consistent between directions.
 #[inline(always)]
-pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
+pub fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
     let h = (hash ^ S::Vi64::set1(seed)) & S::Vi64::set1(7);
     let mask = (S::Vi64::set1(4).cmp_gt(h)).cast_f64();
     let x_magnitude = mask.blendv(S::Vf64::set1(2.0), S::Vf64::set1(1.0));
@@ -41,7 +41,7 @@ pub unsafe fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
 /// Generates a random gradient vector from the origin towards the midpoint of an edge of a
 /// double-unit cube and computes its dot product with [x, y, z]
 #[inline(always)]
-pub unsafe fn grad3d_dot<S: Simd>(
+pub fn grad3d_dot<S: Simd>(
     seed: i64,
     i: S::Vi64,
     j: S::Vi64,
@@ -69,7 +69,7 @@ pub unsafe fn grad3d_dot<S: Simd>(
 ///
 /// This is a separate function because it's slower than `grad3d_dot` and only needed when computing
 /// derivatives.
-pub unsafe fn grad3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> [S::Vf64; 3] {
+pub fn grad3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> [S::Vf64; 3] {
     let h = hash3d::<S>(seed, i, j, k);
 
     let first = S::Vf64::set1(1.0) | h.h1;
@@ -89,7 +89,7 @@ pub unsafe fn grad3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> 
 }
 
 #[inline(always)]
-pub unsafe fn grad4<S: Simd>(
+pub fn grad4<S: Simd>(
     seed: i64,
     hash: S::Vi64,
     x: S::Vf64,

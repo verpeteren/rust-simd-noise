@@ -4,10 +4,10 @@ use simdeez::prelude::*;
 
 use crate::noise::cellular_32::{X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
 use crate::noise::gradient_64::grad3d_dot;
+use crate::noise::ops::gather_64;
 use crate::noise::simplex_32::{
     F2_64, F3_64, F4_64, G22_64, G24_64, G2_64, G33_64, G34_64, G3_64, G44_64, G4_64,
 };
-use crate::noise::ops::gather_64;
 
 const PERM64: [i64; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
@@ -39,7 +39,7 @@ const PERM64: [i64; 512] = [
 
 /// Like `simplex_1d`, but also computes the derivative
 #[inline(always)]
-pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
+pub fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
     // Gradients are selected deterministically based on the whole part of `x`
     let ips = x.fast_floor();
     let mut i0 = ips.cast_i64();
@@ -96,7 +96,7 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::V
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
+pub fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
     simplex_1d_deriv::<S>(x, seed).0
 }
 
@@ -104,17 +104,13 @@ pub unsafe fn simplex_1d<S: Simd>(x: S::Vf64, seed: i64) -> S::Vf64 {
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 {
+pub fn simplex_2d<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> S::Vf64 {
     simplex_2d_deriv::<S>(x, y, seed).0
 }
 
 /// Like `simplex_2d`, but also computes the derivative
 #[inline(always)]
-pub unsafe fn simplex_2d_deriv<S: Simd>(
-    x: S::Vf64,
-    y: S::Vf64,
-    seed: i64,
-) -> (S::Vf64, [S::Vf64; 2]) {
+pub fn simplex_2d_deriv<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> (S::Vf64, [S::Vf64; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
     let s = S::Vf64::set1(F2_64) * (x + y);
@@ -146,10 +142,7 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 
     let gi0 = gather_64::<S>(&PERM64, ii + gather_64::<S>(&PERM64, jj));
 
-    let gi1 = gather_64::<S>(
-        &PERM64,
-        (ii - i1) + gather_64::<S>(&PERM64, jj - j1),
-    );
+    let gi1 = gather_64::<S>(&PERM64, (ii - i1) + gather_64::<S>(&PERM64, jj - j1));
 
     let gi2 = gather_64::<S>(
         &PERM64,
@@ -212,13 +205,13 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64) -> S::Vf64 {
+pub fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64) -> S::Vf64 {
     simplex_3d_deriv::<S>(x, y, z, seed).0
 }
 
 /// Like `simplex_3d`, but also computes the derivative
 #[inline(always)]
-pub unsafe fn simplex_3d_deriv<S: Simd>(
+pub fn simplex_3d_deriv<S: Simd>(
     x: S::Vf64,
     y: S::Vf64,
     z: S::Vf64,
@@ -365,13 +358,7 @@ pub unsafe fn simplex_3d_deriv<S: Simd>(
 ///
 /// Produces a value -1 ≤ n ≤ 1.
 #[inline(always)]
-pub unsafe fn simplex_4d<S: Simd>(
-    x: S::Vf64,
-    y: S::Vf64,
-    z: S::Vf64,
-    w: S::Vf64,
-    seed: i64,
-) -> S::Vf64 {
+pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed: i64) -> S::Vf64 {
     let s = S::Vf64::set1(F4_64) * (x + y + z + w);
 
     let ipd = (x + s).floor();
@@ -471,7 +458,7 @@ pub unsafe fn simplex_4d<S: Simd>(
     let lp = gather_64::<S>(&PERM64, ll + l1);
     let kp = gather_64::<S>(&PERM64, kk + k1 + lp);
     let jp = gather_64::<S>(&PERM64, jj + j1 + kp);
-    let gi1 = gather_64::<S>(&PERM64,ii + i1 + jp);
+    let gi1 = gather_64::<S>(&PERM64, ii + i1 + jp);
 
     let lp = gather_64::<S>(&PERM64, ll + l2);
     let kp = gather_64::<S>(&PERM64, kk + k2 + lp);

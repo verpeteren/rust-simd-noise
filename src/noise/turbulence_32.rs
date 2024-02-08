@@ -3,7 +3,7 @@ use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 use simdeez::prelude::*;
 
 #[inline(always)]
-pub unsafe fn turbulence_1d<S: Simd>(
+pub fn turbulence_1d<S: Simd>(
     mut x: S::Vf32,
     lacunarity: S::Vf32,
     gain: S::Vf32,
@@ -23,7 +23,7 @@ pub unsafe fn turbulence_1d<S: Simd>(
 }
 
 #[inline(always)]
-pub unsafe fn turbulence_2d<S: Simd>(
+pub fn turbulence_2d<S: Simd>(
     mut x: S::Vf32,
     mut y: S::Vf32,
     lac: S::Vf32,
@@ -46,7 +46,7 @@ pub unsafe fn turbulence_2d<S: Simd>(
 }
 
 #[inline(always)]
-pub unsafe fn turbulence_3d<S: Simd>(
+pub fn turbulence_3d<S: Simd>(
     mut x: S::Vf32,
     mut y: S::Vf32,
     mut z: S::Vf32,
@@ -70,7 +70,7 @@ pub unsafe fn turbulence_3d<S: Simd>(
 }
 
 #[inline(always)]
-pub unsafe fn turbulence_4d<S: Simd>(
+pub fn turbulence_4d<S: Simd>(
     mut x: S::Vf32,
     mut y: S::Vf32,
     mut z: S::Vf32,
