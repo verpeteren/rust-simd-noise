@@ -1,6 +1,7 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
+use crate::{get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise};
 use crate::intrinsics::{avx2, scalar, sse2, sse41};
 use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 use crate::noise::simplex_64::{
@@ -107,10 +108,10 @@ impl Settings for GradientSettings {
     fn generate<S: Simd>(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
-            1 => get_1d_noise!(&NoiseType::Gradient(self)),
-            2 => get_2d_noise!(&NoiseType::Gradient(self)),
-            3 => get_3d_noise!(&NoiseType::Gradient(self)),
-            4 => get_4d_noise!(&NoiseType::Gradient(self)),
+            1 => get_1d_noise(&NoiseType::Gradient(self)),
+            2 => get_2d_noise(&NoiseType::Gradient(self)),
+            3 => get_3d_noise(&NoiseType::Gradient(self)),
+            4 => get_4d_noise(&NoiseType::Gradient(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -121,10 +122,10 @@ impl Settings for GradientSettings {
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
-            1 => get_1d_scaled_noise!(&NoiseType::Gradient(new_self)),
-            2 => get_2d_scaled_noise!(&NoiseType::Gradient(new_self)),
-            3 => get_3d_scaled_noise!(&NoiseType::Gradient(new_self)),
-            4 => get_4d_scaled_noise!(&NoiseType::Gradient(new_self)),
+            1 => get_1d_scaled_noise(&NoiseType::Gradient(new_self)),
+            2 => get_2d_scaled_noise(&NoiseType::Gradient(new_self)),
+            3 => get_3d_scaled_noise(&NoiseType::Gradient(new_self)),
+            4 => get_4d_scaled_noise(&NoiseType::Gradient(new_self)),
             _ => panic!("not implemented"),
         }
     }

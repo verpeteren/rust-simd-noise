@@ -106,93 +106,31 @@ pub use noise_builder::NoiseBuilder;
 pub use noise_dimensions::NoiseDimensions;
 pub use noise_type::NoiseType;
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-macro_rules! get_1d_noise {
-    ($setting:expr) => {
-        if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_1d_noise::<simdeez::avx2::Avx2>($setting) }
-        } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_1d_noise::<simdeez::sse41::Ss41>($setting) }
-        } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_1d_noise::<simdeez::sse2::Sse2>($setting) }
-        } else {
-            unsafe { scalar::get_1d_noise::<simdeez::scalar::Scalar>($setting) }
-        }
-    };
-}
+simd_runtime_generate!(
+    pub fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::get_1d_noise::<S>(noise_type)
+    }
+);
 
-#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
-macro_rules! get_1d_noise {
-    ($setting:expr) => {
-        unsafe { scalar::get_1d_noise::<simdeez::scalar::Scalar>($setting) }
-    };
-}
+simd_runtime_generate!(
+    pub fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::get_2d_noise::<S>(noise_type)
+    }
+);
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-macro_rules! get_2d_noise {
-    ($setting:expr) => {
-        if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_2d_noise::<simdeez::avx2::Avx2>($setting) }
-        } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_2d_noise::<simdeez::sse41::Sse41>($setting) }
-        } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_2d_noise::<simdeez::sse2::Sse2>($setting) }
-        } else {
-            unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>($setting) }
-        }
-    };
-}
 
-#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
-macro_rules! get_2d_noise {
-    ($setting:expr) => {
-        unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>($setting) }
-    };
-}
+simd_runtime_generate!(
+    pub fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::get_3d_noise::<S>(noise_type)
+    }
+);
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-macro_rules! get_3d_noise {
-    ($setting:expr) => {
-        if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_3d_noise::<simdeez::avx2::Avx2>($setting) }
-        } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_3d_noise::<simdeez::sse41::Sse41>($setting) }
-        } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_3d_noise::<simdeez::sse2::Sse2>($setting) }
-        } else {
-            unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>($setting) }
-        }
-    };
-}
 
-#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
-macro_rules! get_3d_noise {
-    ($setting:expr) => {
-        unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>($setting) }
-    };
-}
-
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-macro_rules! get_4d_noise {
-    ($setting:expr) => {
-        if is_x86_feature_detected!("avx2") {
-            unsafe { avx2::get_4d_noise::<simdeez::avx2::Avx2>($setting) }
-        } else if is_x86_feature_detected!("sse4.1") {
-            unsafe { sse41::get_4d_noise::<simdeez::sse41::Sse41>($setting) }
-        } else if is_x86_feature_detected!("sse2") {
-            unsafe { sse2::get_4d_noise::<simdeez::sse2::Sse2>($setting) }
-        } else {
-            unsafe { scalar::get_4d_noise::<simdeez::scalar::Scalar>($setting) }
-        }
-    };
-}
-
-#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
-macro_rules! get_4d_noise {
-    ($setting:expr) => {
-        unsafe { scalar::get_4d_noise::<simdeez::scalar::Scalar>($setting) }
-    };
-}
+simd_runtime_generate!(
+    pub fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::get_4d_noise::<S>(noise_type)
+    }
+);
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 macro_rules! get_1d_scaled_noise {

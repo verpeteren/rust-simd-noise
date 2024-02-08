@@ -1,6 +1,7 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
+use crate::{get_2d_noise, get_3d_noise};
 use crate::intrinsics::{avx2, scalar, sse2, sse41};
 use crate::noise::cell_32::{cellular_2d, cellular_3d};
 use crate::noise::cell_64::{cellular_2d as cellular_2d_f64, cellular_3d as cellular_3d_f64};
@@ -102,8 +103,8 @@ impl Settings for CellularSettings {
     fn generate<S: Simd>(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
-            2 => get_2d_noise!(&NoiseType::Cellular(self)),
-            3 => get_3d_noise!(&NoiseType::Cellular(self)),
+            2 => get_2d_noise(&NoiseType::Cellular(self)),
+            3 => get_3d_noise(&NoiseType::Cellular(self)),
             _ => panic!("not implemented"),
         }
     }

@@ -1,6 +1,7 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
+use crate::{get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise};
 use crate::intrinsics::{avx2, scalar, sse2, sse41};
 use crate::noise::ridge_32::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::ridge_64::{
@@ -114,10 +115,10 @@ impl Settings for RidgeSettings {
     fn generate<S: Simd>(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
-            1 => get_1d_noise!(&NoiseType::Ridge(self)),
-            2 => get_2d_noise!(&NoiseType::Ridge(self)),
-            3 => get_3d_noise!(&NoiseType::Ridge(self)),
-            4 => get_4d_noise!(&NoiseType::Ridge(self)),
+            1 => get_1d_noise(&NoiseType::Ridge(self)),
+            2 => get_2d_noise(&NoiseType::Ridge(self)),
+            3 => get_3d_noise(&NoiseType::Ridge(self)),
+            4 => get_4d_noise(&NoiseType::Ridge(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -128,10 +129,10 @@ impl Settings for RidgeSettings {
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
-            1 => get_1d_scaled_noise!(&NoiseType::Ridge(new_self)),
-            2 => get_2d_scaled_noise!(&NoiseType::Ridge(new_self)),
-            3 => get_3d_scaled_noise!(&NoiseType::Ridge(new_self)),
-            4 => get_4d_scaled_noise!(&NoiseType::Ridge(new_self)),
+            1 => get_1d_scaled_noise(&NoiseType::Ridge(new_self)),
+            2 => get_2d_scaled_noise(&NoiseType::Ridge(new_self)),
+            3 => get_3d_scaled_noise(&NoiseType::Ridge(new_self)),
+            4 => get_4d_scaled_noise(&NoiseType::Ridge(new_self)),
             _ => panic!("not implemented"),
         }
     }
