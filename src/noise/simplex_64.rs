@@ -7,6 +7,7 @@ use crate::noise::gradient_64::grad3d_dot;
 use crate::noise::simplex_32::{
     F2_64, F3_64, F4_64, G22_64, G24_64, G2_64, G33_64, G34_64, G3_64, G44_64, G4_64,
 };
+use crate::noise::ops::gather_64;
 
 const PERM64: [i64; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
@@ -50,8 +51,8 @@ pub unsafe fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::V
     let x1 = x0 - S::Vf64::set1(1.0);
 
     i0 = i0 & S::Vi64::set1(0xff);
-    let gi0 = S::i64gather_epi64(&PERM64, i0);
-    let gi1 = S::i64gather_epi64(&PERM64, i1);
+    let gi0 = gather_64::<S>(&PERM64, i0);
+    let gi1 = gather_64::<S>(&PERM64, i1);
 
     // Compute the contribution from the first gradient
     let x20 = x0 * x0; // x^2_0
@@ -143,23 +144,23 @@ pub unsafe fn simplex_2d_deriv<S: Simd>(
     let ii = i & S::Vi64::set1(0xff);
     let jj = j & S::Vi64::set1(0xff);
 
-    let gi0 = S::i64gather_epi64(&PERM64, ii + S::i64gather_epi64(&PERM64, jj));
+    let gi0 = gather_64::<S>(&PERM64, ii + gather_64::<S>(&PERM64, jj));
 
-    let gi1 = S::i64gather_epi64(
+    let gi1 = gather_64::<S>(
         &PERM64,
-        (ii - i1) + S::i64gather_epi64(&PERM64, jj - j1),
+        (ii - i1) + gather_64::<S>(&PERM64, jj - j1),
     );
 
-    let gi2 = S::i64gather_epi64(
+    let gi2 = gather_64::<S>(
         &PERM64,
-        ii - S::Vi64::set1(-1) + S::i64gather_epi64(&PERM64, jj - S::Vi64::set1(-1)),
+        ii - S::Vi64::set1(-1) + gather_64::<S>(&PERM64, jj - S::Vi64::set1(-1)),
     );
 
     // Weights associated with the gradients at each corner
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
-    let mut t0 = S::fnmadd_pd(y0, y0, S::fnmadd_pd(x0, x0, S::Vf64::set1(0.5)));
-    let mut t1 = S::fnmadd_pd(y1, y1, S::fnmadd_pd(x1, x1, S::Vf64::set1(0.5)));
-    let mut t2 = S::fnmadd_pd(y2, y2, S::fnmadd_pd(x2, x2, S::Vf64::set1(0.5)));
+    let mut t0 = S::Vf64::neg_mul_add(y0, y0, S::Vf64::neg_mul_add(x0, x0, S::Vf64::set1(0.5)));
+    let mut t1 = S::Vf64::neg_mul_add(y1, y1, S::Vf64::neg_mul_add(x1, x1, S::Vf64::set1(0.5)));
+    let mut t2 = S::Vf64::neg_mul_add(y2, y2, S::Vf64::neg_mul_add(x2, x2, S::Vf64::set1(0.5)));
 
     // Zero out negative weights
     t0 &= t0.cmp_gte(S::Vf64::zeroes());
@@ -462,30 +463,30 @@ pub unsafe fn simplex_4d<S: Simd>(
     let kk = k & S::Vi64::set1(0xff);
     let ll = l & S::Vi64::set1(0xff);
 
-    let lp = S::i64gather_epi64(&PERM64, ll);
-    let kp = S::i64gather_epi64(&PERM64, kk + lp);
-    let jp = S::i64gather_epi64(&PERM64, jj + kp);
-    let gi0 = S::i64gather_epi64(&PERM64, ii + jp);
+    let lp = gather_64::<S>(&PERM64, ll);
+    let kp = gather_64::<S>(&PERM64, kk + lp);
+    let jp = gather_64::<S>(&PERM64, jj + kp);
+    let gi0 = gather_64::<S>(&PERM64, ii + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, ll + l1);
-    let kp = S::i64gather_epi64(&PERM64, kk + k1 + lp);
-    let jp = S::i64gather_epi64(&PERM64, jj + j1 + kp);
-    let gi1 = S::i64gather_epi64(&PERM64,ii + i1 + jp);
+    let lp = gather_64::<S>(&PERM64, ll + l1);
+    let kp = gather_64::<S>(&PERM64, kk + k1 + lp);
+    let jp = gather_64::<S>(&PERM64, jj + j1 + kp);
+    let gi1 = gather_64::<S>(&PERM64,ii + i1 + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, ll + l2);
-    let kp = S::i64gather_epi64(&PERM64, kk + k2 + lp);
-    let jp = S::i64gather_epi64(&PERM64, jj + j2 + kp);
-    let gi2 = S::i64gather_epi64(&PERM64, ii + i2 + jp);
+    let lp = gather_64::<S>(&PERM64, ll + l2);
+    let kp = gather_64::<S>(&PERM64, kk + k2 + lp);
+    let jp = gather_64::<S>(&PERM64, jj + j2 + kp);
+    let gi2 = gather_64::<S>(&PERM64, ii + i2 + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, ll + l3);
-    let kp = S::i64gather_epi64(&PERM64, kk + k3 + lp);
-    let jp = S::i64gather_epi64(&PERM64, jj + j3 + kp);
-    let gi3 = S::i64gather_epi64(&PERM64, ii + i3 + jp);
+    let lp = gather_64::<S>(&PERM64, ll + l3);
+    let kp = gather_64::<S>(&PERM64, kk + k3 + lp);
+    let jp = gather_64::<S>(&PERM64, jj + j3 + kp);
+    let gi3 = gather_64::<S>(&PERM64, ii + i3 + jp);
 
-    let lp = S::i64gather_epi64(&PERM64, ll + S::Vi64::set1(1));
-    let kp = S::i64gather_epi64(&PERM64, kk + S::Vi64::set1(1) + lp);
-    let jp = S::i64gather_epi64(&PERM64, jj + S::Vi64::set1(1) + kp);
-    let gi4 = S::i64gather_epi64(&PERM64, ii + S::Vi64::set1(1) + jp);
+    let lp = gather_64::<S>(&PERM64, ll + S::Vi64::set1(1));
+    let kp = gather_64::<S>(&PERM64, kk + S::Vi64::set1(1) + lp);
+    let jp = gather_64::<S>(&PERM64, jj + S::Vi64::set1(1) + kp);
+    let gi4 = gather_64::<S>(&PERM64, ii + S::Vi64::set1(1) + jp);
 
     let t0 = S::Vf64::set1(0.5) - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0);
     let t1 = S::Vf64::set1(0.5) - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1);

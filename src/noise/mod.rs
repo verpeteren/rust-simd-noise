@@ -19,3 +19,4 @@ pub mod simplex_32;
 pub mod simplex_64;
 pub mod turbulence_32;
 pub mod turbulence_64;
+pub mod ops;

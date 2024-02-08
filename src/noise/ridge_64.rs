@@ -38,7 +38,7 @@ pub unsafe fn ridge_2d<S: Simd>(
         x = x * lac;
         y = y * lac;
         amp = amp * gain;
-        result = result + S::fnmadd_pd(simplex_2d::<S>(x, y, seed).abs(), amp, S::Vf64::set1(1.0));
+        result = result + S::Vf64::neg_mul_add(simplex_2d::<S>(x, y, seed).abs(), amp, S::Vf64::set1(1.0));
     }
 
     result
@@ -63,7 +63,7 @@ pub unsafe fn ridge_3d<S: Simd>(
         z = z * lac;
         amp = amp * gain;
         result = result
-            + S::fnmadd_pd(
+            + S::Vf64::neg_mul_add(
                 simplex_3d::<S>(x, y, z, seed).abs(),
                 amp,
                 S::Vf64::set1(1.0),
