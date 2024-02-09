@@ -127,9 +127,9 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> (S::Vf64,
     let x0 = x - ips - t;
     let y0 = y - jps - t;
 
-    let i1 = (x0.cmp_gte(y0)).cast_i64();
+    let i1 = (x0.cmp_gte(y0)).bitcast_i64();
 
-    let j1 = (y0.cmp_gt(x0)).cast_i64();
+    let j1 = (y0.cmp_gt(x0)).bitcast_i64();
 
     // Distances to the second and third points of the enclosing simplex
     let x1 = (x0 + i1.cast_f64()) + S::Vf64::set1(G2_64);
@@ -292,15 +292,15 @@ pub fn simplex_3d_deriv<S: Simd>(
     let g0 = grad3d_dot::<S>(seed, i, j, k, x0, y0, z0);
     let v0 = t40 * g0;
 
-    let v1x = i + (i1.cast_i64() & S::Vi64::set1(X_PRIME_64));
-    let v1y = j + (j1.cast_i64() & S::Vi64::set1(Y_PRIME_64));
-    let v1z = k + (k1.cast_i64() & S::Vi64::set1(Z_PRIME_64));
+    let v1x = i + (i1.bitcast_i64() & S::Vi64::set1(X_PRIME_64));
+    let v1y = j + (j1.bitcast_i64() & S::Vi64::set1(Y_PRIME_64));
+    let v1z = k + (k1.bitcast_i64() & S::Vi64::set1(Z_PRIME_64));
     let g1 = grad3d_dot::<S>(seed, v1x, v1y, v1z, x1, y1, z1);
     let v1 = t41 * g1;
 
-    let v2x = i + (i2.cast_i64() & S::Vi64::set1(X_PRIME_64));
-    let v2y = j + (j2.cast_i64() & S::Vi64::set1(Y_PRIME_64));
-    let v2z = k + (k2.cast_i64() & S::Vi64::set1(Z_PRIME_64));
+    let v2x = i + (i2.bitcast_i64() & S::Vi64::set1(X_PRIME_64));
+    let v2y = j + (j2.bitcast_i64() & S::Vi64::set1(Y_PRIME_64));
+    let v2z = k + (k2.bitcast_i64() & S::Vi64::set1(Z_PRIME_64));
     let g2 = grad3d_dot::<S>(seed, v2x, v2y, v2z, x2, y2, z2);
     let v2 = t42 * g2;
 
@@ -382,22 +382,22 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
     let mut rank_z = S::Vi64::zeroes();
     let mut rank_w = S::Vi64::zeroes();
 
-    let cond = (x0.cmp_gt(y0)).cast_i64();
+    let cond = (x0.cmp_gt(y0)).bitcast_i64();
     rank_x = rank_x + (cond & S::Vi64::set1(1));
     rank_y = rank_y + cond.and_not(S::Vi64::set1(1));
-    let cond = (x0.cmp_gt(z0)).cast_i64();
+    let cond = (x0.cmp_gt(z0)).bitcast_i64();
     rank_x = rank_x + (cond & S::Vi64::set1(1));
     rank_z = rank_z + cond.and_not(S::Vi64::set1(1));
-    let cond = (x0.cmp_gt(w0)).cast_i64();
+    let cond = (x0.cmp_gt(w0)).bitcast_i64();
     rank_x = rank_x + (cond & S::Vi64::set1(1));
     rank_w = rank_w + cond.and_not(S::Vi64::set1(1));
-    let cond = (y0.cmp_gt(z0)).cast_i64();
+    let cond = (y0.cmp_gt(z0)).bitcast_i64();
     rank_y = rank_y + (cond & S::Vi64::set1(1));
     rank_z = rank_z + cond.and_not(S::Vi64::set1(1));
-    let cond = (y0.cmp_gt(w0)).cast_i64();
+    let cond = (y0.cmp_gt(w0)).bitcast_i64();
     rank_y = rank_y + (cond & S::Vi64::set1(1));
     rank_w = rank_w + cond.and_not(S::Vi64::set1(1));
-    let cond = (z0.cmp_gt(w0)).cast_i64();
+    let cond = (z0.cmp_gt(w0)).bitcast_i64();
     rank_z = rank_z + (cond & S::Vi64::set1(1));
     rank_w = rank_w + cond.and_not(S::Vi64::set1(1));
 
