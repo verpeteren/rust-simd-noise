@@ -108,14 +108,12 @@ pub use noise_dimensions::NoiseDimensions;
 pub use noise_type::NoiseType;
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
         noise_helpers_32::get_1d_noise::<S>(noise_type)
     }
 );
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
         noise_helpers_32::get_2d_noise::<S>(noise_type)
     }
@@ -123,7 +121,6 @@ simd_runtime_generate!(
 
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
         noise_helpers_32::get_3d_noise::<S>(noise_type)
     }
@@ -131,35 +128,30 @@ simd_runtime_generate!(
 
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
         noise_helpers_32::get_4d_noise::<S>(noise_type)
     }
 );
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
         unsafe { get_scaled_noise::<S, _>(noise_type, get_1d_noise) }
     }
 );
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_2d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
         unsafe { get_scaled_noise::<S, _>(noise_type, get_2d_noise) }
     }
 );
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_3d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
         unsafe { get_scaled_noise::<S, _>(noise_type, get_3d_noise) }
     }
 );
 
 simd_runtime_generate!(
-    #[inline(always)]
     pub fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
         unsafe { get_scaled_noise::<S, _>(noise_type, get_4d_noise) }
     }
