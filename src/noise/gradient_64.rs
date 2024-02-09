@@ -74,12 +74,12 @@ pub fn grad3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> [S::Vf6
 
     let first = S::Vf64::set1(1.0) | h.h1;
     let mut gx = h.l8 & first;
-    let mut gy = h.l8.and_not(first);
+    let mut gy = first.and_not(h.l8);
 
     let second = S::Vf64::set1(1.0) | h.h2;
     gy = h.l4.blendv(gy, second);
-    gx = h.l4.and_not(h.h12_or_14).blendv(gx, second);
-    let gz = (h.h12_or_14 | h.l4).and_not(second);
+    gx = h.h12_or_14.and_not(h.l4).blendv(gx, second);
+    let gz = second.and_not(h.h12_or_14 | h.l4);
     debug_assert_eq!(
         gx[0].abs() + gy[0].abs() + gz[0].abs(),
         2.0,

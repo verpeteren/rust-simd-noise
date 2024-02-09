@@ -271,8 +271,8 @@ pub fn simplex_3d_deriv<S: Simd>(
     let x0_ge_z0 = x0.cmp_gte(z0);
 
     let i1 = x0_ge_y0 & x0_ge_z0;
-    let j1 = x0_ge_y0.and_not(y0_ge_z0);
-    let k1 = x0_ge_z0.and_not(!y0_ge_z0);
+    let j1 = y0_ge_z0.and_not(x0_ge_y0);
+    let k1 = (!y0_ge_z0).and_not(x0_ge_z0);
 
     let i2 = x0_ge_y0 | x0_ge_z0;
     let j2 = (!x0_ge_y0) | y0_ge_z0;
@@ -421,22 +421,22 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
 
     let cond = (x0.cmp_gt(y0)).bitcast_i32();
     rank_x = rank_x + (cond & S::Vi32::set1(1));
-    rank_y = rank_y + cond.and_not(S::Vi32::set1(1));
+    rank_y = rank_y + S::Vi32::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(z0)).bitcast_i32();
     rank_x = rank_x + (cond & S::Vi32::set1(1));
-    rank_z = rank_z + cond.and_not(S::Vi32::set1(1));
+    rank_z = rank_z + S::Vi32::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(w0)).bitcast_i32();
     rank_x = rank_x + (cond & S::Vi32::set1(1));
-    rank_w = rank_w + cond.and_not(S::Vi32::set1(1));
+    rank_w = rank_w + S::Vi32::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(z0)).bitcast_i32();
     rank_y = rank_y + cond & S::Vi32::set1(1);
-    rank_z = rank_z + cond.and_not(S::Vi32::set1(1));
+    rank_z = rank_z + S::Vi32::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(w0)).bitcast_i32();
     rank_y = rank_y + (cond & S::Vi32::set1(1));
-    rank_w = rank_w + cond.and_not(S::Vi32::set1(1));
+    rank_w = rank_w + S::Vi32::set1(1).and_not(cond);
     let cond = (z0.cmp_gt(w0)).bitcast_i32();
     rank_z = rank_z + (cond & S::Vi32::set1(1));
-    rank_w = rank_w + cond.and_not(S::Vi32::set1(1));
+    rank_w = rank_w + S::Vi32::set1(1).and_not(cond);
 
     let cond = rank_x.cmp_gt(S::Vi32::set1(2));
     let i1 = S::Vi32::set1(1) & cond;
@@ -541,15 +541,15 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
 
     // Discard contributions whose base weight factors are negative
     let mut cond = t0.cmp_lt(S::Vf32::zeroes());
-    n0 = cond.and_not(n0);
+    n0 = n0.and_not(cond);
     cond = t1.cmp_lt(S::Vf32::zeroes());
-    n1 = cond.and_not(n1);
+    n1 = n1.and_not(cond);
     cond = t2.cmp_lt(S::Vf32::zeroes());
-    n2 = cond.and_not(n2);
+    n2 = n2.and_not(cond);
     cond = t3.cmp_lt(S::Vf32::zeroes());
-    n3 = cond.and_not(n3);
+    n3 = n3.and_not(cond);
     cond = t4.cmp_lt(S::Vf32::zeroes());
-    n4 = cond.and_not(n4);
+    n4 = n4.and_not(cond);
 
     // Scaling factor found by numerical approximation
     (n0 + n1 + n2 + n3 + n4) * S::Vf32::set1(62.77772078955791)
