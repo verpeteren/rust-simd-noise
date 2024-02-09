@@ -124,8 +124,8 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> (S::Vf64,
     let t = (i + j).cast_f64() * S::Vf64::set1(G2_64);
 
     // Unskewed distances to the first point of the enclosing simplex
-    let x0 = x - ips - t;
-    let y0 = y - jps - t;
+    let x0 = x - (ips - t);
+    let y0 = y - (jps - t);
 
     let i1 = (x0.cmp_gte(y0)).bitcast_i64();
 
@@ -372,10 +372,10 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
     let l = lpd.cast_i64();
 
     let t = (i + j + k + l).cast_f64() * S::Vf64::set1(G4_64);
-    let x0 = x - ipd - t;
-    let y0 = y - jpd - t;
-    let z0 = z - kpd - t;
-    let w0 = w - lpd - t;
+    let x0 = x - (ipd - t);
+    let y0 = y - (jpd - t);
+    let z0 = z - (kpd - t);
+    let w0 = w - (lpd - t);
 
     let mut rank_x = S::Vi64::zeroes();
     let mut rank_y = S::Vi64::zeroes();

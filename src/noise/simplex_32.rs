@@ -156,8 +156,8 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> (S::Vf32,
     let t = (i + j).cast_f32() * S::Vf32::set1(G2_32);
 
     // Unskewed distances to the first point of the enclosing simplex
-    let x0 = x - ips - t;
-    let y0 = y - jps - t;
+    let x0 = x - (ips - t);
+    let y0 = y - (jps - t);
 
     let i1 = (x0.cmp_gte(y0)).bitcast_i32();
 
@@ -409,10 +409,10 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
     let l = lps.cast_i32();
 
     let t = (i + j + k + l).cast_f32() * S::Vf32::set1(G4_32);
-    let x0 = x - ips - t;
-    let y0 = y - jps - t;
-    let z0 = z - kps - t;
-    let w0 = w - lps - t;
+    let x0 = x - (ips - t);
+    let y0 = y - (jps - t);
+    let z0 = z - (kps - t);
+    let w0 = w - (lps - t);
 
     let mut rank_x = S::Vi32::zeroes();
     let mut rank_y = S::Vi32::zeroes();
