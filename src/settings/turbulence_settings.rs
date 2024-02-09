@@ -2,7 +2,6 @@ use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
 use crate::{get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise};
-use crate::intrinsics::{avx2, scalar, sse2, sse41};
 use crate::noise::turbulence_32::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
 use crate::noise::turbulence_64::{
     turbulence_1d as turbulence_1d_f64, turbulence_2d as turbulence_2d_f64,
@@ -112,7 +111,7 @@ impl Settings for TurbulenceSettings {
         //todo
     }
 
-    fn generate<S: Simd>(self) -> (Vec<f32>, f32, f32) {
+    fn generate(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
             1 => get_1d_noise(&NoiseType::Turbulence(self)),
@@ -123,7 +122,7 @@ impl Settings for TurbulenceSettings {
         }
     }
 
-    fn generate_scaled<S: Simd>(self, min: f32, max: f32) -> Vec<f32> {
+    fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
         let d = self.dim.dim;
         let mut new_self = self;
         new_self.dim.min = min;

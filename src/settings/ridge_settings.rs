@@ -2,7 +2,6 @@ use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
 use crate::{get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise};
-use crate::intrinsics::{avx2, scalar, sse2, sse41};
 use crate::noise::ridge_32::{ridge_1d, ridge_2d, ridge_3d, ridge_4d};
 use crate::noise::ridge_64::{
     ridge_1d as ridge_1d_f64, ridge_2d as ridge_2d_f64, ridge_3d as ridge_3d_f64,
@@ -112,7 +111,7 @@ impl Settings for RidgeSettings {
         //todo
     }
 
-    fn generate<S: Simd>(self) -> (Vec<f32>, f32, f32) {
+    fn generate(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
             1 => get_1d_noise(&NoiseType::Ridge(self)),
@@ -123,7 +122,7 @@ impl Settings for RidgeSettings {
         }
     }
 
-    fn generate_scaled<S: Simd>(self, min: f32, max: f32) -> Vec<f32> {
+    fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
         let d = self.dim.dim;
         let mut new_self = self;
         new_self.dim.min = min;
