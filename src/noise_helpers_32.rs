@@ -15,6 +15,7 @@ pub trait Sample32<S: Simd>: DimensionalBeing + Settings {
     fn sample_4d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32;
 }
 
+#[inline(always)]
 unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
@@ -73,6 +74,7 @@ unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     (result, min, max)
 }
 
+#[inline(always)]
 unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
@@ -137,6 +139,7 @@ unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     (result, min, max)
 }
 
+#[inline(always)]
 unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
@@ -209,6 +212,7 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     (result, min, max)
 }
 
+#[inline(always)]
 unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {

@@ -17,6 +17,7 @@ pub trait Sample64<S: Simd>: DimensionalBeing + Settings {
     fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64;
 }
 
+#[inline(always)]
 unsafe fn get_1d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     settings: Settings,
 ) -> (Vec<f64>, f64, f64) {
@@ -75,6 +76,7 @@ unsafe fn get_1d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     (result, min, max)
 }
 
+#[inline(always)]
 unsafe fn get_2d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     settings: Settings,
 ) -> (Vec<f64>, f64, f64) {
@@ -139,6 +141,7 @@ unsafe fn get_2d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     (result, min, max)
 }
 
+#[inline(always)]
 unsafe fn get_3d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     settings: Settings,
 ) -> (Vec<f64>, f64, f64) {
@@ -211,6 +214,7 @@ unsafe fn get_3d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     (result, min, max)
 }
 
+#[inline(always)]
 unsafe fn get_4d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     settings: Settings,
 ) -> (Vec<f64>, f64, f64) {
