@@ -98,16 +98,16 @@ pub fn grad4<S: Simd>(
     t: S::Vf32,
 ) -> S::Vf32 {
     let h = (S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(31);
-    let mut mask = (S::Vi32::set1(24).cmp_gt(h)).cast_f32();
+    let mut mask = (S::Vi32::set1(24).cmp_gt(h)).bitcast_f32();
     let u = mask.blendv(y, x);
-    mask = (S::Vi32::set1(16).cmp_gt(h)).cast_f32();
+    mask = (S::Vi32::set1(16).cmp_gt(h)).bitcast_f32();
     let v = mask.blendv(z, y);
-    mask = (S::Vi32::set1(8).cmp_gt(h)).cast_f32();
+    mask = (S::Vi32::set1(8).cmp_gt(h)).bitcast_f32();
     let w = mask.blendv(t, z);
 
-    let h_and_1 = ((h & S::Vi32::set1(1)).cmp_eq(S::Vi32::zeroes())).cast_f32();
-    let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::Vi32::zeroes())).cast_f32();
-    let h_and_4 = ((h & S::Vi32::set1(4)).cmp_eq(S::Vi32::zeroes())).cast_f32();
+    let h_and_1 = ((h & S::Vi32::set1(1)).cmp_eq(S::Vi32::zeroes())).bitcast_f32();
+    let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::Vi32::zeroes())).bitcast_f32();
+    let h_and_4 = ((h & S::Vi32::set1(4)).cmp_eq(S::Vi32::zeroes())).bitcast_f32();
 
     h_and_1.blendv(S::Vf32::zeroes() - u, u)
         + h_and_2.blendv(S::Vf32::zeroes() - v, v)

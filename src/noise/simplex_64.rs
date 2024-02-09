@@ -230,9 +230,9 @@ pub fn simplex_3d_deriv<S: Simd>(
 
     // Compute distance from first simplex vertex to input coordinates
     let g = S::Vf64::set1(G3_64) * (x0 + y0 + z0);
-    x0 = x - x0 - g;
-    y0 = y - y0 - g;
-    z0 = z - z0 - g;
+    x0 = x - (x0 - g);
+    y0 = y - (y0 - g);
+    z0 = z - (z0 - g);
 
     let x0_ge_y0 = x0.cmp_gte(y0);
     let y0_ge_z0 = y0.cmp_gte(z0);

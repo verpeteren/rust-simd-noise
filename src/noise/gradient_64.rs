@@ -98,16 +98,16 @@ pub fn grad4<S: Simd>(
     t: S::Vf64,
 ) -> S::Vf64 {
     let h = (S::Vi64::set1(seed) ^ hash) & S::Vi64::set1(31);
-    let mut mask = (S::Vi64::set1(24).cmp_gt(h)).cast_f64();
+    let mut mask = (S::Vi64::set1(24).cmp_gt(h)).bitcast_f64();
     let u = mask.blendv(y, x);
-    mask = (S::Vi64::set1(16).cmp_gt(h)).cast_f64();
+    mask = (S::Vi64::set1(16).cmp_gt(h)).bitcast_f64();
     let v = mask.blendv(z, y);
-    mask = (S::Vi64::set1(8).cmp_gt(h)).cast_f64();
+    mask = (S::Vi64::set1(8).cmp_gt(h)).bitcast_f64();
     let w = mask.blendv(t, z);
 
-    let h_and_1 = ((h & S::Vi64::set1(1)).cmp_eq(S::Vi64::zeroes())).cast_f64();
-    let h_and_2 = ((h & S::Vi64::set1(2)).cmp_eq(S::Vi64::zeroes())).cast_f64();
-    let h_and_4 = ((h & S::Vi64::set1(4)).cmp_eq(S::Vi64::zeroes())).cast_f64();
+    let h_and_1 = ((h & S::Vi64::set1(1)).cmp_eq(S::Vi64::zeroes())).bitcast_f64();
+    let h_and_2 = ((h & S::Vi64::set1(2)).cmp_eq(S::Vi64::zeroes())).bitcast_f64();
+    let h_and_4 = ((h & S::Vi64::set1(4)).cmp_eq(S::Vi64::zeroes())).bitcast_f64();
 
     h_and_1.blendv(S::Vf64::zeroes() - u, u)
         + (h_and_2.blendv(S::Vf64::zeroes() - v, v) + h_and_4.blendv(S::Vf64::zeroes() - w, w))
