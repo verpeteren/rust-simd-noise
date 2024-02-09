@@ -69,6 +69,11 @@ const PERM: [i32; 512] = [
     222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180,
 ];
 
+#[inline(always)]
+fn assert_in_perm_range<S: Simd>(values: S::Vi32) {
+    debug_assert!(values.cmp_lt(S::Vi32::set1(PERM.len() as i32)).iter().all(|is_less_than| is_less_than > 0));
+}
+
 /// Like `simplex_1d`, but also computes the derivative
 #[inline(always)]
 pub fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
@@ -83,8 +88,12 @@ pub fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
     let x1 = x0 - S::Vf32::set1(1.0);
 
     i0 = i0 & S::Vi32::set1(0xff);
-    let gi0 = gather_32::<S>(&PERM, i0);
-    let gi1 = gather_32::<S>(&PERM, i1);
+    let (gi0, gi1) = unsafe {
+        // Safety: We just masked i0 and i1 with 0xff, so they're in 0..255.
+        let gi0 = gather_32::<S>(&PERM, i0);
+        let gi1 = gather_32::<S>(&PERM, i1);
+        (gi0, gi1)
+    };
 
     // Compute the contribution from the first gradient
     let x20 = x0 * x0; // x^2_0
@@ -172,14 +181,23 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> (S::Vf32,
     let ii = i & S::Vi32::set1(0xff);
     let jj = j & S::Vi32::set1(0xff);
 
-    let gi0 = gather_32::<S>(&PERM, ii + gather_32::<S>(&PERM, jj));
+    let (gi0, gi1, gi2) = unsafe {
+        assert_in_perm_range::<S>(ii);
+        assert_in_perm_range::<S>(jj);
+        assert_in_perm_range::<S>(ii - i1);
+        assert_in_perm_range::<S>(jj - j1);
+        assert_in_perm_range::<S>(ii + 1);
+        assert_in_perm_range::<S>(jj + 1);
 
-    let gi1 = gather_32::<S>(&PERM, (ii - i1) + gather_32::<S>(&PERM, jj - j1));
+        let gi0 = gather_32::<S>(&PERM, ii + gather_32::<S>(&PERM, jj));
+        let gi1 = gather_32::<S>(&PERM, (ii - i1) + gather_32::<S>(&PERM, jj - j1));
+        let gi2 = gather_32::<S>(
+            &PERM,
+            (ii - S::Vi32::set1(-1)) + gather_32::<S>(&PERM, jj - S::Vi32::set1(-1)),
+        );
 
-    let gi2 = gather_32::<S>(
-        &PERM,
-        (ii - S::Vi32::set1(-1)) + gather_32::<S>(&PERM, jj - S::Vi32::set1(-1)),
-    );
+        (gi0, gi1, gi2)
+    };
 
     // Weights associated with the gradients at each corner
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
@@ -487,30 +505,35 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
     let kk = k & S::Vi32::set1(0xff);
     let ll = l & S::Vi32::set1(0xff);
 
-    let lp = gather_32::<S>(&PERM, ll);
-    let kp = gather_32::<S>(&PERM, kk + lp);
-    let jp = gather_32::<S>(&PERM, jj + kp);
-    let gi0 = gather_32::<S>(&PERM, ii + jp);
+    let (gi0, gi1, gi2, gi3, gi4) = unsafe {
+        // Safety: ii, jj, kk, and ll are all 0..255. All other temporary variables were fetched from PERM, which only
+        // contains elements in the range 0..255.
+        let lp = gather_32::<S>(&PERM, ll);
+        let kp = gather_32::<S>(&PERM, kk + lp);
+        let jp = gather_32::<S>(&PERM, jj + kp);
+        let gi0 = gather_32::<S>(&PERM, ii + jp);
 
-    let lp = gather_32::<S>(&PERM, ll + l1);
-    let kp = gather_32::<S>(&PERM, kk + k1 + lp);
-    let jp = gather_32::<S>(&PERM, jj + j1 + kp);
-    let gi1 = gather_32::<S>(&PERM, ii + i1 + jp);
+        let lp = gather_32::<S>(&PERM, ll + l1);
+        let kp = gather_32::<S>(&PERM, kk + k1 + lp);
+        let jp = gather_32::<S>(&PERM, jj + j1 + kp);
+        let gi1 = gather_32::<S>(&PERM, ii + i1 + jp);
 
-    let lp = gather_32::<S>(&PERM, ll + l2);
-    let kp = gather_32::<S>(&PERM, kk + k2 + lp);
-    let jp = gather_32::<S>(&PERM, jj + j2 + kp);
-    let gi2 = gather_32::<S>(&PERM, ii + i2 + jp);
+        let lp = gather_32::<S>(&PERM, ll + l2);
+        let kp = gather_32::<S>(&PERM, kk + k2 + lp);
+        let jp = gather_32::<S>(&PERM, jj + j2 + kp);
+        let gi2 = gather_32::<S>(&PERM, ii + i2 + jp);
 
-    let lp = gather_32::<S>(&PERM, ll + l3);
-    let kp = gather_32::<S>(&PERM, kk + k3 + lp);
-    let jp = gather_32::<S>(&PERM, jj + j3 + kp);
-    let gi3 = gather_32::<S>(&PERM, ii + i3 + jp);
+        let lp = gather_32::<S>(&PERM, ll + l3);
+        let kp = gather_32::<S>(&PERM, kk + k3 + lp);
+        let jp = gather_32::<S>(&PERM, jj + j3 + kp);
+        let gi3 = gather_32::<S>(&PERM, ii + i3 + jp);
 
-    let lp = gather_32::<S>(&PERM, ll + S::Vi32::set1(1));
-    let kp = gather_32::<S>(&PERM, kk + S::Vi32::set1(1) + lp);
-    let jp = gather_32::<S>(&PERM, jj + S::Vi32::set1(1) + kp);
-    let gi4 = gather_32::<S>(&PERM, ii + S::Vi32::set1(1) + jp);
+        let lp = gather_32::<S>(&PERM, ll + S::Vi32::set1(1));
+        let kp = gather_32::<S>(&PERM, kk + S::Vi32::set1(1) + lp);
+        let jp = gather_32::<S>(&PERM, jj + S::Vi32::set1(1) + kp);
+        let gi4 = gather_32::<S>(&PERM, ii + S::Vi32::set1(1) + jp);
+        (gi0, gi1, gi2, gi3, gi4)
+    };
 
     //
     // Compute base weight factors associated with each vertex

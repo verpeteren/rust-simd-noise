@@ -37,6 +37,11 @@ const PERM64: [i64; 512] = [
     222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180,
 ];
 
+#[inline(always)]
+fn assert_in_perm_range<S: Simd>(values: S::Vi64) {
+    debug_assert!(values.cmp_lt(S::Vi64::set1(PERM64.len() as i64)).iter().all(|is_less_than| is_less_than > 0));
+}
+
 /// Like `simplex_1d`, but also computes the derivative
 #[inline(always)]
 pub fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
@@ -51,8 +56,12 @@ pub fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
     let x1 = x0 - S::Vf64::set1(1.0);
 
     i0 = i0 & S::Vi64::set1(0xff);
-    let gi0 = gather_64::<S>(&PERM64, i0);
-    let gi1 = gather_64::<S>(&PERM64, i1);
+    let (gi0, gi1) = unsafe {
+        // Safety: We just masked i0 and i1 with 0xff, so they're in 0..255.
+        let gi0 = gather_64::<S>(&PERM64, i0);
+        let gi1 = gather_64::<S>(&PERM64, i1);
+        (gi0, gi1)
+    };
 
     // Compute the contribution from the first gradient
     let x20 = x0 * x0; // x^2_0
@@ -140,14 +149,23 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> (S::Vf64,
     let ii = i & S::Vi64::set1(0xff);
     let jj = j & S::Vi64::set1(0xff);
 
-    let gi0 = gather_64::<S>(&PERM64, ii + gather_64::<S>(&PERM64, jj));
+    let (gi0, gi1, gi2) = unsafe {
+        assert_in_perm_range::<S>(ii);
+        assert_in_perm_range::<S>(jj);
+        assert_in_perm_range::<S>(ii - i1);
+        assert_in_perm_range::<S>(jj - j1);
+        assert_in_perm_range::<S>(ii + 1);
+        assert_in_perm_range::<S>(jj + 1);
 
-    let gi1 = gather_64::<S>(&PERM64, (ii - i1) + gather_64::<S>(&PERM64, jj - j1));
+        let gi0 = gather_64::<S>(&PERM64, ii + gather_64::<S>(&PERM64, jj));
+        let gi1 = gather_64::<S>(&PERM64, (ii - i1) + gather_64::<S>(&PERM64, jj - j1));
+        let gi2 = gather_64::<S>(
+            &PERM64,
+            (ii - -1) + gather_64::<S>(&PERM64, jj - -1),
+        );
 
-    let gi2 = gather_64::<S>(
-        &PERM64,
-        ii - S::Vi64::set1(-1) + gather_64::<S>(&PERM64, jj - S::Vi64::set1(-1)),
-    );
+        (gi0, gi1, gi2)
+    };
 
     // Weights associated with the gradients at each corner
     // These FMA operations are equivalent to: let t = 0.5 - x*x - y*y
@@ -450,30 +468,35 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
     let kk = k & S::Vi64::set1(0xff);
     let ll = l & S::Vi64::set1(0xff);
 
-    let lp = gather_64::<S>(&PERM64, ll);
-    let kp = gather_64::<S>(&PERM64, kk + lp);
-    let jp = gather_64::<S>(&PERM64, jj + kp);
-    let gi0 = gather_64::<S>(&PERM64, ii + jp);
+    let (gi0, gi1, gi2, gi3, gi4) = unsafe {
+        // Safety: ii, jj, kk, and ll are all 0..255. All other temporary variables were fetched from PERM, which only
+        // contains elements in the range 0..255.
+        let lp = gather_64::<S>(&PERM64, ll);
+        let kp = gather_64::<S>(&PERM64, kk + lp);
+        let jp = gather_64::<S>(&PERM64, jj + kp);
+        let gi0 = gather_64::<S>(&PERM64, ii + jp);
 
-    let lp = gather_64::<S>(&PERM64, ll + l1);
-    let kp = gather_64::<S>(&PERM64, kk + k1 + lp);
-    let jp = gather_64::<S>(&PERM64, jj + j1 + kp);
-    let gi1 = gather_64::<S>(&PERM64, ii + i1 + jp);
+        let lp = gather_64::<S>(&PERM64, ll + l1);
+        let kp = gather_64::<S>(&PERM64, kk + k1 + lp);
+        let jp = gather_64::<S>(&PERM64, jj + j1 + kp);
+        let gi1 = gather_64::<S>(&PERM64, ii + i1 + jp);
 
-    let lp = gather_64::<S>(&PERM64, ll + l2);
-    let kp = gather_64::<S>(&PERM64, kk + k2 + lp);
-    let jp = gather_64::<S>(&PERM64, jj + j2 + kp);
-    let gi2 = gather_64::<S>(&PERM64, ii + i2 + jp);
+        let lp = gather_64::<S>(&PERM64, ll + l2);
+        let kp = gather_64::<S>(&PERM64, kk + k2 + lp);
+        let jp = gather_64::<S>(&PERM64, jj + j2 + kp);
+        let gi2 = gather_64::<S>(&PERM64, ii + i2 + jp);
 
-    let lp = gather_64::<S>(&PERM64, ll + l3);
-    let kp = gather_64::<S>(&PERM64, kk + k3 + lp);
-    let jp = gather_64::<S>(&PERM64, jj + j3 + kp);
-    let gi3 = gather_64::<S>(&PERM64, ii + i3 + jp);
+        let lp = gather_64::<S>(&PERM64, ll + l3);
+        let kp = gather_64::<S>(&PERM64, kk + k3 + lp);
+        let jp = gather_64::<S>(&PERM64, jj + j3 + kp);
+        let gi3 = gather_64::<S>(&PERM64, ii + i3 + jp);
 
-    let lp = gather_64::<S>(&PERM64, ll + S::Vi64::set1(1));
-    let kp = gather_64::<S>(&PERM64, kk + S::Vi64::set1(1) + lp);
-    let jp = gather_64::<S>(&PERM64, jj + S::Vi64::set1(1) + kp);
-    let gi4 = gather_64::<S>(&PERM64, ii + S::Vi64::set1(1) + jp);
+        let lp = gather_64::<S>(&PERM64, ll + S::Vi64::set1(1));
+        let kp = gather_64::<S>(&PERM64, kk + S::Vi64::set1(1) + lp);
+        let jp = gather_64::<S>(&PERM64, jj + S::Vi64::set1(1) + kp);
+        let gi4 = gather_64::<S>(&PERM64, ii + S::Vi64::set1(1) + jp);
+        (gi0, gi1, gi2, gi3, gi4)
+    };
 
     let t0 = S::Vf64::set1(0.5) - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0);
     let t1 = S::Vf64::set1(0.5) - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1);
