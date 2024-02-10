@@ -594,7 +594,7 @@ mod tests {
             let mut min = f32::INFINITY;
             let mut max = -f32::INFINITY;
             for x in 0..1000 {
-                let n = unsafe { simplex_1d::<Scalar>(F32x1(x as f32 / 10.0), seed).0 };
+                let n = simplex_1d::<Scalar>(F32x1(x as f32 / 10.0), seed).0;
                 min = min.min(n);
                 max = max.max(n);
             }
@@ -612,9 +612,9 @@ mod tests {
                 // Offset a bit so we don't check derivative at lattice points, where it's always zero
                 let center = x as f32 / 10.0 + 0.1234;
                 const H: f32 = 0.01;
-                let n0 = unsafe { simplex_1d::<Scalar>(F32x1(center - H), seed).0 };
-                let (n1, d1) = unsafe { simplex_1d_deriv::<Scalar>(F32x1(center), seed) };
-                let n2 = unsafe { simplex_1d::<Scalar>(F32x1(center + H), seed).0 };
+                let n0 = simplex_1d::<Scalar>(F32x1(center - H), seed).0;
+                let (n1, d1) = simplex_1d_deriv::<Scalar>(F32x1(center), seed);
+                let n2 = simplex_1d::<Scalar>(F32x1(center + H), seed).0;
                 let (n1, d1) = (n1.0, d1.0);
                 avg_err += ((n2 - (n1 + d1 * H)).abs() + (n0 - (n1 - d1 * H)).abs())
                     / (SEEDS * POINTS * 2) as f32;
@@ -630,9 +630,7 @@ mod tests {
             let mut max = -f32::INFINITY;
             for y in 0..10 {
                 for x in 0..100 {
-                    let n = unsafe {
-                        simplex_2d::<Scalar>(F32x1(x as f32 / 10.0), F32x1(y as f32 / 10.0), seed).0
-                    };
+                    let n = simplex_2d::<Scalar>(F32x1(x as f32 / 10.0), F32x1(y as f32 / 10.0), seed).0;
                     min = min.min(n);
                     max = max.max(n);
                 }
@@ -653,22 +651,12 @@ mod tests {
                     let center_x = x as f32 / 10.0 + 0.1234;
                     let center_y = y as f32 / 10.0 + 0.1234;
                     const H: f32 = 0.01;
-                    let (value, d) = unsafe {
-                        simplex_2d_deriv::<Scalar>(F32x1(center_x), F32x1(center_y), seed)
-                    };
+                    let (value, d) = simplex_2d_deriv::<Scalar>(F32x1(center_x), F32x1(center_y), seed);
                     let (value, d) = (value.0, [d[0].0, d[1].0]);
-                    let left = unsafe {
-                        simplex_2d::<Scalar>(F32x1(center_x - H), F32x1(center_y), seed).0
-                    };
-                    let right = unsafe {
-                        simplex_2d::<Scalar>(F32x1(center_x + H), F32x1(center_y), seed).0
-                    };
-                    let down = unsafe {
-                        simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y - H), seed).0
-                    };
-                    let up = unsafe {
-                        simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y + H), seed).0
-                    };
+                    let left = simplex_2d::<Scalar>(F32x1(center_x - H), F32x1(center_y), seed).0;
+                    let right = simplex_2d::<Scalar>(F32x1(center_x + H), F32x1(center_y), seed).0;
+                    let down = simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y - H), seed).0;
+                    let up = simplex_2d::<Scalar>(F32x1(center_x), F32x1(center_y + H), seed).0;
                     avg_err += ((left - (value - d[0] * H)).abs()
                         + (right - (value + d[0] * H)).abs()
                         + (down - (value - d[1] * H)).abs()
@@ -688,15 +676,13 @@ mod tests {
         for z in 0..10 {
             for y in 0..10 {
                 for x in 0..10000 {
-                    let n = unsafe {
-                        simplex_3d::<Scalar>(
-                            F32x1(x as f32 / 10.0),
-                            F32x1(y as f32 / 10.0),
-                            F32x1(z as f32 / 10.0),
-                            SEED,
-                        )
-                        .0
-                    };
+                    let n = simplex_3d::<Scalar>(
+                        F32x1(x as f32 / 10.0),
+                        F32x1(y as f32 / 10.0),
+                        F32x1(z as f32 / 10.0),
+                        SEED,
+                    )
+                        .0;
                     min = min.min(n);
                     max = max.max(n);
                 }
@@ -718,42 +704,34 @@ mod tests {
                     let center_y = y as f32 / 10.0 + 0.1234;
                     let center_z = z as f32 / 10.0 + 0.1234;
                     const H: f32 = 0.01;
-                    let (value, d) = unsafe {
-                        simplex_3d_deriv::<Scalar>(
-                            F32x1(center_x),
-                            F32x1(center_y),
-                            F32x1(center_z),
-                            SEED,
-                        )
-                    };
+                    let (value, d) = simplex_3d_deriv::<Scalar>(
+                        F32x1(center_x),
+                        F32x1(center_y),
+                        F32x1(center_z),
+                        SEED,
+                    );
                     let (value, d) = (value.0, [d[0].0, d[1].0, d[2].0]);
-                    let right = unsafe {
-                        simplex_3d::<Scalar>(
-                            F32x1(center_x + H),
-                            F32x1(center_y),
-                            F32x1(center_z),
-                            SEED,
-                        )
-                        .0
-                    };
-                    let up = unsafe {
-                        simplex_3d::<Scalar>(
-                            F32x1(center_x),
-                            F32x1(center_y + H),
-                            F32x1(center_z),
-                            SEED,
-                        )
-                        .0
-                    };
-                    let forward = unsafe {
-                        simplex_3d::<Scalar>(
-                            F32x1(center_x),
-                            F32x1(center_y),
-                            F32x1(center_z + H),
-                            SEED,
-                        )
-                        .0
-                    };
+                    let right = simplex_3d::<Scalar>(
+                        F32x1(center_x + H),
+                        F32x1(center_y),
+                        F32x1(center_z),
+                        SEED,
+                    )
+                    .0;
+                    let up = simplex_3d::<Scalar>(
+                        F32x1(center_x),
+                        F32x1(center_y + H),
+                        F32x1(center_z),
+                        SEED,
+                    )
+                    .0;
+                    let forward = simplex_3d::<Scalar>(
+                        F32x1(center_x),
+                        F32x1(center_y),
+                        F32x1(center_z + H),
+                        SEED,
+                    )
+                    .0;
                     avg_err += ((right - (value + d[0] * H)).abs()
                         + (up - (value + d[1] * H)).abs()
                         + (forward - (value + d[2] * H)).abs())
@@ -773,16 +751,14 @@ mod tests {
             for z in 0..10 {
                 for y in 0..10 {
                     for x in 0..1000 {
-                        let n = unsafe {
-                            simplex_4d::<Scalar>(
-                                F32x1(x as f32 / 10.0),
-                                F32x1(y as f32 / 10.0),
-                                F32x1(z as f32 / 10.0),
-                                F32x1(w as f32 / 10.0),
-                                SEED,
-                            )
-                            .0
-                        };
+                        let n = simplex_4d::<Scalar>(
+                            F32x1(x as f32 / 10.0),
+                            F32x1(y as f32 / 10.0),
+                            F32x1(z as f32 / 10.0),
+                            F32x1(w as f32 / 10.0),
+                            SEED,
+                        )
+                        .0;
                         min = min.min(n);
                         max = max.max(n);
                     }

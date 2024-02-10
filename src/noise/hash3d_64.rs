@@ -15,6 +15,7 @@ impl<S> Hash3d<S>
 where
     S: Simd,
 {
+    #[allow(dead_code)]
     pub fn new(l8: S::Vf64, l4: S::Vf64, h12_or_14: S::Vf64, h1: S::Vf64, h2: S::Vf64) -> Self {
         Self {
             l8,
@@ -28,6 +29,7 @@ where
 /// Compute hash values used by `grad3d` and `grad3d_dot`
 
 #[inline(always)]
+#[allow(unused_variables)]
 pub fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> Hash3d<S> {
     // This 64 bit variant is not implemented.
     // The codeblock below is just the 64 bit SIMD instructions with the 32 bit magic numbers.

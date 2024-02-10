@@ -127,6 +127,7 @@ impl Settings for CellularSettings {
 
 impl<S: Simd> Sample32<S> for CellularSettings {
     #[inline(always)]
+    #[allow(unused_variables)]
     fn sample_1d(&self, x: S::Vf32) -> S::Vf32 {
         unimplemented!()
     }
@@ -157,6 +158,7 @@ impl<S: Simd> Sample32<S> for CellularSettings {
     }
 
     #[inline(always)]
+    #[allow(unused_variables)]
     fn sample_4d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32 {
         unimplemented!()
     }
@@ -164,6 +166,7 @@ impl<S: Simd> Sample32<S> for CellularSettings {
 
 impl<S: Simd> Sample64<S> for CellularSettings {
     #[inline(always)]
+    #[allow(unused_variables)]
     fn sample_1d(&self, x: S::Vf64) -> S::Vf64 {
         unimplemented!()
     }
@@ -194,6 +197,7 @@ impl<S: Simd> Sample64<S> for CellularSettings {
     }
 
     #[inline(always)]
+    #[allow(unused_variables)]
     fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64 {
         unimplemented!()
     }

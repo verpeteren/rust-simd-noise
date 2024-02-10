@@ -1,5 +1,3 @@
-use simdeez::prelude::*;
-
 pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
