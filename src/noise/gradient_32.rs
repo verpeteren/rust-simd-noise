@@ -11,7 +11,7 @@ pub fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
     let h = (S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(15);
     let v = (h & S::Vi32::set1(7)).cast_f32();
 
-    let h_and_8 = ((h & S::Vi32::set1(8)).cmp_eq(S::Vi32::zeroes())).cast_f32();
+    let h_and_8 = ((h & S::Vi32::set1(8)).cmp_eq(S::Vi32::zeroes())).bitcast_f32();
     h_and_8.blendv(S::Vf32::zeroes() - v, v)
 }
 
@@ -22,12 +22,12 @@ pub fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 #[inline(always)]
 pub fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
     let h = (hash ^ S::Vi32::set1(seed)) & S::Vi32::set1(7);
-    let mask = (S::Vi32::set1(4).cmp_gt(h)).cast_f32();
+    let mask = (S::Vi32::set1(4).cmp_gt(h)).bitcast_f32();
     let x_magnitude = mask.blendv(S::Vf32::set1(2.0), S::Vf32::set1(1.0));
     let y_magnitude = mask.blendv(S::Vf32::set1(1.0), S::Vf32::set1(2.0));
 
-    let h_and_1 = ((h & S::Vi32::set1(1)).cmp_eq(S::Vi32::zeroes())).cast_f32();
-    let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::Vi32::zeroes())).cast_f32();
+    let h_and_1 = ((h & S::Vi32::set1(1)).cmp_eq(S::Vi32::zeroes())).bitcast_f32();
+    let h_and_2 = ((h & S::Vi32::set1(2)).cmp_eq(S::Vi32::zeroes())).bitcast_f32();
 
     let gx = mask
         .blendv(h_and_2, h_and_1)
