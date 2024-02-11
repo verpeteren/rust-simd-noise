@@ -39,7 +39,7 @@ const PERM64: [i64; 512] = [
 
 #[inline(always)]
 fn assert_in_perm_range<S: Simd>(values: S::Vi64) {
-    debug_assert!(values.cmp_lt(S::Vi64::set1(PERM64.len() as i64)).iter().all(|is_less_than| is_less_than > 0));
+    debug_assert!(values.cmp_lt(S::Vi64::set1(PERM64.len() as i64)).iter().all(|is_less_than| is_less_than != 0));
 }
 
 /// Like `simplex_1d`, but also computes the derivative
