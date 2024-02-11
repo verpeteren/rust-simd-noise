@@ -156,7 +156,7 @@ impl NoiseBuilder {
     }
 
     pub fn fbm_4d(width: usize, height: usize, depth: usize, time: usize) -> FbmSettings {
-        let mut dim = NoiseDimensions::default(3);
+        let mut dim = NoiseDimensions::default(4);
         dim.width = width;
         dim.height = height;
         dim.depth = depth;
@@ -174,7 +174,7 @@ impl NoiseBuilder {
         w_offset: f32,
         time: usize,
     ) -> FbmSettings {
-        let mut dim = NoiseDimensions::default(3);
+        let mut dim = NoiseDimensions::default(4);
         dim.width = width;
         dim.height = height;
         dim.depth = depth;
