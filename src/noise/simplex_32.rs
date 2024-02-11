@@ -447,7 +447,7 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
     rank_x = rank_x + (cond & S::Vi32::set1(1));
     rank_w = rank_w + S::Vi32::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(z0)).bitcast_i32();
-    rank_y = rank_y + cond & S::Vi32::set1(1);
+    rank_y = rank_y + (cond & S::Vi32::set1(1));
     rank_z = rank_z + S::Vi32::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(w0)).bitcast_i32();
     rank_y = rank_y + (cond & S::Vi32::set1(1));
