@@ -265,13 +265,13 @@ pub fn simplex_3d_deriv<S: Simd>(
     let k2 = !(x0_ge_z0 & y0_ge_z0);
 
     // Compute distances from remaining simplex vertices to input coordinates
-    let x1 = x0 - i1 & S::Vf64::set1(1.0) + S::Vf64::set1(G3_64);
-    let y1 = y0 - j1 & S::Vf64::set1(1.0) + S::Vf64::set1(G3_64);
-    let z1 = z0 - k1 & S::Vf64::set1(1.0) + S::Vf64::set1(G3_64);
+    let x1 = x0 - (i1 & S::Vf64::set1(1.0)) + S::Vf64::set1(G3_64);
+    let y1 = y0 - (j1 & S::Vf64::set1(1.0)) + S::Vf64::set1(G3_64);
+    let z1 = z0 - (k1 & S::Vf64::set1(1.0)) + S::Vf64::set1(G3_64);
 
-    let x2 = x0 - i2 & S::Vf64::set1(1.0) + S::Vf64::set1(F3_64);
-    let y2 = y0 - j2 & S::Vf64::set1(1.0) + S::Vf64::set1(F3_64);
-    let z2 = z0 - k2 & S::Vf64::set1(1.0) + S::Vf64::set1(F3_64);
+    let x2 = x0 - (i2 & S::Vf64::set1(1.0)) + S::Vf64::set1(F3_64);
+    let y2 = y0 - (j2 & S::Vf64::set1(1.0)) + S::Vf64::set1(F3_64);
+    let z2 = z0 - (k2 & S::Vf64::set1(1.0)) + S::Vf64::set1(F3_64);
 
     let x3 = x0 + S::Vf64::set1(G33_64);
     let y3 = y0 + S::Vf64::set1(G33_64);
