@@ -29,22 +29,23 @@ unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result: Vec<f32> = Vec::with_capacity(width);
-    result.set_len(width);
+    let mut result = Vec::<f32>::with_capacity(width);
+    let result_ptr = result.as_mut_ptr();
     let mut i = 0;
     let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
-    let mut x_arr = Vec::with_capacity(vector_width);
-    x_arr.set_len(vector_width);
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
     for i in (0..vector_width).rev() {
-        x_arr[i] = start_x + i as f32;
+        x_ptr.add(i).write(start_x + i as f32);
     }
-    let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
+    x_arr.set_len(vector_width);
+    let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
     for _ in 0..width / vector_width {
         let f = settings.sample_1d(x * freq_x);
         max_s = max_s.max(f);
         min_s = min_s.min(f);
-        f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
+        f.copy_to_ptr_unaligned(result_ptr.add(i));
         i += vector_width;
         x = x + S::Vf32::set1(vector_width as f32);
     }
@@ -52,7 +53,7 @@ unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         let f = settings.sample_1d(x * freq_x);
         for j in 0..remainder {
             let n = f[j];
-            *result.get_unchecked_mut(i) = n;
+            result_ptr.add(i).write(n);
             // Note: This is unecessary for large images
             if n < min {
                 min = n;
@@ -63,6 +64,7 @@ unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             i += 1;
         }
     }
+    result.set_len(width);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
@@ -91,24 +93,25 @@ unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::with_capacity(width * height);
-    result.set_len(width * height);
+    let mut result = Vec::<f32>::with_capacity(width * height);
+    let result_ptr = result.as_mut_ptr();
     let mut y = S::Vf32::set1(start_y);
     let mut i = 0;
     let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
-    let mut x_arr = Vec::with_capacity(vector_width);
-    x_arr.set_len(vector_width);
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
     for i in (0..vector_width).rev() {
-        x_arr[i] = start_x + i as f32;
+        x_ptr.add(i).write(start_x + i as f32);
     }
+    x_arr.set_len(vector_width);
     for _ in 0..height {
-        let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
+        let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
         for _ in 0..width / vector_width {
             let f = settings.sample_2d(x * freq_x, y * freq_y);
             max_s = max_s.max(f);
             min_s = min_s.min(f);
-            f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
+            f.copy_to_ptr_unaligned(result_ptr.add(i));
             i += vector_width;
             x = x + S::Vf32::set1(vector_width as f32);
         }
@@ -116,7 +119,7 @@ unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             let f = settings.sample_2d(x * freq_x, y * freq_y);
             for j in 0..remainder {
                 let n = f[j];
-                *result.get_unchecked_mut(i) = n;
+                result_ptr.add(i).write(n);
                 if n < min {
                     min = n;
                 }
@@ -128,6 +131,7 @@ unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         }
         y = y + S::Vf32::set1(1.0);
     }
+    result.set_len(width * height);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
@@ -159,16 +163,17 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::with_capacity(width * height * depth);
-    result.set_len(width * height * depth);
+    let mut result = Vec::<f32>::with_capacity(width * height * depth);
+    let result_ptr = result.as_mut_ptr();
     let mut i = 0;
     let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
-    let mut x_arr = Vec::with_capacity(vector_width);
-    x_arr.set_len(vector_width);
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
     for i in (0..vector_width).rev() {
-        x_arr[i] = start_x + i as f32;
+        x_ptr.add(i).write(start_x + i as f32);
     }
+    x_arr.set_len(vector_width);
 
     let mut z = S::Vf32::set1(start_z);
     for _ in 0..depth {
@@ -179,7 +184,7 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                 let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
                 max_s = max_s.max(f);
                 min_s = min_s.min(f);
-                f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
+                f.copy_to_ptr_unaligned(result_ptr.add(i));
                 i += vector_width;
                 x = x + S::Vf32::set1(vector_width as f32);
             }
@@ -187,7 +192,7 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                 let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
                 for j in 0..remainder {
                     let n = f[j];
-                    *result.get_unchecked_mut(i) = n;
+                    result_ptr.add(i).write(n);
                     if n < min {
                         min = n;
                     }
@@ -201,6 +206,7 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         }
         z = z + S::Vf32::set1(1.0);
     }
+    result.set_len(width * height * depth);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
@@ -235,16 +241,17 @@ unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::with_capacity(width * height * depth * time);
-    result.set_len(width * height * depth * time);
+    let mut result = Vec::<f32>::with_capacity(width * height * depth * time);
+    let result_ptr = result.as_mut_ptr();
     let mut i = 0;
     let vector_width = S::Vf32::WIDTH;
     let remainder = width % vector_width;
-    let mut x_arr = Vec::with_capacity(vector_width);
-    x_arr.set_len(vector_width);
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
     for i in (0..vector_width).rev() {
-        x_arr[i] = start_x + i as f32;
+        x_ptr.add(i).write(start_x + i as f32);
     }
+    x_arr.set_len(vector_width);
     let mut w = S::Vf32::set1(start_w);
     for _ in 0..time {
         let mut z = S::Vf32::set1(start_z);
@@ -256,7 +263,7 @@ unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                     let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
                     max_s = max_s.max(f);
                     min_s = min_s.min(f);
-                    f.copy_to_ptr_unaligned(result.get_unchecked_mut(i));
+                    f.copy_to_ptr_unaligned(result_ptr.add(i));
                     i += vector_width;
                     x = x + S::Vf32::set1(vector_width as f32);
                 }
@@ -264,7 +271,7 @@ unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                     let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
                     for j in 0..remainder {
                         let n = f[j];
-                        *result.get_unchecked_mut(i) = n;
+                        result_ptr.add(i).write(n);
                         // Note: This is unecessary for large images
                         if n < min {
                             min = n;
@@ -281,6 +288,7 @@ unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         }
         w = w + S::Vf32::set1(1.0);
     }
+    result.set_len(width * height * depth * time);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
