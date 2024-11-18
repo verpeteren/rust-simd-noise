@@ -39,7 +39,10 @@ static PERM64: [i64; 512] = [
 
 #[inline(always)]
 fn assert_in_perm_range<S: Simd>(values: S::Vi64) {
-    debug_assert!(values.cmp_lt(S::Vi64::set1(PERM64.len() as i64)).iter().all(|is_less_than| is_less_than != 0));
+    debug_assert!(values
+        .cmp_lt(S::Vi64::set1(PERM64.len() as i64))
+        .iter()
+        .all(|is_less_than| is_less_than != 0));
 }
 
 /// Like `simplex_1d`, but also computes the derivative
@@ -159,10 +162,7 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> (S::Vf64,
 
         let gi0 = gather_64::<S>(&PERM64, ii + gather_64::<S>(&PERM64, jj));
         let gi1 = gather_64::<S>(&PERM64, (ii - i1) + gather_64::<S>(&PERM64, jj - j1));
-        let gi2 = gather_64::<S>(
-            &PERM64,
-            (ii - -1) + gather_64::<S>(&PERM64, jj - -1),
-        );
+        let gi2 = gather_64::<S>(&PERM64, (ii - -1) + gather_64::<S>(&PERM64, jj - -1));
 
         (gi0, gi1, gi2)
     };
@@ -547,7 +547,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_1d_range() {
+    fn test_noise_simplex64_1d_range() {
         for seed in 0..10 {
             let mut min = f64::INFINITY;
             let mut max = -f64::INFINITY;
@@ -561,7 +561,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_1d_deriv_sanity() {
+    fn test_noise_simplex64_1d_deriv_sanity() {
         let mut avg_err = 0.0;
         const SEEDS: i64 = 10;
         const POINTS: i64 = 1000;
@@ -582,13 +582,15 @@ mod tests {
     }
 
     #[test]
-    fn simplex_2d_range() {
+    fn test_noise_simplex64_2d_range() {
         for seed in 0..10 {
             let mut min = f64::INFINITY;
             let mut max = -f64::INFINITY;
             for y in 0..10 {
                 for x in 0..100 {
-                    let n = simplex_2d::<Scalar>(F64x1(x as f64 / 10.0), F64x1(y as f64 / 10.0), seed).0;
+                    let n =
+                        simplex_2d::<Scalar>(F64x1(x as f64 / 10.0), F64x1(y as f64 / 10.0), seed)
+                            .0;
                     min = min.min(n);
                     max = max.max(n);
                 }
@@ -598,7 +600,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_2d_deriv_sanity() {
+    fn test_noise_simplex64_2d_deriv_sanity() {
         let mut avg_err = 0.0;
         const SEEDS: i64 = 10;
         const POINTS: i64 = 10;
@@ -609,7 +611,8 @@ mod tests {
                     let center_x = x as f64 / 10.0 + 0.1234;
                     let center_y = y as f64 / 10.0 + 0.1234;
                     const H: f64 = 0.01;
-                    let (value, d) = simplex_2d_deriv::<Scalar>(F64x1(center_x), F64x1(center_y), seed);
+                    let (value, d) =
+                        simplex_2d_deriv::<Scalar>(F64x1(center_x), F64x1(center_y), seed);
                     let (value, d) = (value.0, [d[0].0, d[1].0]);
                     let left = simplex_2d::<Scalar>(F64x1(center_x - H), F64x1(center_y), seed).0;
                     let right = simplex_2d::<Scalar>(F64x1(center_x + H), F64x1(center_y), seed).0;
@@ -628,7 +631,7 @@ mod tests {
 
     #[ignore]
     #[test]
-    fn simplex_3d_range() {
+    fn test_noise_simplex64_3d_range() {
         let mut min = f64::INFINITY;
         let mut max = -f64::INFINITY;
         const SEED: i64 = 0;
@@ -652,7 +655,7 @@ mod tests {
 
     #[ignore]
     #[test]
-    fn simplex_3d_deriv_sanity() {
+    fn test_noise_simplex64_3d_deriv_sanity() {
         let mut avg_err = 0.0;
         const POINTS: i64 = 10;
         const SEED: i64 = 0;
@@ -678,7 +681,7 @@ mod tests {
                         SEED,
                     )
                     .0;
-                let up = simplex_3d::<Scalar>(
+                    let up = simplex_3d::<Scalar>(
                         F64x1(center_x),
                         F64x1(center_y + H),
                         F64x1(center_z),
@@ -703,7 +706,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_4d_range() {
+    fn test_noise_simplex64_4d_range() {
         let mut min = f64::INFINITY;
         let mut max = -f64::INFINITY;
         const SEED: i64 = 0;

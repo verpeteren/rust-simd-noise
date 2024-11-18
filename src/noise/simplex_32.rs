@@ -71,7 +71,10 @@ static PERM: [i32; 512] = [
 
 #[inline(always)]
 fn assert_in_perm_range<S: Simd>(values: S::Vi32) {
-    debug_assert!(values.cmp_lt(S::Vi32::set1(PERM.len() as i32)).iter().all(|is_less_than| is_less_than != 0));
+    debug_assert!(values
+        .cmp_lt(S::Vi32::set1(PERM.len() as i32))
+        .iter()
+        .all(|is_less_than| is_less_than != 0));
 }
 
 /// Like `simplex_1d`, but also computes the derivative
@@ -589,7 +592,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_1d_range() {
+    fn test_noise_simplex32_1d_range() {
         for seed in 0..10 {
             let mut min = f32::INFINITY;
             let mut max = -f32::INFINITY;
@@ -603,7 +606,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_1d_deriv_sanity() {
+    fn test_noise_simplex32_1d_deriv_sanity() {
         let mut avg_err = 0.0;
         const SEEDS: i32 = 10;
         const POINTS: i32 = 1000;
@@ -624,13 +627,15 @@ mod tests {
     }
 
     #[test]
-    fn simplex_2d_range() {
+    fn test_noise_simplex32_2d_range() {
         for seed in 0..10 {
             let mut min = f32::INFINITY;
             let mut max = -f32::INFINITY;
             for y in 0..10 {
                 for x in 0..100 {
-                    let n = simplex_2d::<Scalar>(F32x1(x as f32 / 10.0), F32x1(y as f32 / 10.0), seed).0;
+                    let n =
+                        simplex_2d::<Scalar>(F32x1(x as f32 / 10.0), F32x1(y as f32 / 10.0), seed)
+                            .0;
                     min = min.min(n);
                     max = max.max(n);
                 }
@@ -640,7 +645,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_2d_deriv_sanity() {
+    fn test_noise_simplex32_2d_deriv_sanity() {
         let mut avg_err = 0.0;
         const SEEDS: i32 = 10;
         const POINTS: i32 = 10;
@@ -651,7 +656,8 @@ mod tests {
                     let center_x = x as f32 / 10.0 + 0.1234;
                     let center_y = y as f32 / 10.0 + 0.1234;
                     const H: f32 = 0.01;
-                    let (value, d) = simplex_2d_deriv::<Scalar>(F32x1(center_x), F32x1(center_y), seed);
+                    let (value, d) =
+                        simplex_2d_deriv::<Scalar>(F32x1(center_x), F32x1(center_y), seed);
                     let (value, d) = (value.0, [d[0].0, d[1].0]);
                     let left = simplex_2d::<Scalar>(F32x1(center_x - H), F32x1(center_y), seed).0;
                     let right = simplex_2d::<Scalar>(F32x1(center_x + H), F32x1(center_y), seed).0;
@@ -669,7 +675,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_3d_range() {
+    fn test_noise_simplex32_3d_range() {
         let mut min = f32::INFINITY;
         let mut max = -f32::INFINITY;
         const SEED: i32 = 0;
@@ -682,7 +688,7 @@ mod tests {
                         F32x1(z as f32 / 10.0),
                         SEED,
                     )
-                        .0;
+                    .0;
                     min = min.min(n);
                     max = max.max(n);
                 }
@@ -692,7 +698,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_3d_deriv_sanity() {
+    fn test_noise_simplex32_3d_deriv_sanity() {
         let mut avg_err = 0.0;
         const POINTS: i32 = 10;
         const SEED: i32 = 0;
@@ -743,7 +749,7 @@ mod tests {
     }
 
     #[test]
-    fn simplex_4d_range() {
+    fn test_noise_simplex32_4d_range() {
         let mut min = f32::INFINITY;
         let mut max = -f32::INFINITY;
         const SEED: i32 = 0;
