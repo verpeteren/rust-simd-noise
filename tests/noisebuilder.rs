@@ -1,7 +1,7 @@
 use simdnoise::{NoiseBuilder, Settings, SimplexSettings};
 
 mod helpers;
-use helpers::{read_from_file_f32, save_to_file_f32, BIN_PATH};
+use helpers::{read_from_file_f32, /*save_to_file_f32, */ BIN_PATH};
 
 mod noise {
     use super::*;
@@ -168,7 +168,6 @@ mod noise {
             mod nooffset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_ridge_nooffset_f32_1d() {
                     let file_name = format!(
@@ -223,7 +222,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_ridge_nooffset_f32_4d() {
                     let file_name = format!(
@@ -247,7 +245,6 @@ mod noise {
             mod offset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_ridge_offset_f32_1d() {
                     let file_name = format!(
@@ -303,7 +300,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_ridge_offset_f32_4d() {
                     let file_name = format!(
@@ -334,7 +330,6 @@ mod noise {
             mod nooffset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_turbulence_nooffset_f32_1d() {
                     let file_name = format!(
@@ -389,7 +384,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_turbulence_nooffset_f32_4d() {
                     let file_name = format!(
@@ -413,7 +407,6 @@ mod noise {
             mod offset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_turbulence_offset_f32_1d() {
                     let file_name = format!(
@@ -470,7 +463,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_turbulence_offset_f32_4d() {
                     let file_name = format!(
@@ -501,7 +493,6 @@ mod noise {
             mod nooffset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_fbm_nooffset_f32_1d() {
                     let file_name = format!(
@@ -556,7 +547,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_fbm_nooffset_f32_4d() {
                     let file_name = format!(
@@ -580,7 +570,6 @@ mod noise {
             mod offset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_fbm_offset_f32_1d() {
                     let file_name = format!(
@@ -636,7 +625,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_fbm_offset_f32_4d() {
                     let file_name = format!(
@@ -667,7 +655,6 @@ mod noise {
             mod nooffset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_gradient_nooffset_f32_1d() {
                     let file_name = format!(
@@ -713,7 +700,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_gradient_nooffset_f32_4d() {
                     let file_name = format!(
@@ -734,7 +720,6 @@ mod noise {
             mod offset {
                 use super::*;
 
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_gradient_offset_f32_1d() {
                     let file_name = format!(
@@ -781,7 +766,6 @@ mod noise {
                     let expected = read_from_file_f32(&file_name).unwrap();
                     assert_eq!(expected, noise);
                 }
-                #[ignore]
                 #[test]
                 fn test_noisebuilder_gradient_offset_f32_4d() {
                     let file_name = format!(
