@@ -162,7 +162,6 @@ unsafe fn do_intrinsic_cellular_3_scalar_32_normal() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_cellular_3_scalar_32_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -191,7 +190,6 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_normal() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_cellular_3_sse2_32_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -470,7 +468,6 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_euclidean_cellvalue() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_cellular_3_sse41_32_euclidean_cellvalue() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -939,7 +936,6 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_manhattan_cellvalue() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_cellular_3_sse2_32_manhattan_cellvalue() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -1657,7 +1653,6 @@ unsafe fn do_intrinsic_cellular_3_scalar_32_natural_distance() -> Vec<f32> {
     noise
 }
 
-#[ignore]
 #[test]
 fn test_intrinsic_cellular_3_scalar_32_natural_distance() {
     let file_name = format!(
@@ -6000,7 +5995,6 @@ unsafe fn do_intrinsic_ridge_2_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_ridge_2_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -6526,7 +6520,6 @@ unsafe fn do_intrinsic_ridge_4_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_ridge_4_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -6821,7 +6814,6 @@ unsafe fn do_intrinsic_fbm_1_scalar_32_normal() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_1_scalar_32_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -6852,7 +6844,6 @@ unsafe fn do_intrinsic_fbm_1_scalar_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_1_scalar_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -6884,7 +6875,6 @@ unsafe fn do_intrinsic_fbm_1_sse2_32_normal() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_1_sse2_32_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -6947,7 +6937,6 @@ unsafe fn do_intrinsic_fbm_1_sse41_32_normal() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_1_sse41_32_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -6978,7 +6967,6 @@ unsafe fn do_intrinsic_fbm_1_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
-#[ignore]
 #[test]
 fn test_intrinsic_fbm_1_sse41_64_normal() {
     let file_name = format!(
@@ -7011,7 +6999,6 @@ unsafe fn do_intrinsic_fbm_2_avx2_32_normal() -> Vec<f32> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_2_avx2_32_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -7044,7 +7031,6 @@ unsafe fn do_intrinsic_fbm_2_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_2_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -7236,7 +7222,6 @@ unsafe fn do_intrinsic_fbm_2_sse41_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_2_sse41_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -7571,7 +7556,6 @@ unsafe fn do_intrinsic_fbm_4_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_fbm_4_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -8084,7 +8068,6 @@ unsafe fn do_intrinsic_turbulence_2_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_turbulence_2_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -8342,7 +8325,7 @@ unsafe fn do_intrinsic_turbulence_3_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
+#[should_panic(expected = "not implemented")]
 fn test_intrinsic_turbulence_3_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -8407,7 +8390,7 @@ unsafe fn do_intrinsic_turbulence_3_scalar_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
+#[should_panic(expected = "not implemented")]
 fn test_intrinsic_turbulence_3_scalar_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -8474,7 +8457,7 @@ unsafe fn do_intrinsic_turbulence_3_sse2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
+#[should_panic(expected = "not implemented")]
 fn test_intrinsic_turbulence_3_sse2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -8541,7 +8524,7 @@ unsafe fn do_intrinsic_turbulence_3_sse41_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
+#[should_panic(expected = "not implemented")]
 fn test_intrinsic_turbulence_3_sse41_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -8610,7 +8593,6 @@ unsafe fn do_intrinsic_turbulence_4_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_turbulence_4_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -9073,7 +9055,6 @@ unsafe fn do_intrinsic_gradient_2_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_gradient_2_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -9460,7 +9441,7 @@ unsafe fn do_intrinsic_gradient_3_sse41_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
+#[should_panic(expected = "not implemented")]
 fn test_intrinsic_gradient_3_sse41_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
@@ -9519,7 +9500,6 @@ unsafe fn do_intrinsic_gradient_4_avx2_64_normal() -> Vec<f64> {
 }
 
 #[test]
-#[ignore]
 fn test_intrinsic_gradient_4_avx2_64_normal() {
     let file_name = format!(
         "{}/{}_{}_{}_{}_{}_{}.bin",
