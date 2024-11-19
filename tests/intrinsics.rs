@@ -10,6 +10,14 @@ use helpers::{
     read_from_file_f32, read_from_file_f64, /*save_to_file_f32, save_to_file_f64, */ BIN_PATH,
 };
 
+#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+mod neon {
+    #[test]
+    fn it_works() {
+        assert_eq!(1, 1);
+    }
+}
+
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 mod x86 {
 
