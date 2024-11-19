@@ -138,7 +138,7 @@ impl Display for Distance {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    #[command(arg_required_else_help = true)]
+    #[command(arg_required_else_help = false)]
     Cellular {
         #[clap(long, value_parser, default_value_t = Distance::Euclidean, help="The distance function", global=true)]
         distance: Distance,
@@ -148,7 +148,7 @@ enum Commands {
         jitter: f32,
         //@TODO: index0/1
     },
-    #[command(arg_required_else_help = true)]
+    #[command(arg_required_else_help = false)]
     FBM {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
@@ -159,7 +159,7 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
         octaves: u8,
     },
-    #[command(arg_required_else_help = true)]
+    #[command(arg_required_else_help = false)]
     Ridge {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
@@ -170,7 +170,7 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
         octaves: u8,
     },
-    #[command(arg_required_else_help = true)]
+    #[command(arg_required_else_help = false)]
     Turbulence {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
@@ -181,7 +181,7 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
         octaves: u8,
     },
-    #[command(arg_required_else_help = true)]
+    #[command(arg_required_else_help = false)]
     Gradient {},
 }
 
