@@ -1,10 +1,15 @@
+use simdeez::prelude::*;
+
 use crate::dimensional_being::DimensionalBeing;
-use crate::intrinsics::{avx2, scalar, sse2, sse41};
-pub use crate::noise::cell2_return_type::Cell2ReturnType;
-pub use crate::noise::cell_distance_function::CellDistanceFunction;
-pub use crate::noise::cell_return_type::CellReturnType;
-pub use crate::noise_builder::NoiseBuilder;
+use crate::{get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise};
+use crate::noise::turbulence_32::{turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d};
+use crate::noise::turbulence_64::{
+    turbulence_1d as turbulence_1d_f64, turbulence_2d as turbulence_2d_f64,
+    turbulence_3d as turbulence_3d_f64, turbulence_4d as turbulence_4d_f64,
+};
 pub use crate::noise_dimensions::NoiseDimensions;
+use crate::noise_helpers_32::Sample32;
+use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 
 use super::{Settings, SimplexSettings};
@@ -81,6 +86,22 @@ impl Settings for TurbulenceSettings {
         self
     }
 
+    fn get_freq_x(&self) -> f32 {
+        self.freq_x
+    }
+
+    fn get_freq_y(&self) -> f32 {
+        self.freq_y
+    }
+
+    fn get_freq_z(&self) -> f32 {
+        self.freq_z
+    }
+
+    fn get_freq_w(&self) -> f32 {
+        self.freq_w
+    }
+
     fn wrap(self) -> NoiseType {
         self.validate();
         NoiseType::Turbulence(self)
@@ -93,10 +114,10 @@ impl Settings for TurbulenceSettings {
     fn generate(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
-            1 => get_1d_noise!(&NoiseType::Turbulence(self)),
-            2 => get_2d_noise!(&NoiseType::Turbulence(self)),
-            3 => get_3d_noise!(&NoiseType::Turbulence(self)),
-            4 => get_4d_noise!(&NoiseType::Turbulence(self)),
+            1 => get_1d_noise(&NoiseType::Turbulence(self)),
+            2 => get_2d_noise(&NoiseType::Turbulence(self)),
+            3 => get_3d_noise(&NoiseType::Turbulence(self)),
+            4 => get_4d_noise(&NoiseType::Turbulence(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -107,10 +128,10 @@ impl Settings for TurbulenceSettings {
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
-            1 => get_1d_scaled_noise!(&NoiseType::Turbulence(new_self)),
-            2 => get_2d_scaled_noise!(&NoiseType::Turbulence(new_self)),
-            3 => get_3d_scaled_noise!(&NoiseType::Turbulence(new_self)),
-            4 => get_4d_scaled_noise!(&NoiseType::Turbulence(new_self)),
+            1 => get_1d_scaled_noise(&NoiseType::Turbulence(new_self)),
+            2 => get_2d_scaled_noise(&NoiseType::Turbulence(new_self)),
+            3 => get_3d_scaled_noise(&NoiseType::Turbulence(new_self)),
+            4 => get_4d_scaled_noise(&NoiseType::Turbulence(new_self)),
             _ => panic!("not implemented"),
         }
     }
@@ -130,6 +151,110 @@ impl SimplexSettings for TurbulenceSettings {
     fn with_octaves(&mut self, octaves: u8) -> &mut TurbulenceSettings {
         self.octaves = octaves;
         self
+    }
+}
+
+impl<S: Simd> Sample32<S> for TurbulenceSettings {
+    #[inline(always)]
+    fn sample_1d(&self, x: S::Vf32) -> S::Vf32 {
+        turbulence_1d::<S>(
+            x,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_2d(&self, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
+        turbulence_2d::<S>(
+            x,
+            y,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
+        turbulence_3d::<S>(
+            x,
+            y,
+            z,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32 {
+        turbulence_4d::<S>(
+            x,
+            y,
+            z,
+            w,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+}
+
+impl<S: Simd> Sample64<S> for TurbulenceSettings {
+    #[inline(always)]
+    fn sample_1d(&self, x: S::Vf64) -> S::Vf64 {
+        turbulence_1d_f64::<S>(
+            x,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_2d(&self, x: S::Vf64, y: S::Vf64) -> S::Vf64 {
+        turbulence_2d_f64::<S>(
+            x,
+            y,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> S::Vf64 {
+        turbulence_3d_f64::<S>(
+            x,
+            y,
+            z,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64 {
+        turbulence_4d_f64::<S>(
+            x,
+            y,
+            z,
+            w,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
     }
 }
 

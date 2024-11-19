@@ -13,6 +13,7 @@ mod gradient_32;
 mod gradient_64;
 mod hash3d_32;
 mod hash3d_64;
+pub mod ops;
 pub mod ridge_32;
 pub mod ridge_64;
 pub mod simplex_32;

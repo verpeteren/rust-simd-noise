@@ -1,4 +1,6 @@
-use simdeez::Simd;
+use simdeez::prelude::*;
+
+use crate::{dimensional_being::DimensionalBeing, NoiseType};
 
 #[inline(always)]
 pub unsafe fn scale_noise<S: Simd>(
@@ -12,15 +14,13 @@ pub unsafe fn scale_noise<S: Simd>(
     let range = max - min;
     let multiplier = scale_range / range;
     let offset = scale_min - min * multiplier;
-    let vector_width = S::VF32_WIDTH;
+    let vector_width = S::Vf32::WIDTH;
     let mut i = 0;
     if data.len() >= vector_width {
         while i <= data.len() - vector_width {
-            let value = S::add_ps(
-                S::mul_ps(S::set1_ps(multiplier), S::loadu_ps(&data[i])),
-                S::set1_ps(offset),
-            );
-            S::storeu_ps(data.get_unchecked_mut(i), value);
+            let value = (S::Vf32::set1(multiplier) * S::Vf32::load_from_ptr_unaligned(&data[i]))
+                + S::Vf32::set1(offset);
+            value.copy_to_ptr_unaligned(data.get_unchecked_mut(i));
             i += vector_width;
         }
     }
@@ -29,4 +29,11 @@ pub unsafe fn scale_noise<S: Simd>(
         *data.get_unchecked_mut(i) = data.get_unchecked(i) * multiplier + offset;
         i += 1;
     }
+}
+
+pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f32, f32)>(noise_type: &NoiseType, noise_fn: F) -> Vec<f32> {
+    let (mut noise, min, max) = noise_fn(noise_type);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<S>(dim.min, dim.max, min, max, &mut noise);
+    noise
 }
