@@ -492,6 +492,7 @@ macro_rules! get_noise_scaled {
 }
 
 pub mod avx2;
+pub mod neon;
 pub mod scalar;
 pub mod sse2;
 pub mod sse41;
