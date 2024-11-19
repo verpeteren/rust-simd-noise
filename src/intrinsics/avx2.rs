@@ -3,7 +3,7 @@
 //! It is about twice as fast as the SSE2 version.
 //!
 //! Use `is_x86_feature_detected!("avx2")` provided
-//! by the Rust stanard library to detect at runtime.
+//! by the Rust standard library to detect at runtime.
 //!
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 8, and when it is not small relative height and depth.

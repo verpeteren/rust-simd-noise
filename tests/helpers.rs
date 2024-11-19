@@ -8,6 +8,20 @@ use std::io::BufReader;
 
 use byteorder::{ByteOrder, LittleEndian, WriteBytesExt};
 
+// Fixtures are stored per architecture because the SIMD backends differ bit-for-bit
+// (notably the approximate `rsqrt` used by cellular noise). Tests pick the matching
+// set via this suffix. Only x86 and aarch64/NEON fixtures are generated.
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+pub const ARCH: &str = "x86";
+#[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
+pub const ARCH: &str = "neon";
+#[cfg(not(any(
+    target_arch = "x86",
+    target_arch = "x86_64",
+    all(target_arch = "aarch64", target_feature = "neon")
+)))]
+compile_error!("test fixtures are only generated for x86 and aarch64/NEON targets");
+
 pub const BIN_PATH: &str = "tests/assets";
 
 pub fn read_from_file_f32(file_name: &str) -> std::io::Result<Vec<f32>> {
