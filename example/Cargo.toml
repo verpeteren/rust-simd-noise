@@ -5,11 +5,11 @@ authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "Example app that uses SIMD Noise"
 license = "Apache-2.0/MIT"
 repository = "https://github.com/verpeteren/rust-simd-noise"
-categories = ["game-engines","multimedia::images"]
-edition="2018"
+categories = ["game-engines", "multimedia::images"]
+edition = "2018"
 
 
 [dependencies]
 simdnoise = { path = ".." }
-minifb = "0.23.0"
-clap = { version = "4.1.4", features = ["derive"] }
+minifb = "0.27.0"
+clap = { version = "4.5.21", features = ["derive"] }

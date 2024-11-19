@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use minifb::{Key, Window, WindowOptions};
 use simdnoise::{CellDistanceFunction, Settings, SimplexSettings};
 
-const FPS: u64 = 60;
+const FPS: usize = 60;
 
 const WIDTH: usize = 1920;
 const HEIGHT: usize = 1080;
@@ -539,8 +539,7 @@ fn main() {
     .unwrap_or_else(|e| {
         panic!("{}", e);
     });
-    let refresh_interval = 1_000_000 / FPS;
-    window.limit_update_rate(Some(std::time::Duration::from_micros(refresh_interval)));
+    window.set_target_fps(FPS);
 
     let position = Coordinate::new(args.width, args.height, args.depth, args.time);
     let offset = Coordinate::new_checked(
