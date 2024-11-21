@@ -5,6 +5,11 @@ use std::io::BufReader;
 
 use byteorder::{ByteOrder, LittleEndian, WriteBytesExt};
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+pub const ARCH: &'static str = "x86";
+#[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
+pub const ARCH: &'static str = "neon";
+
 pub const BIN_PATH: &'static str = "tests/assets";
 
 pub fn read_from_file_f32(file_name: &str) -> std::io::Result<Vec<f32>> {
