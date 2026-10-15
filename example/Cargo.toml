@@ -11,5 +11,5 @@ edition = "2018"
 
 [dependencies]
 simdnoise = { path = ".." }
-minifb = "0.27.0"
+minifb = "0.29.0"
 clap = { version = "4.6.7", features = ["derive"] }
