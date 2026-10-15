@@ -2,11 +2,39 @@
 //!
 //! These are much slower than SIMD, and hence on capable hardware have little use but testing.
 
+// The low-level per-operation wrappers below (simplex/cellular/fbm/ridge/turbulence)
+// are only compiled on x86/x86_64, so the imports feeding them are gated the same way
+// to avoid unused-import warnings on other architectures (e.g. aarch64/NEON).
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::cell_32;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::cell_64;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::fbm_32;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::fbm_64;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::ridge_32;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::ridge_64 as simplex_ridge_64;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::simplex_32;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::simplex_64;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::turbulence_32;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::noise::turbulence_64;
 use crate::noise_helpers_32;
 use crate::noise_helpers_64;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::{CellDistanceFunction, CellReturnType};
 use crate::{DimensionalBeing, NoiseType};
 
 use crate::shared::scale_noise;
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use simdeez::{SimdTransmuteF32, SimdTransmuteF64};
 
 
 use std::f32;
