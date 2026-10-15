@@ -70,7 +70,10 @@ pub fn cellular2_2d<S: Simd>(
     }
 }
 
-#[inline(always)]
+// Not `#[inline(always)]`: force-inlining this large function into the noise
+// generation loop builds one huge stack frame that overflows small stacks under
+// AVX2 (issue #38). `#[inline]` still lets LLVM inline it in optimized builds.
+#[inline]
 #[allow(clippy::too_many_arguments)]
 pub fn cellular2_3d<S: Simd>(
     x: S::Vf64,
