@@ -1,3 +1,9 @@
+// These golden tests compare the public (runtime-SIMD) API output against
+// per-arch fixtures. With `--features scalar` the public API returns scalar
+// output, which differs numerically from the SIMD fixtures, so skip the whole
+// file in that configuration.
+#![cfg(not(feature = "scalar"))]
+
 use simdnoise::{NoiseBuilder, Settings, SimplexSettings};
 
 mod helpers;
