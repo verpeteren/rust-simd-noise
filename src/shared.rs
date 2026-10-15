@@ -35,20 +35,6 @@ impl_noise_into!(u32, 0.0, u32::MAX as f32);
 impl_noise_into!(i16, i16::MIN as f32, i16::MAX as f32);
 impl_noise_into!(i32, i32::MIN as f32, i32::MAX as f32);
 
-/// Map f32 noise in `[src_min, src_max]` onto `T`'s full range and write it into
-/// `out` (which must have the same length as `src`).
-pub(crate) fn range_quantize<T: NoiseInto>(src: &[f32], src_min: f32, src_max: f32, out: &mut [T]) {
-    assert_eq!(
-        out.len(),
-        src.len(),
-        "noise output slice length must equal the dimension product"
-    );
-    let mult = (T::RANGE_MAX - T::RANGE_MIN) / (src_max - src_min);
-    let off = T::RANGE_MIN - src_min * mult;
-    for (o, &v) in out.iter_mut().zip(src.iter()) {
-        *o = T::from_noise(v * mult + off);
-    }
-}
 
 #[inline(always)]
 pub unsafe fn scale_noise<S: Simd>(
