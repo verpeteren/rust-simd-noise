@@ -2,13 +2,28 @@ use crate::noise::hash3d_32::hash3d;
 
 use simdeez::prelude::*;
 
+/// Mixes the seed into a position hash so that *every* bit of the seed affects
+/// the gradient selection.
+///
+/// The low-dimensional gradient pickers (`grad1`/`grad2`/`grad4`) mask the hash
+/// down to 3-5 bits. Previously the seed was only XOR'd in before masking, so
+/// only the low bits of the seed survived and `with_seed` had a period of 8
+/// (issue #42). Running the combined value through the same avalanche mixer that
+/// `hash3d` uses spreads the high seed bits down into the masked bits.
+#[inline(always)]
+fn seed_hash<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vi32 {
+    let mut h = S::Vi32::set1(seed) ^ hash;
+    h = ((h * h) * S::Vi32::set1(60493)) * h;
+    (h >> 13) ^ h
+}
+
 /// Generates a random integer gradient in ±7 inclusive
 ///
 /// This differs from Gustavson's well-known implementation in that gradients can be zero, and the
 /// maximum gradient is 7 rather than 8.
 #[inline(always)]
 pub fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
-    let h = (S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(15);
+    let h = seed_hash::<S>(seed, hash) & S::Vi32::set1(15);
     let v = (h & S::Vi32::set1(7)).cast_f32();
 
     let h_and_8 = ((h & S::Vi32::set1(8)).cmp_eq(S::Vi32::zeroes())).bitcast_f32();
@@ -21,7 +36,7 @@ pub fn grad1<S: Simd>(seed: i32, hash: S::Vi32) -> S::Vf32 {
 /// are more consistent between directions.
 #[inline(always)]
 pub fn grad2<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 2] {
-    let h = (hash ^ S::Vi32::set1(seed)) & S::Vi32::set1(7);
+    let h = seed_hash::<S>(seed, hash) & S::Vi32::set1(7);
     let mask = (S::Vi32::set1(4).cmp_gt(h)).bitcast_f32();
     let x_magnitude = mask.blendv(S::Vf32::set1(2.0), S::Vf32::set1(1.0));
     let y_magnitude = mask.blendv(S::Vf32::set1(1.0), S::Vf32::set1(2.0));
@@ -97,7 +112,7 @@ pub fn grad4<S: Simd>(
     z: S::Vf32,
     t: S::Vf32,
 ) -> S::Vf32 {
-    let h = (S::Vi32::set1(seed) ^ hash) & S::Vi32::set1(31);
+    let h = seed_hash::<S>(seed, hash) & S::Vi32::set1(31);
     let mut mask = (S::Vi32::set1(24).cmp_gt(h)).bitcast_f32();
     let u = mask.blendv(y, x);
     mask = (S::Vi32::set1(16).cmp_gt(h)).bitcast_f32();
