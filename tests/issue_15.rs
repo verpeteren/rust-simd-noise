@@ -14,6 +14,7 @@
 //!      constant-z slices become isotropic cross-sections; and
 //!   2. a balanced 12-gradient LUT (`gradient_32::grad3d_vec`) replaces the
 //!      biased `hash & 13` edge selection.
+//!
 //! The trade-off: XY/z-slices become isotropic, the anisotropy moving to the
 //! XZ/YZ planes — the right call for the z-slice / 2D-texture / animation use
 //! that the issue is about.

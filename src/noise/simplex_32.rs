@@ -283,11 +283,11 @@ pub fn simplex_3d_deriv<S: Simd>(
     // is the desired trade-off for z-slice / animation use). Pure rotation, so
     // the noise statistics are unchanged.
     let xy = x + y;
-    let s2 = xy * S::Vf32::set1(-0.211324865405187);
-    let zz = z * S::Vf32::set1(0.577350269189626);
+    let s2 = xy * S::Vf32::set1(-0.21132487);
+    let zz = z * S::Vf32::set1(0.57735026);
     let x = x + s2 + zz;
     let y = y + s2 + zz;
-    let z = xy * S::Vf32::set1(-0.577350269189626) + zz;
+    let z = xy * S::Vf32::set1(-0.57735026) + zz;
 
     // Find skewed simplex grid coordinates associated with the input coordinates
     let f = S::Vf32::set1(F3_32) * ((x + y) + z);
@@ -425,10 +425,10 @@ pub fn simplex_3d_deriv<S: Simd>(
         // (issue #15). Rotate it back to the original input coords with the
         // rotation's transpose so the returned gradient matches the value's
         // dependence on the caller's (x, y, z).
-        let a = S::Vf32::set1(-0.211324865405187);
-        let b = S::Vf32::set1(0.577350269189626);
-        let c = S::Vf32::set1(-0.577350269189626);
-        let one_a = S::Vf32::set1(0.788675134594813); // 1 + a
+        let a = S::Vf32::set1(-0.21132487);
+        let b = S::Vf32::set1(0.57735026);
+        let c = S::Vf32::set1(-0.57735026);
+        let one_a = S::Vf32::set1(0.7886751); // 1 + a
         [
             one_a * dnoise_dx + a * dnoise_dy + c * dnoise_dz,
             a * dnoise_dx + one_a * dnoise_dy + c * dnoise_dz,
