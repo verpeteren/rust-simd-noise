@@ -153,7 +153,10 @@ pub fn simplex_2d<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> S::Vf32 {
 }
 
 /// Like `simplex_2d`, but also computes the derivative
-#[inline(always)]
+// Not `#[inline(always)]`: like the 3D/4D paths (issue #38), force-inlining this
+// large function builds one oversized stack frame that overflows small stacks
+// under AVX2. `#[inline]` still lets LLVM inline it in optimized builds.
+#[inline]
 pub fn simplex_2d_deriv<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> (S::Vf32, [S::Vf32; 2]) {
     // Skew to distort simplexes with side length sqrt(2)/sqrt(3) until they make up
     // squares
@@ -597,16 +600,19 @@ mod tests {
 
     #[test]
     fn test_noise_simplex32_1d_range() {
+        // Aggregate across seeds: with properly mixed seeds (issue #42) a single
+        // seed's samples along one line may not reach the extremes, but the noise
+        // still spans [-1, 1] across the set. (2D+ hit the extremes per-seed.)
+        let mut min = f32::INFINITY;
+        let mut max = -f32::INFINITY;
         for seed in 0..10 {
-            let mut min = f32::INFINITY;
-            let mut max = -f32::INFINITY;
             for x in 0..1000 {
                 let n = simplex_1d::<Scalar>(F32x1(x as f32 / 10.0), seed).0;
                 min = min.min(n);
                 max = max.max(n);
             }
-            check_bounds(min, max);
         }
+        check_bounds(min, max);
     }
 
     #[test]
