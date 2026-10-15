@@ -90,18 +90,22 @@ fn anisotropy(field: &[f32], w: usize, h: usize) -> f32 {
 }
 
 fn turbulence_slice(dims: u8) -> Vec<f32> {
-    if dims == 2 {
-        NoiseBuilder::turbulence_2d_offset(0.0, W, 0.0, H)
+    match dims {
+        2 => NoiseBuilder::turbulence_2d_offset(0.0, W, 0.0, H)
             .with_freq(FREQ)
             .with_octaves(OCTAVES)
             .generate()
-            .0
-    } else {
-        NoiseBuilder::turbulence_3d_offset(0.0, W, 0.0, H, 0.0, 1)
+            .0,
+        4 => NoiseBuilder::turbulence_4d_offset(0.0, W, 0.0, H, 0.0, 1, 0.0, 1)
             .with_freq(FREQ)
             .with_octaves(OCTAVES)
             .generate()
-            .0
+            .0,
+        _ => NoiseBuilder::turbulence_3d_offset(0.0, W, 0.0, H, 0.0, 1)
+            .with_freq(FREQ)
+            .with_octaves(OCTAVES)
+            .generate()
+            .0,
     }
 }
 
@@ -114,6 +118,20 @@ fn turbulence_3d_zslice_is_isotropic() {
         c3.abs() < 0.05,
         "turbulence_3d z-slice is anisotropic (C = {:.4}); the 3D diagonal-streak artifact is present",
         c3
+    );
+}
+
+/// A 2D slice of 4D noise (z, w held constant) must likewise be isotropic. The
+/// 4D artifact was even stronger than 3D (C ~ +0.60 before the fix). The
+/// ImproveXYZ rotation removes it (grad4's 32-gradient set is already balanced,
+/// so no gradient LUT is needed there).
+#[test]
+fn turbulence_4d_slice_is_isotropic() {
+    let c4 = anisotropy(&turbulence_slice(4), W, H);
+    assert!(
+        c4.abs() < 0.05,
+        "turbulence_4d slice is anisotropic (C = {:.4}); the diagonal-streak artifact is present",
+        c4
     );
 }
 
