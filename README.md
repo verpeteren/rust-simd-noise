@@ -76,6 +76,24 @@ warnings for that unused SIMD code therefore remain; the `scalar` feature only
 guarantees that scalar code is what actually *runs*, which is what avoids the
 runtime panic. On a normal LLVM build the feature compiles cleanly.
 
+## WebAssembly
+
+`simdnoise` works on `wasm32` with no code changes: on that target `simdeez`
+dispatches to its wasm32 **SIMD128** engine automatically. Because WebAssembly
+has no runtime SIMD feature detection, build with SIMD128 enabled —
+
+```sh
+RUSTFLAGS="-C target-feature=+simd128" cargo build --target wasm32-unknown-unknown
+```
+
+— and run the result in a SIMD128-capable runtime (all current browsers,
+Node ≥ 16, Deno, wasmtime). For a runtime without SIMD128, build with
+`--features scalar` (and without the `+simd128` flag) to use the scalar backend
+instead.
+
+A runnable, headless `wasm-bindgen` example lives in
+[`wasm-example/`](wasm-example/).
+
 ## Get a block of noise with runtime SIMD detection
 
 The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2.

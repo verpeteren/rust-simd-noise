@@ -1,0 +1,27 @@
+[package]
+name = "simdnoise-wasm-example"
+version = "1.0.0"
+authors = [
+    "Jack Mott <jack.mott@gmail.com>",
+    "Peter Reijnders <peter.reijnders@verpeteren.nl>",
+]
+description = "Headless WebAssembly example that uses SIMD Noise"
+license = "Apache-2.0/MIT"
+repository = "https://github.com/verpeteren/rust-simd-noise"
+categories = ["game-engines", "multimedia::images", "wasm"]
+edition = "2018"
+
+# A `cdylib` is what `wasm-bindgen` processes into a loadable module.
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+simdnoise = { path = ".." }
+wasm-bindgen = "0.2"
+
+[features]
+default = []
+# Route simdnoise through its scalar backend instead of the wasm32 SIMD128
+# engine. Use this when the target runtime does not support WebAssembly SIMD
+# (build WITHOUT `-C target-feature=+simd128`). See this crate's README.
+scalar = ["simdnoise/scalar"]
