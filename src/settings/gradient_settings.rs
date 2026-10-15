@@ -1,7 +1,6 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
-use crate::{get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise};
 use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
 use crate::noise::simplex_64::{
     simplex_1d as simplex_1d_f64, simplex_2d as simplex_2d_f64, simplex_3d as simplex_3d_f64,
@@ -11,6 +10,10 @@ pub use crate::noise_dimensions::NoiseDimensions;
 use crate::noise_helpers_32::Sample32;
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
+use crate::{
+    get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
+    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise,
+};
 
 use crate::settings::Settings;
 

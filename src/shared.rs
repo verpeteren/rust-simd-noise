@@ -31,7 +31,10 @@ pub unsafe fn scale_noise<S: Simd>(
     }
 }
 
-pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f32, f32)>(noise_type: &NoiseType, noise_fn: F) -> Vec<f32> {
+pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f32, f32)>(
+    noise_type: &NoiseType,
+    noise_fn: F,
+) -> Vec<f32> {
     let (mut noise, min, max) = noise_fn(noise_type);
     let dim = noise_type.get_dimensions();
     scale_noise::<S>(dim.min, dim.max, min, max, &mut noise);

@@ -63,10 +63,10 @@ pub fn ridge_3d<S: Simd>(
         z *= lac;
         amp *= gain;
         result += S::Vf32::neg_mul_add(
-                simplex_3d::<S>(x, y, z, seed).abs(),
-                amp,
-                S::Vf32::set1(1.0),
-            );
+            simplex_3d::<S>(x, y, z, seed).abs(),
+            amp,
+            S::Vf32::set1(1.0),
+        );
     }
 
     result

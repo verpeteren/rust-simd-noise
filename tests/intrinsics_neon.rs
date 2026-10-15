@@ -8,7 +8,8 @@ use simdnoise::{
 mod helpers;
 #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 use helpers::{
-    read_from_file_f32, read_from_file_f64, /*save_to_file_f32, save_to_file_f64,*/ ARCH, BIN_PATH,
+    read_from_file_f32, read_from_file_f64, /*save_to_file_f32, save_to_file_f64,*/ ARCH,
+    BIN_PATH,
 };
 #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 mod neon {

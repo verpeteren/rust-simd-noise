@@ -36,7 +36,6 @@ use crate::shared::scale_noise;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use simdeez::{SimdTransmuteF32, SimdTransmuteF64};
 
-
 use std::f32;
 
 cellular!(

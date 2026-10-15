@@ -104,7 +104,8 @@ mod x86 {
         };
 
         let noise_type = CellularSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -215,7 +216,8 @@ mod x86 {
         };
 
         let noise_type = CellularSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -338,7 +340,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(CellReturnType::CellValue)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -465,7 +468,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(CellReturnType::CellValue)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -588,7 +592,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(CellReturnType::Distance)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -715,7 +720,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(CellReturnType::Distance)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -838,7 +844,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(CellReturnType::CellValue)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -965,7 +972,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(CellReturnType::CellValue)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1088,7 +1096,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(CellReturnType::Distance)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1215,7 +1224,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(CellReturnType::Distance)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1338,7 +1348,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(CellReturnType::CellValue)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1465,7 +1476,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(CellReturnType::CellValue)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1588,7 +1600,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(CellReturnType::Distance)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1715,7 +1728,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(CellReturnType::Distance)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1822,7 +1836,8 @@ mod x86 {
         };
 
         let noise_type = Cellular2Settings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -1933,7 +1948,8 @@ mod x86 {
         };
 
         let noise_type = Cellular2Settings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -2056,7 +2072,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -2183,7 +2200,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -2313,7 +2331,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Add)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -2454,7 +2473,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Add)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -2591,7 +2611,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Sub)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -2732,7 +2753,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Sub)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -2869,7 +2891,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Mul)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3010,7 +3033,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Mul)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3147,7 +3171,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Div)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3288,7 +3313,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2Div)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3418,7 +3444,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3545,7 +3572,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3675,7 +3703,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Add)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3816,7 +3845,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Add)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -3953,7 +3983,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Sub)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -4094,7 +4125,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Sub)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -4231,7 +4263,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Mul)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -4372,7 +4405,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Mul)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -4509,7 +4543,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Div)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -4650,7 +4685,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Manhattan)
             .with_return_type(Cell2ReturnType::Distance2Div)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -4780,7 +4816,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -4907,7 +4944,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5030,7 +5068,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Add)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5157,7 +5196,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Add)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5280,7 +5320,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Sub)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5407,7 +5448,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Sub)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5530,7 +5572,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Mul)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5657,7 +5700,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Mul)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5780,7 +5824,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Div)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5907,7 +5952,8 @@ mod x86 {
             .with_distance_function(CellDistanceFunction::Natural)
             .with_return_type(Cell2ReturnType::Distance2Div)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -5968,7 +6014,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -6090,7 +6137,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -6121,7 +6169,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -6152,7 +6201,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -6216,7 +6266,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -6342,7 +6393,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -6375,7 +6427,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -6407,7 +6460,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -6473,7 +6527,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -6605,7 +6660,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -6639,7 +6695,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -6672,7 +6729,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -6741,7 +6799,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -6875,7 +6934,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -6909,7 +6969,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -6943,7 +7004,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7005,7 +7067,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -7127,7 +7190,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -7158,7 +7222,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7189,7 +7254,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7252,7 +7318,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -7378,7 +7445,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -7411,7 +7479,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7443,7 +7512,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7509,7 +7579,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -7641,7 +7712,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -7675,7 +7747,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7708,7 +7781,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7777,7 +7851,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -7911,7 +7986,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -7945,7 +8021,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -7979,7 +8056,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -8041,7 +8119,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -8163,7 +8242,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -8194,7 +8274,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -8225,7 +8306,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -8289,7 +8371,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -8415,7 +8498,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -8448,7 +8532,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -8480,7 +8565,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -8546,7 +8632,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -8678,7 +8765,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -8712,7 +8800,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -8745,7 +8834,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -8814,7 +8904,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -8948,7 +9039,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -8982,7 +9074,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9016,7 +9109,8 @@ mod x86 {
             .with_gain(2.0)
             .with_octaves(5)
             .wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9068,7 +9162,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -9170,7 +9265,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -9196,7 +9292,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9222,7 +9319,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9276,7 +9374,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -9382,7 +9481,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -9410,7 +9510,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9437,7 +9538,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9493,7 +9595,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -9605,7 +9708,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -9634,7 +9738,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9662,7 +9767,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9721,7 +9827,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
+        let (noise, _min, _max) =
+            avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
     }
 
@@ -9835,7 +9942,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
+        let (noise, _min, _max) =
+            sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
     }
 
@@ -9864,7 +9972,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 
@@ -9893,7 +10002,8 @@ mod x86 {
         };
 
         let noise_type = GradientSettings::default(dims).with_seed(1337).wrap();
-        let (noise, _min, _max) = sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
+        let (noise, _min, _max) =
+            sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
         noise
     }
 

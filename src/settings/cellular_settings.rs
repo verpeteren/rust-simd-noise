@@ -1,7 +1,6 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
-use crate::{get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise};
 use crate::noise::cell_32::{cellular_2d, cellular_3d};
 use crate::noise::cell_64::{cellular_2d as cellular_2d_f64, cellular_3d as cellular_3d_f64};
 pub use crate::noise::cell_distance_function::CellDistanceFunction;
@@ -10,6 +9,7 @@ pub use crate::noise_dimensions::NoiseDimensions;
 use crate::noise_helpers_32::Sample32;
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
+use crate::{get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise};
 
 use super::Settings;
 

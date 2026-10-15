@@ -401,22 +401,22 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
     let mut rank_w = S::Vi64::zeroes();
 
     let cond = (x0.cmp_gt(y0)).bitcast_i64();
-    rank_x += cond & S::Vi64::set1(1) ;
+    rank_x += cond & S::Vi64::set1(1);
     rank_y += S::Vi64::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(z0)).bitcast_i64();
-    rank_x += cond & S::Vi64::set1(1) ;
+    rank_x += cond & S::Vi64::set1(1);
     rank_z += S::Vi64::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(w0)).bitcast_i64();
-    rank_x += cond & S::Vi64::set1(1) ;
+    rank_x += cond & S::Vi64::set1(1);
     rank_w += S::Vi64::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(z0)).bitcast_i64();
-    rank_y += cond & S::Vi64::set1(1) ;
+    rank_y += cond & S::Vi64::set1(1);
     rank_z += S::Vi64::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(w0)).bitcast_i64();
-    rank_y += cond & S::Vi64::set1(1) ;
+    rank_y += cond & S::Vi64::set1(1);
     rank_w += S::Vi64::set1(1).and_not(cond);
     let cond = (z0.cmp_gt(w0)).bitcast_i64();
-    rank_z += cond & S::Vi64::set1(1) ;
+    rank_z += cond & S::Vi64::set1(1);
     rank_w += S::Vi64::set1(1).and_not(cond);
 
     let cond = rank_x.cmp_gt(S::Vi64::set1(2));

@@ -89,7 +89,7 @@ pub fn fbm_4d<S: Simd>(
         z *= lac;
         w *= lac;
         amp *= gain;
-        result += simplex_4d::<S>(x, y, z, w, seed) * amp ;
+        result += simplex_4d::<S>(x, y, z, w, seed) * amp;
     }
 
     result
