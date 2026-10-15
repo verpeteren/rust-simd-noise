@@ -384,6 +384,22 @@ pub fn simplex_3d_deriv<S: Simd>(
 // Not `#[inline(always)]`: see `simplex_3d_deriv` (issue #38).
 #[inline]
 pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed: i64) -> S::Vf64 {
+    // ImproveXYZ domain rotation (issue #15): see the f32 `simplex_4d`. Maps
+    // world-w onto the lattice (1,1,1,1) diagonal so w-constant slices become
+    // isotropic cross-sections, removing the diagonal streak from them.
+    let xr = S::Vf64::set1(0.7071067811865476) * x
+        + S::Vf64::set1(0.4082482904638631) * y
+        + S::Vf64::set1(0.28867513459481287) * z
+        + S::Vf64::set1(0.5) * w;
+    let yr = S::Vf64::set1(-0.7071067811865476) * x
+        + S::Vf64::set1(0.4082482904638631) * y
+        + S::Vf64::set1(0.28867513459481287) * z
+        + S::Vf64::set1(0.5) * w;
+    let zr = S::Vf64::set1(-0.8164965809277261) * y
+        + S::Vf64::set1(0.28867513459481287) * z
+        + S::Vf64::set1(0.5) * w;
+    let wr = S::Vf64::set1(-0.8660254037844386) * z + S::Vf64::set1(0.5) * w;
+    let (x, y, z, w) = (xr, yr, zr, wr);
     let s = S::Vf64::set1(F4_64) * (x + y + z + w);
 
     let ipd = (x + s).floor();

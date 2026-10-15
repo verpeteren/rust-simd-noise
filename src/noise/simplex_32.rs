@@ -276,6 +276,19 @@ pub fn simplex_3d_deriv<S: Simd>(
     z: S::Vf32,
     seed: i32,
 ) -> (S::Vf32, [S::Vf32; 3]) {
+    // ImproveXY domain rotation (issue #15): rotate the input so that world-z
+    // lands on the lattice (1,1,1) diagonal. This removes the simplex skew's
+    // in-plane projection for constant-z slices, so XY/z-slices become
+    // isotropic cross-sections (the anisotropy moves to the XZ/YZ planes, which
+    // is the desired trade-off for z-slice / animation use). Pure rotation, so
+    // the noise statistics are unchanged.
+    let xy = x + y;
+    let s2 = xy * S::Vf32::set1(-0.211324865405187);
+    let zz = z * S::Vf32::set1(0.577350269189626);
+    let x = x + s2 + zz;
+    let y = y + s2 + zz;
+    let z = xy * S::Vf32::set1(-0.577350269189626) + zz;
+
     // Find skewed simplex grid coordinates associated with the input coordinates
     let f = S::Vf32::set1(F3_32) * ((x + y) + z);
     let mut x0 = (x + f).fast_floor();
@@ -408,7 +421,19 @@ pub fn simplex_3d_deriv<S: Simd>(
         dnoise_dx *= scale;
         dnoise_dy *= scale;
         dnoise_dz *= scale;
-        [dnoise_dx, dnoise_dy, dnoise_dz]
+        // The derivative above is with respect to the ImproveXY-rotated coords
+        // (issue #15). Rotate it back to the original input coords with the
+        // rotation's transpose so the returned gradient matches the value's
+        // dependence on the caller's (x, y, z).
+        let a = S::Vf32::set1(-0.211324865405187);
+        let b = S::Vf32::set1(0.577350269189626);
+        let c = S::Vf32::set1(-0.577350269189626);
+        let one_a = S::Vf32::set1(0.788675134594813); // 1 + a
+        [
+            one_a * dnoise_dx + a * dnoise_dy + c * dnoise_dz,
+            a * dnoise_dx + one_a * dnoise_dy + c * dnoise_dz,
+            b * dnoise_dx + b * dnoise_dy + b * dnoise_dz,
+        ]
     };
     (result, derivative)
 }
@@ -419,6 +444,25 @@ pub fn simplex_3d_deriv<S: Simd>(
 // Not `#[inline(always)]`: see `simplex_3d_deriv` (issue #38).
 #[inline]
 pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed: i32) -> S::Vf32 {
+    // ImproveXYZ domain rotation (issue #15): a pure orthonormal rotation that
+    // maps world-w onto the lattice (1,1,1,1) diagonal, with world-x/y/z spanning
+    // the orthogonal 3-space. Constant-w slices (and the xy/xz/yz/xyz slices
+    // within them) then become isotropic cross-sections, so the diagonal streak
+    // disappears from them; the anisotropy lives only along w. Same trade-off as
+    // the 3D ImproveXY rotation, which is correct for slice / animation use.
+    let xr = S::Vf32::set1(0.707_106_77) * x
+        + S::Vf32::set1(0.408_248_3) * y
+        + S::Vf32::set1(0.288_675_14) * z
+        + S::Vf32::set1(0.5) * w;
+    let yr = S::Vf32::set1(-0.707_106_77) * x
+        + S::Vf32::set1(0.408_248_3) * y
+        + S::Vf32::set1(0.288_675_14) * z
+        + S::Vf32::set1(0.5) * w;
+    let zr = S::Vf32::set1(-0.816_496_6) * y
+        + S::Vf32::set1(0.288_675_14) * z
+        + S::Vf32::set1(0.5) * w;
+    let wr = S::Vf32::set1(-0.866_025_4) * z + S::Vf32::set1(0.5) * w;
+    let (x, y, z, w) = (xr, yr, zr, wr);
     //
     // Determine which simplex these points lie in, and compute the distance along each axis to each
     // vertex of the simplex
