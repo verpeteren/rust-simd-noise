@@ -47,6 +47,35 @@ The current maintainer is Peter Reijnders.
 * ARM NEON support
 * Other noise types
 
+## Disabling SIMD (the `scalar` feature)
+
+By default the public API uses runtime CPU feature detection and executes the
+fastest available SIMD engine (SSE2/SSE41/AVX2 on x86, NEON on arm64). Some
+toolchains cannot compile or run those vendor SIMD intrinsics — most notably the
+Cranelift rustc backend (`rustc_codegen_cranelift`), popular for fast
+hot-reloaded debug builds, which only partially implements the `std::arch`
+intrinsics and *panics at runtime* if an unimplemented one is executed.
+
+Enabling the `scalar` feature routes the entire public API through the scalar
+backend, so no CPU SIMD intrinsic is ever executed:
+
+```toml
+[dependencies]
+simdnoise = { version = "3", features = ["scalar"] }
+```
+
+This makes the crate usable under such toolchains (e.g. with Cranelift for
+hot-reloaded debug builds). The output is the scalar engine's output, which
+differs numerically from the SIMD engines only within normal floating-point
+tolerance.
+
+**Caveat:** `simdeez` always *compiles* its architecture-gated SIMD engines
+(they are selected with `#[cfg(target_arch = ...)]` and cannot be disabled by a
+feature). Under a backend with incomplete intrinsic support the compile-time
+warnings for that unused SIMD code therefore remain; the `scalar` feature only
+guarantees that scalar code is what actually *runs*, which is what avoids the
+runtime panic. On a normal LLVM build the feature compiles cleanly.
+
 ## Get a block of noise with runtime SIMD detection
 
 The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2.

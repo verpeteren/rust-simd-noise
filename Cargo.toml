@@ -15,6 +15,14 @@ repository = "https://github.com/verpeteren/rust-simd-noise"
 categories = ["game-engines", "multimedia::images"]
 edition = "2018"
 
+[features]
+default = []
+# Force the scalar backend for the whole public API (no CPU SIMD executed).
+# Enable it for toolchains that can't compile/run the vendor SIMD intrinsics,
+# e.g. the Cranelift rustc backend for fast hot-reloaded debug builds. See the
+# crate-level docs for the compile-warning caveat.
+scalar = []
+
 [dependencies]
 simdeez = "3.0.1"
 
