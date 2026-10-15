@@ -200,7 +200,10 @@ pub fn cellular_2d<S: Simd>(
     }
 }
 
-#[inline(always)]
+// Not `#[inline(always)]`: force-inlining this large function into the noise
+// generation loop builds one huge stack frame that overflows small stacks under
+// AVX2 (issue #38). `#[inline]` still lets LLVM inline it in optimized builds.
+#[inline]
 pub fn cellular_3d<S: Simd>(
     x: S::Vf32,
     y: S::Vf32,

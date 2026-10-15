@@ -228,7 +228,10 @@ pub fn simplex_3d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, seed: i64) -> S::
 }
 
 /// Like `simplex_3d`, but also computes the derivative
-#[inline(always)]
+// Not `#[inline(always)]`: force-inlining this large function into the noise
+// generation loop builds one huge stack frame that overflows small stacks under
+// AVX2 (issue #38). `#[inline]` still lets LLVM inline it in optimized builds.
+#[inline]
 pub fn simplex_3d_deriv<S: Simd>(
     x: S::Vf64,
     y: S::Vf64,
@@ -375,7 +378,8 @@ pub fn simplex_3d_deriv<S: Simd>(
 /// Samples 4-dimensional simplex noise
 ///
 /// Produces a value -1 ≤ n ≤ 1.
-#[inline(always)]
+// Not `#[inline(always)]`: see `simplex_3d_deriv` (issue #38).
+#[inline]
 pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed: i64) -> S::Vf64 {
     let s = S::Vf64::set1(F4_64) * (x + y + z + w);
 
