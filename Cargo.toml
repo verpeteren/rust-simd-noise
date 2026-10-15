@@ -2,7 +2,10 @@
 exclude = ["*.jpg"]
 name = "simdnoise"
 version = "3.1.7"
-authors = ["Jack Mott <jack.mott@gmail.com>"]
+authors = [
+    "Jack Mott <jack.mott@gmail.com>",
+    "Peter Reijnders <peter.reijnders@verpeteren.nl>",
+]
 description = "SIMD accelerate noise library with runtime feature detection"
 license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/simdnoise/"
