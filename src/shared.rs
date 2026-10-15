@@ -84,3 +84,30 @@ pub(crate) unsafe fn get_scaled_noise_64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>
     scale_noise_64::<S>(scale_min, scale_max, min, max, &mut noise);
     noise
 }
+
+/// Emplace+scale helper for f32: fills `out` via `noise_fn`, then scales it in
+/// place to the target range read from the noise type's dimensions.
+pub(crate) unsafe fn get_scaled_noise_into<S: Simd, F: Fn(&NoiseType, &mut [f32]) -> (f32, f32)>(
+    noise_type: &NoiseType,
+    out: &mut [f32],
+    noise_fn: F,
+) {
+    let (min, max) = noise_fn(noise_type, out);
+    let dim = noise_type.get_dimensions();
+    scale_noise::<S>(dim.min, dim.max, min, max, out);
+}
+
+/// Emplace+scale helper for f64; the target range is passed explicitly.
+pub(crate) unsafe fn get_scaled_noise_into_64<
+    S: Simd,
+    F: Fn(&NoiseType, &mut [f64]) -> (f64, f64),
+>(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+    out: &mut [f64],
+    noise_fn: F,
+) {
+    let (min, max) = noise_fn(noise_type, out);
+    scale_noise_64::<S>(scale_min, scale_max, min, max, out);
+}

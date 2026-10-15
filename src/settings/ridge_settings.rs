@@ -160,6 +160,53 @@ impl Settings for RidgeSettings {
             _ => panic!("not implemented"),
         }
     }
+
+    fn generate_into(self, out: &mut [f32]) -> (f32, f32) {
+        let d = self.dim.dim;
+        match d {
+            1 => crate::get_1d_noise_into(&NoiseType::Ridge(self), out),
+            2 => crate::get_2d_noise_into(&NoiseType::Ridge(self), out),
+            3 => crate::get_3d_noise_into(&NoiseType::Ridge(self), out),
+            4 => crate::get_4d_noise_into(&NoiseType::Ridge(self), out),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_scaled_into(self, min: f32, max: f32, out: &mut [f32]) {
+        let d = self.dim.dim;
+        let mut new_self = self;
+        new_self.dim.min = min;
+        new_self.dim.max = max;
+        match d {
+            1 => crate::get_1d_scaled_noise_into(&NoiseType::Ridge(new_self), out),
+            2 => crate::get_2d_scaled_noise_into(&NoiseType::Ridge(new_self), out),
+            3 => crate::get_3d_scaled_noise_into(&NoiseType::Ridge(new_self), out),
+            4 => crate::get_4d_scaled_noise_into(&NoiseType::Ridge(new_self), out),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_into_64(self, out: &mut [f64]) -> (f64, f64) {
+        let d = self.dim.dim;
+        match d {
+            1 => crate::get_1d_noise_into_64(&NoiseType::Ridge(self), out),
+            2 => crate::get_2d_noise_into_64(&NoiseType::Ridge(self), out),
+            3 => crate::get_3d_noise_into_64(&NoiseType::Ridge(self), out),
+            4 => crate::get_4d_noise_into_64(&NoiseType::Ridge(self), out),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]) {
+        let d = self.dim.dim;
+        match d {
+            1 => crate::get_1d_scaled_noise_into_64(&NoiseType::Ridge(self), min, max, out),
+            2 => crate::get_2d_scaled_noise_into_64(&NoiseType::Ridge(self), min, max, out),
+            3 => crate::get_3d_scaled_noise_into_64(&NoiseType::Ridge(self), min, max, out),
+            4 => crate::get_4d_scaled_noise_into_64(&NoiseType::Ridge(self), min, max, out),
+            _ => panic!("not implemented"),
+        }
+    }
 }
 
 impl SimplexSettings for RidgeSettings {

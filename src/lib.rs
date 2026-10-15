@@ -96,7 +96,9 @@ mod noise_helpers_64;
 mod noise_type;
 mod shared;
 
-use shared::{get_scaled_noise, get_scaled_noise_64};
+use shared::{
+    get_scaled_noise, get_scaled_noise_64, get_scaled_noise_into, get_scaled_noise_into_64,
+};
 use simdeez::prelude::*;
 
 use dimensional_being::DimensionalBeing;
@@ -226,6 +228,160 @@ simd_runtime_generate!(
         scale_max: f64,
     ) -> Vec<f64> {
         unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_4d_noise_64) }
+    }
+);
+
+// ---------------------------------------------------------------------------
+// Emplace API (#5): write noise into a caller-provided slice instead of
+// returning a fresh Vec. The unscaled variants return the slice's (min, max);
+// the scaled variants map the generated range onto the target range in place.
+// The slice length must equal the product of the requested dimensions.
+// ---------------------------------------------------------------------------
+simd_runtime_generate!(
+    pub fn get_1d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_1d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_2d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_3d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_4d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_1d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_2d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_3d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_4d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_1d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_2d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_3d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_4d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_1d_noise_into_64,
+            )
+        }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_2d_noise_into_64,
+            )
+        }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_3d_noise_into_64,
+            )
+        }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_4d_noise_into_64,
+            )
+        }
     }
 );
 
