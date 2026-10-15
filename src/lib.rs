@@ -96,8 +96,12 @@ mod noise_helpers_64;
 mod noise_type;
 mod shared;
 
-use shared::get_scaled_noise;
+use shared::{
+    get_scaled_noise, get_scaled_noise_64, get_scaled_noise_into, get_scaled_noise_into_64,
+};
+pub use shared::NoiseInto;
 use simdeez::prelude::*;
+use std::marker::PhantomData;
 
 use dimensional_being::DimensionalBeing;
 pub use noise::cell2_return_type::Cell2ReturnType;
@@ -154,6 +158,323 @@ simd_runtime_generate!(
         unsafe { get_scaled_noise::<S, _>(noise_type, get_4d_noise) }
     }
 );
+
+// ---------------------------------------------------------------------------
+// f64 public API
+//
+// f64 noise used to be reachable only by forcing a backend through the
+// `intrinsics` modules. These wrappers give it the same runtime CPU dispatch as
+// the f32 functions above (declared directly with `simd_runtime_generate!`, like
+// the f32 ones — wrapping that macro in a local one makes clippy attribute its
+// internal unsafe shims here). The f64 scaled variants take the target range
+// explicitly as f64 instead of reading the f32 `NoiseDimensions`.
+// ---------------------------------------------------------------------------
+simd_runtime_generate!(
+    pub fn get_1d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_1d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_2d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_3d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_4d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_1d_noise_64) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_2d_noise_64) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_3d_noise_64) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_4d_noise_64) }
+    }
+);
+
+// ---------------------------------------------------------------------------
+// Emplace API (#5): write noise into a caller-provided slice instead of
+// returning a fresh Vec. The unscaled variants return the slice's (min, max);
+// the scaled variants map the generated range onto the target range in place.
+// The slice length must equal the product of the requested dimensions.
+// ---------------------------------------------------------------------------
+simd_runtime_generate!(
+    pub fn get_1d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_1d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_2d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_3d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_4d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_1d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_2d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_3d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_4d_noise_into) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_1d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_2d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_3d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_4d_noise_into::<S>(noise_type, out)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_1d_noise_into_64,
+            )
+        }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_2d_noise_into_64,
+            )
+        }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_3d_noise_into_64,
+            )
+        }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_4d_noise_into_64,
+            )
+        }
+    }
+);
+
+// ---------------------------------------------------------------------------
+// Typed emplace (#5): generate noise and quantize it directly into a
+// caller-provided integer slice (`&mut [u16]`, `&mut [u8]`, ...), with no
+// output-sized f32 scratch. Noise in [src_min, src_max] is mapped onto the
+// target type's full range (see `NoiseInto`) and cast.
+//
+// `simd_runtime_generate!` can't be generic over the output type `T`, so runtime
+// CPU dispatch is obtained by implementing simdeez's `__SimdRunner` on a
+// per-dimension, `T`-generic dispatch struct and handing it to
+// `__run_simd_runtime_decide` (same primitive the macro uses internally).
+// ---------------------------------------------------------------------------
+struct RangeInto1d<T>(PhantomData<T>);
+struct RangeInto2d<T>(PhantomData<T>);
+struct RangeInto3d<T>(PhantomData<T>);
+struct RangeInto4d<T>(PhantomData<T>);
+
+impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> for RangeInto1d<T> {
+    #[inline(always)]
+    unsafe fn run<S: Simd>(args: (&NoiseType, f32, f32, &mut [T])) {
+        let (nt, lo, hi, out) = args;
+        noise_helpers_32::get_1d_noise_range_into::<S, T>(nt, lo, hi, out)
+    }
+}
+impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> for RangeInto2d<T> {
+    #[inline(always)]
+    unsafe fn run<S: Simd>(args: (&NoiseType, f32, f32, &mut [T])) {
+        let (nt, lo, hi, out) = args;
+        noise_helpers_32::get_2d_noise_range_into::<S, T>(nt, lo, hi, out)
+    }
+}
+impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> for RangeInto3d<T> {
+    #[inline(always)]
+    unsafe fn run<S: Simd>(args: (&NoiseType, f32, f32, &mut [T])) {
+        let (nt, lo, hi, out) = args;
+        noise_helpers_32::get_3d_noise_range_into::<S, T>(nt, lo, hi, out)
+    }
+}
+impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> for RangeInto4d<T> {
+    #[inline(always)]
+    unsafe fn run<S: Simd>(args: (&NoiseType, f32, f32, &mut [T])) {
+        let (nt, lo, hi, out) = args;
+        noise_helpers_32::get_4d_noise_range_into::<S, T>(nt, lo, hi, out)
+    }
+}
+
+/// Emplace 1d noise quantized into `out` (length `width`), mapping
+/// `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_1d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    __run_simd_runtime_decide::<RangeInto1d<T>, _, _>((noise_type, src_min, src_max, out))
+}
+
+/// Emplace 2d noise quantized into `out` (length `width * height`), mapping
+/// `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_2d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    __run_simd_runtime_decide::<RangeInto2d<T>, _, _>((noise_type, src_min, src_max, out))
+}
+
+/// Emplace 3d noise quantized into `out` (length `width * height * depth`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_3d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    __run_simd_runtime_decide::<RangeInto3d<T>, _, _>((noise_type, src_min, src_max, out))
+}
+
+/// Emplace 4d noise quantized into `out` (length `width * height * depth * time`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_4d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    __run_simd_runtime_decide::<RangeInto4d<T>, _, _>((noise_type, src_min, src_max, out))
+}
 
 mod settings;
 pub use settings::{

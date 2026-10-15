@@ -25,6 +25,32 @@ pub trait Settings {
 
     /// Generate a chunk of noise with values scaled from min to max
     fn generate_scaled(self, min: f32, max: f32) -> Vec<f32>;
+
+    /// f64 counterpart of [`generate`](Settings::generate).
+    fn generate_64(self) -> (Vec<f64>, f64, f64);
+
+    /// f64 counterpart of [`generate_scaled`](Settings::generate_scaled); the
+    /// target range is given as f64.
+    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64>;
+
+    /// Emplace unscaled noise into `out`, whose length must equal the product of
+    /// the configured dimensions. Returns the slice's `(min, max)`.
+    fn generate_into(self, out: &mut [f32]) -> (f32, f32);
+
+    /// Emplace noise scaled to `[min, max]` into `out` (same length rule).
+    fn generate_scaled_into(self, min: f32, max: f32, out: &mut [f32]);
+
+    /// f64 counterpart of [`generate_into`](Settings::generate_into).
+    fn generate_into_64(self, out: &mut [f64]) -> (f64, f64);
+
+    /// f64 counterpart of [`generate_scaled_into`](Settings::generate_scaled_into).
+    fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]);
+
+    /// Emplace noise quantized to an integer type into `out`, mapping
+    /// `[src_min, src_max]` onto the target type's full range (see
+    /// [`NoiseInto`](crate::NoiseInto)). `out.len()` must equal the dimension
+    /// product.
+    fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]);
 }
 
 pub trait SimplexSettings {

@@ -167,5 +167,20 @@ fn d3_cell(c: &mut Criterion) {
         .measurement_time(Duration::from_secs(5));
 }
 
-criterion_group!(benches, d4, d3, d2, d1, d2_cell, d3_cell);
+// Typed/quantized emplace: fused generation straight into a preallocated u16
+// buffer (runtime-dispatched). No output-sized f32 scratch.
+fn d2_range(c: &mut Criterion) {
+    let setting = NoiseBuilder::fbm_2d(3840, 2160).wrap();
+    let mut buf = vec![0u16; 3840 * 2160];
+    let mut group = c.benchmark_group("fbm2d_range_u16");
+    group.bench_function("runtime u16", move |b| {
+        b.iter(|| get_2d_noise_range_into::<u16>(&setting, -1.0, 1.0, &mut buf))
+    });
+    group
+        .sample_size(10)
+        .warm_up_time(Duration::from_millis(1))
+        .measurement_time(Duration::from_secs(5));
+}
+
+criterion_group!(benches, d4, d3, d2, d1, d2_cell, d3_cell, d2_range);
 criterion_main!(benches);

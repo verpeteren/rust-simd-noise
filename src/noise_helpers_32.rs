@@ -1,4 +1,5 @@
 use crate::dimensional_being::DimensionalBeing;
+use crate::NoiseInto;
 use crate::{
     Cellular2Settings, CellularSettings, FbmSettings, GradientSettings, NoiseType, RidgeSettings,
     Settings, TurbulenceSettings,
@@ -16,20 +17,25 @@ pub trait Sample32<S: Simd>: DimensionalBeing + Settings {
 }
 
 #[inline(always)]
-unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn get_1d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
-) -> (Vec<f32>, f32, f32) {
+    result: &mut [f32],
+) -> (f32, f32) {
     let dim = settings.get_dimensions();
     let freq_x = S::Vf32::set1(settings.get_freq_x());
     let start_x = dim.x;
     let width = dim.width;
+    assert_eq!(
+        result.len(),
+        width,
+        "noise output slice length must equal width"
+    );
     let mut min_s = S::Vf32::set1(f32::MAX);
     let mut max_s = S::Vf32::set1(f32::MIN);
 
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::<f32>::with_capacity(width);
     let result_ptr = result.as_mut_ptr();
     let mut i = 0;
     let vector_width = S::Vf32::WIDTH;
@@ -64,7 +70,6 @@ unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             i += 1;
         }
     }
-    result.set_len(width);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
@@ -73,13 +78,24 @@ unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             max = max_s[i];
         }
     }
+    (min, max)
+}
+
+#[inline(always)]
+unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+    settings: Settings,
+) -> (Vec<f32>, f32, f32) {
+    let width = settings.get_dimensions().width;
+    let mut result = vec![0.0f32; width];
+    let (min, max) = get_1d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn get_2d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
-) -> (Vec<f32>, f32, f32) {
+    result: &mut [f32],
+) -> (f32, f32) {
     let dim = settings.get_dimensions();
     let freq_x = S::Vf32::set1(settings.get_freq_x());
     let freq_y = S::Vf32::set1(settings.get_freq_y());
@@ -87,13 +103,17 @@ unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     let width = dim.width;
     let start_y = dim.y;
     let height = dim.height;
+    assert_eq!(
+        result.len(),
+        width * height,
+        "noise output slice length must equal width * height"
+    );
 
     let mut min_s = S::Vf32::set1(f32::MAX);
     let mut max_s = S::Vf32::set1(f32::MIN);
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::<f32>::with_capacity(width * height);
     let result_ptr = result.as_mut_ptr();
     let mut y = S::Vf32::set1(start_y);
     let mut i = 0;
@@ -131,7 +151,6 @@ unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         }
         y += S::Vf32::set1(1.0);
     }
-    result.set_len(width * height);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
@@ -140,13 +159,25 @@ unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             max = max_s[i];
         }
     }
+    (min, max)
+}
+
+#[inline(always)]
+unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+    settings: Settings,
+) -> (Vec<f32>, f32, f32) {
+    let dim = settings.get_dimensions();
+    let len = dim.width * dim.height;
+    let mut result = vec![0.0f32; len];
+    let (min, max) = get_2d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn get_3d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
-) -> (Vec<f32>, f32, f32) {
+    result: &mut [f32],
+) -> (f32, f32) {
     let dim = settings.get_dimensions();
     let freq_x = S::Vf32::set1(settings.get_freq_x());
     let freq_y = S::Vf32::set1(settings.get_freq_y());
@@ -157,13 +188,17 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     let height = dim.height;
     let start_z = dim.z;
     let depth = dim.depth;
+    assert_eq!(
+        result.len(),
+        width * height * depth,
+        "noise output slice length must equal width * height * depth"
+    );
 
     let mut min_s = S::Vf32::set1(f32::MAX);
     let mut max_s = S::Vf32::set1(f32::MIN);
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::<f32>::with_capacity(width * height * depth);
     let result_ptr = result.as_mut_ptr();
     let mut i = 0;
     let vector_width = S::Vf32::WIDTH;
@@ -206,7 +241,6 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         }
         z += S::Vf32::set1(1.0);
     }
-    result.set_len(width * height * depth);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
@@ -215,13 +249,25 @@ unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             max = max_s[i];
         }
     }
+    (min, max)
+}
+
+#[inline(always)]
+unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+    settings: Settings,
+) -> (Vec<f32>, f32, f32) {
+    let dim = settings.get_dimensions();
+    let len = dim.width * dim.height * dim.depth;
+    let mut result = vec![0.0f32; len];
+    let (min, max) = get_3d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn get_4d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
-) -> (Vec<f32>, f32, f32) {
+    result: &mut [f32],
+) -> (f32, f32) {
     let dim = settings.get_dimensions();
     let freq_x = S::Vf32::set1(settings.get_freq_x());
     let freq_y = S::Vf32::set1(settings.get_freq_y());
@@ -235,13 +281,17 @@ unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     let depth = dim.depth;
     let start_w = dim.w;
     let time = dim.time;
+    assert_eq!(
+        result.len(),
+        width * height * depth * time,
+        "noise output slice length must equal width * height * depth * time"
+    );
 
     let mut min_s = S::Vf32::set1(f32::MAX);
     let mut max_s = S::Vf32::set1(f32::MIN);
     let mut min = f32::MAX;
     let mut max = f32::MIN;
 
-    let mut result = Vec::<f32>::with_capacity(width * height * depth * time);
     let result_ptr = result.as_mut_ptr();
     let mut i = 0;
     let vector_width = S::Vf32::WIDTH;
@@ -288,7 +338,6 @@ unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         }
         w += S::Vf32::set1(1.0);
     }
-    result.set_len(width * height * depth * time);
     for i in 0..vector_width {
         if min_s[i] < min {
             min = min_s[i];
@@ -297,6 +346,17 @@ unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             max = max_s[i];
         }
     }
+    (min, max)
+}
+
+#[inline(always)]
+unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+    settings: Settings,
+) -> (Vec<f32>, f32, f32) {
+    let dim = settings.get_dimensions();
+    let len = dim.width * dim.height * dim.depth * dim.time;
+    let mut result = vec![0.0f32; len];
+    let (min, max) = get_4d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
@@ -367,5 +427,421 @@ pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Cellular2(_) => {
             panic!("not implemented");
         }
+    }
+}
+
+/// Emplace 1d noise into `result` (which must have length `width`); returns the
+/// slice's `(min, max)`.
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_1d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_1d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => get_1d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Turbulence(s) => {
+            get_1d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+        }
+        NoiseType::Gradient(s) => get_1d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(_) => panic!("not implemented"),
+        NoiseType::Cellular2(_) => panic!("not implemented"),
+    }
+}
+
+/// Emplace 2d noise into `result` (which must have length `width * height`);
+/// returns the slice's `(min, max)`.
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_2d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_2d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => get_2d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Turbulence(s) => {
+            get_2d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+        }
+        NoiseType::Gradient(s) => get_2d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => get_2d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => get_2d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+    }
+}
+
+/// Emplace 3d noise into `result` (which must have length
+/// `width * height * depth`); returns the slice's `(min, max)`.
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_3d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_3d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => get_3d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Turbulence(s) => {
+            get_3d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+        }
+        NoiseType::Gradient(s) => get_3d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => get_3d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => get_3d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+    }
+}
+
+/// Emplace 4d noise into `result` (which must have length
+/// `width * height * depth * time`); returns the slice's `(min, max)`.
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_4d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_4d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => get_4d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Turbulence(s) => {
+            get_4d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+        }
+        NoiseType::Gradient(s) => get_4d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(_) => panic!("not implemented"),
+        NoiseType::Cellular2(_) => panic!("not implemented"),
+    }
+}
+
+// --- Fused typed (integer) emplace: SIMD noise compute + scalar map+cast store
+//     directly into `&mut [T]`, with no output-sized f32 scratch. `mult`/`off`
+//     map a noise value from [src_min, src_max] onto [T::RANGE_MIN, T::RANGE_MAX];
+//     the per-lane `v * mult + off` is scalar f32 (no FMA), so results are
+//     backend-independent and bit-match a manual map+cast. ---
+
+#[inline(always)]
+unsafe fn get_1d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+    settings: Settings,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let dim = settings.get_dimensions();
+    let freq_x = S::Vf32::set1(settings.get_freq_x());
+    let start_x = dim.x;
+    let width = dim.width;
+    assert_eq!(out.len(), width, "noise output slice length must equal width");
+    let mult = (T::RANGE_MAX - T::RANGE_MIN) / (src_max - src_min);
+    let off = T::RANGE_MIN - src_min * mult;
+    let out_ptr = out.as_mut_ptr();
+    let mut i = 0;
+    let vector_width = S::Vf32::WIDTH;
+    let remainder = width % vector_width;
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f32);
+    }
+    x_arr.set_len(vector_width);
+    let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
+    for _ in 0..width / vector_width {
+        let f = settings.sample_1d(x * freq_x);
+        for lane in 0..vector_width {
+            out_ptr
+                .add(i + lane)
+                .write(T::from_noise(f[lane] * mult + off));
+        }
+        i += vector_width;
+        x += S::Vf32::set1(vector_width as f32);
+    }
+    if remainder != 0 {
+        let f = settings.sample_1d(x * freq_x);
+        for j in 0..remainder {
+            out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
+            i += 1;
+        }
+    }
+}
+
+#[inline(always)]
+unsafe fn get_2d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+    settings: Settings,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let dim = settings.get_dimensions();
+    let freq_x = S::Vf32::set1(settings.get_freq_x());
+    let freq_y = S::Vf32::set1(settings.get_freq_y());
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+    assert_eq!(
+        out.len(),
+        width * height,
+        "noise output slice length must equal width * height"
+    );
+    let mult = (T::RANGE_MAX - T::RANGE_MIN) / (src_max - src_min);
+    let off = T::RANGE_MIN - src_min * mult;
+    let out_ptr = out.as_mut_ptr();
+    let mut y = S::Vf32::set1(start_y);
+    let mut i = 0;
+    let vector_width = S::Vf32::WIDTH;
+    let remainder = width % vector_width;
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f32);
+    }
+    x_arr.set_len(vector_width);
+    for _ in 0..height {
+        let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
+        for _ in 0..width / vector_width {
+            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            for lane in 0..vector_width {
+                out_ptr
+                    .add(i + lane)
+                    .write(T::from_noise(f[lane] * mult + off));
+            }
+            i += vector_width;
+            x += S::Vf32::set1(vector_width as f32);
+        }
+        if remainder != 0 {
+            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            for j in 0..remainder {
+                out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
+                i += 1;
+            }
+        }
+        y += S::Vf32::set1(1.0);
+    }
+}
+
+#[inline(always)]
+unsafe fn get_3d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+    settings: Settings,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let dim = settings.get_dimensions();
+    let freq_x = S::Vf32::set1(settings.get_freq_x());
+    let freq_y = S::Vf32::set1(settings.get_freq_y());
+    let freq_z = S::Vf32::set1(settings.get_freq_z());
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+    let start_z = dim.z;
+    let depth = dim.depth;
+    assert_eq!(
+        out.len(),
+        width * height * depth,
+        "noise output slice length must equal width * height * depth"
+    );
+    let mult = (T::RANGE_MAX - T::RANGE_MIN) / (src_max - src_min);
+    let off = T::RANGE_MIN - src_min * mult;
+    let out_ptr = out.as_mut_ptr();
+    let mut i = 0;
+    let vector_width = S::Vf32::WIDTH;
+    let remainder = width % vector_width;
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f32);
+    }
+    x_arr.set_len(vector_width);
+    let mut z = S::Vf32::set1(start_z);
+    for _ in 0..depth {
+        let mut y = S::Vf32::set1(start_y);
+        for _ in 0..height {
+            let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
+            for _ in 0..width / vector_width {
+                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                for lane in 0..vector_width {
+                    out_ptr
+                        .add(i + lane)
+                        .write(T::from_noise(f[lane] * mult + off));
+                }
+                i += vector_width;
+                x += S::Vf32::set1(vector_width as f32);
+            }
+            if remainder != 0 {
+                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                for j in 0..remainder {
+                    out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
+                    i += 1;
+                }
+            }
+            y += S::Vf32::set1(1.0);
+        }
+        z += S::Vf32::set1(1.0);
+    }
+}
+
+#[inline(always)]
+unsafe fn get_4d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+    settings: Settings,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let dim = settings.get_dimensions();
+    let freq_x = S::Vf32::set1(settings.get_freq_x());
+    let freq_y = S::Vf32::set1(settings.get_freq_y());
+    let freq_z = S::Vf32::set1(settings.get_freq_z());
+    let freq_w = S::Vf32::set1(settings.get_freq_w());
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+    let start_z = dim.z;
+    let depth = dim.depth;
+    let start_w = dim.w;
+    let time = dim.time;
+    assert_eq!(
+        out.len(),
+        width * height * depth * time,
+        "noise output slice length must equal width * height * depth * time"
+    );
+    let mult = (T::RANGE_MAX - T::RANGE_MIN) / (src_max - src_min);
+    let off = T::RANGE_MIN - src_min * mult;
+    let out_ptr = out.as_mut_ptr();
+    let mut i = 0;
+    let vector_width = S::Vf32::WIDTH;
+    let remainder = width % vector_width;
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f32);
+    }
+    x_arr.set_len(vector_width);
+    let mut w = S::Vf32::set1(start_w);
+    for _ in 0..time {
+        let mut z = S::Vf32::set1(start_z);
+        for _ in 0..depth {
+            let mut y = S::Vf32::set1(start_y);
+            for _ in 0..height {
+                let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
+                for _ in 0..width / vector_width {
+                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    for lane in 0..vector_width {
+                        out_ptr
+                            .add(i + lane)
+                            .write(T::from_noise(f[lane] * mult + off));
+                    }
+                    i += vector_width;
+                    x += S::Vf32::set1(vector_width as f32);
+                }
+                if remainder != 0 {
+                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    for j in 0..remainder {
+                        out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
+                        i += 1;
+                    }
+                }
+                y += S::Vf32::set1(1.0);
+            }
+            z += S::Vf32::set1(1.0);
+        }
+        w += S::Vf32::set1(1.0);
+    }
+}
+
+/// Fused typed 1d emplace dispatcher (maps/casts straight into `out`).
+#[inline(always)]
+pub unsafe fn get_1d_noise_range_into<S: Simd, T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    match noise_type {
+        NoiseType::Fbm(s) => {
+            get_1d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Ridge(s) => {
+            get_1d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Turbulence(s) => get_1d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+            *s, src_min, src_max, out,
+        ),
+        NoiseType::Gradient(s) => {
+            get_1d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular(_) => panic!("not implemented"),
+        NoiseType::Cellular2(_) => panic!("not implemented"),
+    }
+}
+
+/// Fused typed 2d emplace dispatcher.
+#[inline(always)]
+pub unsafe fn get_2d_noise_range_into<S: Simd, T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    match noise_type {
+        NoiseType::Fbm(s) => {
+            get_2d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Ridge(s) => {
+            get_2d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Turbulence(s) => get_2d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+            *s, src_min, src_max, out,
+        ),
+        NoiseType::Gradient(s) => {
+            get_2d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular(s) => {
+            get_2d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular2(s) => get_2d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(
+            *s, src_min, src_max, out,
+        ),
+    }
+}
+
+/// Fused typed 3d emplace dispatcher.
+#[inline(always)]
+pub unsafe fn get_3d_noise_range_into<S: Simd, T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    match noise_type {
+        NoiseType::Fbm(s) => {
+            get_3d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Ridge(s) => {
+            get_3d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Turbulence(s) => get_3d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+            *s, src_min, src_max, out,
+        ),
+        NoiseType::Gradient(s) => {
+            get_3d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular(s) => {
+            get_3d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular2(s) => get_3d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(
+            *s, src_min, src_max, out,
+        ),
+    }
+}
+
+/// Fused typed 4d emplace dispatcher.
+#[inline(always)]
+pub unsafe fn get_4d_noise_range_into<S: Simd, T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    match noise_type {
+        NoiseType::Fbm(s) => {
+            get_4d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Ridge(s) => {
+            get_4d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Turbulence(s) => get_4d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+            *s, src_min, src_max, out,
+        ),
+        NoiseType::Gradient(s) => {
+            get_4d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular(_) => panic!("not implemented"),
+        NoiseType::Cellular2(_) => panic!("not implemented"),
     }
 }

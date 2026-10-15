@@ -123,6 +123,72 @@ impl Settings for CellularSettings {
             _ => panic!("not implemented"),
         }
     }
+
+    fn generate_64(self) -> (Vec<f64>, f64, f64) {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_noise_64(&NoiseType::Cellular(self)),
+            3 => crate::get_3d_noise_64(&NoiseType::Cellular(self)),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64> {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
+            3 => crate::get_3d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_into(self, out: &mut [f32]) -> (f32, f32) {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_noise_into(&NoiseType::Cellular(self), out),
+            3 => crate::get_3d_noise_into(&NoiseType::Cellular(self), out),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_scaled_into(self, min: f32, max: f32, out: &mut [f32]) {
+        let d = self.dim.dim;
+        let mut new_self = self;
+        new_self.dim.min = min;
+        new_self.dim.max = max;
+        match d {
+            2 => crate::get_2d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
+            3 => crate::get_3d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_into_64(self, out: &mut [f64]) -> (f64, f64) {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_noise_into_64(&NoiseType::Cellular(self), out),
+            3 => crate::get_3d_noise_into_64(&NoiseType::Cellular(self), out),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]) {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
+            3 => crate::get_3d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_noise_range_into::<T>(&NoiseType::Cellular(self), src_min, src_max, out),
+            3 => crate::get_3d_noise_range_into::<T>(&NoiseType::Cellular(self), src_min, src_max, out),
+            _ => panic!("not implemented"),
+        }
+    }
 }
 
 impl<S: Simd> Sample32<S> for CellularSettings {
