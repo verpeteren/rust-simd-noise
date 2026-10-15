@@ -25,6 +25,13 @@ pub trait Settings {
 
     /// Generate a chunk of noise with values scaled from min to max
     fn generate_scaled(self, min: f32, max: f32) -> Vec<f32>;
+
+    /// f64 counterpart of [`generate`](Settings::generate).
+    fn generate_64(self) -> (Vec<f64>, f64, f64);
+
+    /// f64 counterpart of [`generate_scaled`](Settings::generate_scaled); the
+    /// target range is given as f64.
+    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64>;
 }
 
 pub trait SimplexSettings {

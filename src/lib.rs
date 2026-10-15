@@ -96,7 +96,7 @@ mod noise_helpers_64;
 mod noise_type;
 mod shared;
 
-use shared::get_scaled_noise;
+use shared::{get_scaled_noise, get_scaled_noise_64};
 use simdeez::prelude::*;
 
 use dimensional_being::DimensionalBeing;
@@ -152,6 +152,80 @@ simd_runtime_generate!(
 simd_runtime_generate!(
     pub fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
         unsafe { get_scaled_noise::<S, _>(noise_type, get_4d_noise) }
+    }
+);
+
+// ---------------------------------------------------------------------------
+// f64 public API
+//
+// f64 noise used to be reachable only by forcing a backend through the
+// `intrinsics` modules. These wrappers give it the same runtime CPU dispatch as
+// the f32 functions above (declared directly with `simd_runtime_generate!`, like
+// the f32 ones — wrapping that macro in a local one makes clippy attribute its
+// internal unsafe shims here). The f64 scaled variants take the target range
+// explicitly as f64 instead of reading the f32 `NoiseDimensions`.
+// ---------------------------------------------------------------------------
+simd_runtime_generate!(
+    pub fn get_1d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_1d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_2d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_3d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_4d_noise::<S>(noise_type)
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_1d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_1d_noise_64) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_2d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_2d_noise_64) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_3d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_3d_noise_64) }
+    }
+);
+
+simd_runtime_generate!(
+    pub fn get_4d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_4d_noise_64) }
     }
 );
 

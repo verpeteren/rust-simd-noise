@@ -123,6 +123,24 @@ impl Settings for CellularSettings {
             _ => panic!("not implemented"),
         }
     }
+
+    fn generate_64(self) -> (Vec<f64>, f64, f64) {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_noise_64(&NoiseType::Cellular(self)),
+            3 => crate::get_3d_noise_64(&NoiseType::Cellular(self)),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64> {
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
+            3 => crate::get_3d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
+            _ => panic!("not implemented"),
+        }
+    }
 }
 
 impl<S: Simd> Sample32<S> for CellularSettings {

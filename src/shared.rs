@@ -40,3 +40,47 @@ pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f
     scale_noise::<S>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
+
+/// f64 counterpart of [`scale_noise`]; affine-maps `[min, max]` onto
+/// `[scale_min, scale_max]` in place over a caller-provided slice.
+#[inline(always)]
+pub unsafe fn scale_noise_64<S: Simd>(
+    scale_min: f64,
+    scale_max: f64,
+    min: f64,
+    max: f64,
+    data: &mut [f64],
+) {
+    let scale_range = scale_max - scale_min;
+    let range = max - min;
+    let multiplier = scale_range / range;
+    let offset = scale_min - min * multiplier;
+    let vector_width = S::Vf64::WIDTH;
+    let mut i = 0;
+    if data.len() >= vector_width {
+        while i <= data.len() - vector_width {
+            let value = (S::Vf64::set1(multiplier) * S::Vf64::load_from_ptr_unaligned(&data[i]))
+                + S::Vf64::set1(offset);
+            value.copy_to_ptr_unaligned(data.get_unchecked_mut(i));
+            i += vector_width;
+        }
+    }
+    i = data.len() - (data.len() % vector_width);
+    while i < data.len() {
+        *data.get_unchecked_mut(i) = data.get_unchecked(i) * multiplier + offset;
+        i += 1;
+    }
+}
+
+/// f64 counterpart of [`get_scaled_noise`]. The target range is passed
+/// explicitly (as f64) rather than read from the f32 `NoiseDimensions`.
+pub(crate) unsafe fn get_scaled_noise_64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>, f64, f64)>(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+    noise_fn: F,
+) -> Vec<f64> {
+    let (mut noise, min, max) = noise_fn(noise_type);
+    scale_noise_64::<S>(scale_min, scale_max, min, max, &mut noise);
+    noise
+}

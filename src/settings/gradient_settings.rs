@@ -131,6 +131,28 @@ impl Settings for GradientSettings {
             _ => panic!("not implemented"),
         }
     }
+
+    fn generate_64(self) -> (Vec<f64>, f64, f64) {
+        let d = self.dim.dim;
+        match d {
+            1 => crate::get_1d_noise_64(&NoiseType::Gradient(self)),
+            2 => crate::get_2d_noise_64(&NoiseType::Gradient(self)),
+            3 => crate::get_3d_noise_64(&NoiseType::Gradient(self)),
+            4 => crate::get_4d_noise_64(&NoiseType::Gradient(self)),
+            _ => panic!("not implemented"),
+        }
+    }
+
+    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64> {
+        let d = self.dim.dim;
+        match d {
+            1 => crate::get_1d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
+            2 => crate::get_2d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
+            3 => crate::get_3d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
+            4 => crate::get_4d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
+            _ => panic!("not implemented"),
+        }
+    }
 }
 
 impl<S: Simd> Sample32<S> for GradientSettings {
