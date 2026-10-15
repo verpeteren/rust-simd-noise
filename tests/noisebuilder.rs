@@ -6,6 +6,17 @@ use helpers::{read_from_file_f32, /*save_to_file_f32, */ BIN_PATH};
 mod noise {
     use super::*;
 
+    // Cellular noise is the only noise type that uses `rsqrt` (see src/noise/cell_32.rs).
+    // `rsqrt` is an approximate instruction whose result is backend-specific: x86 uses the
+    // hardware `rsqrtps` approximation, aarch64 NEON uses `vrsqrteq_f32`, and the scalar
+    // backend computes an exact `1.0/sqrt`. The stored noisebuilder cellular fixtures were
+    // generated on x86 and therefore encode the x86 `rsqrtps` output. `generate()` dispatches
+    // at runtime via simdeez, which picks NEON on aarch64, so byte-exact comparison against the
+    // x86 fixtures cannot pass off x86. (Every non-cellular noisebuilder case, which avoids
+    // rsqrt, does match NEON byte-for-byte.) The scalar cellular algorithm itself is still
+    // covered byte-exactly by tests/intrinsics.rs against dedicated scalar fixtures. So these
+    // byte-exact cross-arch regressions are gated to x86, matching the rest of the branch.
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     mod cellular {
         use super::*;
         mod f32 {
@@ -83,6 +94,9 @@ mod noise {
             }
         }
     }
+    // See the comment on `mod cellular`: cellular2 noise also relies on the approximate `rsqrt`,
+    // so its byte-exact fixtures are x86-specific and the tests are gated to x86.
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     mod cellular2 {
         use super::*;
         mod f32 {
