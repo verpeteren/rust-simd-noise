@@ -45,6 +45,12 @@ pub trait Settings {
 
     /// f64 counterpart of [`generate_scaled_into`](Settings::generate_scaled_into).
     fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]);
+
+    /// Emplace noise quantized to an integer type into `out`, mapping
+    /// `[src_min, src_max]` onto the target type's full range (see
+    /// [`NoiseInto`](crate::NoiseInto)). `out.len()` must equal the dimension
+    /// product.
+    fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]);
 }
 
 pub trait SimplexSettings {

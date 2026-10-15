@@ -188,6 +188,16 @@ impl Settings for Cellular2Settings {
             _ => panic!("not implemented"),
         }
     }
+
+    fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
+        self.validate();
+        let d = self.dim.dim;
+        match d {
+            2 => crate::get_2d_noise_range_into::<T>(&NoiseType::Cellular2(self), src_min, src_max, out),
+            3 => crate::get_3d_noise_range_into::<T>(&NoiseType::Cellular2(self), src_min, src_max, out),
+            _ => panic!("not implemented"),
+        }
+    }
 }
 
 impl<S: Simd> Sample32<S> for Cellular2Settings {

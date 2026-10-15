@@ -99,6 +99,7 @@ mod shared;
 use shared::{
     get_scaled_noise, get_scaled_noise_64, get_scaled_noise_into, get_scaled_noise_into_64,
 };
+pub use shared::NoiseInto;
 use simdeez::prelude::*;
 
 use dimensional_being::DimensionalBeing;
@@ -384,6 +385,61 @@ simd_runtime_generate!(
         }
     }
 );
+
+// ---------------------------------------------------------------------------
+// Typed emplace (#5): generate noise and quantize it into a caller-provided
+// integer slice (`&mut [u16]`, `&mut [u8]`, ...). Noise in [src_min, src_max] is
+// mapped onto the target type's full range (see `NoiseInto`) and cast. These are
+// plain generic wrappers: runtime CPU dispatch happens inside the f32 generation,
+// and the per-element map+cast is scalar.
+// ---------------------------------------------------------------------------
+/// Emplace 1d noise quantized into `out` (length `width`), mapping
+/// `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_1d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let (noise, _, _) = get_1d_noise(noise_type);
+    shared::range_quantize::<T>(&noise, src_min, src_max, out);
+}
+
+/// Emplace 2d noise quantized into `out` (length `width * height`), mapping
+/// `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_2d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let (noise, _, _) = get_2d_noise(noise_type);
+    shared::range_quantize::<T>(&noise, src_min, src_max, out);
+}
+
+/// Emplace 3d noise quantized into `out` (length `width * height * depth`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_3d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let (noise, _, _) = get_3d_noise(noise_type);
+    shared::range_quantize::<T>(&noise, src_min, src_max, out);
+}
+
+/// Emplace 4d noise quantized into `out` (length `width * height * depth * time`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+pub fn get_4d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    let (noise, _, _) = get_4d_noise(noise_type);
+    shared::range_quantize::<T>(&noise, src_min, src_max, out);
+}
 
 mod settings;
 pub use settings::{

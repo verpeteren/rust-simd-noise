@@ -2,6 +2,54 @@ use simdeez::prelude::*;
 
 use crate::{dimensional_being::DimensionalBeing, NoiseType};
 
+/// Integer output types that noise can be quantized into by the `*_range_into`
+/// emplace API. A source noise value in `[src_min, src_max]` is mapped linearly
+/// onto this type's full range `[RANGE_MIN, RANGE_MAX]` and then cast; the cast
+/// saturates (values outside the range clamp to the endpoints) and truncates
+/// toward zero, matching `value as T`.
+pub trait NoiseInto: Copy {
+    /// Low end of the target range, as f32.
+    const RANGE_MIN: f32;
+    /// High end of the target range, as f32.
+    const RANGE_MAX: f32;
+    /// Saturating + truncating cast of an already range-mapped value.
+    fn from_noise(mapped: f32) -> Self;
+}
+
+macro_rules! impl_noise_into {
+    ($t:ty, $min:expr, $max:expr) => {
+        impl NoiseInto for $t {
+            const RANGE_MIN: f32 = $min;
+            const RANGE_MAX: f32 = $max;
+            #[inline(always)]
+            fn from_noise(mapped: f32) -> Self {
+                mapped as $t
+            }
+        }
+    };
+}
+
+impl_noise_into!(u8, 0.0, u8::MAX as f32);
+impl_noise_into!(u16, 0.0, u16::MAX as f32);
+impl_noise_into!(u32, 0.0, u32::MAX as f32);
+impl_noise_into!(i16, i16::MIN as f32, i16::MAX as f32);
+impl_noise_into!(i32, i32::MIN as f32, i32::MAX as f32);
+
+/// Map f32 noise in `[src_min, src_max]` onto `T`'s full range and write it into
+/// `out` (which must have the same length as `src`).
+pub(crate) fn range_quantize<T: NoiseInto>(src: &[f32], src_min: f32, src_max: f32, out: &mut [T]) {
+    assert_eq!(
+        out.len(),
+        src.len(),
+        "noise output slice length must equal the dimension product"
+    );
+    let mult = (T::RANGE_MAX - T::RANGE_MIN) / (src_max - src_min);
+    let off = T::RANGE_MIN - src_min * mult;
+    for (o, &v) in out.iter_mut().zip(src.iter()) {
+        *o = T::from_noise(v * mult + off);
+    }
+}
+
 #[inline(always)]
 pub unsafe fn scale_noise<S: Simd>(
     scale_min: f32,

@@ -54,4 +54,21 @@ fn main() {
         .with_seed(42)
         .generate_into_64(&mut doubles);
     println!("4) f64 sample: {:.6}", doubles[0]);
+
+    // 5. Typed output: quantize straight into an integer buffer (e.g. a u16
+    //    heightmap or a u8 grayscale image). A source noise range is mapped onto
+    //    the target type's full range; values outside it clamp. Works for u8,
+    //    u16, u32, i16, i32 (anything implementing `NoiseInto`).
+    let mut heightmap = vec![0u16; width * height];
+    NoiseBuilder::fbm_2d(width, height)
+        .with_seed(1337)
+        .with_freq_2d(0.02, 0.02)
+        .generate_range_into(-1.0, 1.0, &mut heightmap); // [-1.0, 1.0] -> [0, 65535]
+    println!("5) u16 heightmap sample: {}", heightmap[0]);
+
+    // The same, via the free function, into a u8 grayscale buffer:
+    let nt = NoiseBuilder::gradient_2d(width, height).with_seed(7).wrap();
+    let mut grayscale = vec![0u8; width * height];
+    simdnoise::get_2d_noise_range_into::<u8>(&nt, -1.0, 1.0, &mut grayscale);
+    println!("6) u8 grayscale sample: {}", grayscale[0]);
 }

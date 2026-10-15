@@ -141,3 +141,83 @@ fn emplace_wrong_len_panics_f64() {
         .with_seed(1)
         .generate_into_64(&mut out);
 }
+
+// --- typed (integer) range emplace: generate_range_into / get_Nd_noise_range_into ---
+
+/// Reference: the exact affine map + saturating cast the typed path must produce.
+/// `v * mult + off` then `as T`, with mult/off derived from the source range and
+/// the target type's full range [rmin, rmax].
+fn ref_quantize_u16(noise: &[f32], src_min: f32, src_max: f32) -> Vec<u16> {
+    let (rmin, rmax) = (0.0f32, u16::MAX as f32);
+    let mult = (rmax - rmin) / (src_max - src_min);
+    let off = rmin - src_min * mult;
+    noise.iter().map(|&v| (v * mult + off) as u16).collect()
+}
+fn ref_quantize_u8(noise: &[f32], src_min: f32, src_max: f32) -> Vec<u8> {
+    let (rmin, rmax) = (0.0f32, u8::MAX as f32);
+    let mult = (rmax - rmin) / (src_max - src_min);
+    let off = rmin - src_min * mult;
+    noise.iter().map(|&v| (v * mult + off) as u8).collect()
+}
+
+#[test]
+fn range_into_u16_matches_manual_map() {
+    let (w, h) = (64usize, 32usize);
+    let (lo, hi) = (-1.0f32, 1.0f32);
+    let (noise, _, _) = NoiseBuilder::fbm_2d(w, h)
+        .with_seed(1337)
+        .with_freq_2d(0.02, 0.02)
+        .generate();
+    let expect = ref_quantize_u16(&noise, lo, hi);
+    let mut out = vec![0u16; w * h];
+    NoiseBuilder::fbm_2d(w, h)
+        .with_seed(1337)
+        .with_freq_2d(0.02, 0.02)
+        .generate_range_into(lo, hi, &mut out);
+    assert_eq!(expect, out);
+}
+
+#[test]
+fn range_into_u8_saturates_out_of_range() {
+    // A deliberately narrow source range so some noise overshoots and must clamp
+    // to 0 / 255 — exactly what a saturating `as u8` does.
+    let (w, h) = (64usize, 32usize);
+    let (lo, hi) = (-0.2f32, 0.2f32);
+    let (noise, _, _) = NoiseBuilder::fbm_2d(w, h)
+        .with_seed(7)
+        .with_freq_2d(0.05, 0.05)
+        .generate();
+    let expect = ref_quantize_u8(&noise, lo, hi);
+    let mut out = vec![0u8; w * h];
+    NoiseBuilder::fbm_2d(w, h)
+        .with_seed(7)
+        .with_freq_2d(0.05, 0.05)
+        .generate_range_into(lo, hi, &mut out);
+    assert_eq!(expect, out);
+    assert!(
+        out.contains(&0) && out.contains(&255),
+        "expected the narrow range to exercise saturation at both ends"
+    );
+}
+
+#[test]
+fn range_into_free_fn_matches_builder() {
+    let (w, h) = (32usize, 16usize);
+    let nt = NoiseBuilder::gradient_2d(w, h).with_seed(3).wrap();
+    let mut via_free = vec![0u16; w * h];
+    simdnoise::get_2d_noise_range_into::<u16>(&nt, -1.0, 1.0, &mut via_free);
+    let mut via_builder = vec![0u16; w * h];
+    NoiseBuilder::gradient_2d(w, h)
+        .with_seed(3)
+        .generate_range_into(-1.0, 1.0, &mut via_builder);
+    assert_eq!(via_free, via_builder);
+}
+
+#[test]
+#[should_panic]
+fn range_into_wrong_len_panics() {
+    let mut out = vec![0u16; 10];
+    NoiseBuilder::fbm_2d(64, 32)
+        .with_seed(1)
+        .generate_range_into(-1.0, 1.0, &mut out);
+}
