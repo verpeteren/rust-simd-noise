@@ -2,23 +2,12 @@
 //!
 //! These are much slower than SIMD, and hence on capable hardware have little use but testing.
 
-use crate::noise::cell_32;
-use crate::noise::cell_64;
-use crate::noise::fbm_32;
-use crate::noise::fbm_64;
-use crate::noise::ridge_32;
-use crate::noise::ridge_64 as simplex_ridge_64;
-use crate::noise::simplex_32;
-use crate::noise::simplex_64;
-use crate::noise::turbulence_32;
-use crate::noise::turbulence_64;
 use crate::noise_helpers_32;
 use crate::noise_helpers_64;
-use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
+use crate::{DimensionalBeing, NoiseType};
 
 use crate::shared::scale_noise;
 
-use simdeez::{SimdTransmuteF32, SimdTransmuteF64};
 
 use std::f32;
 

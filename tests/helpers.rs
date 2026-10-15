@@ -1,3 +1,6 @@
+// Helpers are shared across test binaries; not every binary uses all of them.
+#![allow(dead_code)]
+
 use std::fs::metadata;
 use std::fs::File;
 use std::io::prelude::*;

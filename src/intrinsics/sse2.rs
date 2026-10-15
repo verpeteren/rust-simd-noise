@@ -6,23 +6,12 @@
 //! When using the `get_` functions, you will get a performance boost when width
 //! is evenly divisble by 4, and when it is not small relative height and depth.
 
-use crate::noise::cell_32;
-use crate::noise::cell_64;
-use crate::noise::fbm_32;
-use crate::noise::fbm_64;
-use crate::noise::ridge_32;
-use crate::noise::ridge_64;
-use crate::noise::simplex_32;
-use crate::noise::simplex_64;
-use crate::noise::turbulence_32;
-use crate::noise::turbulence_64;
 use crate::noise_helpers_32;
 use crate::noise_helpers_64;
-use crate::{CellDistanceFunction, CellReturnType, DimensionalBeing, NoiseType};
+use crate::{DimensionalBeing, NoiseType};
 
 use crate::shared::scale_noise;
 
-use simdeez::{SimdTransmuteF32, SimdTransmuteF64};
 
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
