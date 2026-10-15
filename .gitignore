@@ -1,6 +1,8 @@
 
 /target
 example/target
+wasm-example/target
+wasm-example/pkg*
 **/*.rs.bk
 Cargo.lock
 *.swp
