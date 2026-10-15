@@ -134,8 +134,8 @@ pub fn cellular2_3d<S: Simd>(
                     distance[0] = distance[0].min(new_distance);
                     i -= 1;
                 }
-                zcf = ycf + S::Vf64::set1(1.0);
-                zc = yc + S::Vi64::set1(Z_PRIME_64);
+                zcf += S::Vf64::set1(1.0);
+                zc += S::Vi64::set1(Z_PRIME_64);
             }
             ycf += S::Vf64::set1(1.0);
             yc += S::Vi64::set1(Y_PRIME_64);
