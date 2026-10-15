@@ -35,7 +35,13 @@ pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f
     noise_type: &NoiseType,
     noise_fn: F,
 ) -> Vec<f32> {
-    let (mut noise, min, max) = noise_fn(noise_type);
+    let (mut noise, observed_min, observed_max) = noise_fn(noise_type);
+    // Scale by the offset-independent theoretical range so that adjacent blocks
+    // (different offsets/sizes) map identically and line up seamlessly (#39).
+    // Cellular noise has no closed-form range, so fall back to its observed one.
+    let (min, max) = noise_type
+        .theoretical_min_max()
+        .unwrap_or((observed_min, observed_max));
     let dim = noise_type.get_dimensions();
     scale_noise::<S>(dim.min, dim.max, min, max, &mut noise);
     noise
