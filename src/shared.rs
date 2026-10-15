@@ -8,7 +8,7 @@ pub unsafe fn scale_noise<S: Simd>(
     scale_max: f32,
     min: f32,
     max: f32,
-    data: &mut Vec<f32>,
+    data: &mut [f32],
 ) {
     let scale_range = scale_max - scale_min;
     let range = max - min;

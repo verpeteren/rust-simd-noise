@@ -28,7 +28,7 @@ pub struct RidgeSettings {
 
 impl DimensionalBeing for RidgeSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
-        return self.dim;
+        self.dim
     }
 }
 

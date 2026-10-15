@@ -5,6 +5,7 @@ use crate::{Cell2ReturnType, CellDistanceFunction};
 use simdeez::prelude::*;
 
 #[inline(always)]
+#[allow(clippy::too_many_arguments)]
 pub fn cellular2_2d<S: Simd>(
     x: S::Vf64,
     y: S::Vf64,
@@ -23,8 +24,8 @@ pub fn cellular2_2d<S: Simd>(
     let mut xcf = xc.cast_f64() - x;
     let ycf_base = yc_base.cast_f64() - y;
 
-    xc = xc * S::Vi64::set1(X_PRIME_64);
-    yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
+    xc *= S::Vi64::set1(X_PRIME_64);
+    yc_base *= S::Vi64::set1(Y_PRIME_64);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -53,11 +54,11 @@ pub fn cellular2_2d<S: Simd>(
                 distance[0] = distance[0].min(new_distance);
                 i -= 1;
             }
-            ycf = ycf + S::Vf64::set1(1.0);
-            yc = yc + S::Vi64::set1(Y_PRIME_64);
+            ycf += S::Vf64::set1(1.0);
+            yc += S::Vi64::set1(Y_PRIME_64);
         }
-        xcf = xcf + S::Vf64::set1(1.0);
-        xc = xc + S::Vi64::set1(X_PRIME_64);
+        xcf += S::Vf64::set1(1.0);
+        xc += S::Vi64::set1(X_PRIME_64);
     }
 
     match return_type {
@@ -70,6 +71,7 @@ pub fn cellular2_2d<S: Simd>(
 }
 
 #[inline(always)]
+#[allow(clippy::too_many_arguments)]
 pub fn cellular2_3d<S: Simd>(
     x: S::Vf64,
     y: S::Vf64,
@@ -91,9 +93,9 @@ pub fn cellular2_3d<S: Simd>(
     let ycf_base = yc_base.cast_f64() - y;
     let zcf_base = zc_base.cast_f64() - z;
 
-    xc = xc * S::Vi64::set1(X_PRIME_64);
-    yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
-    zc_base = zc_base * S::Vi64::set1(Z_PRIME_64);
+    xc *= S::Vi64::set1(X_PRIME_64);
+    yc_base *= S::Vi64::set1(Y_PRIME_64);
+    zc_base *= S::Vi64::set1(Z_PRIME_64);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -132,11 +134,11 @@ pub fn cellular2_3d<S: Simd>(
                 zcf = ycf + S::Vf64::set1(1.0);
                 zc = yc + S::Vi64::set1(Z_PRIME_64);
             }
-            ycf = ycf + S::Vf64::set1(1.0);
-            yc = yc + S::Vi64::set1(Y_PRIME_64);
+            ycf += S::Vf64::set1(1.0);
+            yc += S::Vi64::set1(Y_PRIME_64);
         }
-        xcf = xcf + S::Vf64::set1(1.0);
-        xc = xc + S::Vi64::set1(X_PRIME_64);
+        xcf += S::Vf64::set1(1.0);
+        xc += S::Vi64::set1(X_PRIME_64);
     }
 
     match return_type {

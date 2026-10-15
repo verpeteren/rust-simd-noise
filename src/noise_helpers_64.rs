@@ -49,7 +49,7 @@ unsafe fn get_1d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
         min_s = min_s.min(f);
         f.copy_to_ptr_unaligned(result_ptr.add(i));
         i += vector_width;
-        x = x + S::Vf64::set1(vector_width as f64);
+        x += S::Vf64::set1(vector_width as f64);
     }
     if remainder != 0 {
         let f = settings.sample_1d(x * freq_x);
@@ -115,7 +115,7 @@ unsafe fn get_2d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
             min_s = min_s.min(f);
             f.copy_to_ptr_unaligned(result_ptr.add(i));
             i += vector_width;
-            x = x + S::Vf64::set1(vector_width as f64);
+            x += S::Vf64::set1(vector_width as f64);
         }
         if remainder != 0 {
             let f = settings.sample_2d(x * freq_x, y * freq_y);
@@ -131,7 +131,7 @@ unsafe fn get_2d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                 i += 1;
             }
         }
-        y = y + S::Vf64::set1(1.0);
+        y += S::Vf64::set1(1.0);
     }
     result.set_len(width * height);
     for i in 0..vector_width {
@@ -188,7 +188,7 @@ unsafe fn get_3d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                 min_s = min_s.min(f);
                 f.copy_to_ptr_unaligned(result_ptr.add(i));
                 i += vector_width;
-                x = x + S::Vf64::set1(vector_width as f64);
+                x += S::Vf64::set1(vector_width as f64);
             }
             if remainder != 0 {
                 let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
@@ -204,9 +204,9 @@ unsafe fn get_3d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                     i += 1;
                 }
             }
-            y = y + S::Vf64::set1(1.0);
+            y += S::Vf64::set1(1.0);
         }
-        z = z + S::Vf64::set1(1.0);
+        z += S::Vf64::set1(1.0);
     }
     result.set_len(width * height * depth);
     for i in 0..vector_width {
@@ -267,7 +267,7 @@ unsafe fn get_4d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                     min_s = min_s.min(f);
                     f.copy_to_ptr_unaligned(result_ptr.add(i));
                     i += vector_width;
-                    x = x + S::Vf64::set1(vector_width as f64);
+                    x += S::Vf64::set1(vector_width as f64);
                 }
                 if remainder != 0 {
                     let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
@@ -284,11 +284,11 @@ unsafe fn get_4d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                         i += 1;
                     }
                 }
-                y = y + S::Vf64::set1(1.0);
+                y += S::Vf64::set1(1.0);
             }
-            z = z + S::Vf64::set1(1.0);
+            z += S::Vf64::set1(1.0);
         }
-        w = w + S::Vf64::set1(1.0);
+        w += S::Vf64::set1(1.0);
     }
     result.set_len(width * height * depth * time);
     for i in 0..vector_width {

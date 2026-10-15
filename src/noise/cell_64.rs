@@ -20,8 +20,8 @@ pub fn cellular_2d<S: Simd>(
     let mut xcf = xc.cast_f64() - x;
     let ycf_base = yc_base.cast_f64() - y;
 
-    xc = xc * S::Vi64::set1(X_PRIME_64);
-    yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
+    xc *= S::Vi64::set1(X_PRIME_64);
+    yc_base *= S::Vi64::set1(Y_PRIME_64);
     match return_type {
         CellReturnType::Distance => {
             match distance_function {
@@ -43,11 +43,11 @@ pub fn cellular_2d<S: Simd>(
                             let new_distance = xd2 + (yd * yd);
                             distance = new_distance.min(distance);
 
-                            ycf = ycf + S::Vf64::set1(1.0);
-                            yc = yc + S::Vi64::set1(Y_PRIME_64);
+                            ycf += S::Vf64::set1(1.0);
+                            yc += S::Vi64::set1(Y_PRIME_64);
                         }
-                        xcf = xcf + S::Vf64::set1(1.0);
-                        xc = xc + S::Vi64::set1(X_PRIME_64);
+                        xcf += S::Vf64::set1(1.0);
+                        xc += S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -67,11 +67,11 @@ pub fn cellular_2d<S: Simd>(
                             let new_distance = xd.abs() + yd.abs();
                             distance = new_distance.min(distance);
 
-                            ycf = ycf + S::Vf64::set1(1.0);
-                            yc = yc + S::Vi64::set1(Y_PRIME_64);
+                            ycf += S::Vf64::set1(1.0);
+                            yc += S::Vi64::set1(Y_PRIME_64);
                         }
-                        xcf = xcf + S::Vf64::set1(1.0);
-                        xc = xc + S::Vi64::set1(X_PRIME_64);
+                        xcf += S::Vf64::set1(1.0);
+                        xc += S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -95,11 +95,11 @@ pub fn cellular_2d<S: Simd>(
                             };
                             distance = new_distance.min(distance);
 
-                            ycf = ycf + S::Vf64::set1(1.0);
-                            yc = yc + S::Vi64::set1(Y_PRIME_64);
+                            ycf += S::Vf64::set1(1.0);
+                            yc += S::Vi64::set1(Y_PRIME_64);
                         }
-                        xcf = xcf + S::Vf64::set1(1.0);
-                        xc = xc + S::Vi64::set1(X_PRIME_64);
+                        xcf += S::Vf64::set1(1.0);
+                        xc += S::Vi64::set1(X_PRIME_64);
                     }
                 }
             }
@@ -128,11 +128,11 @@ pub fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
-                            ycf = ycf + S::Vf64::set1(1.0);
-                            yc = yc + S::Vi64::set1(Y_PRIME_64);
+                            ycf += S::Vf64::set1(1.0);
+                            yc += S::Vi64::set1(Y_PRIME_64);
                         }
-                        xcf = xcf + S::Vf64::set1(1.0);
-                        xc = xc + S::Vi64::set1(X_PRIME_64);
+                        xcf += S::Vf64::set1(1.0);
+                        xc += S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Manhattan => {
@@ -155,11 +155,11 @@ pub fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
-                            ycf = ycf + S::Vf64::set1(1.0);
-                            yc = yc + S::Vi64::set1(Y_PRIME_64);
+                            ycf += S::Vf64::set1(1.0);
+                            yc += S::Vi64::set1(Y_PRIME_64);
                         }
-                        xcf = xcf + S::Vf64::set1(1.0);
-                        xc = xc + S::Vi64::set1(X_PRIME_64);
+                        xcf += S::Vf64::set1(1.0);
+                        xc += S::Vi64::set1(X_PRIME_64);
                     }
                 }
                 CellDistanceFunction::Natural => {
@@ -186,11 +186,11 @@ pub fn cellular_2d<S: Simd>(
                             distance = new_distance.min(distance);
                             cell_value = closer.blendv(cell_value, new_cell_value);
 
-                            ycf = ycf + S::Vf64::set1(1.0);
-                            yc = yc + S::Vi64::set1(Y_PRIME_64);
+                            ycf += S::Vf64::set1(1.0);
+                            yc += S::Vi64::set1(Y_PRIME_64);
                         }
-                        xcf = xcf + S::Vf64::set1(1.0);
-                        xc = xc + S::Vi64::set1(X_PRIME_64);
+                        xcf += S::Vf64::set1(1.0);
+                        xc += S::Vi64::set1(X_PRIME_64);
                     }
                 }
             }
@@ -220,9 +220,9 @@ pub fn cellular_3d<S: Simd>(
     let ycf_base = yc_base.cast_f64() - y;
     let zcf_base = zc_base.cast_f64() - z;
 
-    xc = xc * S::Vi64::set1(X_PRIME_64);
-    yc_base = yc_base * S::Vi64::set1(Y_PRIME_64);
-    zc_base = zc_base * S::Vi64::set1(Z_PRIME_64);
+    xc *= S::Vi64::set1(X_PRIME_64);
+    yc_base *= S::Vi64::set1(Y_PRIME_64);
+    zc_base *= S::Vi64::set1(Z_PRIME_64);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -259,11 +259,11 @@ pub fn cellular_3d<S: Simd>(
                 zcf = ycf + S::Vf64::set1(1.0);
                 zc = yc + S::Vi64::set1(Z_PRIME_64);
             }
-            ycf = ycf + S::Vf64::set1(1.0);
-            yc = yc + S::Vi64::set1(Y_PRIME_64);
+            ycf += S::Vf64::set1(1.0);
+            yc += S::Vi64::set1(Y_PRIME_64);
         }
-        xcf = xcf + S::Vf64::set1(1.0);
-        xc = xc + S::Vi64::set1(X_PRIME_64);
+        xcf += S::Vf64::set1(1.0);
+        xc += S::Vi64::set1(X_PRIME_64);
     }
 
     match return_type {

@@ -164,6 +164,7 @@ impl NoiseBuilder {
         FbmSettings::default(dim)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn fbm_4d_offset(
         x_offset: f32,
         width: usize,
@@ -255,6 +256,7 @@ impl NoiseBuilder {
         RidgeSettings::default(dim)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn ridge_4d_offset(
         x_offset: f32,
         width: usize,
@@ -352,6 +354,7 @@ impl NoiseBuilder {
         TurbulenceSettings::default(dim)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn turbulence_4d_offset(
         x_offset: f32,
         width: usize,
@@ -444,6 +447,7 @@ impl NoiseBuilder {
         GradientSettings::default(dim)
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn gradient_4d_offset(
         x_offset: f32,
         width: usize,

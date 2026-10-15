@@ -27,7 +27,6 @@ where
     }
 }
 /// Compute hash values used by `grad3d` and `grad3d_dot`
-
 #[inline(always)]
 #[allow(unused_variables)]
 pub fn hash3d<S: Simd>(seed: i64, i: S::Vi64, j: S::Vi64, k: S::Vi64) -> Hash3d<S> {

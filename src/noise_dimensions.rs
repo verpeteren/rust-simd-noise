@@ -16,7 +16,7 @@ pub struct NoiseDimensions {
 
 impl NoiseDimensions {
     pub fn default(d: usize) -> NoiseDimensions {
-        if d < 1 || d > 4 {
+        if !(1..=4).contains(&d) {
             panic!("dimension invalid");
         }
         NoiseDimensions {

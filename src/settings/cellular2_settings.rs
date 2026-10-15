@@ -28,7 +28,7 @@ pub struct Cellular2Settings {
 
 impl DimensionalBeing for Cellular2Settings {
     fn get_dimensions(&self) -> NoiseDimensions {
-        return self.dim;
+        self.dim
     }
 }
 

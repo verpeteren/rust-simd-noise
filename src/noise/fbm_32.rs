@@ -14,9 +14,9 @@ pub fn fbm_1d<S: Simd>(
     let mut result = simplex_1d::<S>(x, seed);
 
     for _ in 1..octaves {
-        x = x * lacunarity;
-        amp = amp * gain;
-        result = result + simplex_1d::<S>(x, seed);
+        x *= lacunarity;
+        amp *= gain;
+        result += simplex_1d::<S>(x, seed);
     }
 
     result
@@ -35,9 +35,9 @@ pub fn fbm_2d<S: Simd>(
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
-        x = x * lac;
-        y = y * lac;
-        amp = amp * gain;
+        x *= lac;
+        y *= lac;
+        amp *= gain;
         result = (simplex_2d::<S>(x, y, seed) * amp) + result;
     }
 
@@ -58,10 +58,10 @@ pub fn fbm_3d<S: Simd>(
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
-        x = x * lac;
-        y = y * lac;
-        z = z * lac;
-        amp = amp * gain;
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        amp *= gain;
         result = (simplex_3d::<S>(x, y, z, seed) * amp) + result;
     }
 
@@ -69,6 +69,7 @@ pub fn fbm_3d<S: Simd>(
 }
 
 #[inline(always)]
+#[allow(clippy::too_many_arguments)]
 pub fn fbm_4d<S: Simd>(
     mut x: S::Vf32,
     mut y: S::Vf32,
@@ -83,12 +84,12 @@ pub fn fbm_4d<S: Simd>(
     let mut amp = S::Vf32::set1(1.0);
 
     for _ in 1..octaves {
-        x = x * lac;
-        y = y * lac;
-        z = z * lac;
-        w = w * lac;
-        amp = amp * gain;
-        result = result + (simplex_4d::<S>(x, y, z, w, seed) * amp);
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        amp *= gain;
+        result += simplex_4d::<S>(x, y, z, w, seed) * amp ;
     }
 
     result

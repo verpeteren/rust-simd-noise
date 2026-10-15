@@ -27,7 +27,7 @@ pub struct FbmSettings {
 
 impl DimensionalBeing for FbmSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
-        return self.dim;
+        self.dim
     }
 }
 

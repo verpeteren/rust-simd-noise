@@ -28,7 +28,7 @@ pub struct TurbulenceSettings {
 
 impl DimensionalBeing for TurbulenceSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
-        return self.dim;
+        self.dim
     }
 }
 

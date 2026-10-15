@@ -26,7 +26,6 @@ where
     }
 }
 /// Compute hash values used by `grad3d` and `grad3d_dot`
-
 #[inline(always)]
 pub fn hash3d<S: Simd>(seed: i32, i: S::Vi32, j: S::Vi32, k: S::Vi32) -> Hash3d<S> {
     // It seems that this function is inspired by FastNoise-SIMD and Auburn/FastNoise2Simd

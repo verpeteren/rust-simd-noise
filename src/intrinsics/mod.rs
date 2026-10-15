@@ -6,6 +6,9 @@ macro_rules! cellular {
             target_feature = "avx2"
         ))]
         /// Get a single value of 2d cellular/voroni noise
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -32,6 +35,9 @@ macro_rules! cellular {
             target_feature = "avx2"
         ))]
         /// Get a single value of 3d cellular/voroni noise
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -63,6 +69,9 @@ macro_rules! simplex {
             target_feature = "avx2"
         ))]
         /// Get a single value of 1d simplex noise, results are not scaled.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(x: $f_type, seed: $seed_type) -> $f_type {
             $mod::simplex_1d::<S>($transmute_from(x), seed).$transmute_to()
         }
@@ -74,6 +83,9 @@ macro_rules! simplex {
             target_feature = "avx2"
         ))]
         /// Get a single value of 2d simplex noise, results are not scaled.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -89,6 +101,9 @@ macro_rules! simplex {
             target_feature = "avx2"
         ))]
         /// Get a single value of 3d simplex noise, results are not scaled.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -111,6 +126,9 @@ macro_rules! simplex {
             target_feature = "avx2"
         ))]
         /// Get a single value of 4d simplex noise, results are not scaled.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -138,6 +156,9 @@ macro_rules! fbm {
             target_feature = "avx2"
         ))]
         /// Get a single value of 1d fractal brownian motion.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             lacunarity: $f_type,
@@ -162,6 +183,9 @@ macro_rules! fbm {
             target_feature = "avx2"
         ))]
         /// Get a single value of 2d fractal brownian motion.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -188,6 +212,9 @@ macro_rules! fbm {
             target_feature = "avx2"
         ))]
         /// Get a single value of 3d fractal brownian motion.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -216,6 +243,9 @@ macro_rules! fbm {
             target_feature = "avx2"
         ))]
         /// Get a single value of 4d fractal brownian motion.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -248,6 +278,9 @@ macro_rules! ridge {
             target_feature = "avx2"
         ))]
         /// Get a single value of 1d ridge noise.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             lacunarity: $f_type,
@@ -272,6 +305,9 @@ macro_rules! ridge {
             target_feature = "avx2"
         ))]
         /// Get a single value of 2d ridge noise.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -298,6 +334,9 @@ macro_rules! ridge {
             target_feature = "avx2"
         ))]
         /// Get a single value of 3d ridge noise.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -326,6 +365,9 @@ macro_rules! ridge {
             target_feature = "avx2"
         ))]
         /// Get a single value of 4d ridge noise.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -359,6 +401,9 @@ macro_rules! turbulence {
             target_feature = "avx2"
         ))]
         /// Get a single value of 1d turbulence.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             lacunarity: $f_type,
@@ -383,6 +428,9 @@ macro_rules! turbulence {
             target_feature = "avx2"
         ))]
         /// Get a single value of 2d turbulence.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -409,6 +457,9 @@ macro_rules! turbulence {
             target_feature = "avx2"
         ))]
         /// Get a single value of 3d turbulence.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -437,6 +488,9 @@ macro_rules! turbulence {
             target_feature = "avx2"
         ))]
         /// Get a single value of 4d turbulence.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -469,6 +523,9 @@ macro_rules! get_noise {
         /// coordinates. Results are unscaled, 'min' and 'max' noise values
         /// are returned so you can scale and transform the noise as you see fit
         /// in a single pass.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             noise_type: &NoiseType,
         ) -> (Vec<$f_type>, $f_type, $f_type) {
@@ -482,6 +539,9 @@ macro_rules! get_noise_scaled {
         /// `start_x` can be used to provide an offset in the coordinates.
         /// `scaled_min` and `scaled_max` specify the range you want the noise scaled to.
 
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(noise_type: &NoiseType) -> Vec<$f_type> {
             let (mut noise, min, max) = $call::<S>(noise_type);
             let dim = noise_type.get_dimensions();

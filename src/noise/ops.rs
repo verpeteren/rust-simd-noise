@@ -1,6 +1,6 @@
 use simdeez::prelude::*;
 
-/// # Safety:
+/// # Safety
 /// All array indices must be in-bounds.
 #[inline(always)]
 pub unsafe fn gather_32<S: Simd>(arr: &[i32], indices: S::Vi32) -> S::Vi32 {
@@ -12,7 +12,7 @@ pub unsafe fn gather_32<S: Simd>(arr: &[i32], indices: S::Vi32) -> S::Vi32 {
     dst
 }
 
-/// # Safety:
+/// # Safety
 /// All array indices must be in-bounds.
 #[inline(always)]
 pub unsafe fn gather_64<S: Simd>(arr: &[i64], indices: S::Vi64) -> S::Vi64 {

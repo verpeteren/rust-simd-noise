@@ -25,7 +25,7 @@ pub struct GradientSettings {
 
 impl DimensionalBeing for GradientSettings {
     fn get_dimensions(&self) -> NoiseDimensions {
-        return self.dim;
+        self.dim
     }
 }
 

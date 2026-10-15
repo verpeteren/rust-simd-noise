@@ -4,6 +4,7 @@ use crate::{Cell2ReturnType, CellDistanceFunction};
 use simdeez::prelude::*;
 
 #[inline(always)]
+#[allow(clippy::too_many_arguments)]
 pub fn cellular2_2d<S: Simd>(
     x: S::Vf32,
     y: S::Vf32,
@@ -22,8 +23,8 @@ pub fn cellular2_2d<S: Simd>(
     let mut xcf = xc.cast_f32() - x;
     let ycf_base = yc_base.cast_f32() - y;
 
-    xc = xc * S::Vi32::set1(X_PRIME_32);
-    yc_base = yc_base * S::Vi32::set1(Y_PRIME_32);
+    xc *= S::Vi32::set1(X_PRIME_32);
+    yc_base *= S::Vi32::set1(Y_PRIME_32);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -52,11 +53,11 @@ pub fn cellular2_2d<S: Simd>(
                 distance[0] = distance[0].min(new_distance);
                 i -= 1;
             }
-            ycf = ycf + S::Vf32::set1(1.0);
-            yc = yc + S::Vi32::set1(Y_PRIME_32);
+            ycf += S::Vf32::set1(1.0);
+            yc += S::Vi32::set1(Y_PRIME_32);
         }
-        xcf = xcf + S::Vf32::set1(1.0);
-        xc = xc + S::Vi32::set1(X_PRIME_32);
+        xcf += S::Vf32::set1(1.0);
+        xc += S::Vi32::set1(X_PRIME_32);
     }
 
     match return_type {
@@ -69,6 +70,7 @@ pub fn cellular2_2d<S: Simd>(
 }
 
 #[inline(always)]
+#[allow(clippy::too_many_arguments)]
 pub fn cellular2_3d<S: Simd>(
     x: S::Vf32,
     y: S::Vf32,
@@ -90,9 +92,9 @@ pub fn cellular2_3d<S: Simd>(
     let ycf_base = yc_base.cast_f32() - y;
     let zcf_base = zc_base.cast_f32() - z;
 
-    xc = xc * S::Vi32::set1(X_PRIME_32);
-    yc_base = yc_base * S::Vi32::set1(Y_PRIME_32);
-    zc_base = zc_base * S::Vi32::set1(Z_PRIME_32);
+    xc *= S::Vi32::set1(X_PRIME_32);
+    yc_base *= S::Vi32::set1(Y_PRIME_32);
+    zc_base *= S::Vi32::set1(Z_PRIME_32);
 
     for _x in 0..3 {
         let mut ycf = ycf_base;
@@ -131,11 +133,11 @@ pub fn cellular2_3d<S: Simd>(
                 zcf = ycf + S::Vf32::set1(1.0);
                 zc = yc + S::Vi32::set1(Z_PRIME_32);
             }
-            ycf = ycf + S::Vf32::set1(1.0);
-            yc = yc + S::Vi32::set1(Y_PRIME_32);
+            ycf += S::Vf32::set1(1.0);
+            yc += S::Vi32::set1(Y_PRIME_32);
         }
-        xcf = xcf + S::Vf32::set1(1.0);
-        xc = xc + S::Vi32::set1(X_PRIME_32);
+        xcf += S::Vf32::set1(1.0);
+        xc += S::Vi32::set1(X_PRIME_32);
     }
 
     match return_type {

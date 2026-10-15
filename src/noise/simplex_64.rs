@@ -58,7 +58,7 @@ pub fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
     // signed distance to the right gradient node
     let x1 = x0 - S::Vf64::set1(1.0);
 
-    i0 = i0 & S::Vi64::set1(0xff);
+    i0 &= S::Vi64::set1(0xff);
     let (gi0, gi1) = unsafe {
         // Safety: We just masked i0 and i1 with 0xff, so they're in 0..255.
         let gi0 = gather_64::<S>(&PERM64, i0);
@@ -196,7 +196,7 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> (S::Vf64,
     let n2 = t42 * g2;
 
     // Scaling factor found by numerical approximation
-    let scale = S::Vf64::set1(45.26450774985561631259);
+    let scale = S::Vf64::set1(45.264_507_749_855_62);
     let value = (n0 + n1 + n2) * scale;
     let derivative = {
         let temp0 = t20 * t0 * g0;
@@ -401,23 +401,23 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
     let mut rank_w = S::Vi64::zeroes();
 
     let cond = (x0.cmp_gt(y0)).bitcast_i64();
-    rank_x = rank_x + (cond & S::Vi64::set1(1));
-    rank_y = rank_y + S::Vi64::set1(1).and_not(cond);
+    rank_x += cond & S::Vi64::set1(1) ;
+    rank_y += S::Vi64::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(z0)).bitcast_i64();
-    rank_x = rank_x + (cond & S::Vi64::set1(1));
-    rank_z = rank_z + S::Vi64::set1(1).and_not(cond);
+    rank_x += cond & S::Vi64::set1(1) ;
+    rank_z += S::Vi64::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(w0)).bitcast_i64();
-    rank_x = rank_x + (cond & S::Vi64::set1(1));
-    rank_w = rank_w + S::Vi64::set1(1).and_not(cond);
+    rank_x += cond & S::Vi64::set1(1) ;
+    rank_w += S::Vi64::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(z0)).bitcast_i64();
-    rank_y = rank_y + (cond & S::Vi64::set1(1));
-    rank_z = rank_z + S::Vi64::set1(1).and_not(cond);
+    rank_y += cond & S::Vi64::set1(1) ;
+    rank_z += S::Vi64::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(w0)).bitcast_i64();
-    rank_y = rank_y + (cond & S::Vi64::set1(1));
-    rank_w = rank_w + S::Vi64::set1(1).and_not(cond);
+    rank_y += cond & S::Vi64::set1(1) ;
+    rank_w += S::Vi64::set1(1).and_not(cond);
     let cond = (z0.cmp_gt(w0)).bitcast_i64();
-    rank_z = rank_z + (cond & S::Vi64::set1(1));
-    rank_w = rank_w + S::Vi64::set1(1).and_not(cond);
+    rank_z += cond & S::Vi64::set1(1) ;
+    rank_w += S::Vi64::set1(1).and_not(cond);
 
     let cond = rank_x.cmp_gt(S::Vi64::set1(2));
     let i1 = S::Vi64::set1(1) & cond;

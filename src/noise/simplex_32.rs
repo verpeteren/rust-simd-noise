@@ -13,16 +13,16 @@ use std::f32;
 use std::f64;
 
 /// Skew factor for 2D simplex noise
-const F2_32: f32 = 0.36602540378;
+const F2_32: f32 = 0.366_025_42;
 pub const F2_64: f64 = 0.36602540378;
 /// Skew factor for 3D simplex noise
 const F3_32: f32 = 1.0 / 3.0;
 pub const F3_64: f64 = 1.0 / 3.0;
 /// Skew factor for 4D simplex noise
-const F4_32: f32 = 0.309016994;
+const F4_32: f32 = 0.309_017;
 pub const F4_64: f64 = 0.309016994;
 /// Unskew factor for 2D simplex noise
-const G2_32: f32 = 0.2113248654;
+const G2_32: f32 = 0.211_324_87;
 pub const G2_64: f64 = 0.2113248654;
 const G22_32: f32 = G2_32 * 2.0;
 pub const G22_64: f64 = G2_64 * 2.0;
@@ -32,7 +32,7 @@ pub const G3_64: f64 = 1.0 / 6.0;
 const G33_32: f32 = 3.0 / 6.0 - 1.0;
 pub const G33_64: f64 = 3.0 / 6.0 - 1.0;
 /// Unskew factor for 4D simplex noise
-const G4_32: f32 = 0.138196601;
+const G4_32: f32 = 0.138_196_6;
 pub const G4_64: f64 = 0.138196601;
 const G24_32: f32 = 2.0 * G4_32;
 pub const G24_64: f64 = 2.0 * G4_64;
@@ -90,7 +90,7 @@ pub fn simplex_1d_deriv<S: Simd>(x: S::Vf32, seed: i32) -> (S::Vf32, S::Vf32) {
     // signed distance to the right gradient node
     let x1 = x0 - S::Vf32::set1(1.0);
 
-    i0 = i0 & S::Vi32::set1(0xff);
+    i0 &= S::Vi32::set1(0xff);
     let (gi0, gi1) = unsafe {
         // Safety: We just masked i0 and i1 with 0xff, so they're in 0..255.
         let gi0 = gather_32::<S>(&PERM, i0);
@@ -231,7 +231,7 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf32, y: S::Vf32, seed: i32) -> (S::Vf32,
     let n2 = t42 * g2;
 
     // Scaling factor found by numerical approximation
-    let scale = S::Vf32::set1(45.26450774985561631259);
+    let scale = S::Vf32::set1(45.264_507);
     let value = (n0 + (n1 + n2)) * scale;
     let derivative = {
         let temp0 = t20 * t0 * g0;
@@ -369,7 +369,7 @@ pub fn simplex_3d_deriv<S: Simd>(
     let p2 = p1 + v1;
 
     // Scaling factor found by numerical approximation
-    let scale = S::Vf32::set1(32.69587493801679);
+    let scale = S::Vf32::set1(32.695_873);
     let result = (p2 + v0) * scale;
     let derivative = {
         let temp0 = t20 * t0 * g0;
@@ -441,23 +441,23 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
     let mut rank_w = S::Vi32::zeroes();
 
     let cond = (x0.cmp_gt(y0)).bitcast_i32();
-    rank_x = rank_x + (cond & S::Vi32::set1(1));
-    rank_y = rank_y + S::Vi32::set1(1).and_not(cond);
+    rank_x += cond & S::Vi32::set1(1);
+    rank_y += S::Vi32::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(z0)).bitcast_i32();
-    rank_x = rank_x + (cond & S::Vi32::set1(1));
-    rank_z = rank_z + S::Vi32::set1(1).and_not(cond);
+    rank_x += cond & S::Vi32::set1(1);
+    rank_z += S::Vi32::set1(1).and_not(cond);
     let cond = (x0.cmp_gt(w0)).bitcast_i32();
-    rank_x = rank_x + (cond & S::Vi32::set1(1));
-    rank_w = rank_w + S::Vi32::set1(1).and_not(cond);
+    rank_x += cond & S::Vi32::set1(1);
+    rank_w += S::Vi32::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(z0)).bitcast_i32();
-    rank_y = rank_y + (cond & S::Vi32::set1(1));
-    rank_z = rank_z + S::Vi32::set1(1).and_not(cond);
+    rank_y += cond & S::Vi32::set1(1);
+    rank_z += S::Vi32::set1(1).and_not(cond);
     let cond = (y0.cmp_gt(w0)).bitcast_i32();
-    rank_y = rank_y + (cond & S::Vi32::set1(1));
-    rank_w = rank_w + S::Vi32::set1(1).and_not(cond);
+    rank_y += cond & S::Vi32::set1(1);
+    rank_w += S::Vi32::set1(1).and_not(cond);
     let cond = (z0.cmp_gt(w0)).bitcast_i32();
-    rank_z = rank_z + (cond & S::Vi32::set1(1));
-    rank_w = rank_w + S::Vi32::set1(1).and_not(cond);
+    rank_z += cond & S::Vi32::set1(1);
+    rank_w += S::Vi32::set1(1).and_not(cond);
 
     let cond = rank_x.cmp_gt(S::Vi32::set1(2));
     let i1 = S::Vi32::set1(1) & cond;
@@ -578,7 +578,7 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
     n4 = n4.and_not(cond);
 
     // Scaling factor found by numerical approximation
-    (n0 + n1 + n2 + n3 + n4) * S::Vf32::set1(62.77772078955791)
+    (n0 + n1 + n2 + n3 + n4) * S::Vf32::set1(62.777_72)
 }
 
 #[cfg(test)]
