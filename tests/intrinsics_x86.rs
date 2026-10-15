@@ -1,9 +1,11 @@
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use simdnoise::{
     Cell2ReturnType, CellDistanceFunction, CellReturnType, Cellular2Settings, CellularSettings,
     FbmSettings, GradientSettings, NoiseDimensions, RidgeSettings, Settings, SimplexSettings,
     TurbulenceSettings,
 };
 mod helpers;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use helpers::{
     read_from_file_f32, read_from_file_f64, ARCH,
     /*save_to_file_f32, save_to_file_f64, */ BIN_PATH,

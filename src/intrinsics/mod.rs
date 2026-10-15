@@ -552,6 +552,7 @@ macro_rules! get_noise_scaled {
 }
 
 pub mod avx2;
+#[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 pub mod neon;
 pub mod scalar;
 pub mod sse2;
