@@ -149,7 +149,7 @@ enum Commands {
         //@TODO: index0/1
     },
     #[command(arg_required_else_help = false)]
-    FBM {
+    Fbm {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_FREQUENCY)]
         frequency: f32,
         #[arg(short, long, value_parser, default_value_t = DEFAULT_LACUNARITY)]
@@ -223,52 +223,22 @@ where
         let mut coord = Coordinate::<T>::default();
         match (dimension, x, y, z, w) {
             (Dimension::One, x, None, None, None) => {
-                coord.x = match x {
-                    Some(xu) => xu,
-                    None => T::default(),
-                };
+                coord.x = x.unwrap_or_default();
             }
             (Dimension::Two, x, y, None, None) => {
-                coord.x = match x {
-                    Some(xu) => xu,
-                    None => T::default(),
-                };
-                coord.y = match y {
-                    Some(yu) => yu,
-                    None => T::default(),
-                };
+                coord.x = x.unwrap_or_default();
+                coord.y = y.unwrap_or_default();
             }
             (Dimension::Three, x, y, z, None) => {
-                coord.x = match x {
-                    Some(xu) => xu,
-                    None => T::default(),
-                };
-                coord.y = match y {
-                    Some(yu) => yu,
-                    None => T::default(),
-                };
-                coord.z = match z {
-                    Some(zu) => zu,
-                    None => T::default(),
-                };
+                coord.x = x.unwrap_or_default();
+                coord.y = y.unwrap_or_default();
+                coord.z = z.unwrap_or_default();
             }
             (Dimension::Four, x, y, z, w) => {
-                coord.x = match x {
-                    Some(xu) => xu,
-                    None => T::default(),
-                };
-                coord.y = match y {
-                    Some(yu) => yu,
-                    None => T::default(),
-                };
-                coord.z = match z {
-                    Some(zu) => zu,
-                    None => T::default(),
-                };
-                coord.w = match w {
-                    Some(wu) => wu,
-                    None => T::default(),
-                };
+                coord.x = x.unwrap_or_default();
+                coord.y = y.unwrap_or_default();
+                coord.z = z.unwrap_or_default();
+                coord.w = w.unwrap_or_default();
             }
             _ => {
                 panic!(
@@ -431,7 +401,7 @@ fn process_command(
             }
         },
 
-        Commands::FBM {
+        Commands::Fbm {
             frequency,
             lacunarity,
             gain,
@@ -552,7 +522,7 @@ fn main() {
     let buffers = process_command(args.command, args.dimension, args.seed, position, offset);
     while window.is_open() && !window.is_key_down(Key::Escape) {
         for buffer in &buffers {
-            window.update_with_buffer(&buffer, width, height).unwrap();
+            window.update_with_buffer(buffer, width, height).unwrap();
         }
     }
 }
