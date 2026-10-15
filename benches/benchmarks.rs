@@ -5,7 +5,6 @@ extern crate simdnoise;
 use std::time::Duration;
 
 use criterion::*;
-use simdeez::prelude::*;
 
 use simdnoise::intrinsics::*;
 use simdnoise::*;
@@ -16,12 +15,15 @@ fn d4(c: &mut Criterion) {
     group.bench_function("scalar 4d", move |b| {
         b.iter(|| unsafe { scalar::get_4d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 4d", move |b| {
         b.iter(|| unsafe { sse2::get_4d_noise::<simdeez::Sse2>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 4d", move |b| {
         b.iter(|| unsafe { sse41::get_4d_noise::<simdeez::Sse41>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 4d", move |b| {
         b.iter(|| unsafe { avx2::get_4d_noise::<simdeez::Avx2>(&setting) })
     });
@@ -37,12 +39,15 @@ fn d3(c: &mut Criterion) {
     group.bench_function("scalar 3d", move |b| {
         b.iter(|| unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 3d", move |b| {
         b.iter(|| unsafe { sse2::get_3d_noise::<simdeez::Sse2>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 3d", move |b| {
         b.iter(|| unsafe { sse41::get_3d_noise::<simdeez::Sse41>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 3d", move |b| {
         b.iter(|| unsafe { avx2::get_3d_noise::<simdeez::Avx2>(&setting) })
     });
@@ -58,12 +63,15 @@ fn d2(c: &mut Criterion) {
     group.bench_function("scalar 2d", move |b| {
         b.iter(|| unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 2d", move |b| {
         b.iter(|| unsafe { sse2::get_2d_noise::<simdeez::Sse2>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 2d", move |b| {
         b.iter(|| unsafe { sse41::get_2d_noise::<simdeez::Sse41>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 2d", move |b| {
         b.iter(|| unsafe { avx2::get_2d_noise::<simdeez::Avx2>(&setting) })
     });
@@ -79,12 +87,15 @@ fn d1(c: &mut Criterion) {
     group.bench_function("scalar 1d", move |b| {
         b.iter(|| unsafe { scalar::get_1d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 1d", move |b| {
         b.iter(|| unsafe { sse2::get_1d_noise::<simdeez::Sse2>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 1d", move |b| {
         b.iter(|| unsafe { sse41::get_1d_noise::<simdeez::Sse41>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 1d", move |b| {
         b.iter(|| unsafe { avx2::get_1d_noise::<simdeez::Avx2>(&setting) })
     });
@@ -102,12 +113,15 @@ fn d2_cell(c: &mut Criterion) {
     group.bench_function("scalar 2d", move |b| {
         b.iter(|| unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 2d", move |b| {
         b.iter(|| unsafe { sse2::get_2d_noise::<simdeez::Sse2>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 2d", move |b| {
         b.iter(|| unsafe { sse41::get_2d_noise::<simdeez::Sse41>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 2d", move |b| {
         b.iter(|| unsafe { avx2::get_2d_noise::<simdeez::Avx2>(&setting) })
     });
@@ -123,12 +137,15 @@ fn d3_cell(c: &mut Criterion) {
     group.bench_function("scalar 3d", move |b| {
         b.iter(|| unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 3d", move |b| {
         b.iter(|| unsafe { sse2::get_3d_noise::<simdeez::Sse2>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 3d", move |b| {
         b.iter(|| unsafe { sse41::get_3d_noise::<simdeez::Sse41>(&setting) })
     });
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 3d", move |b| {
         b.iter(|| unsafe { avx2::get_3d_noise::<simdeez::Avx2>(&setting) })
     });

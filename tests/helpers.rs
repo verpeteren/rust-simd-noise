@@ -8,7 +8,7 @@ use std::io::BufReader;
 
 use byteorder::{ByteOrder, LittleEndian, WriteBytesExt};
 
-pub const BIN_PATH: &'static str = "tests/assets";
+pub const BIN_PATH: &str = "tests/assets";
 
 pub fn read_from_file_f32(file_name: &str) -> std::io::Result<Vec<f32>> {
     let file = File::open(file_name)?;
@@ -16,16 +16,9 @@ pub fn read_from_file_f32(file_name: &str) -> std::io::Result<Vec<f32>> {
     let mut noise = Vec::with_capacity((len / 4) as usize);
     let mut reader = BufReader::new(file);
     let mut block: [u8; 4] = [0; 4];
-    loop {
-        match reader.read_exact(&mut block) {
-            Ok(_) => {
-                let f = LittleEndian::read_f32(&mut block);
-                noise.push(f);
-            }
-            Err(_) => {
-                break;
-            }
-        };
+    while reader.read_exact(&mut block).is_ok() {
+        let f = LittleEndian::read_f32(&block);
+        noise.push(f);
     }
     Ok(noise)
 }
@@ -36,16 +29,9 @@ pub fn read_from_file_f64(file_name: &str) -> std::io::Result<Vec<f64>> {
     let mut noise = Vec::with_capacity((len / 4) as usize);
     let mut reader = BufReader::new(file);
     let mut block: [u8; 8] = [0; 8];
-    loop {
-        match reader.read_exact(&mut block) {
-            Ok(_) => {
-                let f = LittleEndian::read_f64(&mut block);
-                noise.push(f);
-            }
-            Err(_) => {
-                break;
-            }
-        };
+    while reader.read_exact(&mut block).is_ok() {
+        let f = LittleEndian::read_f64(&block);
+        noise.push(f);
     }
     Ok(noise)
 }

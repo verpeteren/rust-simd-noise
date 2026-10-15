@@ -542,7 +542,7 @@ mod tests {
     use simdeez::scalar::{F64x1, Scalar};
 
     fn check_bounds(min: f64, max: f64) {
-        assert!(min < -0.75 && min >= -1.0, "min out of range {}", min);
+        assert!((-1.0..-0.75).contains(&min), "min out of range {}", min);
         assert!(max > 0.75 && max <= 1.0, "max out of range: {}", max);
     }
 

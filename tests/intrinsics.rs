@@ -1,4 +1,6 @@
-use simdnoise::intrinsics::{avx2, scalar, sse2, sse41};
+use simdnoise::intrinsics::scalar;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use simdnoise::intrinsics::{avx2, sse2, sse41};
 use simdnoise::{
     Cell2ReturnType, CellDistanceFunction, CellReturnType, Cellular2Settings, CellularSettings,
     FbmSettings, GradientSettings, NoiseDimensions, RidgeSettings, Settings, SimplexSettings,
@@ -10,6 +12,7 @@ use helpers::{
     read_from_file_f32, read_from_file_f64, /*save_to_file_f32, save_to_file_f64, */ BIN_PATH,
 };
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_2_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -23,6 +26,7 @@ unsafe fn do_intrinsic_cellular_2_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_avx2_32_normal() {
     let file_name = format!(
@@ -63,6 +67,7 @@ fn test_intrinsic_cellular_2_scalar_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_2_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -76,6 +81,7 @@ unsafe fn do_intrinsic_cellular_2_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse2_32_normal() {
     let file_name = format!(
@@ -90,6 +96,7 @@ fn test_intrinsic_cellular_2_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_2_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -103,6 +110,7 @@ unsafe fn do_intrinsic_cellular_2_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse41_32_normal() {
     let file_name = format!(
@@ -117,6 +125,7 @@ fn test_intrinsic_cellular_2_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_3_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -131,6 +140,7 @@ unsafe fn do_intrinsic_cellular_3_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_avx2_32_normal() {
     let file_name = format!(
@@ -172,6 +182,7 @@ fn test_intrinsic_cellular_3_scalar_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_3_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -186,6 +197,7 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse2_32_normal() {
     let file_name = format!(
@@ -200,6 +212,7 @@ fn test_intrinsic_cellular_3_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_3_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -214,6 +227,7 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse41_32_normal() {
     let file_name = format!(
@@ -228,6 +242,7 @@ fn test_intrinsic_cellular_3_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_2_avx2_32_euclidean_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -245,6 +260,7 @@ unsafe fn do_intrinsic_cellular_2_avx2_32_euclidean_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_avx2_32_euclidean_cellvalue() {
     let file_name = format!(
@@ -289,6 +305,7 @@ fn test_intrinsic_cellular_2_scalar_32_euclidean_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_2_sse2_32_euclidean_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -306,6 +323,7 @@ unsafe fn do_intrinsic_cellular_2_sse2_32_euclidean_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse2_32_euclidean_cellvalue() {
     let file_name = format!(
@@ -320,6 +338,7 @@ fn test_intrinsic_cellular_2_sse2_32_euclidean_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_2_sse41_32_euclidean_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -337,6 +356,7 @@ unsafe fn do_intrinsic_cellular_2_sse41_32_euclidean_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse41_32_euclidean_cellvalue() {
     let file_name = format!(
@@ -351,6 +371,7 @@ fn test_intrinsic_cellular_2_sse41_32_euclidean_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_3_avx2_32_euclidean_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -369,6 +390,7 @@ unsafe fn do_intrinsic_cellular_3_avx2_32_euclidean_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_avx2_32_euclidean_cellvalue() {
     let file_name = format!(
@@ -414,6 +436,7 @@ fn test_intrinsic_cellular_3_scalar_32_euclidean_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_3_sse2_32_euclidean_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -432,6 +455,7 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_euclidean_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse2_32_euclidean_cellvalue() {
     let file_name = format!(
@@ -446,6 +470,7 @@ fn test_intrinsic_cellular_3_sse2_32_euclidean_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_3_sse41_32_euclidean_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -464,6 +489,7 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_euclidean_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse41_32_euclidean_cellvalue() {
     let file_name = format!(
@@ -478,6 +504,7 @@ fn test_intrinsic_cellular_3_sse41_32_euclidean_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_2_avx2_32_euclidean_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -495,6 +522,7 @@ unsafe fn do_intrinsic_cellular_2_avx2_32_euclidean_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_avx2_32_euclidean_distance() {
     let file_name = format!(
@@ -539,6 +567,7 @@ fn test_intrinsic_cellular_2_scalar_32_euclidean_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_2_sse2_32_euclidean_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -556,6 +585,7 @@ unsafe fn do_intrinsic_cellular_2_sse2_32_euclidean_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse2_32_euclidean_distance() {
     let file_name = format!(
@@ -570,6 +600,7 @@ fn test_intrinsic_cellular_2_sse2_32_euclidean_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_2_sse41_32_euclidean_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -587,6 +618,7 @@ unsafe fn do_intrinsic_cellular_2_sse41_32_euclidean_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse41_32_euclidean_distance() {
     let file_name = format!(
@@ -601,6 +633,7 @@ fn test_intrinsic_cellular_2_sse41_32_euclidean_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_3_avx2_32_euclidean_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -619,6 +652,7 @@ unsafe fn do_intrinsic_cellular_3_avx2_32_euclidean_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_avx2_32_euclidean_distance() {
     let file_name = format!(
@@ -664,6 +698,7 @@ fn test_intrinsic_cellular_3_scalar_32_euclidean_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_3_sse2_32_euclidean_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -682,6 +717,7 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_euclidean_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse2_32_euclidean_distance() {
     let file_name = format!(
@@ -696,6 +732,7 @@ fn test_intrinsic_cellular_3_sse2_32_euclidean_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_3_sse41_32_euclidean_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -714,6 +751,7 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_euclidean_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse41_32_euclidean_distance() {
     let file_name = format!(
@@ -728,6 +766,7 @@ fn test_intrinsic_cellular_3_sse41_32_euclidean_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_2_avx2_32_manhattan_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -745,6 +784,7 @@ unsafe fn do_intrinsic_cellular_2_avx2_32_manhattan_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_avx2_32_manhattan_cellvalue() {
     let file_name = format!(
@@ -789,6 +829,7 @@ fn test_intrinsic_cellular_2_scalar_32_manhattan_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_2_sse2_32_manhattan_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -806,6 +847,7 @@ unsafe fn do_intrinsic_cellular_2_sse2_32_manhattan_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse2_32_manhattan_cellvalue() {
     let file_name = format!(
@@ -820,6 +862,7 @@ fn test_intrinsic_cellular_2_sse2_32_manhattan_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_2_sse41_32_manhattan_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -837,6 +880,7 @@ unsafe fn do_intrinsic_cellular_2_sse41_32_manhattan_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse41_32_manhattan_cellvalue() {
     let file_name = format!(
@@ -851,6 +895,7 @@ fn test_intrinsic_cellular_2_sse41_32_manhattan_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_3_avx2_32_manhattan_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -869,6 +914,7 @@ unsafe fn do_intrinsic_cellular_3_avx2_32_manhattan_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_avx2_32_manhattan_cellvalue() {
     let file_name = format!(
@@ -914,6 +960,7 @@ fn test_intrinsic_cellular_3_scalar_32_manhattan_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_3_sse2_32_manhattan_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -932,6 +979,7 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_manhattan_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse2_32_manhattan_cellvalue() {
     let file_name = format!(
@@ -946,6 +994,7 @@ fn test_intrinsic_cellular_3_sse2_32_manhattan_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_3_sse41_32_manhattan_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -964,6 +1013,7 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_manhattan_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse41_32_manhattan_cellvalue() {
     let file_name = format!(
@@ -978,6 +1028,7 @@ fn test_intrinsic_cellular_3_sse41_32_manhattan_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_2_avx2_32_manhattan_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -995,6 +1046,7 @@ unsafe fn do_intrinsic_cellular_2_avx2_32_manhattan_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_avx2_32_manhattan_distance() {
     let file_name = format!(
@@ -1039,6 +1091,7 @@ fn test_intrinsic_cellular_2_scalar_32_manhattan_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_2_sse2_32_manhattan_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1056,6 +1109,7 @@ unsafe fn do_intrinsic_cellular_2_sse2_32_manhattan_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse2_32_manhattan_distance() {
     let file_name = format!(
@@ -1070,6 +1124,7 @@ fn test_intrinsic_cellular_2_sse2_32_manhattan_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_2_sse41_32_manhattan_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1087,6 +1142,7 @@ unsafe fn do_intrinsic_cellular_2_sse41_32_manhattan_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse41_32_manhattan_distance() {
     let file_name = format!(
@@ -1101,6 +1157,7 @@ fn test_intrinsic_cellular_2_sse41_32_manhattan_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_3_avx2_32_manhattan_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1119,6 +1176,7 @@ unsafe fn do_intrinsic_cellular_3_avx2_32_manhattan_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_avx2_32_manhattan_distance() {
     let file_name = format!(
@@ -1164,6 +1222,7 @@ fn test_intrinsic_cellular_3_scalar_32_manhattan_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_3_sse2_32_manhattan_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1182,6 +1241,7 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_manhattan_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse2_32_manhattan_distance() {
     let file_name = format!(
@@ -1196,6 +1256,7 @@ fn test_intrinsic_cellular_3_sse2_32_manhattan_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_3_sse41_32_manhattan_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1214,6 +1275,7 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_manhattan_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse41_32_manhattan_distance() {
     let file_name = format!(
@@ -1228,6 +1290,7 @@ fn test_intrinsic_cellular_3_sse41_32_manhattan_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_2_avx2_32_natural_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1245,6 +1308,7 @@ unsafe fn do_intrinsic_cellular_2_avx2_32_natural_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_avx2_32_natural_cellvalue() {
     let file_name = format!(
@@ -1289,6 +1353,7 @@ fn test_intrinsic_cellular_2_scalar_32_natural_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_2_sse2_32_natural_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1306,6 +1371,7 @@ unsafe fn do_intrinsic_cellular_2_sse2_32_natural_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse2_32_natural_cellvalue() {
     let file_name = format!(
@@ -1320,6 +1386,7 @@ fn test_intrinsic_cellular_2_sse2_32_natural_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_2_sse41_32_natural_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1337,6 +1404,7 @@ unsafe fn do_intrinsic_cellular_2_sse41_32_natural_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse41_32_natural_cellvalue() {
     let file_name = format!(
@@ -1351,6 +1419,7 @@ fn test_intrinsic_cellular_2_sse41_32_natural_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_3_avx2_32_natural_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1369,6 +1438,7 @@ unsafe fn do_intrinsic_cellular_3_avx2_32_natural_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_avx2_32_natural_cellvalue() {
     let file_name = format!(
@@ -1414,6 +1484,7 @@ fn test_intrinsic_cellular_3_scalar_32_natural_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_3_sse2_32_natural_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1432,6 +1503,7 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_natural_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse2_32_natural_cellvalue() {
     let file_name = format!(
@@ -1446,6 +1518,7 @@ fn test_intrinsic_cellular_3_sse2_32_natural_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_3_sse41_32_natural_cellvalue() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1464,6 +1537,7 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_natural_cellvalue() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse41_32_natural_cellvalue() {
     let file_name = format!(
@@ -1478,6 +1552,7 @@ fn test_intrinsic_cellular_3_sse41_32_natural_cellvalue() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_2_avx2_32_natural_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1495,6 +1570,7 @@ unsafe fn do_intrinsic_cellular_2_avx2_32_natural_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_avx2_32_natural_distance() {
     let file_name = format!(
@@ -1539,6 +1615,7 @@ fn test_intrinsic_cellular_2_scalar_32_natural_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_2_sse2_32_natural_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1556,6 +1633,7 @@ unsafe fn do_intrinsic_cellular_2_sse2_32_natural_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse2_32_natural_distance() {
     let file_name = format!(
@@ -1570,6 +1648,7 @@ fn test_intrinsic_cellular_2_sse2_32_natural_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_2_sse41_32_natural_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1587,6 +1666,7 @@ unsafe fn do_intrinsic_cellular_2_sse41_32_natural_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_2_sse41_32_natural_distance() {
     let file_name = format!(
@@ -1601,6 +1681,7 @@ fn test_intrinsic_cellular_2_sse41_32_natural_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular_3_avx2_32_natural_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1619,6 +1700,7 @@ unsafe fn do_intrinsic_cellular_3_avx2_32_natural_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_avx2_32_natural_distance() {
     let file_name = format!(
@@ -1664,6 +1746,7 @@ fn test_intrinsic_cellular_3_scalar_32_natural_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular_3_sse2_32_natural_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1682,6 +1765,7 @@ unsafe fn do_intrinsic_cellular_3_sse2_32_natural_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse2_32_natural_distance() {
     let file_name = format!(
@@ -1696,6 +1780,7 @@ fn test_intrinsic_cellular_3_sse2_32_natural_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular_3_sse41_32_natural_distance() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1714,6 +1799,7 @@ unsafe fn do_intrinsic_cellular_3_sse41_32_natural_distance() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular_3_sse41_32_natural_distance() {
     let file_name = format!(
@@ -1728,6 +1814,7 @@ fn test_intrinsic_cellular_3_sse41_32_natural_distance() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1741,6 +1828,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_normal() {
     let file_name = format!(
@@ -1781,6 +1869,7 @@ fn test_intrinsic_cellular2_2_scalar_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1794,6 +1883,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_normal() {
     let file_name = format!(
@@ -1808,6 +1898,7 @@ fn test_intrinsic_cellular2_2_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1821,6 +1912,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_normal() {
     let file_name = format!(
@@ -1835,6 +1927,7 @@ fn test_intrinsic_cellular2_2_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1849,6 +1942,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_normal() {
     let file_name = format!(
@@ -1890,6 +1984,7 @@ fn test_intrinsic_cellular2_3_scalar_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1904,6 +1999,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_normal() {
     let file_name = format!(
@@ -1918,6 +2014,7 @@ fn test_intrinsic_cellular2_3_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1932,6 +2029,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_normal() {
     let file_name = format!(
@@ -1946,6 +2044,7 @@ fn test_intrinsic_cellular2_3_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -1963,6 +2062,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_euclidean_distance2() {
     let file_name = format!(
@@ -2007,6 +2107,7 @@ fn test_intrinsic_cellular2_2_scalar_32_euclidean_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2024,6 +2125,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2() {
     let file_name = format!(
@@ -2038,6 +2140,7 @@ fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2055,6 +2158,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2() {
     let file_name = format!(
@@ -2069,6 +2173,7 @@ fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2087,6 +2192,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_euclidean_distance2() {
     let file_name = format!(
@@ -2132,6 +2238,7 @@ fn test_intrinsic_cellular2_3_scalar_32_euclidean_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2150,6 +2257,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2() {
     let file_name = format!(
@@ -2164,6 +2272,7 @@ fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2182,6 +2291,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2() {
     let file_name = format!(
@@ -2196,6 +2306,7 @@ fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2213,6 +2324,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_euclidean_distance2add() {
     let file_name = format!(
@@ -2257,6 +2369,7 @@ fn test_intrinsic_cellular2_2_scalar_32_euclidean_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2274,6 +2387,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2add() {
     let file_name = format!(
@@ -2288,6 +2402,7 @@ fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2305,6 +2420,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2add() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2add() {
     let file_name = format!(
@@ -2319,6 +2435,7 @@ fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2337,6 +2454,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_euclidean_distance2add() {
     let file_name = format!(
@@ -2382,6 +2500,7 @@ fn test_intrinsic_cellular2_3_scalar_32_euclidean_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2400,6 +2519,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2add() {
     let file_name = format!(
@@ -2414,6 +2534,7 @@ fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2432,6 +2553,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2add() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2add() {
     let file_name = format!(
@@ -2446,6 +2568,7 @@ fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2463,6 +2586,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_euclidean_distance2sub() {
     let file_name = format!(
@@ -2507,6 +2631,7 @@ fn test_intrinsic_cellular2_2_scalar_32_euclidean_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2524,6 +2649,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2sub() {
     let file_name = format!(
@@ -2538,6 +2664,7 @@ fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2555,6 +2682,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2sub() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2sub() {
     let file_name = format!(
@@ -2569,6 +2697,7 @@ fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2587,6 +2716,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_euclidean_distance2sub() {
     let file_name = format!(
@@ -2632,6 +2762,7 @@ fn test_intrinsic_cellular2_3_scalar_32_euclidean_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2650,6 +2781,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2sub() {
     let file_name = format!(
@@ -2664,6 +2796,7 @@ fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2682,6 +2815,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2sub() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2sub() {
     let file_name = format!(
@@ -2696,6 +2830,7 @@ fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2713,6 +2848,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_euclidean_distance2mul() {
     let file_name = format!(
@@ -2757,6 +2893,7 @@ fn test_intrinsic_cellular2_2_scalar_32_euclidean_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2774,6 +2911,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2mul() {
     let file_name = format!(
@@ -2788,6 +2926,7 @@ fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2805,6 +2944,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2mul() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2mul() {
     let file_name = format!(
@@ -2819,6 +2959,7 @@ fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2837,6 +2978,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_euclidean_distance2mul() {
     let file_name = format!(
@@ -2882,6 +3024,7 @@ fn test_intrinsic_cellular2_3_scalar_32_euclidean_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2900,6 +3043,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2mul() {
     let file_name = format!(
@@ -2914,6 +3058,7 @@ fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2932,6 +3077,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2mul() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2mul() {
     let file_name = format!(
@@ -2946,6 +3092,7 @@ fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -2963,6 +3110,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_euclidean_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_euclidean_distance2div() {
     let file_name = format!(
@@ -3007,6 +3155,7 @@ fn test_intrinsic_cellular2_2_scalar_32_euclidean_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3024,6 +3173,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_euclidean_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2div() {
     let file_name = format!(
@@ -3038,6 +3188,7 @@ fn test_intrinsic_cellular2_2_sse2_32_euclidean_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3055,6 +3206,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_euclidean_distance2div() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2div() {
     let file_name = format!(
@@ -3069,6 +3221,7 @@ fn test_intrinsic_cellular2_2_sse41_32_euclidean_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3087,6 +3240,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_euclidean_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_euclidean_distance2div() {
     let file_name = format!(
@@ -3132,6 +3286,7 @@ fn test_intrinsic_cellular2_3_scalar_32_euclidean_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3150,6 +3305,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_euclidean_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2div() {
     let file_name = format!(
@@ -3164,6 +3320,7 @@ fn test_intrinsic_cellular2_3_sse2_32_euclidean_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3182,6 +3339,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_euclidean_distance2div() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2div() {
     let file_name = format!(
@@ -3196,6 +3354,7 @@ fn test_intrinsic_cellular2_3_sse41_32_euclidean_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3213,6 +3372,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_manhattan_distance2() {
     let file_name = format!(
@@ -3257,6 +3417,7 @@ fn test_intrinsic_cellular2_2_scalar_32_manhattan_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3274,6 +3435,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2() {
     let file_name = format!(
@@ -3288,6 +3450,7 @@ fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3305,6 +3468,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2() {
     let file_name = format!(
@@ -3319,6 +3483,7 @@ fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3337,6 +3502,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_manhattan_distance2() {
     let file_name = format!(
@@ -3382,6 +3548,7 @@ fn test_intrinsic_cellular2_3_scalar_32_manhattan_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3400,6 +3567,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2() {
     let file_name = format!(
@@ -3414,6 +3582,7 @@ fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3432,6 +3601,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2() {
     let file_name = format!(
@@ -3446,6 +3616,7 @@ fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3463,6 +3634,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_manhattan_distance2add() {
     let file_name = format!(
@@ -3507,6 +3679,7 @@ fn test_intrinsic_cellular2_2_scalar_32_manhattan_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3524,6 +3697,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2add() {
     let file_name = format!(
@@ -3538,6 +3712,7 @@ fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3555,6 +3730,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2add() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2add() {
     let file_name = format!(
@@ -3569,6 +3745,7 @@ fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3587,6 +3764,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_manhattan_distance2add() {
     let file_name = format!(
@@ -3632,6 +3810,7 @@ fn test_intrinsic_cellular2_3_scalar_32_manhattan_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3650,6 +3829,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2add() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2add() {
     let file_name = format!(
@@ -3664,6 +3844,7 @@ fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3682,6 +3863,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2add() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2add() {
     let file_name = format!(
@@ -3696,6 +3878,7 @@ fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3713,6 +3896,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_manhattan_distance2sub() {
     let file_name = format!(
@@ -3757,6 +3941,7 @@ fn test_intrinsic_cellular2_2_scalar_32_manhattan_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3774,6 +3959,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2sub() {
     let file_name = format!(
@@ -3788,6 +3974,7 @@ fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3805,6 +3992,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2sub() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2sub() {
     let file_name = format!(
@@ -3819,6 +4007,7 @@ fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3837,6 +4026,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_manhattan_distance2sub() {
     let file_name = format!(
@@ -3882,6 +4072,7 @@ fn test_intrinsic_cellular2_3_scalar_32_manhattan_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3900,6 +4091,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2sub() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2sub() {
     let file_name = format!(
@@ -3914,6 +4106,7 @@ fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3932,6 +4125,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2sub() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2sub() {
     let file_name = format!(
@@ -3946,6 +4140,7 @@ fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -3963,6 +4158,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_manhattan_distance2mul() {
     let file_name = format!(
@@ -4007,6 +4203,7 @@ fn test_intrinsic_cellular2_2_scalar_32_manhattan_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4024,6 +4221,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2mul() {
     let file_name = format!(
@@ -4038,6 +4236,7 @@ fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4055,6 +4254,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2mul() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2mul() {
     let file_name = format!(
@@ -4069,6 +4269,7 @@ fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4087,6 +4288,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_manhattan_distance2mul() {
     let file_name = format!(
@@ -4132,6 +4334,7 @@ fn test_intrinsic_cellular2_3_scalar_32_manhattan_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4150,6 +4353,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2mul() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2mul() {
     let file_name = format!(
@@ -4164,6 +4368,7 @@ fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4182,6 +4387,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2mul() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2mul() {
     let file_name = format!(
@@ -4196,6 +4402,7 @@ fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4213,6 +4420,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_manhattan_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_manhattan_distance2div() {
     let file_name = format!(
@@ -4257,6 +4465,7 @@ fn test_intrinsic_cellular2_2_scalar_32_manhattan_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4274,6 +4483,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_manhattan_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2div() {
     let file_name = format!(
@@ -4288,6 +4498,7 @@ fn test_intrinsic_cellular2_2_sse2_32_manhattan_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4305,6 +4516,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_manhattan_distance2div() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2div() {
     let file_name = format!(
@@ -4319,6 +4531,7 @@ fn test_intrinsic_cellular2_2_sse41_32_manhattan_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4337,6 +4550,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_manhattan_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_manhattan_distance2div() {
     let file_name = format!(
@@ -4382,6 +4596,7 @@ fn test_intrinsic_cellular2_3_scalar_32_manhattan_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4400,6 +4615,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_manhattan_distance2div() -> Vec<f32> 
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2div() {
     let file_name = format!(
@@ -4414,6 +4630,7 @@ fn test_intrinsic_cellular2_3_sse2_32_manhattan_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4432,6 +4649,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_manhattan_distance2div() -> Vec<f32>
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2div() {
     let file_name = format!(
@@ -4446,6 +4664,7 @@ fn test_intrinsic_cellular2_3_sse41_32_manhattan_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4463,6 +4682,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_natural_distance2() {
     let file_name = format!(
@@ -4507,6 +4727,7 @@ fn test_intrinsic_cellular2_2_scalar_32_natural_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4524,6 +4745,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_natural_distance2() {
     let file_name = format!(
@@ -4538,6 +4760,7 @@ fn test_intrinsic_cellular2_2_sse2_32_natural_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4555,6 +4778,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_natural_distance2() {
     let file_name = format!(
@@ -4569,6 +4793,7 @@ fn test_intrinsic_cellular2_2_sse41_32_natural_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4587,6 +4812,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_natural_distance2() {
     let file_name = format!(
@@ -4632,6 +4858,7 @@ fn test_intrinsic_cellular2_3_scalar_32_natural_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4650,6 +4877,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_natural_distance2() {
     let file_name = format!(
@@ -4664,6 +4892,7 @@ fn test_intrinsic_cellular2_3_sse2_32_natural_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4682,6 +4911,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_natural_distance2() {
     let file_name = format!(
@@ -4696,6 +4926,7 @@ fn test_intrinsic_cellular2_3_sse41_32_natural_distance2() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4713,6 +4944,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2add() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_natural_distance2add() {
     let file_name = format!(
@@ -4757,6 +4989,7 @@ fn test_intrinsic_cellular2_2_scalar_32_natural_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4774,6 +5007,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2add() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_natural_distance2add() {
     let file_name = format!(
@@ -4788,6 +5022,7 @@ fn test_intrinsic_cellular2_2_sse2_32_natural_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4805,6 +5040,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2add() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_natural_distance2add() {
     let file_name = format!(
@@ -4819,6 +5055,7 @@ fn test_intrinsic_cellular2_2_sse41_32_natural_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4837,6 +5074,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2add() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_natural_distance2add() {
     let file_name = format!(
@@ -4882,6 +5120,7 @@ fn test_intrinsic_cellular2_3_scalar_32_natural_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4900,6 +5139,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2add() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_natural_distance2add() {
     let file_name = format!(
@@ -4914,6 +5154,7 @@ fn test_intrinsic_cellular2_3_sse2_32_natural_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2add() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4932,6 +5173,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2add() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_natural_distance2add() {
     let file_name = format!(
@@ -4946,6 +5188,7 @@ fn test_intrinsic_cellular2_3_sse41_32_natural_distance2add() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -4963,6 +5206,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2sub() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_natural_distance2sub() {
     let file_name = format!(
@@ -5007,6 +5251,7 @@ fn test_intrinsic_cellular2_2_scalar_32_natural_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5024,6 +5269,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2sub() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_natural_distance2sub() {
     let file_name = format!(
@@ -5038,6 +5284,7 @@ fn test_intrinsic_cellular2_2_sse2_32_natural_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5055,6 +5302,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2sub() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_natural_distance2sub() {
     let file_name = format!(
@@ -5069,6 +5317,7 @@ fn test_intrinsic_cellular2_2_sse41_32_natural_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5087,6 +5336,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2sub() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_natural_distance2sub() {
     let file_name = format!(
@@ -5132,6 +5382,7 @@ fn test_intrinsic_cellular2_3_scalar_32_natural_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5150,6 +5401,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2sub() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_natural_distance2sub() {
     let file_name = format!(
@@ -5164,6 +5416,7 @@ fn test_intrinsic_cellular2_3_sse2_32_natural_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2sub() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5182,6 +5435,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2sub() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_natural_distance2sub() {
     let file_name = format!(
@@ -5196,6 +5450,7 @@ fn test_intrinsic_cellular2_3_sse41_32_natural_distance2sub() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5213,6 +5468,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2mul() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_natural_distance2mul() {
     let file_name = format!(
@@ -5257,6 +5513,7 @@ fn test_intrinsic_cellular2_2_scalar_32_natural_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5274,6 +5531,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2mul() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_natural_distance2mul() {
     let file_name = format!(
@@ -5288,6 +5546,7 @@ fn test_intrinsic_cellular2_2_sse2_32_natural_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5305,6 +5564,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2mul() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_natural_distance2mul() {
     let file_name = format!(
@@ -5319,6 +5579,7 @@ fn test_intrinsic_cellular2_2_sse41_32_natural_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5337,6 +5598,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2mul() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_natural_distance2mul() {
     let file_name = format!(
@@ -5382,6 +5644,7 @@ fn test_intrinsic_cellular2_3_scalar_32_natural_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5400,6 +5663,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2mul() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_natural_distance2mul() {
     let file_name = format!(
@@ -5414,6 +5678,7 @@ fn test_intrinsic_cellular2_3_sse2_32_natural_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2mul() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5432,6 +5697,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2mul() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_natural_distance2mul() {
     let file_name = format!(
@@ -5446,6 +5712,7 @@ fn test_intrinsic_cellular2_3_sse41_32_natural_distance2mul() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5463,6 +5730,7 @@ unsafe fn do_intrinsic_cellular2_2_avx2_32_natural_distance2div() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_avx2_32_natural_distance2div() {
     let file_name = format!(
@@ -5507,6 +5775,7 @@ fn test_intrinsic_cellular2_2_scalar_32_natural_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5524,6 +5793,7 @@ unsafe fn do_intrinsic_cellular2_2_sse2_32_natural_distance2div() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse2_32_natural_distance2div() {
     let file_name = format!(
@@ -5538,6 +5808,7 @@ fn test_intrinsic_cellular2_2_sse2_32_natural_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5555,6 +5826,7 @@ unsafe fn do_intrinsic_cellular2_2_sse41_32_natural_distance2div() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_2_sse41_32_natural_distance2div() {
     let file_name = format!(
@@ -5569,6 +5841,7 @@ fn test_intrinsic_cellular2_2_sse41_32_natural_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5587,6 +5860,7 @@ unsafe fn do_intrinsic_cellular2_3_avx2_32_natural_distance2div() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_avx2_32_natural_distance2div() {
     let file_name = format!(
@@ -5632,6 +5906,7 @@ fn test_intrinsic_cellular2_3_scalar_32_natural_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5650,6 +5925,7 @@ unsafe fn do_intrinsic_cellular2_3_sse2_32_natural_distance2div() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse2_32_natural_distance2div() {
     let file_name = format!(
@@ -5664,6 +5940,7 @@ fn test_intrinsic_cellular2_3_sse2_32_natural_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2div() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5682,6 +5959,7 @@ unsafe fn do_intrinsic_cellular2_3_sse41_32_natural_distance2div() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_cellular2_3_sse41_32_natural_distance2div() {
     let file_name = format!(
@@ -5696,6 +5974,7 @@ fn test_intrinsic_cellular2_3_sse41_32_natural_distance2div() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_1_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5712,6 +5991,7 @@ unsafe fn do_intrinsic_ridge_1_avx2_32_normal() -> Vec<f32> {
     let (noise, _min, _max) = avx2::get_1d_noise::<simdeez::Avx2>(&noise_type);
     noise
 }
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_1_avx2_32_normal() {
     let file_name = format!(
@@ -5726,6 +6006,7 @@ fn test_intrinsic_ridge_1_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_1_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -5743,6 +6024,7 @@ unsafe fn do_intrinsic_ridge_1_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_1_avx2_64_normal() {
     let file_name = format!(
@@ -5817,6 +6099,7 @@ fn test_intrinsic_ridge_1_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_1_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5834,6 +6117,7 @@ unsafe fn do_intrinsic_ridge_1_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_1_sse2_32_normal() {
     let file_name = format!(
@@ -5848,6 +6132,7 @@ fn test_intrinsic_ridge_1_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_1_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -5865,6 +6150,7 @@ unsafe fn do_intrinsic_ridge_1_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_1_sse2_64_normal() {
     let file_name = format!(
@@ -5879,6 +6165,7 @@ fn test_intrinsic_ridge_1_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_1_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5896,6 +6183,7 @@ unsafe fn do_intrinsic_ridge_1_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_1_sse41_32_normal() {
     let file_name = format!(
@@ -5910,6 +6198,7 @@ fn test_intrinsic_ridge_1_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_1_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -5927,6 +6216,7 @@ unsafe fn do_intrinsic_ridge_1_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_1_sse41_64_normal() {
     let file_name = format!(
@@ -5941,6 +6231,7 @@ fn test_intrinsic_ridge_1_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_2_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -5959,6 +6250,7 @@ unsafe fn do_intrinsic_ridge_2_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_2_avx2_32_normal() {
     let file_name = format!(
@@ -5973,6 +6265,7 @@ fn test_intrinsic_ridge_2_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_2_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -5991,6 +6284,7 @@ unsafe fn do_intrinsic_ridge_2_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_2_avx2_64_normal() {
     let file_name = format!(
@@ -6067,6 +6361,7 @@ fn test_intrinsic_ridge_2_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_2_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6085,6 +6380,7 @@ unsafe fn do_intrinsic_ridge_2_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_2_sse2_32_normal() {
     let file_name = format!(
@@ -6099,6 +6395,7 @@ fn test_intrinsic_ridge_2_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_2_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6117,6 +6414,7 @@ unsafe fn do_intrinsic_ridge_2_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[ignore]
 fn test_intrinsic_ridge_2_sse2_64_normal() {
@@ -6132,6 +6430,7 @@ fn test_intrinsic_ridge_2_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_2_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6150,6 +6449,7 @@ unsafe fn do_intrinsic_ridge_2_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_2_sse41_32_normal() {
     let file_name = format!(
@@ -6164,6 +6464,7 @@ fn test_intrinsic_ridge_2_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_2_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6182,6 +6483,7 @@ unsafe fn do_intrinsic_ridge_2_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_2_sse41_64_normal() {
     let file_name = format!(
@@ -6196,6 +6498,7 @@ fn test_intrinsic_ridge_2_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_3_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6215,6 +6518,7 @@ unsafe fn do_intrinsic_ridge_3_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_3_avx2_32_normal() {
     let file_name = format!(
@@ -6229,6 +6533,7 @@ fn test_intrinsic_ridge_3_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_3_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6248,6 +6553,7 @@ unsafe fn do_intrinsic_ridge_3_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_ridge_3_avx2_64_normal() {
@@ -6328,6 +6634,7 @@ fn test_intrinsic_ridge_3_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_3_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6347,6 +6654,7 @@ unsafe fn do_intrinsic_ridge_3_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_3_sse2_32_normal() {
     let file_name = format!(
@@ -6361,6 +6669,7 @@ fn test_intrinsic_ridge_3_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_3_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6380,6 +6689,7 @@ unsafe fn do_intrinsic_ridge_3_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_ridge_3_sse2_64_normal() {
@@ -6395,6 +6705,7 @@ fn test_intrinsic_ridge_3_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_3_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6414,6 +6725,7 @@ unsafe fn do_intrinsic_ridge_3_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_3_sse41_32_normal() {
     let file_name = format!(
@@ -6428,6 +6740,7 @@ fn test_intrinsic_ridge_3_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_3_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6447,6 +6760,7 @@ unsafe fn do_intrinsic_ridge_3_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_ridge_3_sse41_64_normal() {
@@ -6462,6 +6776,7 @@ fn test_intrinsic_ridge_3_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_4_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6482,6 +6797,7 @@ unsafe fn do_intrinsic_ridge_4_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_4_avx2_32_normal() {
     let file_name = format!(
@@ -6496,6 +6812,7 @@ fn test_intrinsic_ridge_4_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_ridge_4_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6516,6 +6833,7 @@ unsafe fn do_intrinsic_ridge_4_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_4_avx2_64_normal() {
     let file_name = format!(
@@ -6596,6 +6914,7 @@ fn test_intrinsic_ridge_4_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_4_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6616,6 +6935,7 @@ unsafe fn do_intrinsic_ridge_4_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_4_sse2_32_normal() {
     let file_name = format!(
@@ -6630,6 +6950,7 @@ fn test_intrinsic_ridge_4_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_ridge_4_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6650,6 +6971,7 @@ unsafe fn do_intrinsic_ridge_4_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_4_sse2_64_normal() {
     let file_name = format!(
@@ -6664,6 +6986,7 @@ fn test_intrinsic_ridge_4_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_4_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6684,6 +7007,7 @@ unsafe fn do_intrinsic_ridge_4_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_4_sse41_32_normal() {
     let file_name = format!(
@@ -6698,6 +7022,7 @@ fn test_intrinsic_ridge_4_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_ridge_4_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6718,6 +7043,7 @@ unsafe fn do_intrinsic_ridge_4_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_ridge_4_sse41_64_normal() {
     let file_name = format!(
@@ -6732,6 +7058,7 @@ fn test_intrinsic_ridge_4_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_1_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6749,6 +7076,7 @@ unsafe fn do_intrinsic_fbm_1_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_1_avx2_32_normal() {
     let file_name = format!(
@@ -6763,6 +7091,7 @@ fn test_intrinsic_fbm_1_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_1_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6780,6 +7109,7 @@ unsafe fn do_intrinsic_fbm_1_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_1_avx2_64_normal() {
     let file_name = format!(
@@ -6854,6 +7184,7 @@ fn test_intrinsic_fbm_1_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_1_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6871,6 +7202,7 @@ unsafe fn do_intrinsic_fbm_1_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_1_sse2_32_normal() {
     let file_name = format!(
@@ -6885,6 +7217,7 @@ fn test_intrinsic_fbm_1_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_1_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6902,6 +7235,7 @@ unsafe fn do_intrinsic_fbm_1_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_1_sse2_64_normal() {
     let file_name = format!(
@@ -6916,6 +7250,7 @@ fn test_intrinsic_fbm_1_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_1_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6933,6 +7268,7 @@ unsafe fn do_intrinsic_fbm_1_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_1_sse41_32_normal() {
     let file_name = format!(
@@ -6947,6 +7283,7 @@ fn test_intrinsic_fbm_1_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_1_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -6964,6 +7301,7 @@ unsafe fn do_intrinsic_fbm_1_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_1_sse41_64_normal() {
     let file_name = format!(
@@ -6977,6 +7315,7 @@ fn test_intrinsic_fbm_1_sse41_64_normal() {
         assert_eq!(expected, noise);
     }
 }
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_2_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -6995,6 +7334,7 @@ unsafe fn do_intrinsic_fbm_2_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_2_avx2_32_normal() {
     let file_name = format!(
@@ -7009,6 +7349,7 @@ fn test_intrinsic_fbm_2_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_2_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7027,6 +7368,7 @@ unsafe fn do_intrinsic_fbm_2_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_2_avx2_64_normal() {
     let file_name = format!(
@@ -7103,6 +7445,7 @@ fn test_intrinsic_fbm_2_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_2_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7121,6 +7464,7 @@ unsafe fn do_intrinsic_fbm_2_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_2_sse2_32_normal() {
     let file_name = format!(
@@ -7135,6 +7479,7 @@ fn test_intrinsic_fbm_2_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_2_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7153,6 +7498,7 @@ unsafe fn do_intrinsic_fbm_2_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[ignore]
 fn test_intrinsic_fbm_2_sse2_64_normal() {
@@ -7168,6 +7514,7 @@ fn test_intrinsic_fbm_2_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_2_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7186,6 +7533,7 @@ unsafe fn do_intrinsic_fbm_2_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_2_sse41_32_normal() {
     let file_name = format!(
@@ -7200,6 +7548,7 @@ fn test_intrinsic_fbm_2_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_2_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7218,6 +7567,7 @@ unsafe fn do_intrinsic_fbm_2_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_2_sse41_64_normal() {
     let file_name = format!(
@@ -7232,6 +7582,7 @@ fn test_intrinsic_fbm_2_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_3_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7251,6 +7602,7 @@ unsafe fn do_intrinsic_fbm_3_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_3_avx2_32_normal() {
     let file_name = format!(
@@ -7265,6 +7617,7 @@ fn test_intrinsic_fbm_3_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_3_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7284,6 +7637,7 @@ unsafe fn do_intrinsic_fbm_3_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_fbm_3_avx2_64_normal() {
@@ -7364,6 +7718,7 @@ fn test_intrinsic_fbm_3_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_3_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7383,6 +7738,7 @@ unsafe fn do_intrinsic_fbm_3_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_3_sse2_32_normal() {
     let file_name = format!(
@@ -7397,6 +7753,7 @@ fn test_intrinsic_fbm_3_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_3_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7416,6 +7773,7 @@ unsafe fn do_intrinsic_fbm_3_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_fbm_3_sse2_64_normal() {
@@ -7431,6 +7789,7 @@ fn test_intrinsic_fbm_3_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_3_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7450,6 +7809,7 @@ unsafe fn do_intrinsic_fbm_3_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_3_sse41_32_normal() {
     let file_name = format!(
@@ -7464,6 +7824,7 @@ fn test_intrinsic_fbm_3_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_3_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7483,6 +7844,7 @@ unsafe fn do_intrinsic_fbm_3_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_fbm_3_sse41_64_normal() {
@@ -7498,6 +7860,7 @@ fn test_intrinsic_fbm_3_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_4_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7518,6 +7881,7 @@ unsafe fn do_intrinsic_fbm_4_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_4_avx2_32_normal() {
     let file_name = format!(
@@ -7532,6 +7896,7 @@ fn test_intrinsic_fbm_4_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_fbm_4_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7552,6 +7917,7 @@ unsafe fn do_intrinsic_fbm_4_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_4_avx2_64_normal() {
     let file_name = format!(
@@ -7632,6 +7998,7 @@ fn test_intrinsic_fbm_4_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_4_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7652,6 +8019,7 @@ unsafe fn do_intrinsic_fbm_4_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_4_sse2_32_normal() {
     let file_name = format!(
@@ -7666,6 +8034,7 @@ fn test_intrinsic_fbm_4_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_fbm_4_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7686,6 +8055,7 @@ unsafe fn do_intrinsic_fbm_4_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_4_sse2_64_normal() {
     let file_name = format!(
@@ -7700,6 +8070,7 @@ fn test_intrinsic_fbm_4_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_4_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7720,6 +8091,7 @@ unsafe fn do_intrinsic_fbm_4_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_4_sse41_32_normal() {
     let file_name = format!(
@@ -7734,6 +8106,7 @@ fn test_intrinsic_fbm_4_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_fbm_4_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7754,6 +8127,7 @@ unsafe fn do_intrinsic_fbm_4_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_fbm_4_sse41_64_normal() {
     let file_name = format!(
@@ -7768,6 +8142,7 @@ fn test_intrinsic_fbm_4_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_1_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7785,6 +8160,7 @@ unsafe fn do_intrinsic_turbulence_1_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_1_avx2_32_normal() {
     let file_name = format!(
@@ -7799,6 +8175,7 @@ fn test_intrinsic_turbulence_1_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_1_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7816,6 +8193,7 @@ unsafe fn do_intrinsic_turbulence_1_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_1_avx2_64_normal() {
     let file_name = format!(
@@ -7890,6 +8268,7 @@ fn test_intrinsic_turbulence_1_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_1_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7907,6 +8286,7 @@ unsafe fn do_intrinsic_turbulence_1_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_1_sse2_32_normal() {
     let file_name = format!(
@@ -7921,6 +8301,7 @@ fn test_intrinsic_turbulence_1_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_1_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -7938,6 +8319,7 @@ unsafe fn do_intrinsic_turbulence_1_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_1_sse2_64_normal() {
     let file_name = format!(
@@ -7952,6 +8334,7 @@ fn test_intrinsic_turbulence_1_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_1_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -7969,6 +8352,7 @@ unsafe fn do_intrinsic_turbulence_1_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_1_sse41_32_normal() {
     let file_name = format!(
@@ -7983,6 +8367,7 @@ fn test_intrinsic_turbulence_1_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_1_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8000,6 +8385,7 @@ unsafe fn do_intrinsic_turbulence_1_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_1_sse41_64_normal() {
     let file_name = format!(
@@ -8014,6 +8400,7 @@ fn test_intrinsic_turbulence_1_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_2_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8032,6 +8419,7 @@ unsafe fn do_intrinsic_turbulence_2_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_2_avx2_32_normal() {
     let file_name = format!(
@@ -8046,6 +8434,7 @@ fn test_intrinsic_turbulence_2_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_2_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8064,6 +8453,7 @@ unsafe fn do_intrinsic_turbulence_2_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_2_avx2_64_normal() {
     let file_name = format!(
@@ -8140,6 +8530,7 @@ fn test_intrinsic_turbulence_2_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_2_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8158,6 +8549,7 @@ unsafe fn do_intrinsic_turbulence_2_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_2_sse2_32_normal() {
     let file_name = format!(
@@ -8172,6 +8564,7 @@ fn test_intrinsic_turbulence_2_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_2_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8190,6 +8583,7 @@ unsafe fn do_intrinsic_turbulence_2_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[ignore]
 fn test_intrinsic_turbulence_2_sse2_64_normal() {
@@ -8205,6 +8599,7 @@ fn test_intrinsic_turbulence_2_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_2_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8223,6 +8618,7 @@ unsafe fn do_intrinsic_turbulence_2_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_2_sse41_32_normal() {
     let file_name = format!(
@@ -8237,6 +8633,7 @@ fn test_intrinsic_turbulence_2_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_2_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8255,6 +8652,7 @@ unsafe fn do_intrinsic_turbulence_2_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_2_sse41_64_normal() {
     let file_name = format!(
@@ -8269,6 +8667,7 @@ fn test_intrinsic_turbulence_2_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_3_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8288,6 +8687,7 @@ unsafe fn do_intrinsic_turbulence_3_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_3_avx2_32_normal() {
     let file_name = format!(
@@ -8302,6 +8702,7 @@ fn test_intrinsic_turbulence_3_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_3_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8321,6 +8722,7 @@ unsafe fn do_intrinsic_turbulence_3_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_turbulence_3_avx2_64_normal() {
@@ -8401,6 +8803,7 @@ fn test_intrinsic_turbulence_3_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_3_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8420,6 +8823,7 @@ unsafe fn do_intrinsic_turbulence_3_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_3_sse2_32_normal() {
     let file_name = format!(
@@ -8434,6 +8838,7 @@ fn test_intrinsic_turbulence_3_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_3_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8453,6 +8858,7 @@ unsafe fn do_intrinsic_turbulence_3_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_turbulence_3_sse2_64_normal() {
@@ -8468,6 +8874,7 @@ fn test_intrinsic_turbulence_3_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_3_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8487,6 +8894,7 @@ unsafe fn do_intrinsic_turbulence_3_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_3_sse41_2_normal() {
     let file_name = format!(
@@ -8501,6 +8909,7 @@ fn test_intrinsic_turbulence_3_sse41_2_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_3_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8520,6 +8929,7 @@ unsafe fn do_intrinsic_turbulence_3_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_turbulence_3_sse41_64_normal() {
@@ -8535,6 +8945,7 @@ fn test_intrinsic_turbulence_3_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_4_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8555,6 +8966,7 @@ unsafe fn do_intrinsic_turbulence_4_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_4_avx2_32_normal() {
     let file_name = format!(
@@ -8569,6 +8981,7 @@ fn test_intrinsic_turbulence_4_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_turbulence_4_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8589,6 +9002,7 @@ unsafe fn do_intrinsic_turbulence_4_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_4_avx2_64_normal() {
     let file_name = format!(
@@ -8669,6 +9083,7 @@ fn test_intrinsic_turbulence_4_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_4_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8689,6 +9104,7 @@ unsafe fn do_intrinsic_turbulence_4_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_4_sse2_32_normal() {
     let file_name = format!(
@@ -8703,6 +9119,7 @@ fn test_intrinsic_turbulence_4_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_turbulence_4_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8723,6 +9140,7 @@ unsafe fn do_intrinsic_turbulence_4_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_4_sse2_64_normal() {
     let file_name = format!(
@@ -8737,6 +9155,7 @@ fn test_intrinsic_turbulence_4_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_4_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8757,6 +9176,7 @@ unsafe fn do_intrinsic_turbulence_4_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_4_sse41_32_normal() {
     let file_name = format!(
@@ -8771,6 +9191,7 @@ fn test_intrinsic_turbulence_4_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_turbulence_4_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8791,6 +9212,7 @@ unsafe fn do_intrinsic_turbulence_4_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_turbulence_4_sse41_64_normal() {
     let file_name = format!(
@@ -8805,6 +9227,7 @@ fn test_intrinsic_turbulence_4_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_1_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8817,6 +9240,7 @@ unsafe fn do_intrinsic_gradient_1_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_1_avx2_32_normal() {
     let file_name = format!(
@@ -8831,6 +9255,7 @@ fn test_intrinsic_gradient_1_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_1_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8843,6 +9268,7 @@ unsafe fn do_intrinsic_gradient_1_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_1_avx2_64_normal() {
     let file_name = format!(
@@ -8907,6 +9333,7 @@ fn test_intrinsic_gradient_1_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_1_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8919,6 +9346,7 @@ unsafe fn do_intrinsic_gradient_1_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_1_sse2_32_normal() {
     let file_name = format!(
@@ -8933,6 +9361,7 @@ fn test_intrinsic_gradient_1_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_1_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8945,6 +9374,7 @@ unsafe fn do_intrinsic_gradient_1_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_1_sse2_64_normal() {
     let file_name = format!(
@@ -8959,6 +9389,7 @@ fn test_intrinsic_gradient_1_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_1_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -8971,6 +9402,7 @@ unsafe fn do_intrinsic_gradient_1_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_1_sse41_32_normal() {
     let file_name = format!(
@@ -8985,6 +9417,7 @@ fn test_intrinsic_gradient_1_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_1_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -8997,6 +9430,7 @@ unsafe fn do_intrinsic_gradient_1_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_1_sse41_64_normal() {
     let file_name = format!(
@@ -9011,6 +9445,7 @@ fn test_intrinsic_gradient_1_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_2_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9024,6 +9459,7 @@ unsafe fn do_intrinsic_gradient_2_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_2_avx2_32_normal() {
     let file_name = format!(
@@ -9038,6 +9474,7 @@ fn test_intrinsic_gradient_2_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_2_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9051,6 +9488,7 @@ unsafe fn do_intrinsic_gradient_2_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_2_avx2_64_normal() {
     let file_name = format!(
@@ -9117,6 +9555,7 @@ fn test_intrinsic_gradient_2_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_2_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9130,6 +9569,7 @@ unsafe fn do_intrinsic_gradient_2_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_2_sse2_32_normal() {
     let file_name = format!(
@@ -9144,6 +9584,7 @@ fn test_intrinsic_gradient_2_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_2_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9157,6 +9598,7 @@ unsafe fn do_intrinsic_gradient_2_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[ignore]
 fn test_intrinsic_gradient_2_sse2_64_normal() {
@@ -9172,6 +9614,7 @@ fn test_intrinsic_gradient_2_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_2_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9185,6 +9628,7 @@ unsafe fn do_intrinsic_gradient_2_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_2_sse41_32_normal() {
     let file_name = format!(
@@ -9199,6 +9643,7 @@ fn test_intrinsic_gradient_2_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_2_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9212,6 +9657,7 @@ unsafe fn do_intrinsic_gradient_2_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_2_sse41_64_normal() {
     let file_name = format!(
@@ -9226,6 +9672,7 @@ fn test_intrinsic_gradient_2_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_3_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9240,6 +9687,7 @@ unsafe fn do_intrinsic_gradient_3_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_3_avx2_32_normal() {
     let file_name = format!(
@@ -9254,6 +9702,7 @@ fn test_intrinsic_gradient_3_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_3_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9268,6 +9717,7 @@ unsafe fn do_intrinsic_gradient_3_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_gradient_3_avx2_64_normal() {
@@ -9338,6 +9788,7 @@ fn test_intrinsic_gradient_3_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_3_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9352,6 +9803,7 @@ unsafe fn do_intrinsic_gradient_3_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_3_sse2_32_normal() {
     let file_name = format!(
@@ -9366,6 +9818,7 @@ fn test_intrinsic_gradient_3_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_3_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9380,6 +9833,7 @@ unsafe fn do_intrinsic_gradient_3_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_gradient_3_sse2_64_normal() {
@@ -9395,6 +9849,7 @@ fn test_intrinsic_gradient_3_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_3_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9409,6 +9864,7 @@ unsafe fn do_intrinsic_gradient_3_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_3_sse41_32_normal() {
     let file_name = format!(
@@ -9423,6 +9879,7 @@ fn test_intrinsic_gradient_3_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_3_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9437,6 +9894,7 @@ unsafe fn do_intrinsic_gradient_3_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic(expected = "not implemented")]
 fn test_intrinsic_gradient_3_sse41_64_normal() {
@@ -9452,6 +9910,7 @@ fn test_intrinsic_gradient_3_sse41_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_4_avx2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9467,6 +9926,7 @@ unsafe fn do_intrinsic_gradient_4_avx2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_4_avx2_32_normal() {
     let file_name = format!(
@@ -9481,6 +9941,7 @@ fn test_intrinsic_gradient_4_avx2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
 unsafe fn do_intrinsic_gradient_4_avx2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9496,6 +9957,7 @@ unsafe fn do_intrinsic_gradient_4_avx2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_4_avx2_64_normal() {
     let file_name = format!(
@@ -9566,6 +10028,7 @@ fn test_intrinsic_gradient_4_scalar_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_4_sse2_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9581,6 +10044,7 @@ unsafe fn do_intrinsic_gradient_4_sse2_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_4_sse2_32_normal() {
     let file_name = format!(
@@ -9595,6 +10059,7 @@ fn test_intrinsic_gradient_4_sse2_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse2")]
 unsafe fn do_intrinsic_gradient_4_sse2_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9610,6 +10075,7 @@ unsafe fn do_intrinsic_gradient_4_sse2_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_4_sse2_64_normal() {
     let file_name = format!(
@@ -9624,6 +10090,7 @@ fn test_intrinsic_gradient_4_sse2_64_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_4_sse41_32_normal() -> Vec<f32> {
     let dims = NoiseDimensions {
@@ -9639,6 +10106,7 @@ unsafe fn do_intrinsic_gradient_4_sse41_32_normal() -> Vec<f32> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_4_sse41_32_normal() {
     let file_name = format!(
@@ -9653,6 +10121,7 @@ fn test_intrinsic_gradient_4_sse41_32_normal() {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "sse4.1")]
 unsafe fn do_intrinsic_gradient_4_sse41_64_normal() -> Vec<f64> {
     let dims = NoiseDimensions {
@@ -9668,6 +10137,7 @@ unsafe fn do_intrinsic_gradient_4_sse41_64_normal() -> Vec<f64> {
     noise
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_intrinsic_gradient_4_sse41_64_normal() {
     let file_name = format!(
