@@ -1561,7 +1561,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_ridge_2_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -1628,7 +1628,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_ridge_3_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -1823,7 +1823,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_fbm_2_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -1890,7 +1890,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_fbm_3_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -2085,7 +2085,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_turbulence_2_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -2152,7 +2152,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_turbulence_3_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -2327,7 +2327,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_gradient_2_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -2384,7 +2384,7 @@ mod neon {
     }
 
     #[test]
-    #[ignore = "upstream simdeez 2.0.0-dev3 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
+    #[ignore = "upstream simdeez 2.0.0 NEON f64 2d/3d produces NaN/inf; scalar and SSE2 paths are correct. Re-enable once simdeez fixes NEON f64."]
     fn test_intrinsic_gradient_3_neon_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
