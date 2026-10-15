@@ -260,8 +260,8 @@ pub fn cellular_3d<S: Simd>(
                 let closer = new_distance.cmp_lt(distance);
                 distance = new_distance.min(distance);
                 cell_value = closer.blendv(cell_value, new_cell_value);
-                zcf = ycf + S::Vf32::set1(1.0);
-                zc = yc + S::Vi32::set1(Z_PRIME_32);
+                zcf += S::Vf32::set1(1.0);
+                zc += S::Vi32::set1(Z_PRIME_32);
             }
             ycf += S::Vf32::set1(1.0);
             yc += S::Vi32::set1(Y_PRIME_32);
