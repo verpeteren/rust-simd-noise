@@ -16,7 +16,7 @@ pub fn fbm_1d<S: Simd>(
     for _ in 1..octaves {
         x *= lacunarity;
         amp *= gain;
-        result += simplex_1d::<S>(x, seed);
+        result = (simplex_1d::<S>(x, seed) * amp) + result;
     }
 
     result
