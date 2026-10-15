@@ -16,7 +16,7 @@ edition = "2018"
 simdeez = "2.0.0-dev3"
 
 [dev-dependencies]
-criterion = "0.4.0"
+criterion = "0.8.2"
 byteorder = "1.5.0"
 
 [[bench]]
