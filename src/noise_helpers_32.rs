@@ -515,7 +515,11 @@ unsafe fn get_1d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sa
     let freq_x = S::Vf32::set1(settings.get_freq_x());
     let start_x = dim.x;
     let width = dim.width;
-    assert_eq!(out.len(), width, "noise output slice length must equal width");
+    assert_eq!(
+        out.len(),
+        width,
+        "noise output slice length must equal width"
+    );
     let mult = (T::RANGE_MAX - T::RANGE_MIN) / (src_max - src_min);
     let off = T::RANGE_MIN - src_min * mult;
     let out_ptr = out.as_mut_ptr();
@@ -784,9 +788,9 @@ pub unsafe fn get_2d_noise_range_into<S: Simd, T: NoiseInto>(
         NoiseType::Cellular(s) => {
             get_2d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Cellular2(s) => get_2d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(
-            *s, src_min, src_max, out,
-        ),
+        NoiseType::Cellular2(s) => {
+            get_2d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+        }
     }
 }
 
@@ -814,9 +818,9 @@ pub unsafe fn get_3d_noise_range_into<S: Simd, T: NoiseInto>(
         NoiseType::Cellular(s) => {
             get_3d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Cellular2(s) => get_3d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(
-            *s, src_min, src_max, out,
-        ),
+        NoiseType::Cellular2(s) => {
+            get_3d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+        }
     }
 }
 

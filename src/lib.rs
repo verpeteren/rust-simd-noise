@@ -127,10 +127,10 @@ mod noise_helpers_64;
 mod noise_type;
 mod shared;
 
+pub use shared::NoiseInto;
 use shared::{
     get_scaled_noise, get_scaled_noise_64, get_scaled_noise_into, get_scaled_noise_into_64,
 };
-pub use shared::NoiseInto;
 #[cfg(not(feature = "scalar"))]
 use simdeez::prelude::*;
 #[cfg(not(feature = "scalar"))]
