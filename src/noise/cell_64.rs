@@ -1,19 +1,21 @@
 use super::cellular_32::{BIT_10_MASK_64, HASH_2_FLOAT_64, X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
 use super::cellular_64::{hash_2d, hash_3d};
-use crate::{CellDistanceFunction, CellReturnType};
+use crate::noise::cell_strategy::{CellDistance, CellReturn};
 
 use simdeez::prelude::*;
 
-#[inline(always)]
-pub fn cellular_2d<S: Simd>(
+// `#[inline]` rather than `#[inline(always)]`: the call boundary now dispatches
+// over the (distance, return) strategy types, so force-inlining would splice
+// every instantiation into one frame and overflow small stacks in debug
+// (same concern as issue #38). `#[inline]` still inlines in optimized builds.
+#[inline]
+pub fn cellular_2d<S: Simd, D: CellDistance, R: CellReturn<S::Vf64>>(
     x: S::Vf64,
     y: S::Vf64,
-    distance_function: CellDistanceFunction,
-    return_type: CellReturnType,
     jitter: S::Vf64,
     seed: i64,
 ) -> S::Vf64 {
-    let mut distance = S::Vf64::set1(999999.0);
+    let mut acc = R::init();
     let mut xc = x.cast_i64() - S::Vi64::set1(1);
     let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
 
@@ -22,198 +24,46 @@ pub fn cellular_2d<S: Simd>(
 
     xc *= S::Vi64::set1(X_PRIME_64);
     yc_base *= S::Vi64::set1(Y_PRIME_64);
-    match return_type {
-        CellReturnType::Distance => {
-            match distance_function {
-                CellDistanceFunction::Euclidean => {
-                    for _x in 0..3 {
-                        let mut ycf = ycf_base;
-                        let mut yc = yc_base;
-                        for _y in 0..3 {
-                            let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let mut xd2 = xd * xd;
-                            let inv_mag = jitter * (xd2 + (yd * yd)).rsqrt();
-                            xd = (xd * inv_mag) + xcf;
-                            yd = (yd * inv_mag) + ycf;
-                            xd2 = xd * xd;
-                            let new_distance = xd2 + (yd * yd);
-                            distance = new_distance.min(distance);
 
-                            ycf += S::Vf64::set1(1.0);
-                            yc += S::Vi64::set1(Y_PRIME_64);
-                        }
-                        xcf += S::Vf64::set1(1.0);
-                        xc += S::Vi64::set1(X_PRIME_64);
-                    }
-                }
-                CellDistanceFunction::Manhattan => {
-                    for _x in 0..3 {
-                        let mut ycf = ycf_base;
-                        let mut yc = yc_base;
-                        for _y in 0..3 {
-                            let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
-                            xd = (xd * inv_mag) + xcf;
-                            yd = (yd * inv_mag) + ycf;
+    for _x in 0..3 {
+        let mut ycf = ycf_base;
+        let mut yc = yc_base;
+        for _y in 0..3 {
+            let hash = hash_2d::<S>(seed, xc, yc);
+            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64() - S::Vf64::set1(511.5);
+            let mut yd =
+                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64() - S::Vf64::set1(511.5);
+            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+            xd = (xd * inv_mag) + xcf;
+            yd = (yd * inv_mag) + ycf;
 
-                            let new_distance = xd.abs() + yd.abs();
-                            distance = new_distance.min(distance);
+            let new_distance = D::new_distance_2d(xd, yd);
+            R::accumulate(&mut acc, new_distance, || {
+                S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64()
+            });
 
-                            ycf += S::Vf64::set1(1.0);
-                            yc += S::Vi64::set1(Y_PRIME_64);
-                        }
-                        xcf += S::Vf64::set1(1.0);
-                        xc += S::Vi64::set1(X_PRIME_64);
-                    }
-                }
-                CellDistanceFunction::Natural => {
-                    for _x in 0..3 {
-                        let mut ycf = ycf_base;
-                        let mut yc = yc_base;
-                        for _y in 0..3 {
-                            let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
-                            xd = (xd * inv_mag) + xcf;
-                            yd = (yd * inv_mag) + ycf;
-
-                            let new_distance = {
-                                let euc = (xd * xd) + (yd * yd);
-                                let man = xd.abs() + yd.abs();
-                                euc + man
-                            };
-                            distance = new_distance.min(distance);
-
-                            ycf += S::Vf64::set1(1.0);
-                            yc += S::Vi64::set1(Y_PRIME_64);
-                        }
-                        xcf += S::Vf64::set1(1.0);
-                        xc += S::Vi64::set1(X_PRIME_64);
-                    }
-                }
-            }
-            distance
+            ycf += S::Vf64::set1(1.0);
+            yc += S::Vi64::set1(Y_PRIME_64);
         }
-        CellReturnType::CellValue => {
-            let mut cell_value = S::Vf64::zeroes();
-            match distance_function {
-                CellDistanceFunction::Euclidean => {
-                    for _x in 0..3 {
-                        let mut ycf = ycf_base;
-                        let mut yc = yc_base;
-                        for _y in 0..3 {
-                            let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
-                            xd = (xd * inv_mag) + xcf;
-                            yd = (yd * inv_mag) + ycf;
-
-                            let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
-                            let new_distance = (xd * xd) + (yd * yd);
-                            let closer = new_distance.cmp_lt(distance);
-                            distance = new_distance.min(distance);
-                            cell_value = closer.blendv(cell_value, new_cell_value);
-
-                            ycf += S::Vf64::set1(1.0);
-                            yc += S::Vi64::set1(Y_PRIME_64);
-                        }
-                        xcf += S::Vf64::set1(1.0);
-                        xc += S::Vi64::set1(X_PRIME_64);
-                    }
-                }
-                CellDistanceFunction::Manhattan => {
-                    for _x in 0..3 {
-                        let mut ycf = ycf_base;
-                        let mut yc = yc_base;
-                        for _y in 0..3 {
-                            let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
-                            xd = (xd * inv_mag) + xcf;
-                            yd = (yd * inv_mag) + ycf;
-
-                            let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
-                            let new_distance = xd.abs() + yd.abs();
-                            let closer = new_distance.cmp_lt(distance);
-                            distance = new_distance.min(distance);
-                            cell_value = closer.blendv(cell_value, new_cell_value);
-
-                            ycf += S::Vf64::set1(1.0);
-                            yc += S::Vi64::set1(Y_PRIME_64);
-                        }
-                        xcf += S::Vf64::set1(1.0);
-                        xc += S::Vi64::set1(X_PRIME_64);
-                    }
-                }
-                CellDistanceFunction::Natural => {
-                    for _x in 0..3 {
-                        let mut ycf = ycf_base;
-                        let mut yc = yc_base;
-                        for _y in 0..3 {
-                            let hash = hash_2d::<S>(seed, xc, yc);
-                            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
-                                - S::Vf64::set1(511.5);
-                            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
-                            xd = (xd * inv_mag) + xcf;
-                            yd = (yd * inv_mag) + ycf;
-
-                            let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
-                            let new_distance = {
-                                let euc = (xd * xd) + (yd * yd);
-                                let man = xd.abs() + yd.abs();
-                                euc + man
-                            };
-                            let closer = new_distance.cmp_lt(distance);
-                            distance = new_distance.min(distance);
-                            cell_value = closer.blendv(cell_value, new_cell_value);
-
-                            ycf += S::Vf64::set1(1.0);
-                            yc += S::Vi64::set1(Y_PRIME_64);
-                        }
-                        xcf += S::Vf64::set1(1.0);
-                        xc += S::Vi64::set1(X_PRIME_64);
-                    }
-                }
-            }
-            cell_value
-        }
+        xcf += S::Vf64::set1(1.0);
+        xc += S::Vi64::set1(X_PRIME_64);
     }
+
+    R::finish(acc)
 }
 
 // Not `#[inline(always)]`: force-inlining this large function into the noise
 // generation loop builds one huge stack frame that overflows small stacks under
 // AVX2 (issue #38). `#[inline]` still lets LLVM inline it in optimized builds.
 #[inline]
-pub fn cellular_3d<S: Simd>(
+pub fn cellular_3d<S: Simd, D: CellDistance, R: CellReturn<S::Vf64>>(
     x: S::Vf64,
     y: S::Vf64,
     z: S::Vf64,
-    distance_function: CellDistanceFunction,
-    return_type: CellReturnType,
     jitter: S::Vf64,
     seed: i64,
 ) -> S::Vf64 {
-    let mut distance = S::Vf64::set1(999999.0);
-    let mut cell_value = S::Vf64::zeroes();
+    let mut acc = R::init();
 
     let mut xc = x.cast_i64() - S::Vi64::set1(1);
     let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
@@ -246,19 +96,11 @@ pub fn cellular_3d<S: Simd>(
                 yd = (yd * inv_mag) + ycf;
                 zd = (zd * inv_mag) + zcf;
 
-                let new_cell_value = S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64();
-                let new_distance = match distance_function {
-                    CellDistanceFunction::Euclidean => (xd * xd) + (yd * yd) + (zd * zd),
-                    CellDistanceFunction::Manhattan => xd.abs() + yd.abs() + zd.abs(),
-                    CellDistanceFunction::Natural => {
-                        let euc = (xd * xd) + (yd * yd) + (zd * zd);
-                        let man = xd.abs() + yd.abs() + zd.abs();
-                        euc + man
-                    }
-                };
-                let closer = new_distance.cmp_lt(distance);
-                distance = new_distance.min(distance);
-                cell_value = closer.blendv(cell_value, new_cell_value);
+                let new_distance = D::new_distance_3d(xd, yd, zd);
+                R::accumulate(&mut acc, new_distance, || {
+                    S::Vf64::set1(HASH_2_FLOAT_64) * hash.cast_f64()
+                });
+
                 zcf += S::Vf64::set1(1.0);
                 zc += S::Vi64::set1(Z_PRIME_64);
             }
@@ -269,8 +111,5 @@ pub fn cellular_3d<S: Simd>(
         xc += S::Vi64::set1(X_PRIME_64);
     }
 
-    match return_type {
-        CellReturnType::Distance => distance,
-        CellReturnType::CellValue => cell_value,
-    }
+    R::finish(acc)
 }
