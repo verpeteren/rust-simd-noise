@@ -29,8 +29,10 @@ use simdeez::prelude::*;
 
 /// Computes the per-cell distance metric from the coordinate deltas.
 pub trait CellDistance {
+    fn new_distance_1d<V: SimdFloat>(xd: V) -> V;
     fn new_distance_2d<V: SimdFloat>(xd: V, yd: V) -> V;
     fn new_distance_3d<V: SimdFloat>(xd: V, yd: V, zd: V) -> V;
+    fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V;
 }
 
 pub struct Euclidean;
@@ -39,6 +41,10 @@ pub struct Natural;
 
 impl CellDistance for Euclidean {
     #[inline(always)]
+    fn new_distance_1d<V: SimdFloat>(xd: V) -> V {
+        xd * xd
+    }
+    #[inline(always)]
     fn new_distance_2d<V: SimdFloat>(xd: V, yd: V) -> V {
         (xd * xd) + (yd * yd)
     }
@@ -46,9 +52,17 @@ impl CellDistance for Euclidean {
     fn new_distance_3d<V: SimdFloat>(xd: V, yd: V, zd: V) -> V {
         (xd * xd) + ((yd * yd) + (zd * zd))
     }
+    #[inline(always)]
+    fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V {
+        (xd * xd) + ((yd * yd) + ((zd * zd) + (wd * wd)))
+    }
 }
 
 impl CellDistance for Manhattan {
+    #[inline(always)]
+    fn new_distance_1d<V: SimdFloat>(xd: V) -> V {
+        xd.abs()
+    }
     #[inline(always)]
     fn new_distance_2d<V: SimdFloat>(xd: V, yd: V) -> V {
         xd.abs() + yd.abs()
@@ -57,9 +71,17 @@ impl CellDistance for Manhattan {
     fn new_distance_3d<V: SimdFloat>(xd: V, yd: V, zd: V) -> V {
         (xd.abs() + yd.abs()) + zd.abs()
     }
+    #[inline(always)]
+    fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V {
+        (xd.abs() + yd.abs()) + (zd.abs() + wd.abs())
+    }
 }
 
 impl CellDistance for Natural {
+    #[inline(always)]
+    fn new_distance_1d<V: SimdFloat>(xd: V) -> V {
+        (xd * xd) + xd.abs()
+    }
     #[inline(always)]
     fn new_distance_2d<V: SimdFloat>(xd: V, yd: V) -> V {
         let euc = (xd * xd) + (yd * yd);
@@ -70,6 +92,12 @@ impl CellDistance for Natural {
     fn new_distance_3d<V: SimdFloat>(xd: V, yd: V, zd: V) -> V {
         let euc = (xd * xd) + ((yd * yd) + (zd * zd));
         let man = (xd.abs() + yd.abs()) + zd.abs();
+        euc + man
+    }
+    #[inline(always)]
+    fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V {
+        let euc = (xd * xd) + ((yd * yd) + ((zd * zd) + (wd * wd)));
+        let man = (xd.abs() + yd.abs()) + (zd.abs() + wd.abs());
         euc + man
     }
 }

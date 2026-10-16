@@ -211,10 +211,18 @@ impl Settings for RidgeSettings {
     fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out),
-            2 => crate::get_2d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out),
-            3 => crate::get_3d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out),
-            4 => crate::get_4d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out),
+            1 => {
+                crate::get_1d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out)
+            }
+            2 => {
+                crate::get_2d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out)
+            }
+            3 => {
+                crate::get_3d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out)
+            }
+            4 => {
+                crate::get_4d_noise_range_into::<T>(&NoiseType::Ridge(self), src_min, src_max, out)
+            }
             _ => panic!("not implemented"),
         }
     }

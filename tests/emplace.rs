@@ -72,14 +72,20 @@ fn emplace_matches_vec_fbm() {
     check!(64 * 32, NoiseBuilder::fbm_2d(64, 32).with_seed(1337));
     // 3D f64 is unimplemented upstream (hash3d_64), so f32 only here.
     check_f32!(32 * 16 * 8, NoiseBuilder::fbm_3d(32, 16, 8).with_seed(1337));
-    check!(16 * 8 * 4 * 2, NoiseBuilder::fbm_4d(16, 8, 4, 2).with_seed(1337));
+    check!(
+        16 * 8 * 4 * 2,
+        NoiseBuilder::fbm_4d(16, 8, 4, 2).with_seed(1337)
+    );
 }
 
 #[test]
 fn emplace_matches_vec_gradient() {
     check!(64, NoiseBuilder::gradient_1d(64).with_seed(42));
     check!(64 * 32, NoiseBuilder::gradient_2d(64, 32).with_seed(42));
-    check_f32!(32 * 16 * 8, NoiseBuilder::gradient_3d(32, 16, 8).with_seed(42));
+    check_f32!(
+        32 * 16 * 8,
+        NoiseBuilder::gradient_3d(32, 16, 8).with_seed(42)
+    );
 }
 
 #[test]
@@ -92,9 +98,15 @@ fn emplace_matches_vec_ridge_turbulence() {
 fn emplace_matches_vec_cellular() {
     // Cellular only supports 2d/3d.
     check!(64 * 32, NoiseBuilder::cellular_2d(64, 32).with_seed(99));
-    check!(32 * 16 * 8, NoiseBuilder::cellular_3d(32, 16, 8).with_seed(99));
+    check!(
+        32 * 16 * 8,
+        NoiseBuilder::cellular_3d(32, 16, 8).with_seed(99)
+    );
     check!(64 * 32, NoiseBuilder::cellular2_2d(64, 32).with_seed(99));
-    check!(32 * 16 * 8, NoiseBuilder::cellular2_3d(32, 16, 8).with_seed(99));
+    check!(
+        32 * 16 * 8,
+        NoiseBuilder::cellular2_3d(32, 16, 8).with_seed(99)
+    );
 }
 
 /// The parallel use case: filling disjoint row-chunks with the matching y offset

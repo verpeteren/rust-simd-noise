@@ -5,11 +5,11 @@
 //!
 //!## Features
 //!
-//!* SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
+//!* SSE2, SSE41, AVX2, AVX-512, and NEON instruction sets, along with a non-SIMD fallback
 //!* Runtime detection picks the best available instruction set
 //!* Simplex noise, fractal brownian motion, turbulence, and ridge
 //!* 1D, 2D, 3D, and 4D
-//!* Cellular / Voroni Noise  2D and 3D
+//!* Cellular / Voroni Noise  1D, 2D, 3D, and 4D
 //!
 //!## The `scalar` cargo feature
 //!
@@ -46,8 +46,6 @@
 //! See [Github](https://github.com/verpeteren/rust-simd-noise)
 //!## Todo
 //!
-//!* AVX512 support
-//!* ARM NEON support
 //!* Other noise types
 //!
 //!# Examples
@@ -127,10 +125,10 @@ mod noise_helpers_64;
 mod noise_type;
 mod shared;
 
+pub use shared::NoiseInto;
 use shared::{
     get_scaled_noise, get_scaled_noise_64, get_scaled_noise_into, get_scaled_noise_into_64,
 };
-pub use shared::NoiseInto;
 #[cfg(not(feature = "scalar"))]
 use simdeez::prelude::*;
 #[cfg(not(feature = "scalar"))]

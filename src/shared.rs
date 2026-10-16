@@ -35,7 +35,6 @@ impl_noise_into!(u32, 0.0, u32::MAX as f32);
 impl_noise_into!(i16, i16::MIN as f32, i16::MAX as f32);
 impl_noise_into!(i32, i32::MIN as f32, i32::MAX as f32);
 
-
 #[inline(always)]
 pub unsafe fn scale_noise<S: Simd>(
     scale_min: f32,

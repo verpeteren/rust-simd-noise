@@ -24,6 +24,11 @@ pub const Y_PRIME_64: i64 = 31337;
 pub const Z_PRIME_32: i32 = 6971;
 pub const Z_PRIME_64: i64 = 6971;
 
+// 4th-axis prime for 4D (and higher) cellular noise. There is no reference
+// implementation to match for 4D cellular, so this is simply a distinct prime.
+pub const W_PRIME_32: i32 = 1013;
+pub const W_PRIME_64: i64 = 1013;
+
 #[inline(always)]
 pub fn hash_2d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32) -> S::Vi32 {
     let mut hash = x ^ S::Vi32::set1(seed);
@@ -36,5 +41,28 @@ pub fn hash_3d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32, z: S::Vi32) -> S::Vi3
     let mut hash = x ^ S::Vi32::set1(seed);
     hash = y ^ hash;
     hash = z ^ hash;
+    ((hash * hash) * S::Vi32::set1(60493)) * hash
+}
+
+#[inline(always)]
+pub fn hash_1d<S: Simd>(seed: i32, x: S::Vi32) -> S::Vi32 {
+    let hash = x ^ S::Vi32::set1(seed);
+    ((hash * hash) * S::Vi32::set1(60493)) * hash
+}
+
+#[inline(always)]
+pub fn hash_4d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32, z: S::Vi32, w: S::Vi32) -> S::Vi32 {
+    let mut hash = x ^ S::Vi32::set1(seed);
+    hash = y ^ hash;
+    hash = z ^ hash;
+    hash = w ^ hash;
+    ((hash * hash) * S::Vi32::set1(60493)) * hash
+}
+
+/// A second avalanche round, used to draw fresh jitter bits for the 4th (and
+/// higher) axis: a 32-bit hash only has room for three 10-bit jitter fields
+/// (bits 0-9/10-19/20-29), so axes beyond the third re-hash instead of shifting.
+#[inline(always)]
+pub fn rehash<S: Simd>(hash: S::Vi32) -> S::Vi32 {
     ((hash * hash) * S::Vi32::set1(60493)) * hash
 }

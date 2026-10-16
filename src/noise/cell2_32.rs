@@ -1,4 +1,7 @@
-use super::cellular_32::{hash_2d, hash_3d, BIT_10_MASK_32, X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
+use super::cellular_32::{
+    hash_1d, hash_2d, hash_3d, hash_4d, rehash, BIT_10_MASK_32, W_PRIME_32, X_PRIME_32, Y_PRIME_32,
+    Z_PRIME_32,
+};
 use crate::noise::cell_strategy::{Cell2Return, CellDistance};
 
 use simdeez::prelude::*;
@@ -110,6 +113,123 @@ pub fn cellular2_3d<S: Simd, D: CellDistance, R: Cell2Return>(
                     distance[i] = distance[i].min(new_distance).max(distance[i - 1]);
                     distance[0] = distance[0].min(new_distance);
                     i -= 1;
+                }
+                zcf += S::Vf32::set1(1.0);
+                zc += S::Vi32::set1(Z_PRIME_32);
+            }
+            ycf += S::Vf32::set1(1.0);
+            yc += S::Vi32::set1(Y_PRIME_32);
+        }
+        xcf += S::Vf32::set1(1.0);
+        xc += S::Vi32::set1(X_PRIME_32);
+    }
+
+    R::combine(&distance, index0, index1)
+}
+
+// 1D cellular2: a 3-cell neighbourhood along x. Only 3 candidate cells exist, so
+// callers must keep `index1 <= 2` (enforced by `Cellular2Settings::validate`).
+#[inline]
+#[allow(clippy::too_many_arguments)]
+pub fn cellular2_1d<S: Simd, D: CellDistance, R: Cell2Return>(
+    x: S::Vf32,
+    jitter: S::Vf32,
+    index0: usize,
+    index1: usize,
+    seed: i32,
+) -> S::Vf32 {
+    let mut distance: [S::Vf32; 4] = [S::Vf32::set1(999999.0); 4];
+
+    let mut xc = x.cast_i32() - S::Vi32::set1(1);
+    let mut xcf = xc.cast_f32() - x;
+    xc *= S::Vi32::set1(X_PRIME_32);
+
+    for _x in 0..3 {
+        let hash = hash_1d::<S>(seed, xc);
+        let mut xd = (hash & S::Vi32::set1(BIT_10_MASK_32)).cast_f32() - S::Vf32::set1(511.5);
+        let inv_mag = jitter * (xd * xd).rsqrt();
+        xd = (xd * inv_mag) + xcf;
+
+        let new_distance = D::new_distance_1d(xd);
+        let mut i = index1;
+        while i > 0 {
+            distance[i] = distance[i].min(new_distance).max(distance[i - 1]);
+            distance[0] = distance[0].min(new_distance);
+            i -= 1;
+        }
+        xcf += S::Vf32::set1(1.0);
+        xc += S::Vi32::set1(X_PRIME_32);
+    }
+
+    R::combine(&distance, index0, index1)
+}
+
+// 4D cellular2: a 3^4 = 81-cell neighbourhood. The 4th jitter field is drawn
+// from a second hash round (`rehash`); see `cellular_32::rehash`.
+#[inline]
+#[allow(clippy::too_many_arguments)]
+pub fn cellular2_4d<S: Simd, D: CellDistance, R: Cell2Return>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    jitter: S::Vf32,
+    index0: usize,
+    index1: usize,
+    seed: i32,
+) -> S::Vf32 {
+    let mut distance: [S::Vf32; 4] = [S::Vf32::set1(999999.0); 4];
+
+    let mut xc = x.cast_i32() - S::Vi32::set1(1);
+    let mut yc_base = y.cast_i32() - S::Vi32::set1(1);
+    let mut zc_base = z.cast_i32() - S::Vi32::set1(1);
+    let mut wc_base = w.cast_i32() - S::Vi32::set1(1);
+
+    let mut xcf = xc.cast_f32() - x;
+    let ycf_base = yc_base.cast_f32() - y;
+    let zcf_base = zc_base.cast_f32() - z;
+    let wcf_base = wc_base.cast_f32() - w;
+
+    xc *= S::Vi32::set1(X_PRIME_32);
+    yc_base *= S::Vi32::set1(Y_PRIME_32);
+    zc_base *= S::Vi32::set1(Z_PRIME_32);
+    wc_base *= S::Vi32::set1(W_PRIME_32);
+
+    for _x in 0..3 {
+        let mut ycf = ycf_base;
+        let mut yc = yc_base;
+        for _y in 0..3 {
+            let mut zcf = zcf_base;
+            let mut zc = zc_base;
+            for _z in 0..3 {
+                let mut wcf = wcf_base;
+                let mut wc = wc_base;
+                for _w in 0..3 {
+                    let hash = hash_4d::<S>(seed, xc, yc, zc, wc);
+                    let mut xd =
+                        (hash & S::Vi32::set1(BIT_10_MASK_32)).cast_f32() - S::Vf32::set1(511.5);
+                    let mut yd = ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32()
+                        - S::Vf32::set1(511.5);
+                    let mut zd = ((hash >> 20) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32()
+                        - S::Vf32::set1(511.5);
+                    let mut wd = (rehash::<S>(hash) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32()
+                        - S::Vf32::set1(511.5);
+                    let inv_mag =
+                        jitter * ((xd * xd) + ((yd * yd) + ((zd * zd) + (wd * wd)))).rsqrt();
+                    xd = (xd * inv_mag) + xcf;
+                    yd = (yd * inv_mag) + ycf;
+                    zd = (zd * inv_mag) + zcf;
+                    wd = (wd * inv_mag) + wcf;
+
+                    let new_distance = D::new_distance_4d(xd, yd, zd, wd);
+                    let mut i = index1;
+                    while i > 0 {
+                        distance[i] = distance[i].min(new_distance).max(distance[i - 1]);
+                        distance[0] = distance[0].min(new_distance);
+                        i -= 1;
+                    }
+                    wcf += S::Vf32::set1(1.0);
+                    wc += S::Vi32::set1(W_PRIME_32);
                 }
                 zcf += S::Vf32::set1(1.0);
                 zc += S::Vi32::set1(Z_PRIME_32);

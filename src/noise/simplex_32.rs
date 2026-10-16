@@ -458,9 +458,8 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
         + S::Vf32::set1(0.408_248_3) * y
         + S::Vf32::set1(0.288_675_14) * z
         + S::Vf32::set1(0.5) * w;
-    let zr = S::Vf32::set1(-0.816_496_6) * y
-        + S::Vf32::set1(0.288_675_14) * z
-        + S::Vf32::set1(0.5) * w;
+    let zr =
+        S::Vf32::set1(-0.816_496_6) * y + S::Vf32::set1(0.288_675_14) * z + S::Vf32::set1(0.5) * w;
     let wr = S::Vf32::set1(-0.866_025_4) * z + S::Vf32::set1(0.5) * w;
     let (x, y, z, w) = (xr, yr, zr, wr);
     //

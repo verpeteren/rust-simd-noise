@@ -92,21 +92,27 @@ fn anisotropy(field: &[f32], w: usize, h: usize) -> f32 {
 
 fn turbulence_slice(dims: u8) -> Vec<f32> {
     match dims {
-        2 => NoiseBuilder::turbulence_2d_offset(0.0, W, 0.0, H)
-            .with_freq(FREQ)
-            .with_octaves(OCTAVES)
-            .generate()
-            .0,
-        4 => NoiseBuilder::turbulence_4d_offset(0.0, W, 0.0, H, 0.0, 1, 0.0, 1)
-            .with_freq(FREQ)
-            .with_octaves(OCTAVES)
-            .generate()
-            .0,
-        _ => NoiseBuilder::turbulence_3d_offset(0.0, W, 0.0, H, 0.0, 1)
-            .with_freq(FREQ)
-            .with_octaves(OCTAVES)
-            .generate()
-            .0,
+        2 => {
+            NoiseBuilder::turbulence_2d_offset(0.0, W, 0.0, H)
+                .with_freq(FREQ)
+                .with_octaves(OCTAVES)
+                .generate()
+                .0
+        }
+        4 => {
+            NoiseBuilder::turbulence_4d_offset(0.0, W, 0.0, H, 0.0, 1, 0.0, 1)
+                .with_freq(FREQ)
+                .with_octaves(OCTAVES)
+                .generate()
+                .0
+        }
+        _ => {
+            NoiseBuilder::turbulence_3d_offset(0.0, W, 0.0, H, 0.0, 1)
+                .with_freq(FREQ)
+                .with_octaves(OCTAVES)
+                .generate()
+                .0
+        }
     }
 }
 
@@ -140,5 +146,9 @@ fn turbulence_4d_slice_is_isotropic() {
 #[test]
 fn turbulence_2d_is_isotropic() {
     let c2 = anisotropy(&turbulence_slice(2), W, H);
-    assert!(c2.abs() < 0.05, "turbulence_2d unexpectedly anisotropic (C = {:.4})", c2);
+    assert!(
+        c2.abs() < 0.05,
+        "turbulence_2d unexpectedly anisotropic (C = {:.4})",
+        c2
+    );
 }
