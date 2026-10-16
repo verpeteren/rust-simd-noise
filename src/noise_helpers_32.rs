@@ -368,12 +368,8 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Ridge(s) => get_1d_noise_helper_f32::<S, RidgeSettings>(*s),
         NoiseType::Turbulence(s) => get_1d_noise_helper_f32::<S, TurbulenceSettings>(*s),
         NoiseType::Gradient(s) => get_1d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(_) => {
-            panic!("not implemented");
-        }
-        NoiseType::Cellular2(_) => {
-            panic!("not implemented");
-        }
+        NoiseType::Cellular(s) => get_1d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => get_1d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
@@ -421,12 +417,8 @@ pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
         NoiseType::Ridge(s) => get_4d_noise_helper_f32::<S, RidgeSettings>(*s),
         NoiseType::Turbulence(s) => get_4d_noise_helper_f32::<S, TurbulenceSettings>(*s),
         NoiseType::Gradient(s) => get_4d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(_) => {
-            panic!("not implemented");
-        }
-        NoiseType::Cellular2(_) => {
-            panic!("not implemented");
-        }
+        NoiseType::Cellular(s) => get_4d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => get_4d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
@@ -442,8 +434,8 @@ pub unsafe fn get_1d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
             get_1d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
         NoiseType::Gradient(s) => get_1d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(_) => panic!("not implemented"),
-        NoiseType::Cellular2(_) => panic!("not implemented"),
+        NoiseType::Cellular(s) => get_1d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => get_1d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -493,8 +485,8 @@ pub unsafe fn get_4d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
             get_4d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
         NoiseType::Gradient(s) => get_4d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(_) => panic!("not implemented"),
-        NoiseType::Cellular2(_) => panic!("not implemented"),
+        NoiseType::Cellular(s) => get_4d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => get_4d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -759,8 +751,12 @@ pub unsafe fn get_1d_noise_range_into<S: Simd, T: NoiseInto>(
         NoiseType::Gradient(s) => {
             get_1d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Cellular(_) => panic!("not implemented"),
-        NoiseType::Cellular2(_) => panic!("not implemented"),
+        NoiseType::Cellular(s) => {
+            get_1d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular2(s) => {
+            get_1d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+        }
     }
 }
 
@@ -845,7 +841,11 @@ pub unsafe fn get_4d_noise_range_into<S: Simd, T: NoiseInto>(
         NoiseType::Gradient(s) => {
             get_4d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Cellular(_) => panic!("not implemented"),
-        NoiseType::Cellular2(_) => panic!("not implemented"),
+        NoiseType::Cellular(s) => {
+            get_4d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+        }
+        NoiseType::Cellular2(s) => {
+            get_4d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+        }
     }
 }

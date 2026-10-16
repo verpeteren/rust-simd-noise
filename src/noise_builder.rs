@@ -53,6 +53,51 @@ impl NoiseBuilder {
         CellularSettings::default(dim)
     }
 
+    pub fn cellular_1d(width: usize) -> CellularSettings {
+        let mut dim = NoiseDimensions::default(1);
+        dim.width = width;
+        CellularSettings::default(dim)
+    }
+
+    pub fn cellular_1d_offset(x_offset: f32, width: usize) -> CellularSettings {
+        let mut dim = NoiseDimensions::default(1);
+        dim.width = width;
+        dim.x = x_offset;
+        CellularSettings::default(dim)
+    }
+
+    pub fn cellular_4d(width: usize, height: usize, depth: usize, time: usize) -> CellularSettings {
+        let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        CellularSettings::default(dim)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn cellular_4d_offset(
+        x_offset: f32,
+        width: usize,
+        y_offset: f32,
+        height: usize,
+        z_offset: f32,
+        depth: usize,
+        w_offset: f32,
+        time: usize,
+    ) -> CellularSettings {
+        let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        dim.w = w_offset;
+        CellularSettings::default(dim)
+    }
+
     pub fn cellular2_2d(width: usize, height: usize) -> Cellular2Settings {
         let mut dim = NoiseDimensions::default(2);
         dim.width = width;
@@ -97,6 +142,56 @@ impl NoiseBuilder {
         dim.x = x_offset;
         dim.y = y_offset;
         dim.z = z_offset;
+        Cellular2Settings::default(dim)
+    }
+
+    pub fn cellular2_1d(width: usize) -> Cellular2Settings {
+        let mut dim = NoiseDimensions::default(1);
+        dim.width = width;
+        Cellular2Settings::default(dim)
+    }
+
+    pub fn cellular2_1d_offset(x_offset: f32, width: usize) -> Cellular2Settings {
+        let mut dim = NoiseDimensions::default(1);
+        dim.width = width;
+        dim.x = x_offset;
+        Cellular2Settings::default(dim)
+    }
+
+    pub fn cellular2_4d(
+        width: usize,
+        height: usize,
+        depth: usize,
+        time: usize,
+    ) -> Cellular2Settings {
+        let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        Cellular2Settings::default(dim)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn cellular2_4d_offset(
+        x_offset: f32,
+        width: usize,
+        y_offset: f32,
+        height: usize,
+        z_offset: f32,
+        depth: usize,
+        w_offset: f32,
+        time: usize,
+    ) -> Cellular2Settings {
+        let mut dim = NoiseDimensions::default(4);
+        dim.width = width;
+        dim.height = height;
+        dim.depth = depth;
+        dim.time = time;
+        dim.x = x_offset;
+        dim.y = y_offset;
+        dim.z = z_offset;
+        dim.w = w_offset;
         Cellular2Settings::default(dim)
     }
 

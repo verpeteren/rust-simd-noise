@@ -1,15 +1,21 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
-use crate::noise::cell_32::{cellular_2d, cellular_3d};
-use crate::noise::cell_64::{cellular_2d as cellular_2d_f64, cellular_3d as cellular_3d_f64};
+use crate::noise::cell_32::{cellular_1d, cellular_2d, cellular_3d, cellular_4d};
+use crate::noise::cell_64::{
+    cellular_1d as cellular_1d_f64, cellular_2d as cellular_2d_f64, cellular_3d as cellular_3d_f64,
+    cellular_4d as cellular_4d_f64,
+};
 pub use crate::noise::cell_distance_function::CellDistanceFunction;
 pub use crate::noise::cell_return_type::CellReturnType;
 pub use crate::noise_dimensions::NoiseDimensions;
 use crate::noise_helpers_32::Sample32;
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
-use crate::{get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise};
+use crate::{
+    get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
+    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise,
+};
 
 use super::Settings;
 
@@ -49,6 +55,7 @@ pub struct CellularSettings {
     pub freq_x: f32,
     pub freq_y: f32,
     pub freq_z: f32,
+    pub freq_w: f32,
     pub distance_function: CellDistanceFunction,
     pub return_type: CellReturnType,
     pub jitter: f32,
@@ -67,6 +74,7 @@ impl Settings for CellularSettings {
             freq_x: 0.02,
             freq_y: 0.02,
             freq_z: 0.02,
+            freq_w: 0.02,
             distance_function: CellDistanceFunction::Euclidean,
             return_type: CellReturnType::Distance,
             jitter: 0.25,
@@ -82,6 +90,7 @@ impl Settings for CellularSettings {
         self.freq_x = freq;
         self.freq_y = freq;
         self.freq_z = freq;
+        self.freq_w = freq;
         self
     }
 
@@ -100,12 +109,16 @@ impl Settings for CellularSettings {
 
     fn with_freq_4d(
         &mut self,
-        _freq_x: f32,
-        _freq_y: f32,
-        _freq_z: f32,
-        _freq_w: f32,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
     ) -> &mut CellularSettings {
-        unimplemented!()
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
+        self
     }
 
     fn get_freq_x(&self) -> f32 {
@@ -121,7 +134,7 @@ impl Settings for CellularSettings {
     }
 
     fn get_freq_w(&self) -> f32 {
-        unimplemented!()
+        self.freq_w
     }
 
     fn wrap(self) -> NoiseType {
@@ -132,8 +145,10 @@ impl Settings for CellularSettings {
     fn generate(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
+            1 => get_1d_noise(&NoiseType::Cellular(self)),
             2 => get_2d_noise(&NoiseType::Cellular(self)),
             3 => get_3d_noise(&NoiseType::Cellular(self)),
+            4 => get_4d_noise(&NoiseType::Cellular(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -148,8 +163,10 @@ impl Settings for CellularSettings {
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
+            1 => get_1d_scaled_noise(&NoiseType::Cellular(new_self)),
             2 => get_2d_scaled_noise(&NoiseType::Cellular(new_self)),
             3 => get_3d_scaled_noise(&NoiseType::Cellular(new_self)),
+            4 => get_4d_scaled_noise(&NoiseType::Cellular(new_self)),
             _ => panic!("not implemented"),
         }
     }
@@ -157,8 +174,10 @@ impl Settings for CellularSettings {
     fn generate_64(self) -> (Vec<f64>, f64, f64) {
         let d = self.dim.dim;
         match d {
+            1 => crate::get_1d_noise_64(&NoiseType::Cellular(self)),
             2 => crate::get_2d_noise_64(&NoiseType::Cellular(self)),
             3 => crate::get_3d_noise_64(&NoiseType::Cellular(self)),
+            4 => crate::get_4d_noise_64(&NoiseType::Cellular(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -166,8 +185,10 @@ impl Settings for CellularSettings {
     fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64> {
         let d = self.dim.dim;
         match d {
+            1 => crate::get_1d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
             2 => crate::get_2d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
             3 => crate::get_3d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
+            4 => crate::get_4d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
             _ => panic!("not implemented"),
         }
     }
@@ -175,8 +196,10 @@ impl Settings for CellularSettings {
     fn generate_into(self, out: &mut [f32]) -> (f32, f32) {
         let d = self.dim.dim;
         match d {
+            1 => crate::get_1d_noise_into(&NoiseType::Cellular(self), out),
             2 => crate::get_2d_noise_into(&NoiseType::Cellular(self), out),
             3 => crate::get_3d_noise_into(&NoiseType::Cellular(self), out),
+            4 => crate::get_4d_noise_into(&NoiseType::Cellular(self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -187,8 +210,10 @@ impl Settings for CellularSettings {
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
+            1 => crate::get_1d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
             2 => crate::get_2d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
             3 => crate::get_3d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
+            4 => crate::get_4d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -196,8 +221,10 @@ impl Settings for CellularSettings {
     fn generate_into_64(self, out: &mut [f64]) -> (f64, f64) {
         let d = self.dim.dim;
         match d {
+            1 => crate::get_1d_noise_into_64(&NoiseType::Cellular(self), out),
             2 => crate::get_2d_noise_into_64(&NoiseType::Cellular(self), out),
             3 => crate::get_3d_noise_into_64(&NoiseType::Cellular(self), out),
+            4 => crate::get_4d_noise_into_64(&NoiseType::Cellular(self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -205,8 +232,10 @@ impl Settings for CellularSettings {
     fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]) {
         let d = self.dim.dim;
         match d {
+            1 => crate::get_1d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
             2 => crate::get_2d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
             3 => crate::get_3d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
+            4 => crate::get_4d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
             _ => panic!("not implemented"),
         }
     }
@@ -214,6 +243,12 @@ impl Settings for CellularSettings {
     fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
         let d = self.dim.dim;
         match d {
+            1 => crate::get_1d_noise_range_into::<T>(
+                &NoiseType::Cellular(self),
+                src_min,
+                src_max,
+                out,
+            ),
             2 => crate::get_2d_noise_range_into::<T>(
                 &NoiseType::Cellular(self),
                 src_min,
@@ -226,6 +261,12 @@ impl Settings for CellularSettings {
                 src_max,
                 out,
             ),
+            4 => crate::get_4d_noise_range_into::<T>(
+                &NoiseType::Cellular(self),
+                src_min,
+                src_max,
+                out,
+            ),
             _ => panic!("not implemented"),
         }
     }
@@ -233,9 +274,15 @@ impl Settings for CellularSettings {
 
 impl<S: Simd> Sample32<S> for CellularSettings {
     #[inline(always)]
-    #[allow(unused_variables)]
     fn sample_1d(&self, x: S::Vf32) -> S::Vf32 {
-        unimplemented!()
+        dispatch_cell!(
+            cellular_1d,
+            self.distance_function,
+            self.return_type,
+            x,
+            S::Vf32::set1(self.jitter),
+            self.dim.seed
+        )
     }
 
     #[inline(always)]
@@ -266,17 +313,32 @@ impl<S: Simd> Sample32<S> for CellularSettings {
     }
 
     #[inline(always)]
-    #[allow(unused_variables)]
     fn sample_4d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32 {
-        unimplemented!()
+        dispatch_cell!(
+            cellular_4d,
+            self.distance_function,
+            self.return_type,
+            x,
+            y,
+            z,
+            w,
+            S::Vf32::set1(self.jitter),
+            self.dim.seed
+        )
     }
 }
 
 impl<S: Simd> Sample64<S> for CellularSettings {
     #[inline(always)]
-    #[allow(unused_variables)]
     fn sample_1d(&self, x: S::Vf64) -> S::Vf64 {
-        unimplemented!()
+        dispatch_cell!(
+            cellular_1d_f64,
+            self.distance_function,
+            self.return_type,
+            x,
+            S::Vf64::set1(self.jitter.into()),
+            self.dim.seed.into()
+        )
     }
 
     #[inline(always)]
@@ -307,9 +369,18 @@ impl<S: Simd> Sample64<S> for CellularSettings {
     }
 
     #[inline(always)]
-    #[allow(unused_variables)]
     fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64 {
-        unimplemented!()
+        dispatch_cell!(
+            cellular_4d_f64,
+            self.distance_function,
+            self.return_type,
+            x,
+            y,
+            z,
+            w,
+            S::Vf64::set1(self.jitter.into()),
+            self.dim.seed.into()
+        )
     }
 }
 
