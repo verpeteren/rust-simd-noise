@@ -1,4 +1,6 @@
-use crate::noise::simplex_64::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
+use crate::noise::simplex_64::{
+    simplex_1d, simplex_2d, simplex_3d, simplex_4d, simplex_5d, simplex_6d,
+};
 
 use simdeez::prelude::*;
 
@@ -91,6 +93,66 @@ pub fn turbulence_4d<S: Simd>(
         w *= lac;
         amp *= gain;
         result += (simplex_4d::<S>(x, y, z, w, seed) * amp).abs();
+    }
+
+    result
+}
+
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn turbulence_5d<S: Simd>(
+    mut x: S::Vf64,
+    mut y: S::Vf64,
+    mut z: S::Vf64,
+    mut w: S::Vf64,
+    mut u: S::Vf64,
+    lac: S::Vf64,
+    gain: S::Vf64,
+    octaves: u8,
+    seed: i64,
+) -> S::Vf64 {
+    let mut result = simplex_5d::<S>(x, y, z, w, u, seed).abs();
+    let mut amp = S::Vf64::set1(1.0);
+
+    for _ in 1..octaves {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        amp *= gain;
+        result += (simplex_5d::<S>(x, y, z, w, u, seed) * amp).abs();
+    }
+
+    result
+}
+
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn turbulence_6d<S: Simd>(
+    mut x: S::Vf64,
+    mut y: S::Vf64,
+    mut z: S::Vf64,
+    mut w: S::Vf64,
+    mut u: S::Vf64,
+    mut t: S::Vf64,
+    lac: S::Vf64,
+    gain: S::Vf64,
+    octaves: u8,
+    seed: i64,
+) -> S::Vf64 {
+    let mut result = simplex_6d::<S>(x, y, z, w, u, t, seed).abs();
+    let mut amp = S::Vf64::set1(1.0);
+
+    for _ in 1..octaves {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        t *= lac;
+        amp *= gain;
+        result += (simplex_6d::<S>(x, y, z, w, u, t, seed) * amp).abs();
     }
 
     result

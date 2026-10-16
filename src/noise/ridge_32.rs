@@ -1,4 +1,6 @@
-use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
+use crate::noise::simplex_32::{
+    simplex_1d, simplex_2d, simplex_3d, simplex_4d, simplex_5d, simplex_6d,
+};
 
 use simdeez::prelude::*;
 
@@ -94,6 +96,67 @@ pub fn ridge_4d<S: Simd>(
         w *= lac;
         amp *= gain;
         result = result + S::Vf32::set1(1.0) - (simplex_4d::<S>(x, y, z, w, seed) * amp).abs();
+    }
+
+    result
+}
+
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn ridge_5d<S: Simd>(
+    mut x: S::Vf32,
+    mut y: S::Vf32,
+    mut z: S::Vf32,
+    mut w: S::Vf32,
+    mut u: S::Vf32,
+    lac: S::Vf32,
+    gain: S::Vf32,
+    octaves: u8,
+    seed: i32,
+) -> S::Vf32 {
+    let mut result = S::Vf32::set1(1.0) - simplex_5d::<S>(x, y, z, w, u, seed).abs();
+    let mut amp = S::Vf32::set1(1.0);
+
+    for _ in 1..octaves {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        amp *= gain;
+        result = result + S::Vf32::set1(1.0) - (simplex_5d::<S>(x, y, z, w, u, seed) * amp).abs();
+    }
+
+    result
+}
+
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn ridge_6d<S: Simd>(
+    mut x: S::Vf32,
+    mut y: S::Vf32,
+    mut z: S::Vf32,
+    mut w: S::Vf32,
+    mut u: S::Vf32,
+    mut t: S::Vf32,
+    lac: S::Vf32,
+    gain: S::Vf32,
+    octaves: u8,
+    seed: i32,
+) -> S::Vf32 {
+    let mut result = S::Vf32::set1(1.0) - simplex_6d::<S>(x, y, z, w, u, t, seed).abs();
+    let mut amp = S::Vf32::set1(1.0);
+
+    for _ in 1..octaves {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        t *= lac;
+        amp *= gain;
+        result =
+            result + S::Vf32::set1(1.0) - (simplex_6d::<S>(x, y, z, w, u, t, seed) * amp).abs();
     }
 
     result

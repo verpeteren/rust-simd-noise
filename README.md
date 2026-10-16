@@ -9,13 +9,61 @@ The current maintainer is Peter Reijnders.
 
 ## Features
 
-* Gradient Noise (Simplex aka Perlin) 1D,2D,3D,4D
+* Gradient Noise (Simplex aka Perlin) 1D,2D,3D,4D, and **5D/6D (experimental)**
 * Fractal Brownian Motion, Ridge, and Turbulence
-* Cellular Noise (aka Voroni) 2D, 3D
-* SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
+* Cellular Noise (aka Voroni) 1D,2D,3D,4D, and **5D/6D (experimental)**
+* `f32` and `f64` output for every algorithm and dimension
+* SSE2, SSE41, AVX2, and AVX-512 instruction sets, plus NEON and a non-SIMD fallback
 * AVX2 version also leverages FMA3
 * Runtime detection picks the best available instruction set
 * Provide a seed value to randomize your noise result
+
+### Capability matrix
+
+What is implemented, per algorithm and dimension. `v` = implemented & working,
+blank = not applicable. Entries marked `v*` are **experimental** (see below).
+
+| Algorithm | knobs | 1D | 2D | 3D | 4D | 5D | 6D |
+|---|---|:--:|:--:|:--:|:--:|:--:|:--:|
+| Gradient (raw Simplex) | seed, freq | v | v | v | v | v* | v* |
+| FBM | + lacunarity, gain, octaves | v | v | v | v | v* | v* |
+| Ridge | + lacunarity, gain, octaves | v | v | v | v | v* | v* |
+| Turbulence | + lacunarity, gain, octaves | v | v | v | v | v* | v* |
+| Cellular (Voronoi F1) | seed, freq, distance_fn, return_type, jitter | v | v | v | v | v* | v* |
+| Cellular2 (Voronoi F2) | + return_type2, index0, index1 | v | v | v | v | v* | v* |
+
+Every `v`/`v*` cell is available for both `f32` (`generate()`, …) and `f64`
+(`generate_64()`, …).
+
+#### Engines
+
+| Scalar | SSE2 | SSE4.1 | AVX2 | AVX-512 | NEON (aarch64) | WASM simd128 |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| v | v | v | v | v | v | v |
+
+Selection is automatic at runtime (x86: AVX-512 → AVX2 → SSE4.1 → SSE2 → scalar;
+aarch64: NEON), or compile-time via the `scalar` feature / the per-engine
+`intrinsics::{engine}` modules. NEON `f64` cellular is excluded (its `rsqrt`
+approximation produces NaN).
+
+#### ⚠️ Experimental: 5D and 6D
+
+5D and 6D noise has **no canonical reference implementation** (FastNoiseSIMD and
+friends stop at 4D), so these dimensions are experimental:
+
+* The simplex 5D/6D kernels are classic simplex extended by hand; the
+  `[-1, 1]` normalization constant is **empirically calibrated**, not derived.
+* Classic simplex develops visible surflet artifacts past 4D.
+
+**There are no golden (stored-fixture) tests for 5D/6D yet.** Because the
+output values are still expected to change (normalization is being refined and
+the kernels have no reference to match), pinning them byte-for-byte would be
+premature. Correctness is instead verified by cross-engine agreement,
+`f32`↔`f64` agreement, and statistical range/finiteness checks. Golden fixtures
+(and the per-architecture NEON regen) will be added once 5D/6D stabilizes.
+
+The API and output values at 5D/6D may change in a future release. 1D–4D are
+stable and keep their full per-engine golden-fixture coverage.
 
 ## Benchmarks
 *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*
@@ -43,8 +91,7 @@ The current maintainer is Peter Reijnders.
 
 ## Todo
 
-* AVX512 support
-* ARM NEON support
+* Stabilize the experimental 5D/6D noise (golden fixtures, normalization review)
 * Other noise types
 
 ## Disabling SIMD (the `scalar` feature)
