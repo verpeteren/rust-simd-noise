@@ -74,6 +74,42 @@ cellular!(
     cell_64,
     try_transmute_scalar
 );
+cellular!(
+    "1d",
+    cellular_1d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    cell_32,
+    try_transmute_scalar
+);
+cellular!(
+    "4d",
+    cellular_4d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    cell_32,
+    try_transmute_scalar
+);
+cellular!(
+    "1d",
+    cellular_1d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    cell_64,
+    try_transmute_scalar
+);
+cellular!(
+    "4d",
+    cellular_4d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    cell_64,
+    try_transmute_scalar
+);
 
 simplex!(
     "1d",

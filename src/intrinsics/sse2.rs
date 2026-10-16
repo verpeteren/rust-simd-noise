@@ -67,6 +67,42 @@ cellular!(
     cell_64,
     try_transmute_sse2
 );
+cellular!(
+    "1d",
+    cellular_1d,
+    __m128,
+    SimdTransmuteF32::try_transmute_from_sse2,
+    i32,
+    cell_32,
+    try_transmute_sse2
+);
+cellular!(
+    "4d",
+    cellular_4d,
+    __m128,
+    SimdTransmuteF32::try_transmute_from_sse2,
+    i32,
+    cell_32,
+    try_transmute_sse2
+);
+cellular!(
+    "1d",
+    cellular_1d_f64,
+    __m128d,
+    SimdTransmuteF64::try_transmute_from_sse2,
+    i64,
+    cell_64,
+    try_transmute_sse2
+);
+cellular!(
+    "4d",
+    cellular_4d_f64,
+    __m128d,
+    SimdTransmuteF64::try_transmute_from_sse2,
+    i64,
+    cell_64,
+    try_transmute_sse2
+);
 
 simplex!(
     "1d",

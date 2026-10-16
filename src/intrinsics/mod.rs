@@ -91,6 +91,99 @@ macro_rules! cellular {
             result.$transmute_to()
         }
     };
+    ("1d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 1d cellular/voroni noise
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            distance_function: CellDistanceFunction,
+            return_type: CellReturnType,
+            jitter: $f_type,
+            seed: $seed_type,
+        ) -> $f_type {
+            use $crate::noise::cell_strategy as cs;
+            let xt = $transmute_from(x);
+            let jt = $transmute_from(jitter);
+            let result = match (distance_function, return_type) {
+                (CellDistanceFunction::Euclidean, CellReturnType::Distance) => {
+                    $mod::cellular_1d::<S, cs::Euclidean, cs::Distance>(xt, jt, seed)
+                }
+                (CellDistanceFunction::Euclidean, CellReturnType::CellValue) => {
+                    $mod::cellular_1d::<S, cs::Euclidean, cs::CellValue>(xt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::Distance) => {
+                    $mod::cellular_1d::<S, cs::Manhattan, cs::Distance>(xt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::CellValue) => {
+                    $mod::cellular_1d::<S, cs::Manhattan, cs::CellValue>(xt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::Distance) => {
+                    $mod::cellular_1d::<S, cs::Natural, cs::Distance>(xt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::CellValue) => {
+                    $mod::cellular_1d::<S, cs::Natural, cs::CellValue>(xt, jt, seed)
+                }
+            };
+            result.$transmute_to()
+        }
+    };
+    ("4d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 4d cellular/voroni noise
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            distance_function: CellDistanceFunction,
+            return_type: CellReturnType,
+            jitter: $f_type,
+            seed: $seed_type,
+        ) -> $f_type {
+            use $crate::noise::cell_strategy as cs;
+            let xt = $transmute_from(x);
+            let yt = $transmute_from(y);
+            let zt = $transmute_from(z);
+            let wt = $transmute_from(w);
+            let jt = $transmute_from(jitter);
+            let result = match (distance_function, return_type) {
+                (CellDistanceFunction::Euclidean, CellReturnType::Distance) => {
+                    $mod::cellular_4d::<S, cs::Euclidean, cs::Distance>(xt, yt, zt, wt, jt, seed)
+                }
+                (CellDistanceFunction::Euclidean, CellReturnType::CellValue) => {
+                    $mod::cellular_4d::<S, cs::Euclidean, cs::CellValue>(xt, yt, zt, wt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::Distance) => {
+                    $mod::cellular_4d::<S, cs::Manhattan, cs::Distance>(xt, yt, zt, wt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::CellValue) => {
+                    $mod::cellular_4d::<S, cs::Manhattan, cs::CellValue>(xt, yt, zt, wt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::Distance) => {
+                    $mod::cellular_4d::<S, cs::Natural, cs::Distance>(xt, yt, zt, wt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::CellValue) => {
+                    $mod::cellular_4d::<S, cs::Natural, cs::CellValue>(xt, yt, zt, wt, jt, seed)
+                }
+            };
+            result.$transmute_to()
+        }
+    };
 }
 
 macro_rules! simplex {
