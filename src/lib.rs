@@ -5,7 +5,7 @@
 //!
 //!## Features
 //!
-//!* SSE2, SSE41, and AVX2 instruction sets, along with non SIMD fallback
+//!* SSE2, SSE41, AVX2, AVX-512, and NEON instruction sets, along with a non-SIMD fallback
 //!* Runtime detection picks the best available instruction set
 //!* Simplex noise, fractal brownian motion, turbulence, and ridge
 //!* 1D, 2D, 3D, and 4D
@@ -46,8 +46,6 @@
 //! See [Github](https://github.com/verpeteren/rust-simd-noise)
 //!## Todo
 //!
-//!* AVX512 support
-//!* ARM NEON support
 //!* Other noise types
 //!
 //!# Examples
