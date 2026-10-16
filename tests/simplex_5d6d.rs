@@ -6,7 +6,9 @@
 //!   * the field is non-trivial (not collapsed to ~0),
 //!   * every SIMD engine agrees with the scalar engine (uniform-lane inputs).
 //!
-//! Full per-engine block golden fixtures follow once the kernels are plumbed.
+//! 5D/6D is experimental and has no stored golden fixtures yet (its output
+//! values are still expected to change); these behavioral checks stand in until
+//! it stabilizes.
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 
 use simdeez::prelude::*;

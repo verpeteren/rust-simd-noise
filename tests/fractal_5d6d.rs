@@ -3,8 +3,9 @@
 //! kernels. Like `simplex_5d6d.rs` they call the raw `noise::*_{32,64}::*_5d/6d`
 //! functions directly (the public block API is wired up in a later task) and
 //! check that output is finite and that every SIMD engine agrees with the
-//! scalar engine. Full per-engine block golden fixtures follow once the kernels
-//! are plumbed.
+//! scalar engine. 5D/6D is experimental and has no stored golden fixtures yet
+//! (its output values are still expected to change); these behavioral checks
+//! stand in until it stabilizes.
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 
 use simdeez::prelude::*;

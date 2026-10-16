@@ -2,8 +2,9 @@
 //! `simplex_5d6d.rs` they call the raw `noise::cell*_{32,64}::cellular*_5d/6d`
 //! kernels directly (the public block API is wired up in a later task) and check
 //! that output is finite and that every SIMD engine agrees with the scalar
-//! engine. Full per-engine block golden fixtures follow once the kernels are
-//! plumbed. The f64 cellular path is exercised only on x86 (NEON f64 cellular is
+//! engine. 5D/6D is experimental and has no stored golden fixtures yet (the
+//! output values are still expected to change); these behavioral checks stand
+//! in until it stabilizes. The f64 cellular path is exercised only on x86 (NEON f64 cellular is
 //! excluded crate-wide because its `rsqrt` approximation yields NaN).
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 

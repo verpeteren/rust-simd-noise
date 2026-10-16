@@ -54,11 +54,16 @@ friends stop at 4D), so these dimensions are experimental:
 * The simplex 5D/6D kernels are classic simplex extended by hand; the
   `[-1, 1]` normalization constant is **empirically calibrated**, not derived.
 * Classic simplex develops visible surflet artifacts past 4D.
-* Correctness is verified by cross-engine agreement, `f32`↔`f64` agreement, and
-  statistical range/finiteness checks rather than byte-for-byte golden fixtures.
+
+**There are no golden (stored-fixture) tests for 5D/6D yet.** Because the
+output values are still expected to change (normalization is being refined and
+the kernels have no reference to match), pinning them byte-for-byte would be
+premature. Correctness is instead verified by cross-engine agreement,
+`f32`↔`f64` agreement, and statistical range/finiteness checks. Golden fixtures
+(and the per-architecture NEON regen) will be added once 5D/6D stabilizes.
 
 The API and output values at 5D/6D may change in a future release. 1D–4D are
-stable.
+stable and keep their full per-engine golden-fixture coverage.
 
 ## Benchmarks
 *Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz*

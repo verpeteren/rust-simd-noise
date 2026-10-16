@@ -17,10 +17,15 @@
 //! reference implementation for simplex noise above 4D, so these kernels are
 //! classic simplex extended by hand with an *empirically calibrated* `[-1, 1]`
 //! normalization constant, and classic simplex shows visible surflet artifacts
-//! past 4D. They are validated by cross-engine and `f32`↔`f64` agreement plus
-//! statistical range/finiteness checks rather than byte-exact golden fixtures.
-//! The output values and API at 5D/6D may change in a future release; 1D–4D are
-//! stable.
+//! past 4D.
+//!
+//! **There are no golden (stored-fixture) tests for 5D/6D yet.** Pinning the
+//! output byte-for-byte would be premature while the values are still expected
+//! to change, so 5D/6D is validated by cross-engine and `f32`↔`f64` agreement
+//! plus statistical range/finiteness checks instead; golden fixtures (and the
+//! NEON regen) come once it stabilizes. The output values and API at 5D/6D may
+//! change in a future release; 1D–4D are stable and keep their full golden
+//! coverage.
 //!
 //!## The `scalar` cargo feature
 //!
