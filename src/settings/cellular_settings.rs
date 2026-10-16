@@ -13,6 +13,36 @@ use crate::{get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise
 
 use super::Settings;
 
+/// Select the monomorphized cellular kernel for the runtime (distance, return)
+/// configuration. This runs once per `sample_*` call (once per SIMD-vector
+/// batch), outside the kernel's inner loops, so the kernel itself — chosen here
+/// via the compile-time `cell_strategy` markers — carries no config branch.
+macro_rules! dispatch_cell {
+    ($call:ident, $df:expr, $rt:expr, $($arg:expr),* $(,)?) => {{
+        use crate::noise::cell_strategy as cs;
+        match ($df, $rt) {
+            (CellDistanceFunction::Euclidean, CellReturnType::Distance) => {
+                $call::<S, cs::Euclidean, cs::Distance>($($arg),*)
+            }
+            (CellDistanceFunction::Euclidean, CellReturnType::CellValue) => {
+                $call::<S, cs::Euclidean, cs::CellValue>($($arg),*)
+            }
+            (CellDistanceFunction::Manhattan, CellReturnType::Distance) => {
+                $call::<S, cs::Manhattan, cs::Distance>($($arg),*)
+            }
+            (CellDistanceFunction::Manhattan, CellReturnType::CellValue) => {
+                $call::<S, cs::Manhattan, cs::CellValue>($($arg),*)
+            }
+            (CellDistanceFunction::Natural, CellReturnType::Distance) => {
+                $call::<S, cs::Natural, cs::Distance>($($arg),*)
+            }
+            (CellDistanceFunction::Natural, CellReturnType::CellValue) => {
+                $call::<S, cs::Natural, cs::CellValue>($($arg),*)
+            }
+        }
+    }};
+}
+
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
     dim: NoiseDimensions,
@@ -184,8 +214,18 @@ impl Settings for CellularSettings {
     fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
         let d = self.dim.dim;
         match d {
-            2 => crate::get_2d_noise_range_into::<T>(&NoiseType::Cellular(self), src_min, src_max, out),
-            3 => crate::get_3d_noise_range_into::<T>(&NoiseType::Cellular(self), src_min, src_max, out),
+            2 => crate::get_2d_noise_range_into::<T>(
+                &NoiseType::Cellular(self),
+                src_min,
+                src_max,
+                out,
+            ),
+            3 => crate::get_3d_noise_range_into::<T>(
+                &NoiseType::Cellular(self),
+                src_min,
+                src_max,
+                out,
+            ),
             _ => panic!("not implemented"),
         }
     }
@@ -200,26 +240,28 @@ impl<S: Simd> Sample32<S> for CellularSettings {
 
     #[inline(always)]
     fn sample_2d(&self, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
-        cellular_2d::<S>(
-            x,
-            y,
+        dispatch_cell!(
+            cellular_2d,
             self.distance_function,
             self.return_type,
+            x,
+            y,
             S::Vf32::set1(self.jitter),
-            self.dim.seed,
+            self.dim.seed
         )
     }
 
     #[inline(always)]
     fn sample_3d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
-        cellular_3d::<S>(
+        dispatch_cell!(
+            cellular_3d,
+            self.distance_function,
+            self.return_type,
             x,
             y,
             z,
-            self.distance_function,
-            self.return_type,
             S::Vf32::set1(self.jitter),
-            self.dim.seed,
+            self.dim.seed
         )
     }
 
@@ -239,26 +281,28 @@ impl<S: Simd> Sample64<S> for CellularSettings {
 
     #[inline(always)]
     fn sample_2d(&self, x: S::Vf64, y: S::Vf64) -> S::Vf64 {
-        cellular_2d_f64::<S>(
-            x,
-            y,
+        dispatch_cell!(
+            cellular_2d_f64,
             self.distance_function,
             self.return_type,
+            x,
+            y,
             S::Vf64::set1(self.jitter.into()),
-            self.dim.seed.into(),
+            self.dim.seed.into()
         )
     }
 
     #[inline(always)]
     fn sample_3d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> S::Vf64 {
-        cellular_3d_f64::<S>(
+        dispatch_cell!(
+            cellular_3d_f64,
+            self.distance_function,
+            self.return_type,
             x,
             y,
             z,
-            self.distance_function,
-            self.return_type,
             S::Vf64::set1(self.jitter.into()),
-            self.dim.seed.into(),
+            self.dim.seed.into()
         )
     }
 

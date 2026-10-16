@@ -5,6 +5,7 @@ pub mod cell_32;
 pub mod cell_64;
 pub mod cell_distance_function;
 pub mod cell_return_type;
+pub mod cell_strategy;
 mod cellular_32;
 mod cellular_64;
 pub mod fbm_32;

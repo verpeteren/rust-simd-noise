@@ -17,15 +17,31 @@ macro_rules! cellular {
             jitter: $f_type,
             seed: $seed_type,
         ) -> $f_type {
-            $mod::cellular_2d::<S>(
-                $transmute_from(x),
-                $transmute_from(y),
-                distance_function,
-                return_type,
-                $transmute_from(jitter),
-                seed,
-            )
-            .$transmute_to()
+            use $crate::noise::cell_strategy as cs;
+            let xt = $transmute_from(x);
+            let yt = $transmute_from(y);
+            let jt = $transmute_from(jitter);
+            let result = match (distance_function, return_type) {
+                (CellDistanceFunction::Euclidean, CellReturnType::Distance) => {
+                    $mod::cellular_2d::<S, cs::Euclidean, cs::Distance>(xt, yt, jt, seed)
+                }
+                (CellDistanceFunction::Euclidean, CellReturnType::CellValue) => {
+                    $mod::cellular_2d::<S, cs::Euclidean, cs::CellValue>(xt, yt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::Distance) => {
+                    $mod::cellular_2d::<S, cs::Manhattan, cs::Distance>(xt, yt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::CellValue) => {
+                    $mod::cellular_2d::<S, cs::Manhattan, cs::CellValue>(xt, yt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::Distance) => {
+                    $mod::cellular_2d::<S, cs::Natural, cs::Distance>(xt, yt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::CellValue) => {
+                    $mod::cellular_2d::<S, cs::Natural, cs::CellValue>(xt, yt, jt, seed)
+                }
+            };
+            result.$transmute_to()
         }
     };
     ("3d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
@@ -47,16 +63,32 @@ macro_rules! cellular {
             jitter: $f_type,
             seed: $seed_type,
         ) -> $f_type {
-            $mod::cellular_3d::<S>(
-                $transmute_from(x),
-                $transmute_from(y),
-                $transmute_from(z),
-                distance_function,
-                return_type,
-                $transmute_from(jitter),
-                seed,
-            )
-            .$transmute_to()
+            use $crate::noise::cell_strategy as cs;
+            let xt = $transmute_from(x);
+            let yt = $transmute_from(y);
+            let zt = $transmute_from(z);
+            let jt = $transmute_from(jitter);
+            let result = match (distance_function, return_type) {
+                (CellDistanceFunction::Euclidean, CellReturnType::Distance) => {
+                    $mod::cellular_3d::<S, cs::Euclidean, cs::Distance>(xt, yt, zt, jt, seed)
+                }
+                (CellDistanceFunction::Euclidean, CellReturnType::CellValue) => {
+                    $mod::cellular_3d::<S, cs::Euclidean, cs::CellValue>(xt, yt, zt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::Distance) => {
+                    $mod::cellular_3d::<S, cs::Manhattan, cs::Distance>(xt, yt, zt, jt, seed)
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::CellValue) => {
+                    $mod::cellular_3d::<S, cs::Manhattan, cs::CellValue>(xt, yt, zt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::Distance) => {
+                    $mod::cellular_3d::<S, cs::Natural, cs::Distance>(xt, yt, zt, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::CellValue) => {
+                    $mod::cellular_3d::<S, cs::Natural, cs::CellValue>(xt, yt, zt, jt, seed)
+                }
+            };
+            result.$transmute_to()
         }
     };
 }

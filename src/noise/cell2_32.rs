@@ -1,15 +1,17 @@
 use super::cellular_32::{hash_2d, hash_3d, BIT_10_MASK_32, X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
-use crate::{Cell2ReturnType, CellDistanceFunction};
+use crate::noise::cell_strategy::{Cell2Return, CellDistance};
 
 use simdeez::prelude::*;
 
-#[inline(always)]
+// `#[inline]` rather than `#[inline(always)]`: the call boundary now dispatches
+// over the (distance, return) strategy types, so force-inlining would splice
+// every instantiation into one frame and overflow small stacks in debug
+// (same concern as issue #38). `#[inline]` still inlines in optimized builds.
+#[inline]
 #[allow(clippy::too_many_arguments)]
-pub fn cellular2_2d<S: Simd>(
+pub fn cellular2_2d<S: Simd, D: CellDistance, R: Cell2Return>(
     x: S::Vf32,
     y: S::Vf32,
-    distance_function: CellDistanceFunction,
-    return_type: Cell2ReturnType,
     jitter: S::Vf32,
     index0: usize,
     index1: usize,
@@ -38,15 +40,7 @@ pub fn cellular2_2d<S: Simd>(
             xd = (xd * inv_mag) + xcf;
             yd = (yd * inv_mag) + ycf;
 
-            let new_distance = match distance_function {
-                CellDistanceFunction::Euclidean => (xd * xd) + (yd * yd),
-                CellDistanceFunction::Manhattan => xd.abs() + yd.abs(),
-                CellDistanceFunction::Natural => {
-                    let euc = (xd * xd) + (yd * yd);
-                    let man = xd.abs() + yd.abs();
-                    euc + man
-                }
-            };
+            let new_distance = D::new_distance_2d(xd, yd);
             let mut i = index1;
             while i > 0 {
                 distance[i] = distance[i].min(new_distance).max(distance[i - 1]);
@@ -60,13 +54,7 @@ pub fn cellular2_2d<S: Simd>(
         xc += S::Vi32::set1(X_PRIME_32);
     }
 
-    match return_type {
-        Cell2ReturnType::Distance2 => distance[index1],
-        Cell2ReturnType::Distance2Add => distance[index0] + distance[index1],
-        Cell2ReturnType::Distance2Sub => distance[index0] - distance[index1],
-        Cell2ReturnType::Distance2Mul => distance[index0] * distance[index1],
-        Cell2ReturnType::Distance2Div => distance[index0] / distance[index1],
-    }
+    R::combine(&distance, index0, index1)
 }
 
 // Not `#[inline(always)]`: force-inlining this large function into the noise
@@ -74,12 +62,10 @@ pub fn cellular2_2d<S: Simd>(
 // AVX2 (issue #38). `#[inline]` still lets LLVM inline it in optimized builds.
 #[inline]
 #[allow(clippy::too_many_arguments)]
-pub fn cellular2_3d<S: Simd>(
+pub fn cellular2_3d<S: Simd, D: CellDistance, R: Cell2Return>(
     x: S::Vf32,
     y: S::Vf32,
     z: S::Vf32,
-    distance_function: CellDistanceFunction,
-    return_type: Cell2ReturnType,
     jitter: S::Vf32,
     index0: usize,
     index1: usize,
@@ -118,15 +104,7 @@ pub fn cellular2_3d<S: Simd>(
                 yd = (yd * inv_mag) + ycf;
                 zd = (zd * inv_mag) + zcf;
 
-                let new_distance = match distance_function {
-                    CellDistanceFunction::Euclidean => (xd * xd) + ((yd * yd) + (zd * zd)),
-                    CellDistanceFunction::Manhattan => (xd.abs() + yd.abs()) + zd.abs(),
-                    CellDistanceFunction::Natural => {
-                        let euc = (xd * xd) + ((yd * yd) + (zd * zd));
-                        let man = (xd.abs() + yd.abs()) + zd.abs();
-                        euc + man
-                    }
-                };
+                let new_distance = D::new_distance_3d(xd, yd, zd);
                 let mut i = index1;
                 while i > 0 {
                     distance[i] = distance[i].min(new_distance).max(distance[i - 1]);
@@ -143,11 +121,5 @@ pub fn cellular2_3d<S: Simd>(
         xc += S::Vi32::set1(X_PRIME_32);
     }
 
-    match return_type {
-        Cell2ReturnType::Distance2 => distance[index1],
-        Cell2ReturnType::Distance2Add => distance[index0] + distance[index1],
-        Cell2ReturnType::Distance2Sub => distance[index0] - distance[index1],
-        Cell2ReturnType::Distance2Mul => distance[index0] * distance[index1],
-        Cell2ReturnType::Distance2Div => distance[index0] / distance[index1],
-    }
+    R::combine(&distance, index0, index1)
 }

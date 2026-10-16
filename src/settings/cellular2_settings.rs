@@ -13,6 +13,35 @@ use crate::{get_2d_noise, get_2d_scaled_noise, get_3d_noise, get_3d_scaled_noise
 
 use super::Settings;
 
+/// Select the monomorphized cellular2 kernel for the runtime (distance, return)
+/// configuration. Runs once per `sample_*` call, outside the kernel's inner
+/// loops; `index0`/`index1` stay runtime arguments (array indices / `while`
+/// bound), so only the distance metric and the final combine are specialized.
+macro_rules! dispatch_cell2 {
+    ($call:ident, $df:expr, $rt:expr, $($arg:expr),* $(,)?) => {{
+        use crate::noise::cell_strategy as cs;
+        use Cell2ReturnType::*;
+        use CellDistanceFunction::*;
+        match ($df, $rt) {
+            (Euclidean, Distance2) => $call::<S, cs::Euclidean, cs::Distance2>($($arg),*),
+            (Euclidean, Distance2Add) => $call::<S, cs::Euclidean, cs::Distance2Add>($($arg),*),
+            (Euclidean, Distance2Sub) => $call::<S, cs::Euclidean, cs::Distance2Sub>($($arg),*),
+            (Euclidean, Distance2Mul) => $call::<S, cs::Euclidean, cs::Distance2Mul>($($arg),*),
+            (Euclidean, Distance2Div) => $call::<S, cs::Euclidean, cs::Distance2Div>($($arg),*),
+            (Manhattan, Distance2) => $call::<S, cs::Manhattan, cs::Distance2>($($arg),*),
+            (Manhattan, Distance2Add) => $call::<S, cs::Manhattan, cs::Distance2Add>($($arg),*),
+            (Manhattan, Distance2Sub) => $call::<S, cs::Manhattan, cs::Distance2Sub>($($arg),*),
+            (Manhattan, Distance2Mul) => $call::<S, cs::Manhattan, cs::Distance2Mul>($($arg),*),
+            (Manhattan, Distance2Div) => $call::<S, cs::Manhattan, cs::Distance2Div>($($arg),*),
+            (Natural, Distance2) => $call::<S, cs::Natural, cs::Distance2>($($arg),*),
+            (Natural, Distance2Add) => $call::<S, cs::Natural, cs::Distance2Add>($($arg),*),
+            (Natural, Distance2Sub) => $call::<S, cs::Natural, cs::Distance2Sub>($($arg),*),
+            (Natural, Distance2Mul) => $call::<S, cs::Natural, cs::Distance2Mul>($($arg),*),
+            (Natural, Distance2Div) => $call::<S, cs::Natural, cs::Distance2Div>($($arg),*),
+        }
+    }};
+}
+
 #[derive(Copy, Clone)]
 pub struct Cellular2Settings {
     dim: NoiseDimensions,
@@ -193,8 +222,18 @@ impl Settings for Cellular2Settings {
         self.validate();
         let d = self.dim.dim;
         match d {
-            2 => crate::get_2d_noise_range_into::<T>(&NoiseType::Cellular2(self), src_min, src_max, out),
-            3 => crate::get_3d_noise_range_into::<T>(&NoiseType::Cellular2(self), src_min, src_max, out),
+            2 => crate::get_2d_noise_range_into::<T>(
+                &NoiseType::Cellular2(self),
+                src_min,
+                src_max,
+                out,
+            ),
+            3 => crate::get_3d_noise_range_into::<T>(
+                &NoiseType::Cellular2(self),
+                src_min,
+                src_max,
+                out,
+            ),
             _ => panic!("not implemented"),
         }
     }
@@ -209,30 +248,32 @@ impl<S: Simd> Sample32<S> for Cellular2Settings {
 
     #[inline(always)]
     fn sample_2d(&self, x: S::Vf32, y: S::Vf32) -> S::Vf32 {
-        cellular2_2d::<S>(
-            x,
-            y,
+        dispatch_cell2!(
+            cellular2_2d,
             self.distance_function,
             self.return_type,
+            x,
+            y,
             S::Vf32::set1(self.jitter),
             self.index0,
             self.index1,
-            self.dim.seed,
+            self.dim.seed
         )
     }
 
     #[inline(always)]
     fn sample_3d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> S::Vf32 {
-        cellular2_3d::<S>(
+        dispatch_cell2!(
+            cellular2_3d,
+            self.distance_function,
+            self.return_type,
             x,
             y,
             z,
-            self.distance_function,
-            self.return_type,
             S::Vf32::set1(self.jitter),
             self.index0,
             self.index1,
-            self.dim.seed,
+            self.dim.seed
         )
     }
 
@@ -252,30 +293,32 @@ impl<S: Simd> Sample64<S> for Cellular2Settings {
 
     #[inline(always)]
     fn sample_2d(&self, x: S::Vf64, y: S::Vf64) -> S::Vf64 {
-        cellular2_2d_f64::<S>(
-            x,
-            y,
+        dispatch_cell2!(
+            cellular2_2d_f64,
             self.distance_function,
             self.return_type,
+            x,
+            y,
             S::Vf64::set1(self.jitter.into()),
             self.index0,
             self.index1,
-            self.dim.seed.into(),
+            self.dim.seed.into()
         )
     }
 
     #[inline(always)]
     fn sample_3d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> S::Vf64 {
-        cellular2_3d_f64::<S>(
+        dispatch_cell2!(
+            cellular2_3d_f64,
+            self.distance_function,
+            self.return_type,
             x,
             y,
             z,
-            self.distance_function,
-            self.return_type,
             S::Vf64::set1(self.jitter.into()),
             self.index0,
             self.index1,
-            self.dim.seed.into(),
+            self.dim.seed.into()
         )
     }
 
