@@ -204,3 +204,50 @@ pub fn grad5<S: Simd>(
         + keep(sign(w, 17), 3)
         + keep(sign(u, 18), 4)
 }
+
+/// 6D gradient dot product. The 6D gradient set is the 192 vectors with one axis
+/// zero and the other five `±1`. We pick the zeroed axis uniformly in `0..=5`
+/// (via the `(hm * 6) >> 13` trick, 13 bits) and a sign per axis from six more
+/// hash bits (`13..=18`), then return the dot with `[x, y, z, w, u, t]`.
+/// Magnitude is left unnormalised; the simplex scale constant absorbs it.
+///
+/// As in `grad5`, every hash bit used stays in `0..=18` so the f32 and f64
+/// kernels select identical gradients (see `grad5` for why bit 19+ diverges).
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn grad6<S: Simd>(
+    seed: i32,
+    hash: S::Vi32,
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    u: S::Vf32,
+    t: S::Vf32,
+) -> S::Vf32 {
+    let h = seed_hash::<S>(seed, hash);
+    // Which axis is zeroed, uniform in 0..=5 (bits 0..=12).
+    let zero_axis = ((h & S::Vi32::set1(0x1FFF)) * S::Vi32::set1(6)) >> 13;
+    let zero = S::Vf32::zeroes();
+
+    // `+coord` when the axis sign bit is clear, `-coord` when set (bits 13..=18).
+    let sign = |coord: S::Vf32, bit: i32| -> S::Vf32 {
+        ((h & S::Vi32::set1(1 << bit)).cmp_eq(S::Vi32::zeroes()))
+            .bitcast_f32()
+            .blendv(zero - coord, coord)
+    };
+    // Drop the contribution of the zeroed axis.
+    let keep = |signed: S::Vf32, axis: i32| -> S::Vf32 {
+        zero_axis
+            .cmp_eq(S::Vi32::set1(axis))
+            .bitcast_f32()
+            .blendv(signed, zero)
+    };
+
+    keep(sign(x, 13), 0)
+        + keep(sign(y, 14), 1)
+        + keep(sign(z, 15), 2)
+        + keep(sign(w, 16), 3)
+        + keep(sign(u, 17), 4)
+        + keep(sign(t, 18), 5)
+}

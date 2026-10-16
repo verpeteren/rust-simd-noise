@@ -4,7 +4,7 @@
 //! interfaces.
 
 use crate::noise::cellular_32::{X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
-use crate::noise::gradient_32::{grad1, grad2, grad3d, grad3d_dot, grad4, grad5};
+use crate::noise::gradient_32::{grad1, grad2, grad3d, grad3d_dot, grad4, grad5, grad6};
 use crate::noise::ops::gather_32;
 
 use simdeez::prelude::*;
@@ -54,6 +54,22 @@ const G45_32: f32 = 4.0 * G5_32;
 pub const G45_64: f64 = 4.0 * G5_64;
 const G55_32: f32 = 5.0 * G5_32;
 pub const G55_64: f64 = 5.0 * G5_64;
+/// Skew factor for 6D simplex noise: `(sqrt(7) - 1) / 6`.
+const F6_32: f32 = 0.274_291_88;
+pub const F6_64: f64 = 0.2742918851774318;
+/// Unskew factor for 6D simplex noise: `(1 - 1/sqrt(7)) / 6`.
+const G6_32: f32 = 0.103_672_59;
+pub const G6_64: f64 = 0.10367258783179546;
+const G26_32: f32 = 2.0 * G6_32;
+pub const G26_64: f64 = 2.0 * G6_64;
+const G36_32: f32 = 3.0 * G6_32;
+pub const G36_64: f64 = 3.0 * G6_64;
+const G46_32: f32 = 4.0 * G6_32;
+pub const G46_64: f64 = 4.0 * G6_64;
+const G56_32: f32 = 5.0 * G6_32;
+pub const G56_64: f64 = 5.0 * G6_64;
+const G66_32: f32 = 6.0 * G6_32;
+pub const G66_64: f64 = 6.0 * G6_64;
 
 static PERM: [i32; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
@@ -828,6 +844,234 @@ pub fn simplex_5d<S: Simd>(
     n5 = n5.and_not(t5.cmp_lt(zf));
 
     (n0 + n1 + n2 + n3 + n4 + n5) * S::Vf32::set1(SIMPLEX_5D_SCALE_32)
+}
+
+/// Empirical normalization for 6D simplex: maps the raw kernel into ~[-1, 1].
+/// See `SIMPLEX_5D_SCALE_32` for the calibration method (large random sample,
+/// scale = 1/peak).
+const SIMPLEX_6D_SCALE_32: f32 = 49.5;
+
+/// 6D simplex noise. Classic simplex extended to six dimensions, mirroring
+/// `simplex_5d`: skew by `F6`, rank-order the six fractional coordinates with
+/// the 15 pairwise comparisons into 7 corner offsets, unskew by `G6`, and sum
+/// `t^4 * dot(grad6, d)` over the corners (base weight `r^2 = 0.5`).
+#[inline(always)]
+pub fn simplex_6d<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    u: S::Vf32,
+    t: S::Vf32,
+    seed: i32,
+) -> S::Vf32 {
+    let sk = S::Vf32::set1(F6_32) * (x + y + z + w + u + t);
+    let ips = (x + sk).floor();
+    let jps = (y + sk).floor();
+    let kps = (z + sk).floor();
+    let lps = (w + sk).floor();
+    let mps = (u + sk).floor();
+    let nps = (t + sk).floor();
+
+    let i = ips.cast_i32();
+    let j = jps.cast_i32();
+    let k = kps.cast_i32();
+    let l = lps.cast_i32();
+    let m = mps.cast_i32();
+    let n = nps.cast_i32();
+
+    let uns = (i + j + k + l + m + n).cast_f32() * S::Vf32::set1(G6_32);
+    let x0 = x - (ips - uns);
+    let y0 = y - (jps - uns);
+    let z0 = z - (kps - uns);
+    let w0 = w - (lps - uns);
+    let u0 = u - (mps - uns);
+    let t0c = t - (nps - uns);
+
+    // Rank each coordinate by how many of the others it exceeds (0..=5), via the
+    // 15 pairwise comparisons.
+    let mut rank_x = S::Vi32::zeroes();
+    let mut rank_y = S::Vi32::zeroes();
+    let mut rank_z = S::Vi32::zeroes();
+    let mut rank_w = S::Vi32::zeroes();
+    let mut rank_u = S::Vi32::zeroes();
+    let mut rank_t = S::Vi32::zeroes();
+    let one = S::Vi32::set1(1);
+    macro_rules! cmp_rank {
+        ($a0:expr, $ra:ident, $b0:expr, $rb:ident) => {{
+            let cond = ($a0.cmp_gt($b0)).bitcast_i32();
+            $ra += cond & one;
+            $rb += one.and_not(cond);
+        }};
+    }
+    cmp_rank!(x0, rank_x, y0, rank_y);
+    cmp_rank!(x0, rank_x, z0, rank_z);
+    cmp_rank!(x0, rank_x, w0, rank_w);
+    cmp_rank!(x0, rank_x, u0, rank_u);
+    cmp_rank!(x0, rank_x, t0c, rank_t);
+    cmp_rank!(y0, rank_y, z0, rank_z);
+    cmp_rank!(y0, rank_y, w0, rank_w);
+    cmp_rank!(y0, rank_y, u0, rank_u);
+    cmp_rank!(y0, rank_y, t0c, rank_t);
+    cmp_rank!(z0, rank_z, w0, rank_w);
+    cmp_rank!(z0, rank_z, u0, rank_u);
+    cmp_rank!(z0, rank_z, t0c, rank_t);
+    cmp_rank!(w0, rank_w, u0, rank_u);
+    cmp_rank!(w0, rank_w, t0c, rank_t);
+    cmp_rank!(u0, rank_u, t0c, rank_t);
+
+    // Corner c (1..=5) increments every axis whose rank exceeds `6-1-c`.
+    let offs = |rank: S::Vi32, thresh: i32| -> S::Vi32 { one & rank.cmp_gt(S::Vi32::set1(thresh)) };
+    let (i1, j1, k1, l1, m1, n1) = (
+        offs(rank_x, 4),
+        offs(rank_y, 4),
+        offs(rank_z, 4),
+        offs(rank_w, 4),
+        offs(rank_u, 4),
+        offs(rank_t, 4),
+    );
+    let (i2, j2, k2, l2, m2, n2) = (
+        offs(rank_x, 3),
+        offs(rank_y, 3),
+        offs(rank_z, 3),
+        offs(rank_w, 3),
+        offs(rank_u, 3),
+        offs(rank_t, 3),
+    );
+    let (i3, j3, k3, l3, m3, n3) = (
+        offs(rank_x, 2),
+        offs(rank_y, 2),
+        offs(rank_z, 2),
+        offs(rank_w, 2),
+        offs(rank_u, 2),
+        offs(rank_t, 2),
+    );
+    let (i4, j4, k4, l4, m4, n4) = (
+        offs(rank_x, 1),
+        offs(rank_y, 1),
+        offs(rank_z, 1),
+        offs(rank_w, 1),
+        offs(rank_u, 1),
+        offs(rank_t, 1),
+    );
+    let (i5, j5, k5, l5, m5, n5v) = (
+        offs(rank_x, 0),
+        offs(rank_y, 0),
+        offs(rank_z, 0),
+        offs(rank_w, 0),
+        offs(rank_u, 0),
+        offs(rank_t, 0),
+    );
+
+    let g1 = S::Vf32::set1(G6_32);
+    let g2 = S::Vf32::set1(G26_32);
+    let g3 = S::Vf32::set1(G36_32);
+    let g4 = S::Vf32::set1(G46_32);
+    let g5 = S::Vf32::set1(G56_32);
+    let g6 = S::Vf32::set1(G66_32);
+    let one_f = S::Vf32::set1(1.0);
+
+    let x1 = x0 - i1.cast_f32() + g1;
+    let y1 = y0 - j1.cast_f32() + g1;
+    let z1 = z0 - k1.cast_f32() + g1;
+    let w1 = w0 - l1.cast_f32() + g1;
+    let u1 = u0 - m1.cast_f32() + g1;
+    let t1 = t0c - n1.cast_f32() + g1;
+    let x2 = x0 - i2.cast_f32() + g2;
+    let y2 = y0 - j2.cast_f32() + g2;
+    let z2 = z0 - k2.cast_f32() + g2;
+    let w2 = w0 - l2.cast_f32() + g2;
+    let u2 = u0 - m2.cast_f32() + g2;
+    let t2 = t0c - n2.cast_f32() + g2;
+    let x3 = x0 - i3.cast_f32() + g3;
+    let y3 = y0 - j3.cast_f32() + g3;
+    let z3 = z0 - k3.cast_f32() + g3;
+    let w3 = w0 - l3.cast_f32() + g3;
+    let u3 = u0 - m3.cast_f32() + g3;
+    let t3 = t0c - n3.cast_f32() + g3;
+    let x4 = x0 - i4.cast_f32() + g4;
+    let y4 = y0 - j4.cast_f32() + g4;
+    let z4 = z0 - k4.cast_f32() + g4;
+    let w4 = w0 - l4.cast_f32() + g4;
+    let u4 = u0 - m4.cast_f32() + g4;
+    let t4 = t0c - n4.cast_f32() + g4;
+    let x5 = x0 - i5.cast_f32() + g5;
+    let y5 = y0 - j5.cast_f32() + g5;
+    let z5 = z0 - k5.cast_f32() + g5;
+    let w5 = w0 - l5.cast_f32() + g5;
+    let u5 = u0 - m5.cast_f32() + g5;
+    let t5 = t0c - n5v.cast_f32() + g5;
+    let x6 = x0 - one_f + g6;
+    let y6 = y0 - one_f + g6;
+    let z6 = z0 - one_f + g6;
+    let w6 = w0 - one_f + g6;
+    let u6 = u0 - one_f + g6;
+    let t6 = t0c - one_f + g6;
+
+    let ii = i & S::Vi32::set1(0xff);
+    let jj = j & S::Vi32::set1(0xff);
+    let kk = k & S::Vi32::set1(0xff);
+    let ll = l & S::Vi32::set1(0xff);
+    let mm = m & S::Vi32::set1(0xff);
+    let nn = n & S::Vi32::set1(0xff);
+
+    // Nested permutation gather over the six cell coordinates.
+    let (gi0, gi1, gi2, gi3, gi4, gi5, gi6) = unsafe {
+        macro_rules! corner {
+            ($i:expr, $j:expr, $k:expr, $l:expr, $m:expr, $n:expr) => {{
+                let np = gather_32::<S>(&PERM, nn + $n);
+                let mp = gather_32::<S>(&PERM, mm + $m + np);
+                let lp = gather_32::<S>(&PERM, ll + $l + mp);
+                let kp = gather_32::<S>(&PERM, kk + $k + lp);
+                let jp = gather_32::<S>(&PERM, jj + $j + kp);
+                gather_32::<S>(&PERM, ii + $i + jp)
+            }};
+        }
+        let z0i = S::Vi32::zeroes();
+        let gi0 = corner!(z0i, z0i, z0i, z0i, z0i, z0i);
+        let gi1 = corner!(i1, j1, k1, l1, m1, n1);
+        let gi2 = corner!(i2, j2, k2, l2, m2, n2);
+        let gi3 = corner!(i3, j3, k3, l3, m3, n3);
+        let gi4 = corner!(i4, j4, k4, l4, m4, n4);
+        let gi5 = corner!(i5, j5, k5, l5, m5, n5v);
+        let gi6 = corner!(one, one, one, one, one, one);
+        (gi0, gi1, gi2, gi3, gi4, gi5, gi6)
+    };
+
+    let r2 = S::Vf32::set1(0.5);
+    let s0 = r2 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0) - (u0 * u0) - (t0c * t0c);
+    let s1 = r2 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1) - (u1 * u1) - (t1 * t1);
+    let s2 = r2 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2) - (u2 * u2) - (t2 * t2);
+    let s3 = r2 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3) - (u3 * u3) - (t3 * t3);
+    let s4 = r2 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4) - (u4 * u4) - (t4 * t4);
+    let s5 = r2 - (x5 * x5) - (y5 * y5) - (z5 * z5) - (w5 * w5) - (u5 * u5) - (t5 * t5);
+    let s6 = r2 - (x6 * x6) - (y6 * y6) - (z6 * z6) - (w6 * w6) - (u6 * u6) - (t6 * t6);
+
+    // Each weight to the 4th power.
+    let q = |t: S::Vf32| -> S::Vf32 {
+        let tt = t * t;
+        tt * tt
+    };
+
+    let mut n0 = q(s0) * grad6::<S>(seed, gi0, x0, y0, z0, w0, u0, t0c);
+    let mut na = q(s1) * grad6::<S>(seed, gi1, x1, y1, z1, w1, u1, t1);
+    let mut nb = q(s2) * grad6::<S>(seed, gi2, x2, y2, z2, w2, u2, t2);
+    let mut nc = q(s3) * grad6::<S>(seed, gi3, x3, y3, z3, w3, u3, t3);
+    let mut nd = q(s4) * grad6::<S>(seed, gi4, x4, y4, z4, w4, u4, t4);
+    let mut ne = q(s5) * grad6::<S>(seed, gi5, x5, y5, z5, w5, u5, t5);
+    let mut nf = q(s6) * grad6::<S>(seed, gi6, x6, y6, z6, w6, u6, t6);
+
+    // Discard contributions whose base weight is negative.
+    let zf = S::Vf32::zeroes();
+    n0 = n0.and_not(s0.cmp_lt(zf));
+    na = na.and_not(s1.cmp_lt(zf));
+    nb = nb.and_not(s2.cmp_lt(zf));
+    nc = nc.and_not(s3.cmp_lt(zf));
+    nd = nd.and_not(s4.cmp_lt(zf));
+    ne = ne.and_not(s5.cmp_lt(zf));
+    nf = nf.and_not(s6.cmp_lt(zf));
+
+    (n0 + na + nb + nc + nd + ne + nf) * S::Vf32::set1(SIMPLEX_6D_SCALE_32)
 }
 
 #[cfg(test)]

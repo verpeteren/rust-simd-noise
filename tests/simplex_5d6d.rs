@@ -11,8 +11,8 @@
 
 use simdeez::prelude::*;
 use simdeez::scalar::Scalar;
-use simdnoise::noise::simplex_32::simplex_5d as s5_32;
-use simdnoise::noise::simplex_64::simplex_5d as s5_64;
+use simdnoise::noise::simplex_32::{simplex_5d as s5_32, simplex_6d as s6_32};
+use simdnoise::noise::simplex_64::{simplex_5d as s5_64, simplex_6d as s6_64};
 
 fn g5_32<S: Simd>(p: [f32; 5], seed: i32) -> f32 {
     s5_32::<S>(
@@ -123,4 +123,116 @@ fn simplex_5d_engines_agree_with_scalar() {
         }
     }
     assert!(md < 1e-4, "5D SIMD engines disagree with scalar: {}", md);
+}
+
+fn g6_32<S: Simd>(p: [f32; 6], seed: i32) -> f32 {
+    s6_32::<S>(
+        S::Vf32::set1(p[0]),
+        S::Vf32::set1(p[1]),
+        S::Vf32::set1(p[2]),
+        S::Vf32::set1(p[3]),
+        S::Vf32::set1(p[4]),
+        S::Vf32::set1(p[5]),
+        seed,
+    )[0]
+}
+fn g6_64<S: Simd>(p: [f64; 6], seed: i64) -> f64 {
+    s6_64::<S>(
+        S::Vf64::set1(p[0]),
+        S::Vf64::set1(p[1]),
+        S::Vf64::set1(p[2]),
+        S::Vf64::set1(p[3]),
+        S::Vf64::set1(p[4]),
+        S::Vf64::set1(p[5]),
+        seed,
+    )[0]
+}
+
+// A quasi-random walk through 6D space.
+fn pt6(n: u64) -> [f64; 6] {
+    let t = n as f64;
+    [
+        t * 0.0123,
+        t * 0.0321,
+        t * 0.0213,
+        t * 0.0312,
+        t * 0.0231,
+        t * 0.0132,
+    ]
+}
+
+#[test]
+fn simplex_6d_scalar_finite_range_nontrivial() {
+    let mut max_abs = 0.0f64;
+    let mut max_f32f64_diff = 0.0f64;
+    for seed in [1i64, 1337, 42] {
+        for n in 0..60_000u64 {
+            let p = pt6(n);
+            let v = g6_64::<Scalar>(p, seed);
+            assert!(v.is_finite(), "non-finite 6D scalar value");
+            max_abs = max_abs.max(v.abs());
+            let p32 = [
+                p[0] as f32,
+                p[1] as f32,
+                p[2] as f32,
+                p[3] as f32,
+                p[4] as f32,
+                p[5] as f32,
+            ];
+            let v32 = g6_32::<Scalar>(p32, seed as i32);
+            assert!(v32.is_finite());
+            // Same f32-precision caveat as the 5D test: only compare where both
+            // widths still resolve the same simplex cell.
+            if n < 20_000 {
+                max_f32f64_diff = max_f32f64_diff.max((v - v32 as f64).abs());
+            }
+        }
+    }
+    assert!(max_abs < 1.1, "6D out of calibrated range: {}", max_abs);
+    assert!(max_abs > 0.3, "6D field looks trivial: peak {}", max_abs);
+    assert!(
+        max_f32f64_diff < 1e-3,
+        "6D f32 vs f64 diverge: {}",
+        max_f32f64_diff
+    );
+}
+
+#[test]
+fn simplex_6d_engines_agree_with_scalar() {
+    #[target_feature(enable = "sse2")]
+    unsafe fn sse2_6d(p: [f32; 6], seed: i32) -> f32 {
+        g6_32::<simdeez::engines::sse2::Sse2>(p, seed)
+    }
+    #[target_feature(enable = "sse4.1")]
+    unsafe fn sse41_6d(p: [f32; 6], seed: i32) -> f32 {
+        g6_32::<simdeez::engines::sse41::Sse41>(p, seed)
+    }
+    #[target_feature(enable = "avx2")]
+    unsafe fn avx2_6d(p: [f32; 6], seed: i32) -> f32 {
+        g6_32::<simdeez::engines::avx2::Avx2>(p, seed)
+    }
+
+    let mut md = 0.0f32;
+    for n in 0..8000u64 {
+        let p = pt6(n);
+        let p = [
+            p[0] as f32,
+            p[1] as f32,
+            p[2] as f32,
+            p[3] as f32,
+            p[4] as f32,
+            p[5] as f32,
+        ];
+        let s = g6_32::<Scalar>(p, 1337);
+        unsafe {
+            md = md.max((sse2_6d(p, 1337) - s).abs());
+            if is_x86_feature_detected!("sse4.1") {
+                md = md.max((sse41_6d(p, 1337) - s).abs());
+            }
+            if is_x86_feature_detected!("avx2") {
+                md = md.max((avx2_6d(p, 1337) - s).abs());
+            }
+        }
+    }
+    assert!(md < 1e-4, "6D SIMD engines disagree with scalar: {}", md);
 }
