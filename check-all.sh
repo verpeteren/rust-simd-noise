@@ -4,14 +4,17 @@
 # from a single machine, and build + test the host target.
 #
 # What it does
-#   * Host target:  `cargo build --workspace --all-targets`, then run the tests
-#     and the doc-tests. This is the only target that is *linked* and *run*.
-#   * Cross targets: `cargo check --workspace --all-targets` (lib, tests,
-#     examples and benches). `cargo check` does not link, so a cross target
-#     only needs its Rust std (added automatically with `rustup target add`).
-#   * Warnings are treated as errors everywhere (`-D warnings`). Registry
-#     dependencies are cap-lints'd by Cargo, so only this workspace's own
-#     crates (simdnoise + the example) are held to that bar.
+#   * Host target:  `cargo build --workspace --all-targets`, then clippy, then
+#     run the tests and the doc-tests. This is the only target that is *linked*
+#     and *run*.
+#   * Cross targets: `cargo clippy --workspace --all-targets` (lib, tests,
+#     examples and benches). Clippy does not link, so a cross target only needs
+#     its Rust std (added automatically with `rustup target add`); it also lints
+#     the arch-gated SIMD engines (e.g. NEON) that the host build never compiles.
+#   * Warnings are treated as errors everywhere: rustc's via `-D warnings` in
+#     RUSTFLAGS, and clippy's via a trailing `-- -D warnings`. Registry
+#     dependencies are cap-lints'd by Cargo, so only this workspace's own crates
+#     (simdnoise + the example) are held to that bar.
 #
 # C cross-compilers
 #   The dev-dependency `criterion` (via `alloca`) and the example's `minifb`
@@ -89,17 +92,20 @@ echo
 echo ">>> $HOST: build everything (lib, tests, examples, benches)"
 record "build[$HOST]"    cargo build --workspace --all-targets
 echo
+echo ">>> $HOST: clippy (lint lib/tests/examples/benches, warnings = errors)"
+record "clippy[$HOST]"   cargo clippy --workspace --all-targets -- -D warnings
+echo
 echo ">>> $HOST: run tests"
 record "test[$HOST]"     cargo test  --workspace
 echo
 echo ">>> $HOST: run doc-tests"
 record "doctest[$HOST]"  cargo test  --workspace --doc
 
-# ---- cross targets: type-check only (no linking) --------------------------
+# ---- cross targets: lint-check only (no linking) --------------------------
 for t in "${CROSS_TARGETS[@]}"; do
     [ "$t" = "$HOST" ] && continue
     echo
-    echo ">>> $t: cargo check (no linking)"
+    echo ">>> $t: cargo clippy (lint, no linking)"
     if ! rustup target add "$t" >/dev/null 2>&1; then
         echo "!! could not install Rust std for '$t' (unsupported target?) — skipping"
         FAILED+=("std[$t]")
@@ -113,10 +119,10 @@ for t in "${CROSS_TARGETS[@]}"; do
         echo "   criterion (dev-dep) and minifb (example) compile C for the target,"
         echo "   so checking tests/benches/examples for '$t' needs it. Install with:"
         echo "       sudo apt-get install ${pkg:-<your-distro-cross-gcc>}"
-        echo "   Falling back to a library-only check for '$t':"
-        record "check-lib[$t]" cargo check --lib --target "$t"
+        echo "   Falling back to a library-only lint for '$t':"
+        record "clippy-lib[$t]" cargo clippy --lib --target "$t" -- -D warnings
     else
-        record "check[$t]" cargo check --workspace --all-targets --target "$t"
+        record "clippy[$t]" cargo clippy --workspace --all-targets --target "$t" -- -D warnings
     fi
 done
 
