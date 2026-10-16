@@ -33,6 +33,8 @@ pub trait CellDistance {
     fn new_distance_2d<V: SimdFloat>(xd: V, yd: V) -> V;
     fn new_distance_3d<V: SimdFloat>(xd: V, yd: V, zd: V) -> V;
     fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V;
+    fn new_distance_5d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V) -> V;
+    fn new_distance_6d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V, td: V) -> V;
 }
 
 pub struct Euclidean;
@@ -56,6 +58,14 @@ impl CellDistance for Euclidean {
     fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V {
         (xd * xd) + ((yd * yd) + ((zd * zd) + (wd * wd)))
     }
+    #[inline(always)]
+    fn new_distance_5d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V) -> V {
+        (xd * xd) + ((yd * yd) + ((zd * zd) + ((wd * wd) + (ud * ud))))
+    }
+    #[inline(always)]
+    fn new_distance_6d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V, td: V) -> V {
+        (xd * xd) + ((yd * yd) + ((zd * zd) + ((wd * wd) + ((ud * ud) + (td * td)))))
+    }
 }
 
 impl CellDistance for Manhattan {
@@ -74,6 +84,14 @@ impl CellDistance for Manhattan {
     #[inline(always)]
     fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V {
         (xd.abs() + yd.abs()) + (zd.abs() + wd.abs())
+    }
+    #[inline(always)]
+    fn new_distance_5d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V) -> V {
+        ((xd.abs() + yd.abs()) + (zd.abs() + wd.abs())) + ud.abs()
+    }
+    #[inline(always)]
+    fn new_distance_6d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V, td: V) -> V {
+        ((xd.abs() + yd.abs()) + (zd.abs() + wd.abs())) + (ud.abs() + td.abs())
     }
 }
 
@@ -98,6 +116,18 @@ impl CellDistance for Natural {
     fn new_distance_4d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V) -> V {
         let euc = (xd * xd) + ((yd * yd) + ((zd * zd) + (wd * wd)));
         let man = (xd.abs() + yd.abs()) + (zd.abs() + wd.abs());
+        euc + man
+    }
+    #[inline(always)]
+    fn new_distance_5d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V) -> V {
+        let euc = (xd * xd) + ((yd * yd) + ((zd * zd) + ((wd * wd) + (ud * ud))));
+        let man = ((xd.abs() + yd.abs()) + (zd.abs() + wd.abs())) + ud.abs();
+        euc + man
+    }
+    #[inline(always)]
+    fn new_distance_6d<V: SimdFloat>(xd: V, yd: V, zd: V, wd: V, ud: V, td: V) -> V {
+        let euc = (xd * xd) + ((yd * yd) + ((zd * zd) + ((wd * wd) + ((ud * ud) + (td * td)))));
+        let man = ((xd.abs() + yd.abs()) + (zd.abs() + wd.abs())) + (ud.abs() + td.abs());
         euc + man
     }
 }

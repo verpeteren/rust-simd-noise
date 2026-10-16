@@ -29,6 +29,14 @@ pub const Z_PRIME_64: i64 = 6971;
 pub const W_PRIME_32: i32 = 1013;
 pub const W_PRIME_64: i64 = 1013;
 
+// 5th- and 6th-axis primes for 5D/6D cellular noise (distinct primes, same
+// rationale as `W_PRIME`).
+pub const U_PRIME_32: i32 = 2053;
+pub const U_PRIME_64: i64 = 2053;
+
+pub const V_PRIME_32: i32 = 3079;
+pub const V_PRIME_64: i64 = 3079;
+
 #[inline(always)]
 pub fn hash_2d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32) -> S::Vi32 {
     let mut hash = x ^ S::Vi32::set1(seed);
@@ -56,6 +64,44 @@ pub fn hash_4d<S: Simd>(seed: i32, x: S::Vi32, y: S::Vi32, z: S::Vi32, w: S::Vi3
     hash = y ^ hash;
     hash = z ^ hash;
     hash = w ^ hash;
+    ((hash * hash) * S::Vi32::set1(60493)) * hash
+}
+
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn hash_5d<S: Simd>(
+    seed: i32,
+    x: S::Vi32,
+    y: S::Vi32,
+    z: S::Vi32,
+    w: S::Vi32,
+    u: S::Vi32,
+) -> S::Vi32 {
+    let mut hash = x ^ S::Vi32::set1(seed);
+    hash = y ^ hash;
+    hash = z ^ hash;
+    hash = w ^ hash;
+    hash = u ^ hash;
+    ((hash * hash) * S::Vi32::set1(60493)) * hash
+}
+
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn hash_6d<S: Simd>(
+    seed: i32,
+    x: S::Vi32,
+    y: S::Vi32,
+    z: S::Vi32,
+    w: S::Vi32,
+    u: S::Vi32,
+    v: S::Vi32,
+) -> S::Vi32 {
+    let mut hash = x ^ S::Vi32::set1(seed);
+    hash = y ^ hash;
+    hash = z ^ hash;
+    hash = w ^ hash;
+    hash = u ^ hash;
+    hash = v ^ hash;
     ((hash * hash) * S::Vi32::set1(60493)) * hash
 }
 
