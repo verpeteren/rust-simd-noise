@@ -14,7 +14,7 @@
 //! what those tests generate.
 #![cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 
-use simdnoise::intrinsics::neon;
+use simdnoise::intrinsics::{neon, scalar};
 use simdnoise::{
     FbmSettings, GradientSettings, NoiseDimensions, NoiseType, RidgeSettings, Settings,
     SimplexSettings, TurbulenceSettings,
@@ -78,12 +78,32 @@ fn regen_neon_f64() {
                     gen_3d(&nt)
                 }
             };
+            // Correctness cross-check: NEON must agree with the scalar reference
+            // (not merely be self-consistent). This fails loudly rather than
+            // letting a wrong-but-deterministic result become a golden fixture.
+            let reference = unsafe {
+                if dim == 2 {
+                    scalar::get_2d_noise_64::<simdeez::scalar::Scalar>(&nt).0
+                } else {
+                    scalar::get_3d_noise_64::<simdeez::scalar::Scalar>(&nt).0
+                }
+            };
+            let max_diff = noise
+                .iter()
+                .zip(&reference)
+                .map(|(a, b)| (a - b).abs())
+                .fold(0.0f64, f64::max);
+            let nan = noise.iter().filter(|v| !v.is_finite()).count();
+            assert!(
+                nan == 0 && max_diff < 1e-9,
+                "NEON {kind} {dim_str} diverges from scalar (max_diff={max_diff}, non_finite={nan}) — not saving"
+            );
             let file_name = format!(
                 "{}/{}_{}_{}_{}_{}_{}_{}.bin",
                 BIN_PATH, "intrinsics", kind, "64", dim_str, "neon", "normal", ARCH
             );
             save_to_file_f64(&file_name, &noise).unwrap();
-            println!("wrote {file_name} ({} values)", noise.len());
+            println!("wrote {file_name} ({} values, max_diff_vs_scalar={max_diff:e})", noise.len());
         }
     }
 }
