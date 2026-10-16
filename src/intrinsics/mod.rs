@@ -278,6 +278,7 @@ macro_rules! fbm {
         /// # Safety
         /// `S` must be a SIMD instruction set supported by the running CPU;
         /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -400,6 +401,7 @@ macro_rules! ridge {
         /// # Safety
         /// `S` must be a SIMD instruction set supported by the running CPU;
         /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
@@ -523,6 +525,7 @@ macro_rules! turbulence {
         /// # Safety
         /// `S` must be a SIMD instruction set supported by the running CPU;
         /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
         pub unsafe fn $fn_name<S: simdeez::Simd>(
             x: $f_type,
             y: $f_type,
