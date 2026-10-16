@@ -656,7 +656,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_noise_simplex64_3d_range() {
         let mut min = f64::INFINITY;
         let mut max = -f64::INFINITY;
@@ -680,7 +679,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_noise_simplex64_3d_deriv_sanity() {
         let mut avg_err = 0.0;
         const POINTS: i64 = 10;

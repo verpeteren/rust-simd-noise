@@ -21,7 +21,7 @@ pub fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
     let h = seed_hash::<S>(seed, hash) & S::Vi64::set1(15);
     let v = (h & S::Vi64::set1(7)).cast_f64();
 
-    let h_and_8 = ((h & S::Vi64::set1(8)).cmp_eq(S::Vi64::zeroes())).cast_f64();
+    let h_and_8 = ((h & S::Vi64::set1(8)).cmp_eq(S::Vi64::zeroes())).bitcast_f64();
     h_and_8.blendv(S::Vf64::zeroes() - v, v)
 }
 
@@ -32,12 +32,12 @@ pub fn grad1<S: Simd>(seed: i64, hash: S::Vi64) -> S::Vf64 {
 #[inline(always)]
 pub fn grad2<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 2] {
     let h = seed_hash::<S>(seed, hash) & S::Vi64::set1(7);
-    let mask = (S::Vi64::set1(4).cmp_gt(h)).cast_f64();
+    let mask = (S::Vi64::set1(4).cmp_gt(h)).bitcast_f64();
     let x_magnitude = mask.blendv(S::Vf64::set1(2.0), S::Vf64::set1(1.0));
     let y_magnitude = mask.blendv(S::Vf64::set1(1.0), S::Vf64::set1(2.0));
 
-    let h_and_1 = ((h & S::Vi64::set1(1)).cmp_eq(S::Vi64::zeroes())).cast_f64();
-    let h_and_2 = ((h & S::Vi64::set1(2)).cmp_eq(S::Vi64::zeroes())).cast_f64();
+    let h_and_1 = ((h & S::Vi64::set1(1)).cmp_eq(S::Vi64::zeroes())).bitcast_f64();
+    let h_and_2 = ((h & S::Vi64::set1(2)).cmp_eq(S::Vi64::zeroes())).bitcast_f64();
 
     let gx = mask
         .blendv(h_and_2, h_and_1)

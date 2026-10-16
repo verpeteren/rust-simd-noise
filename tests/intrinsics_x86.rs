@@ -6399,7 +6399,6 @@ mod x86 {
     }
 
     #[test]
-    #[ignore]
     fn test_intrinsic_ridge_2_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -6533,7 +6532,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_ridge_3_avx2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -6598,7 +6596,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_ridge_3_scalar_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -6666,7 +6663,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_ridge_3_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -6735,7 +6731,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_ridge_3_sse41_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -7451,7 +7446,6 @@ mod x86 {
     }
 
     #[test]
-    #[ignore]
     fn test_intrinsic_fbm_2_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -7585,7 +7579,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_fbm_3_avx2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -7650,7 +7643,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_fbm_3_scalar_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -7718,7 +7710,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_fbm_3_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -7787,7 +7778,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_fbm_3_sse41_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -8504,7 +8494,6 @@ mod x86 {
     }
 
     #[test]
-    #[ignore]
     fn test_intrinsic_turbulence_2_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -8638,7 +8627,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_turbulence_3_avx2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -8703,7 +8691,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_turbulence_3_scalar_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -8771,7 +8758,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_turbulence_3_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -8840,7 +8826,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_turbulence_3_sse41_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -9487,7 +9472,6 @@ mod x86 {
     }
 
     #[test]
-    #[ignore]
     fn test_intrinsic_gradient_2_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -9601,7 +9585,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_gradient_3_avx2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -9656,7 +9639,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_gradient_3_scalar_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -9714,7 +9696,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_gradient_3_sse2_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
@@ -9773,7 +9754,6 @@ mod x86 {
     }
 
     #[test]
-    #[should_panic(expected = "not implemented")]
     fn test_intrinsic_gradient_3_sse41_64_normal() {
         let file_name = format!(
             "{}/{}_{}_{}_{}_{}_{}_{}.bin",
