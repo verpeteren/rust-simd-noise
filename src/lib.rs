@@ -9,7 +9,7 @@
 //!* Runtime detection picks the best available instruction set
 //!* Simplex noise, fractal brownian motion, turbulence, and ridge
 //!* 1D, 2D, 3D, and 4D
-//!* Cellular / Voroni Noise  2D and 3D
+//!* Cellular / Voroni Noise  1D, 2D, 3D, and 4D
 //!
 //!## The `scalar` cargo feature
 //!
