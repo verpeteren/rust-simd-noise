@@ -564,7 +564,8 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
 /// `simplex_32::SIMPLEX_5D_SCALE_32`.
 const SIMPLEX_5D_SCALE_64: f64 = 54.5;
 
-/// 5D simplex noise (f64). From-scratch generalisation of `simplex_4d`; see the
+/// 5D simplex noise (f64). **Experimental** (see the crate docs). From-scratch
+/// generalisation of `simplex_4d`; see the
 /// f32 `simplex_32::simplex_5d` for the design (plain simplex, no domain
 /// rotation, `F5`/`G5`, 10-compare ranks → 6 corners, 80-gradient `grad5`,
 /// `r² = 0.5`).
@@ -738,7 +739,7 @@ pub fn simplex_5d<S: Simd>(
 /// f64 6D normalization. Same value as `simplex_32::SIMPLEX_6D_SCALE_32`.
 const SIMPLEX_6D_SCALE_64: f64 = 49.5;
 
-/// 6D simplex noise (f64). Mirror of the f32 `simplex_32::simplex_6d`: `F6`/`G6`
+/// 6D simplex noise (f64). **Experimental** (see the crate docs). Mirror of the f32 `simplex_32::simplex_6d`: `F6`/`G6`
 /// skew, 15-compare ranks → 7 corners, 192-gradient `grad6`, base weight
 /// `r^2 = 0.5`, scaled by `SIMPLEX_6D_SCALE_64`.
 #[inline(always)]

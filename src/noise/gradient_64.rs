@@ -123,7 +123,7 @@ pub fn grad4<S: Simd>(
         + (h_and_2.blendv(S::Vf64::zeroes() - v, v) + h_and_4.blendv(S::Vf64::zeroes() - w, w))
 }
 
-/// 5D gradient dot product (f64). See the f32 `gradient_32::grad5`: 80 gradients
+/// 5D gradient dot product (f64; experimental). See the f32 `gradient_32::grad5`: 80 gradients
 /// (one axis zero, other four `±1`), zeroed axis uniform in `0..=4`, sign per
 /// axis from separate hash bits; magnitude left unnormalised. Hash bits stay in
 /// `0..=18` so this agrees bit-for-gradient with the f32 kernel (see the f32
@@ -162,7 +162,7 @@ pub fn grad5<S: Simd>(
         + keep(sign(u, 18), 4)
 }
 
-/// 6D gradient dot product (f64). See the f32 `gradient_32::grad6`: 192
+/// 6D gradient dot product (f64; experimental). See the f32 `gradient_32::grad6`: 192
 /// gradients (one axis zero, other five `±1`), zeroed axis uniform in `0..=5`,
 /// sign per axis from separate hash bits; magnitude left unnormalised. Hash bits
 /// stay in `0..=18` so this agrees bit-for-gradient with the f32 kernel.

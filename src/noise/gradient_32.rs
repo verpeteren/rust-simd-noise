@@ -155,7 +155,8 @@ pub fn grad4<S: Simd>(
         + h_and_4.blendv(S::Vf32::zeroes() - w, w)
 }
 
-/// 5D gradient dot product. The 5D gradient set is the 80 vectors with one axis
+/// 5D gradient dot product (experimental; part of the experimental 5D noise).
+/// The 5D gradient set is the 80 vectors with one axis
 /// zero and the other four `±1`. We pick the zeroed axis uniformly in `0..=4`
 /// (via the `(hm * 5) >> 14` trick) and a sign per axis from separate hash bits,
 /// then return the dot with `[x, y, z, w, u]`. Magnitude is left unnormalised
@@ -205,7 +206,8 @@ pub fn grad5<S: Simd>(
         + keep(sign(u, 18), 4)
 }
 
-/// 6D gradient dot product. The 6D gradient set is the 192 vectors with one axis
+/// 6D gradient dot product (experimental; part of the experimental 6D noise).
+/// The 6D gradient set is the 192 vectors with one axis
 /// zero and the other five `±1`. We pick the zeroed axis uniformly in `0..=5`
 /// (via the `(hm * 6) >> 13` trick, 13 bits) and a sign per axis from six more
 /// hash bits (`13..=18`), then return the dot with `[x, y, z, w, u, t]`.

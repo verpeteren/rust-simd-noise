@@ -665,8 +665,9 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
 /// `[-1, 1]`; there is no reference implementation to match).
 const SIMPLEX_5D_SCALE_32: f32 = 54.5;
 
-/// 5D simplex noise. A from-scratch generalisation of `simplex_4d` (no reference
-/// implementation exists for 5D). Plain simplex — the ImproveXYZ-style domain
+/// 5D simplex noise. **Experimental** — the normalization is empirically
+/// calibrated and there is no reference implementation to match; see the crate
+/// docs. A from-scratch generalisation of `simplex_4d`. Plain simplex — the ImproveXYZ-style domain
 /// rotation that 2D/3D/4D apply is intentionally omitted (a future improvement
 /// could add an N-D rotation for slice isotropy). Uses skew/unskew `F5`/`G5`, a
 /// 10-comparison rank ordering selecting the 6 simplex corners, the 80-gradient
@@ -851,7 +852,9 @@ pub fn simplex_5d<S: Simd>(
 /// scale = 1/peak).
 const SIMPLEX_6D_SCALE_32: f32 = 49.5;
 
-/// 6D simplex noise. Classic simplex extended to six dimensions, mirroring
+/// 6D simplex noise. **Experimental** — empirically calibrated normalization,
+/// no reference implementation; see the crate docs. Classic simplex extended to
+/// six dimensions, mirroring
 /// `simplex_5d`: skew by `F6`, rank-order the six fractional coordinates with
 /// the 15 pairwise comparisons into 7 corner offsets, unskew by `G6`, and sum
 /// `t^4 * dot(grad6, d)` over the corners (base weight `r^2 = 0.5`).

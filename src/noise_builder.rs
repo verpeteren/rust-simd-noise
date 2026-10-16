@@ -98,6 +98,7 @@ impl NoiseBuilder {
         CellularSettings::default(dim)
     }
 
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular_5d(
         width: usize,
         height: usize,
@@ -115,6 +116,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular_5d_offset(
         x_offset: f32,
         width: usize,
@@ -142,6 +144,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular_6d(
         width: usize,
         height: usize,
@@ -161,6 +164,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular_6d_offset(
         x_offset: f32,
         width: usize,
@@ -288,6 +292,7 @@ impl NoiseBuilder {
         Cellular2Settings::default(dim)
     }
 
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular2_5d(
         width: usize,
         height: usize,
@@ -305,6 +310,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular2_5d_offset(
         x_offset: f32,
         width: usize,
@@ -332,6 +338,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular2_6d(
         width: usize,
         height: usize,
@@ -351,6 +358,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn cellular2_6d_offset(
         x_offset: f32,
         width: usize,
@@ -468,6 +476,7 @@ impl NoiseBuilder {
         FbmSettings::default(dim)
     }
 
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn fbm_5d(
         width: usize,
         height: usize,
@@ -485,6 +494,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn fbm_5d_offset(
         x_offset: f32,
         width: usize,
@@ -512,6 +522,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn fbm_6d(
         width: usize,
         height: usize,
@@ -531,6 +542,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn fbm_6d_offset(
         x_offset: f32,
         width: usize,
@@ -653,6 +665,7 @@ impl NoiseBuilder {
         RidgeSettings::default(dim)
     }
 
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn ridge_5d(
         width: usize,
         height: usize,
@@ -670,6 +683,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn ridge_5d_offset(
         x_offset: f32,
         width: usize,
@@ -697,6 +711,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn ridge_6d(
         width: usize,
         height: usize,
@@ -716,6 +731,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn ridge_6d_offset(
         x_offset: f32,
         width: usize,
@@ -844,6 +860,7 @@ impl NoiseBuilder {
         TurbulenceSettings::default(dim)
     }
 
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn turbulence_5d(
         width: usize,
         height: usize,
@@ -861,6 +878,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn turbulence_5d_offset(
         x_offset: f32,
         width: usize,
@@ -888,6 +906,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn turbulence_6d(
         width: usize,
         height: usize,
@@ -907,6 +926,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn turbulence_6d_offset(
         x_offset: f32,
         width: usize,
@@ -1030,6 +1050,7 @@ impl NoiseBuilder {
         GradientSettings::default(dim)
     }
 
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn gradient_5d(
         width: usize,
         height: usize,
@@ -1047,6 +1068,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn gradient_5d_offset(
         x_offset: f32,
         width: usize,
@@ -1074,6 +1096,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn gradient_6d(
         width: usize,
         height: usize,
@@ -1093,6 +1116,7 @@ impl NoiseBuilder {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Experimental: 5D/6D noise. See the crate-level docs on 5D/6D.
     pub fn gradient_6d_offset(
         x_offset: f32,
         width: usize,

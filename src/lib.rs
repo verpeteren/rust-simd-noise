@@ -11,6 +11,17 @@
 //!* 1D, 2D, 3D, 4D, 5D, and 6D
 //!* Cellular / Voroni Noise  1D, 2D, 3D, 4D, 5D, and 6D
 //!
+//!## ⚠️ Experimental: 5D and 6D
+//!
+//! The 5D and 6D noise functions are **experimental**. There is no canonical
+//! reference implementation for simplex noise above 4D, so these kernels are
+//! classic simplex extended by hand with an *empirically calibrated* `[-1, 1]`
+//! normalization constant, and classic simplex shows visible surflet artifacts
+//! past 4D. They are validated by cross-engine and `f32`↔`f64` agreement plus
+//! statistical range/finiteness checks rather than byte-exact golden fixtures.
+//! The output values and API at 5D/6D may change in a future release; 1D–4D are
+//! stable.
+//!
 //!## The `scalar` cargo feature
 //!
 //! By default the public API uses runtime CPU feature detection and executes
