@@ -96,7 +96,11 @@ fn regen_neon_f64() {
             let nan = noise.iter().filter(|v| !v.is_finite()).count();
             assert!(
                 nan == 0 && max_diff < 1e-9,
-                "NEON {kind} {dim_str} diverges from scalar (max_diff={max_diff}, non_finite={nan}) — not saving"
+                "NEON {} {} diverges from scalar (max_diff={}, non_finite={}) — not saving",
+                kind,
+                dim_str,
+                max_diff,
+                nan
             );
             let file_name = format!(
                 "{}/{}_{}_{}_{}_{}_{}_{}.bin",
