@@ -127,12 +127,20 @@ pub(crate) unsafe fn get_scaled_noise_64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>
 
 /// Emplace+scale helper for f32: fills `out` via `noise_fn`, then scales it in
 /// place to the target range read from the noise type's dimensions.
+///
+/// Mirrors [`get_scaled_noise`]: the source range is the offset-independent
+/// theoretical range so adjacent blocks line up seamlessly (#39) and the emplace
+/// result is bit-for-bit identical to the Vec-returning path. Cellular noise has
+/// no closed-form range, so fall back to its observed one.
 pub(crate) unsafe fn get_scaled_noise_into<S: Simd, F: Fn(&NoiseType, &mut [f32]) -> (f32, f32)>(
     noise_type: &NoiseType,
     out: &mut [f32],
     noise_fn: F,
 ) {
-    let (min, max) = noise_fn(noise_type, out);
+    let (observed_min, observed_max) = noise_fn(noise_type, out);
+    let (min, max) = noise_type
+        .theoretical_min_max()
+        .unwrap_or((observed_min, observed_max));
     let dim = noise_type.get_dimensions();
     scale_noise::<S>(dim.min, dim.max, min, max, out);
 }

@@ -387,11 +387,11 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
     // ImproveXYZ domain rotation (issue #15): see the f32 `simplex_4d`. Maps
     // world-w onto the lattice (1,1,1,1) diagonal so w-constant slices become
     // isotropic cross-sections, removing the diagonal streak from them.
-    let xr = S::Vf64::set1(0.7071067811865476) * x
+    let xr = S::Vf64::set1(std::f64::consts::FRAC_1_SQRT_2) * x
         + S::Vf64::set1(0.4082482904638631) * y
         + S::Vf64::set1(0.28867513459481287) * z
         + S::Vf64::set1(0.5) * w;
-    let yr = S::Vf64::set1(-0.7071067811865476) * x
+    let yr = S::Vf64::set1(-std::f64::consts::FRAC_1_SQRT_2) * x
         + S::Vf64::set1(0.4082482904638631) * y
         + S::Vf64::set1(0.28867513459481287) * z
         + S::Vf64::set1(0.5) * w;
