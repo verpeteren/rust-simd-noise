@@ -1,0 +1,15 @@
+# Build this example for WebAssembly by default, so a plain `cargo build` in
+# this directory produces a `.wasm` module ready for `wasm-bindgen`.
+#
+# SIMD note: on wasm32 simdnoise uses simdeez's wasm32 SIMD128 engine (there is
+# no runtime SIMD detection in WebAssembly). Pass `-C target-feature=+simd128`
+# so the whole module is compiled for SIMD128; the result then requires a
+# SIMD128-capable runtime (all current browsers, Node >= 16, wasmtime, ...).
+#
+# For a runtime WITHOUT SIMD128, build with `--features scalar` and REMOVE the
+# rustflags line below (the scalar backend needs no SIMD128).
+[build]
+target = "wasm32-unknown-unknown"
+
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "target-feature=+simd128"]

@@ -76,6 +76,45 @@ warnings for that unused SIMD code therefore remain; the `scalar` feature only
 guarantees that scalar code is what actually *runs*, which is what avoids the
 runtime panic. On a normal LLVM build the feature compiles cleanly.
 
+## WebAssembly
+
+`simdnoise` works on `wasm32` with no code changes: on that target `simdeez`
+dispatches to its wasm32 **SIMD128** engine automatically, and the ordinary API
+(`NoiseBuilder`, `get_*_noise`) just works.
+
+### The gotcha: no runtime SIMD detection on wasm
+
+On x86 and ARM, `simdnoise` detects CPU features **at runtime** and transparently
+falls back to the best available engine (down to scalar) — so a single binary
+runs anywhere. **WebAssembly has no such runtime detection.** On `wasm32`,
+`simdeez` therefore *always* emits its SIMD128 engine; there is no automatic
+fallback.
+
+The consequence: a default `wasm32` build uses SIMD128 unconditionally, so it
+**only runs in a SIMD128-capable runtime**. In a runtime without SIMD128 the
+module fails to *instantiate* (a `WebAssembly.CompileError` / validation error) —
+it does not silently run slower, it does not load at all.
+
+You have two options, and you must pick one up front:
+
+1. **Target SIMD128 (recommended).** Build with the feature enabled and run in a
+   SIMD128-capable runtime — every current browser, Node ≥ 16, Deno, wasmtime:
+
+   ```sh
+   RUSTFLAGS="-C target-feature=+simd128" cargo build --target wasm32-unknown-unknown
+   ```
+
+2. **Avoid SIMD128 entirely.** Build against the [`scalar`](#disabling-simd-the-scalar-feature)
+   backend (and *without* `+simd128`) so no SIMD128 instruction is emitted; the
+   module then runs in any wasm runtime:
+
+   ```sh
+   cargo build --target wasm32-unknown-unknown --features scalar
+   ```
+
+A runnable, headless `wasm-bindgen` example — covering both paths — lives in
+[`wasm-example/`](wasm-example/).
+
 ## Get a block of noise with runtime SIMD detection
 
 The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2.
