@@ -154,3 +154,53 @@ pub fn grad4<S: Simd>(
         + h_and_2.blendv(S::Vf32::zeroes() - v, v)
         + h_and_4.blendv(S::Vf32::zeroes() - w, w)
 }
+
+/// 5D gradient dot product. The 5D gradient set is the 80 vectors with one axis
+/// zero and the other four `±1`. We pick the zeroed axis uniformly in `0..=4`
+/// (via the `(hm * 5) >> 14` trick) and a sign per axis from separate hash bits,
+/// then return the dot with `[x, y, z, w, u]`. Magnitude is left unnormalised
+/// (like `grad4`); the simplex scale constant absorbs it.
+///
+/// All hash bits used stay in `0..=18`. The `seed_hash` mixer (`(h >> 13) ^ h`
+/// over a wrapping multiply) only agrees between the `i32` and `i64` engines for
+/// those low bits — result bit `b` XORs pre-bits `b` and `b+13`, and bit 19
+/// needs pre-bit 32, which the 32-bit multiply truncates but the 64-bit one
+/// keeps. Reaching bit 19+ would make the f32 and f64 kernels pick different
+/// gradients. So: 14 bits (`0..=13`) select the zeroed axis, and the five sign
+/// bits sit at `14..=18`.
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn grad5<S: Simd>(
+    seed: i32,
+    hash: S::Vi32,
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    u: S::Vf32,
+) -> S::Vf32 {
+    let h = seed_hash::<S>(seed, hash);
+    // Which axis is zeroed, uniform in 0..=4 (bits 0..=13).
+    let zero_axis = ((h & S::Vi32::set1(0x3FFF)) * S::Vi32::set1(5)) >> 14;
+    let zero = S::Vf32::zeroes();
+
+    // `+coord` when the axis sign bit is clear, `-coord` when set (bits 14..=18).
+    let sign = |coord: S::Vf32, bit: i32| -> S::Vf32 {
+        ((h & S::Vi32::set1(1 << bit)).cmp_eq(S::Vi32::zeroes()))
+            .bitcast_f32()
+            .blendv(zero - coord, coord)
+    };
+    // Drop the contribution of the zeroed axis.
+    let keep = |signed: S::Vf32, axis: i32| -> S::Vf32 {
+        zero_axis
+            .cmp_eq(S::Vi32::set1(axis))
+            .bitcast_f32()
+            .blendv(signed, zero)
+    };
+
+    keep(sign(x, 14), 0)
+        + keep(sign(y, 15), 1)
+        + keep(sign(z, 16), 2)
+        + keep(sign(w, 17), 3)
+        + keep(sign(u, 18), 4)
+}

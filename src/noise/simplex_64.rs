@@ -1,4 +1,4 @@
-use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4};
+use crate::noise::gradient_64::{grad1, grad2, grad3d, grad4, grad5};
 
 use simdeez::prelude::*;
 
@@ -6,7 +6,8 @@ use crate::noise::cellular_32::{X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
 use crate::noise::gradient_64::grad3d_dot;
 use crate::noise::ops::gather_64;
 use crate::noise::simplex_32::{
-    F2_64, F3_64, F4_64, G22_64, G24_64, G2_64, G33_64, G34_64, G3_64, G44_64, G4_64,
+    F2_64, F3_64, F4_64, F5_64, G22_64, G24_64, G25_64, G2_64, G33_64, G34_64, G35_64, G3_64,
+    G44_64, G45_64, G4_64, G55_64, G5_64,
 };
 
 static PERM64: [i64; 512] = [
@@ -557,6 +558,181 @@ pub fn simplex_4d<S: Simd>(x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, seed:
     n4 = n4.and_not(cond);
 
     (n0 + (n1 + (n2 + (n3 + n4)))) * S::Vf64::set1(62.77772078955791)
+}
+
+/// Empirical normalisation for 5D simplex (f64); see the f32
+/// `simplex_32::SIMPLEX_5D_SCALE_32`.
+const SIMPLEX_5D_SCALE_64: f64 = 54.5;
+
+/// 5D simplex noise (f64). From-scratch generalisation of `simplex_4d`; see the
+/// f32 `simplex_32::simplex_5d` for the design (plain simplex, no domain
+/// rotation, `F5`/`G5`, 10-compare ranks → 6 corners, 80-gradient `grad5`,
+/// `r² = 0.5`).
+#[inline]
+#[allow(clippy::too_many_arguments)]
+pub fn simplex_5d<S: Simd>(
+    x: S::Vf64,
+    y: S::Vf64,
+    z: S::Vf64,
+    w: S::Vf64,
+    u: S::Vf64,
+    seed: i64,
+) -> S::Vf64 {
+    let s = S::Vf64::set1(F5_64) * (x + y + z + w + u);
+    let ipd = (x + s).floor();
+    let jpd = (y + s).floor();
+    let kpd = (z + s).floor();
+    let lpd = (w + s).floor();
+    let mpd = (u + s).floor();
+
+    let i = ipd.cast_i64();
+    let j = jpd.cast_i64();
+    let k = kpd.cast_i64();
+    let l = lpd.cast_i64();
+    let m = mpd.cast_i64();
+
+    let t = (i + j + k + l + m).cast_f64() * S::Vf64::set1(G5_64);
+    let x0 = x - (ipd - t);
+    let y0 = y - (jpd - t);
+    let z0 = z - (kpd - t);
+    let w0 = w - (lpd - t);
+    let v0 = u - (mpd - t);
+
+    let mut rank_x = S::Vi64::zeroes();
+    let mut rank_y = S::Vi64::zeroes();
+    let mut rank_z = S::Vi64::zeroes();
+    let mut rank_w = S::Vi64::zeroes();
+    let mut rank_v = S::Vi64::zeroes();
+    let one = S::Vi64::set1(1);
+    macro_rules! cmp_rank {
+        ($a0:expr, $ra:ident, $b0:expr, $rb:ident) => {{
+            let cond = ($a0.cmp_gt($b0)).bitcast_i64();
+            $ra += cond & one;
+            $rb += one.and_not(cond);
+        }};
+    }
+    cmp_rank!(x0, rank_x, y0, rank_y);
+    cmp_rank!(x0, rank_x, z0, rank_z);
+    cmp_rank!(x0, rank_x, w0, rank_w);
+    cmp_rank!(x0, rank_x, v0, rank_v);
+    cmp_rank!(y0, rank_y, z0, rank_z);
+    cmp_rank!(y0, rank_y, w0, rank_w);
+    cmp_rank!(y0, rank_y, v0, rank_v);
+    cmp_rank!(z0, rank_z, w0, rank_w);
+    cmp_rank!(z0, rank_z, v0, rank_v);
+    cmp_rank!(w0, rank_w, v0, rank_v);
+
+    let offs = |rank: S::Vi64, thresh: i64| -> S::Vi64 { one & rank.cmp_gt(S::Vi64::set1(thresh)) };
+    let (i1, j1, k1, l1, m1) = (
+        offs(rank_x, 3),
+        offs(rank_y, 3),
+        offs(rank_z, 3),
+        offs(rank_w, 3),
+        offs(rank_v, 3),
+    );
+    let (i2, j2, k2, l2, m2) = (
+        offs(rank_x, 2),
+        offs(rank_y, 2),
+        offs(rank_z, 2),
+        offs(rank_w, 2),
+        offs(rank_v, 2),
+    );
+    let (i3, j3, k3, l3, m3) = (
+        offs(rank_x, 1),
+        offs(rank_y, 1),
+        offs(rank_z, 1),
+        offs(rank_w, 1),
+        offs(rank_v, 1),
+    );
+    let (i4, j4, k4, l4, m4) = (
+        offs(rank_x, 0),
+        offs(rank_y, 0),
+        offs(rank_z, 0),
+        offs(rank_w, 0),
+        offs(rank_v, 0),
+    );
+
+    let x1 = x0 - i1.cast_f64() + S::Vf64::set1(G5_64);
+    let y1 = y0 - j1.cast_f64() + S::Vf64::set1(G5_64);
+    let z1 = z0 - k1.cast_f64() + S::Vf64::set1(G5_64);
+    let w1 = w0 - l1.cast_f64() + S::Vf64::set1(G5_64);
+    let v1 = v0 - m1.cast_f64() + S::Vf64::set1(G5_64);
+    let x2 = x0 - i2.cast_f64() + S::Vf64::set1(G25_64);
+    let y2 = y0 - j2.cast_f64() + S::Vf64::set1(G25_64);
+    let z2 = z0 - k2.cast_f64() + S::Vf64::set1(G25_64);
+    let w2 = w0 - l2.cast_f64() + S::Vf64::set1(G25_64);
+    let v2 = v0 - m2.cast_f64() + S::Vf64::set1(G25_64);
+    let x3 = x0 - i3.cast_f64() + S::Vf64::set1(G35_64);
+    let y3 = y0 - j3.cast_f64() + S::Vf64::set1(G35_64);
+    let z3 = z0 - k3.cast_f64() + S::Vf64::set1(G35_64);
+    let w3 = w0 - l3.cast_f64() + S::Vf64::set1(G35_64);
+    let v3 = v0 - m3.cast_f64() + S::Vf64::set1(G35_64);
+    let x4 = x0 - i4.cast_f64() + S::Vf64::set1(G45_64);
+    let y4 = y0 - j4.cast_f64() + S::Vf64::set1(G45_64);
+    let z4 = z0 - k4.cast_f64() + S::Vf64::set1(G45_64);
+    let w4 = w0 - l4.cast_f64() + S::Vf64::set1(G45_64);
+    let v4 = v0 - m4.cast_f64() + S::Vf64::set1(G45_64);
+    let x5 = x0 - S::Vf64::set1(1.0) + S::Vf64::set1(G55_64);
+    let y5 = y0 - S::Vf64::set1(1.0) + S::Vf64::set1(G55_64);
+    let z5 = z0 - S::Vf64::set1(1.0) + S::Vf64::set1(G55_64);
+    let w5 = w0 - S::Vf64::set1(1.0) + S::Vf64::set1(G55_64);
+    let v5 = v0 - S::Vf64::set1(1.0) + S::Vf64::set1(G55_64);
+
+    let ii = i & S::Vi64::set1(0xff);
+    let jj = j & S::Vi64::set1(0xff);
+    let kk = k & S::Vi64::set1(0xff);
+    let ll = l & S::Vi64::set1(0xff);
+    let mm = m & S::Vi64::set1(0xff);
+
+    let (gi0, gi1, gi2, gi3, gi4, gi5) = unsafe {
+        macro_rules! corner {
+            ($i:expr, $j:expr, $k:expr, $l:expr, $m:expr) => {{
+                let mp = gather_64::<S>(&PERM64, mm + $m);
+                let lp = gather_64::<S>(&PERM64, ll + $l + mp);
+                let kp = gather_64::<S>(&PERM64, kk + $k + lp);
+                let jp = gather_64::<S>(&PERM64, jj + $j + kp);
+                gather_64::<S>(&PERM64, ii + $i + jp)
+            }};
+        }
+        let z0i = S::Vi64::zeroes();
+        let gi0 = corner!(z0i, z0i, z0i, z0i, z0i);
+        let gi1 = corner!(i1, j1, k1, l1, m1);
+        let gi2 = corner!(i2, j2, k2, l2, m2);
+        let gi3 = corner!(i3, j3, k3, l3, m3);
+        let gi4 = corner!(i4, j4, k4, l4, m4);
+        let gi5 = corner!(one, one, one, one, one);
+        (gi0, gi1, gi2, gi3, gi4, gi5)
+    };
+
+    let r2 = S::Vf64::set1(0.5);
+    let t0 = r2 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0) - (v0 * v0);
+    let t1 = r2 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1) - (v1 * v1);
+    let t2 = r2 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2) - (v2 * v2);
+    let t3 = r2 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3) - (v3 * v3);
+    let t4 = r2 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4) - (v4 * v4);
+    let t5 = r2 - (x5 * x5) - (y5 * y5) - (z5 * z5) - (w5 * w5) - (v5 * v5);
+
+    let q = |t: S::Vf64| -> S::Vf64 {
+        let tt = t * t;
+        tt * tt
+    };
+
+    let mut n0 = q(t0) * grad5::<S>(seed, gi0, x0, y0, z0, w0, v0);
+    let mut n1 = q(t1) * grad5::<S>(seed, gi1, x1, y1, z1, w1, v1);
+    let mut n2 = q(t2) * grad5::<S>(seed, gi2, x2, y2, z2, w2, v2);
+    let mut n3 = q(t3) * grad5::<S>(seed, gi3, x3, y3, z3, w3, v3);
+    let mut n4 = q(t4) * grad5::<S>(seed, gi4, x4, y4, z4, w4, v4);
+    let mut n5 = q(t5) * grad5::<S>(seed, gi5, x5, y5, z5, w5, v5);
+
+    let zf = S::Vf64::zeroes();
+    n0 = n0.and_not(t0.cmp_lt(zf));
+    n1 = n1.and_not(t1.cmp_lt(zf));
+    n2 = n2.and_not(t2.cmp_lt(zf));
+    n3 = n3.and_not(t3.cmp_lt(zf));
+    n4 = n4.and_not(t4.cmp_lt(zf));
+    n5 = n5.and_not(t5.cmp_lt(zf));
+
+    (n0 + n1 + n2 + n3 + n4 + n5) * S::Vf64::set1(SIMPLEX_5D_SCALE_64)
 }
 
 #[cfg(test)]

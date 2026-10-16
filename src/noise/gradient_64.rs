@@ -122,3 +122,42 @@ pub fn grad4<S: Simd>(
     h_and_1.blendv(S::Vf64::zeroes() - u, u)
         + (h_and_2.blendv(S::Vf64::zeroes() - v, v) + h_and_4.blendv(S::Vf64::zeroes() - w, w))
 }
+
+/// 5D gradient dot product (f64). See the f32 `gradient_32::grad5`: 80 gradients
+/// (one axis zero, other four `±1`), zeroed axis uniform in `0..=4`, sign per
+/// axis from separate hash bits; magnitude left unnormalised. Hash bits stay in
+/// `0..=18` so this agrees bit-for-gradient with the f32 kernel (see the f32
+/// doc comment for why bit 19+ would diverge).
+#[inline(always)]
+#[allow(clippy::too_many_arguments)]
+pub fn grad5<S: Simd>(
+    seed: i64,
+    hash: S::Vi64,
+    x: S::Vf64,
+    y: S::Vf64,
+    z: S::Vf64,
+    w: S::Vf64,
+    u: S::Vf64,
+) -> S::Vf64 {
+    let h = seed_hash::<S>(seed, hash);
+    let zero_axis = ((h & S::Vi64::set1(0x3FFF)) * S::Vi64::set1(5)) >> 14;
+    let zero = S::Vf64::zeroes();
+
+    let sign = |coord: S::Vf64, bit: i32| -> S::Vf64 {
+        ((h & S::Vi64::set1(1i64 << bit)).cmp_eq(S::Vi64::zeroes()))
+            .bitcast_f64()
+            .blendv(zero - coord, coord)
+    };
+    let keep = |signed: S::Vf64, axis: i64| -> S::Vf64 {
+        zero_axis
+            .cmp_eq(S::Vi64::set1(axis))
+            .bitcast_f64()
+            .blendv(signed, zero)
+    };
+
+    keep(sign(x, 14), 0)
+        + keep(sign(y, 15), 1)
+        + keep(sign(z, 16), 2)
+        + keep(sign(w, 17), 3)
+        + keep(sign(u, 18), 4)
+}

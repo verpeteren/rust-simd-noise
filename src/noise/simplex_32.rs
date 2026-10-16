@@ -4,7 +4,7 @@
 //! interfaces.
 
 use crate::noise::cellular_32::{X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
-use crate::noise::gradient_32::{grad1, grad2, grad3d, grad3d_dot, grad4};
+use crate::noise::gradient_32::{grad1, grad2, grad3d, grad3d_dot, grad4, grad5};
 use crate::noise::ops::gather_32;
 
 use simdeez::prelude::*;
@@ -40,6 +40,20 @@ const G34_32: f32 = 3.0 * G4_32;
 pub const G34_64: f64 = 3.0 * G4_64;
 const G44_32: f32 = 4.0 * G4_32;
 pub const G44_64: f64 = 4.0 * G4_64;
+/// Skew factor for 5D simplex noise: `(sqrt(6) - 1) / 5`.
+const F5_32: f32 = 0.289_897_95;
+pub const F5_64: f64 = 0.2898979485566356;
+/// Unskew factor for 5D simplex noise: `(1 - 1/sqrt(6)) / 5`.
+const G5_32: f32 = 0.118_350_34;
+pub const G5_64: f64 = 0.11835034190722738;
+const G25_32: f32 = 2.0 * G5_32;
+pub const G25_64: f64 = 2.0 * G5_64;
+const G35_32: f32 = 3.0 * G5_32;
+pub const G35_64: f64 = 3.0 * G5_64;
+const G45_32: f32 = 4.0 * G5_32;
+pub const G45_64: f64 = 4.0 * G5_64;
+const G55_32: f32 = 5.0 * G5_32;
+pub const G55_64: f64 = 5.0 * G5_64;
 
 static PERM: [i32; 512] = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
@@ -629,6 +643,191 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
 
     // Scaling factor found by numerical approximation
     (n0 + n1 + n2 + n3 + n4) * S::Vf32::set1(62.777_72)
+}
+
+/// Empirical normalisation for 5D simplex (calibrated so output lands in
+/// `[-1, 1]`; there is no reference implementation to match).
+const SIMPLEX_5D_SCALE_32: f32 = 54.5;
+
+/// 5D simplex noise. A from-scratch generalisation of `simplex_4d` (no reference
+/// implementation exists for 5D). Plain simplex — the ImproveXYZ-style domain
+/// rotation that 2D/3D/4D apply is intentionally omitted (a future improvement
+/// could add an N-D rotation for slice isotropy). Uses skew/unskew `F5`/`G5`, a
+/// 10-comparison rank ordering selecting the 6 simplex corners, the 80-gradient
+/// `grad5`, and the `r² = 0.5` kernel (as 4D).
+#[inline]
+#[allow(clippy::too_many_arguments)]
+pub fn simplex_5d<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    u: S::Vf32,
+    seed: i32,
+) -> S::Vf32 {
+    let s = S::Vf32::set1(F5_32) * (x + y + z + w + u);
+    let ips = (x + s).floor();
+    let jps = (y + s).floor();
+    let kps = (z + s).floor();
+    let lps = (w + s).floor();
+    let mps = (u + s).floor();
+
+    let i = ips.cast_i32();
+    let j = jps.cast_i32();
+    let k = kps.cast_i32();
+    let l = lps.cast_i32();
+    let m = mps.cast_i32();
+
+    let t = (i + j + k + l + m).cast_f32() * S::Vf32::set1(G5_32);
+    let x0 = x - (ips - t);
+    let y0 = y - (jps - t);
+    let z0 = z - (kps - t);
+    let w0 = w - (lps - t);
+    let v0 = u - (mps - t);
+
+    // Rank each coordinate by how many of the others it exceeds (0..=4), via the
+    // 10 pairwise comparisons.
+    let mut rank_x = S::Vi32::zeroes();
+    let mut rank_y = S::Vi32::zeroes();
+    let mut rank_z = S::Vi32::zeroes();
+    let mut rank_w = S::Vi32::zeroes();
+    let mut rank_v = S::Vi32::zeroes();
+    let one = S::Vi32::set1(1);
+    macro_rules! cmp_rank {
+        ($a0:expr, $ra:ident, $b0:expr, $rb:ident) => {{
+            let cond = ($a0.cmp_gt($b0)).bitcast_i32();
+            $ra += cond & one;
+            $rb += one.and_not(cond);
+        }};
+    }
+    cmp_rank!(x0, rank_x, y0, rank_y);
+    cmp_rank!(x0, rank_x, z0, rank_z);
+    cmp_rank!(x0, rank_x, w0, rank_w);
+    cmp_rank!(x0, rank_x, v0, rank_v);
+    cmp_rank!(y0, rank_y, z0, rank_z);
+    cmp_rank!(y0, rank_y, w0, rank_w);
+    cmp_rank!(y0, rank_y, v0, rank_v);
+    cmp_rank!(z0, rank_z, w0, rank_w);
+    cmp_rank!(z0, rank_z, v0, rank_v);
+    cmp_rank!(w0, rank_w, v0, rank_v);
+
+    // Corner c (1..=4) increments every axis whose rank exceeds `5-1-c`.
+    let offs = |rank: S::Vi32, thresh: i32| -> S::Vi32 { one & rank.cmp_gt(S::Vi32::set1(thresh)) };
+    let (i1, j1, k1, l1, m1) = (
+        offs(rank_x, 3),
+        offs(rank_y, 3),
+        offs(rank_z, 3),
+        offs(rank_w, 3),
+        offs(rank_v, 3),
+    );
+    let (i2, j2, k2, l2, m2) = (
+        offs(rank_x, 2),
+        offs(rank_y, 2),
+        offs(rank_z, 2),
+        offs(rank_w, 2),
+        offs(rank_v, 2),
+    );
+    let (i3, j3, k3, l3, m3) = (
+        offs(rank_x, 1),
+        offs(rank_y, 1),
+        offs(rank_z, 1),
+        offs(rank_w, 1),
+        offs(rank_v, 1),
+    );
+    let (i4, j4, k4, l4, m4) = (
+        offs(rank_x, 0),
+        offs(rank_y, 0),
+        offs(rank_z, 0),
+        offs(rank_w, 0),
+        offs(rank_v, 0),
+    );
+
+    let x1 = x0 - i1.cast_f32() + S::Vf32::set1(G5_32);
+    let y1 = y0 - j1.cast_f32() + S::Vf32::set1(G5_32);
+    let z1 = z0 - k1.cast_f32() + S::Vf32::set1(G5_32);
+    let w1 = w0 - l1.cast_f32() + S::Vf32::set1(G5_32);
+    let v1 = v0 - m1.cast_f32() + S::Vf32::set1(G5_32);
+    let x2 = x0 - i2.cast_f32() + S::Vf32::set1(G25_32);
+    let y2 = y0 - j2.cast_f32() + S::Vf32::set1(G25_32);
+    let z2 = z0 - k2.cast_f32() + S::Vf32::set1(G25_32);
+    let w2 = w0 - l2.cast_f32() + S::Vf32::set1(G25_32);
+    let v2 = v0 - m2.cast_f32() + S::Vf32::set1(G25_32);
+    let x3 = x0 - i3.cast_f32() + S::Vf32::set1(G35_32);
+    let y3 = y0 - j3.cast_f32() + S::Vf32::set1(G35_32);
+    let z3 = z0 - k3.cast_f32() + S::Vf32::set1(G35_32);
+    let w3 = w0 - l3.cast_f32() + S::Vf32::set1(G35_32);
+    let v3 = v0 - m3.cast_f32() + S::Vf32::set1(G35_32);
+    let x4 = x0 - i4.cast_f32() + S::Vf32::set1(G45_32);
+    let y4 = y0 - j4.cast_f32() + S::Vf32::set1(G45_32);
+    let z4 = z0 - k4.cast_f32() + S::Vf32::set1(G45_32);
+    let w4 = w0 - l4.cast_f32() + S::Vf32::set1(G45_32);
+    let v4 = v0 - m4.cast_f32() + S::Vf32::set1(G45_32);
+    let x5 = x0 - S::Vf32::set1(1.0) + S::Vf32::set1(G55_32);
+    let y5 = y0 - S::Vf32::set1(1.0) + S::Vf32::set1(G55_32);
+    let z5 = z0 - S::Vf32::set1(1.0) + S::Vf32::set1(G55_32);
+    let w5 = w0 - S::Vf32::set1(1.0) + S::Vf32::set1(G55_32);
+    let v5 = v0 - S::Vf32::set1(1.0) + S::Vf32::set1(G55_32);
+
+    let ii = i & S::Vi32::set1(0xff);
+    let jj = j & S::Vi32::set1(0xff);
+    let kk = k & S::Vi32::set1(0xff);
+    let ll = l & S::Vi32::set1(0xff);
+    let mm = m & S::Vi32::set1(0xff);
+
+    // Nested permutation gather over the five cell coordinates. Each PERM entry
+    // is 0..255 and PERM has 512 slots, so `coord(0..255) + offset(0..1) +
+    // prev(0..255)` stays in bounds.
+    let (gi0, gi1, gi2, gi3, gi4, gi5) = unsafe {
+        macro_rules! corner {
+            ($i:expr, $j:expr, $k:expr, $l:expr, $m:expr) => {{
+                let mp = gather_32::<S>(&PERM, mm + $m);
+                let lp = gather_32::<S>(&PERM, ll + $l + mp);
+                let kp = gather_32::<S>(&PERM, kk + $k + lp);
+                let jp = gather_32::<S>(&PERM, jj + $j + kp);
+                gather_32::<S>(&PERM, ii + $i + jp)
+            }};
+        }
+        let z0i = S::Vi32::zeroes();
+        let gi0 = corner!(z0i, z0i, z0i, z0i, z0i);
+        let gi1 = corner!(i1, j1, k1, l1, m1);
+        let gi2 = corner!(i2, j2, k2, l2, m2);
+        let gi3 = corner!(i3, j3, k3, l3, m3);
+        let gi4 = corner!(i4, j4, k4, l4, m4);
+        let gi5 = corner!(one, one, one, one, one);
+        (gi0, gi1, gi2, gi3, gi4, gi5)
+    };
+
+    let r2 = S::Vf32::set1(0.5);
+    let t0 = r2 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0) - (v0 * v0);
+    let t1 = r2 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1) - (v1 * v1);
+    let t2 = r2 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2) - (v2 * v2);
+    let t3 = r2 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3) - (v3 * v3);
+    let t4 = r2 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4) - (v4 * v4);
+    let t5 = r2 - (x5 * x5) - (y5 * y5) - (z5 * z5) - (w5 * w5) - (v5 * v5);
+
+    // Each weight to the 4th power.
+    let q = |t: S::Vf32| -> S::Vf32 {
+        let tt = t * t;
+        tt * tt
+    };
+
+    let mut n0 = q(t0) * grad5::<S>(seed, gi0, x0, y0, z0, w0, v0);
+    let mut n1 = q(t1) * grad5::<S>(seed, gi1, x1, y1, z1, w1, v1);
+    let mut n2 = q(t2) * grad5::<S>(seed, gi2, x2, y2, z2, w2, v2);
+    let mut n3 = q(t3) * grad5::<S>(seed, gi3, x3, y3, z3, w3, v3);
+    let mut n4 = q(t4) * grad5::<S>(seed, gi4, x4, y4, z4, w4, v4);
+    let mut n5 = q(t5) * grad5::<S>(seed, gi5, x5, y5, z5, w5, v5);
+
+    // Discard contributions whose base weight is negative.
+    let zf = S::Vf32::zeroes();
+    n0 = n0.and_not(t0.cmp_lt(zf));
+    n1 = n1.and_not(t1.cmp_lt(zf));
+    n2 = n2.and_not(t2.cmp_lt(zf));
+    n3 = n3.and_not(t3.cmp_lt(zf));
+    n4 = n4.and_not(t4.cmp_lt(zf));
+    n5 = n5.and_not(t5.cmp_lt(zf));
+
+    (n0 + n1 + n2 + n3 + n4 + n5) * S::Vf32::set1(SIMPLEX_5D_SCALE_32)
 }
 
 #[cfg(test)]
