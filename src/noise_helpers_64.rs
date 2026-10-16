@@ -15,6 +15,17 @@ pub trait Sample64<S: Simd>: DimensionalBeing + Settings {
     fn sample_2d(&self, x: S::Vf64, y: S::Vf64) -> S::Vf64;
     fn sample_3d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> S::Vf64;
     fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64;
+    fn sample_5d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, u: S::Vf64) -> S::Vf64;
+    #[allow(clippy::too_many_arguments)]
+    fn sample_6d(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+        u: S::Vf64,
+        t: S::Vf64,
+    ) -> S::Vf64;
 }
 
 #[inline(always)]
@@ -362,6 +373,245 @@ unsafe fn get_4d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
 }
 
 #[inline(always)]
+unsafe fn get_5d_noise_into_helper_f64<S: Simd, Settings: Sample64<S>>(
+    settings: Settings,
+    result: &mut [f64],
+) -> (f64, f64) {
+    let dim = settings.get_dimensions();
+    let freq_x = S::Vf64::set1(settings.get_freq_x() as f64);
+    let freq_y = S::Vf64::set1(settings.get_freq_y() as f64);
+    let freq_z = S::Vf64::set1(settings.get_freq_z() as f64);
+    let freq_w = S::Vf64::set1(settings.get_freq_w() as f64);
+    let freq_u = S::Vf64::set1(settings.get_freq_u() as f64);
+    let start_x = dim.x as f64;
+    let width = dim.width;
+    let start_y = dim.y as f64;
+    let height = dim.height;
+    let start_z = dim.z as f64;
+    let depth = dim.depth;
+    let start_w = dim.w as f64;
+    let time = dim.time;
+    let start_u = dim.offset5 as f64;
+    let extent5 = dim.extent5;
+    assert_eq!(
+        result.len(),
+        width * height * depth * time * extent5,
+        "noise output slice length must equal width * height * depth * time * extent5"
+    );
+
+    let mut min_s = S::Vf64::set1(f64::MAX);
+    let mut max_s = S::Vf64::set1(f64::MIN);
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+
+    let result_ptr = result.as_mut_ptr();
+    let mut i = 0;
+    let vector_width = S::Vf64::WIDTH;
+    let remainder = width % vector_width;
+    let mut x_arr = Vec::<f64>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f64);
+    }
+    x_arr.set_len(vector_width);
+    let mut u = S::Vf64::set1(start_u);
+    for _ in 0..extent5 {
+        let mut w = S::Vf64::set1(start_w);
+        for _ in 0..time {
+            let mut z = S::Vf64::set1(start_z);
+            for _ in 0..depth {
+                let mut y = S::Vf64::set1(start_y);
+                for _ in 0..height {
+                    let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
+                    for _ in 0..width / vector_width {
+                        let f = settings.sample_5d(
+                            x * freq_x,
+                            y * freq_y,
+                            z * freq_z,
+                            w * freq_w,
+                            u * freq_u,
+                        );
+                        max_s = max_s.max(f);
+                        min_s = min_s.min(f);
+                        f.copy_to_ptr_unaligned(result_ptr.add(i));
+                        i += vector_width;
+                        x += S::Vf64::set1(vector_width as f64);
+                    }
+                    if remainder != 0 {
+                        let f = settings.sample_5d(
+                            x * freq_x,
+                            y * freq_y,
+                            z * freq_z,
+                            w * freq_w,
+                            u * freq_u,
+                        );
+                        for j in 0..remainder {
+                            let n = f[j];
+                            result_ptr.add(i).write(n);
+                            if n < min {
+                                min = n;
+                            }
+                            if n > max {
+                                max = n;
+                            }
+                            i += 1;
+                        }
+                    }
+                    y += S::Vf64::set1(1.0);
+                }
+                z += S::Vf64::set1(1.0);
+            }
+            w += S::Vf64::set1(1.0);
+        }
+        u += S::Vf64::set1(1.0);
+    }
+    for i in 0..vector_width {
+        if min_s[i] < min {
+            min = min_s[i];
+        }
+        if max_s[i] > max {
+            max = max_s[i];
+        }
+    }
+    (min, max)
+}
+
+#[inline(always)]
+unsafe fn get_5d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
+    settings: Settings,
+) -> (Vec<f64>, f64, f64) {
+    let dim = settings.get_dimensions();
+    let len = dim.width * dim.height * dim.depth * dim.time * dim.extent5;
+    let mut result = vec![0.0f64; len];
+    let (min, max) = get_5d_noise_into_helper_f64::<S, Settings>(settings, &mut result);
+    (result, min, max)
+}
+
+#[inline(always)]
+unsafe fn get_6d_noise_into_helper_f64<S: Simd, Settings: Sample64<S>>(
+    settings: Settings,
+    result: &mut [f64],
+) -> (f64, f64) {
+    let dim = settings.get_dimensions();
+    let freq_x = S::Vf64::set1(settings.get_freq_x() as f64);
+    let freq_y = S::Vf64::set1(settings.get_freq_y() as f64);
+    let freq_z = S::Vf64::set1(settings.get_freq_z() as f64);
+    let freq_w = S::Vf64::set1(settings.get_freq_w() as f64);
+    let freq_u = S::Vf64::set1(settings.get_freq_u() as f64);
+    let freq_v = S::Vf64::set1(settings.get_freq_v() as f64);
+    let start_x = dim.x as f64;
+    let width = dim.width;
+    let start_y = dim.y as f64;
+    let height = dim.height;
+    let start_z = dim.z as f64;
+    let depth = dim.depth;
+    let start_w = dim.w as f64;
+    let time = dim.time;
+    let start_u = dim.offset5 as f64;
+    let extent5 = dim.extent5;
+    let start_v = dim.offset6 as f64;
+    let extent6 = dim.extent6;
+    assert_eq!(
+        result.len(),
+        width * height * depth * time * extent5 * extent6,
+        "noise output slice length must equal width * height * depth * time * extent5 * extent6"
+    );
+
+    let mut min_s = S::Vf64::set1(f64::MAX);
+    let mut max_s = S::Vf64::set1(f64::MIN);
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+
+    let result_ptr = result.as_mut_ptr();
+    let mut i = 0;
+    let vector_width = S::Vf64::WIDTH;
+    let remainder = width % vector_width;
+    let mut x_arr = Vec::<f64>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f64);
+    }
+    x_arr.set_len(vector_width);
+    let mut v = S::Vf64::set1(start_v);
+    for _ in 0..extent6 {
+        let mut u = S::Vf64::set1(start_u);
+        for _ in 0..extent5 {
+            let mut w = S::Vf64::set1(start_w);
+            for _ in 0..time {
+                let mut z = S::Vf64::set1(start_z);
+                for _ in 0..depth {
+                    let mut y = S::Vf64::set1(start_y);
+                    for _ in 0..height {
+                        let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
+                        for _ in 0..width / vector_width {
+                            let f = settings.sample_6d(
+                                x * freq_x,
+                                y * freq_y,
+                                z * freq_z,
+                                w * freq_w,
+                                u * freq_u,
+                                v * freq_v,
+                            );
+                            max_s = max_s.max(f);
+                            min_s = min_s.min(f);
+                            f.copy_to_ptr_unaligned(result_ptr.add(i));
+                            i += vector_width;
+                            x += S::Vf64::set1(vector_width as f64);
+                        }
+                        if remainder != 0 {
+                            let f = settings.sample_6d(
+                                x * freq_x,
+                                y * freq_y,
+                                z * freq_z,
+                                w * freq_w,
+                                u * freq_u,
+                                v * freq_v,
+                            );
+                            for j in 0..remainder {
+                                let n = f[j];
+                                result_ptr.add(i).write(n);
+                                if n < min {
+                                    min = n;
+                                }
+                                if n > max {
+                                    max = n;
+                                }
+                                i += 1;
+                            }
+                        }
+                        y += S::Vf64::set1(1.0);
+                    }
+                    z += S::Vf64::set1(1.0);
+                }
+                w += S::Vf64::set1(1.0);
+            }
+            u += S::Vf64::set1(1.0);
+        }
+        v += S::Vf64::set1(1.0);
+    }
+    for i in 0..vector_width {
+        if min_s[i] < min {
+            min = min_s[i];
+        }
+        if max_s[i] > max {
+            max = max_s[i];
+        }
+    }
+    (min, max)
+}
+
+#[inline(always)]
+unsafe fn get_6d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
+    settings: Settings,
+) -> (Vec<f64>, f64, f64) {
+    let dim = settings.get_dimensions();
+    let len = dim.width * dim.height * dim.depth * dim.time * dim.extent5 * dim.extent6;
+    let mut result = vec![0.0f64; len];
+    let (min, max) = get_6d_noise_into_helper_f64::<S, Settings>(settings, &mut result);
+    (result, min, max)
+}
+
+#[inline(always)]
 #[allow(dead_code)]
 pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
     match noise_type {
@@ -420,6 +670,32 @@ pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f64>, f64, f
         NoiseType::Gradient(s) => get_4d_noise_helper_f64::<S, GradientSettings>(*s),
         NoiseType::Cellular(s) => get_4d_noise_helper_f64::<S, CellularSettings>(*s),
         NoiseType::Cellular2(s) => get_4d_noise_helper_f64::<S, Cellular2Settings>(*s),
+    }
+}
+
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_5d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_5d_noise_helper_f64::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => get_5d_noise_helper_f64::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => get_5d_noise_helper_f64::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => get_5d_noise_helper_f64::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => get_5d_noise_helper_f64::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => get_5d_noise_helper_f64::<S, Cellular2Settings>(*s),
+    }
+}
+
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_6d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_6d_noise_helper_f64::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => get_6d_noise_helper_f64::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => get_6d_noise_helper_f64::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => get_6d_noise_helper_f64::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => get_6d_noise_helper_f64::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => get_6d_noise_helper_f64::<S, Cellular2Settings>(*s),
     }
 }
 
@@ -484,5 +760,37 @@ pub unsafe fn get_4d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
         NoiseType::Gradient(s) => get_4d_noise_into_helper_f64::<S, GradientSettings>(*s, result),
         NoiseType::Cellular(s) => get_4d_noise_into_helper_f64::<S, CellularSettings>(*s, result),
         NoiseType::Cellular2(s) => get_4d_noise_into_helper_f64::<S, Cellular2Settings>(*s, result),
+    }
+}
+
+/// Emplace 5d f64 noise into `result` (length `width * height * depth * time * extent5`); returns `(min, max)`.
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_5d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f64]) -> (f64, f64) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_5d_noise_into_helper_f64::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => get_5d_noise_into_helper_f64::<S, RidgeSettings>(*s, result),
+        NoiseType::Turbulence(s) => {
+            get_5d_noise_into_helper_f64::<S, TurbulenceSettings>(*s, result)
+        }
+        NoiseType::Gradient(s) => get_5d_noise_into_helper_f64::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => get_5d_noise_into_helper_f64::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => get_5d_noise_into_helper_f64::<S, Cellular2Settings>(*s, result),
+    }
+}
+
+/// Emplace 6d f64 noise into `result` (length `width * height * depth * time * extent5 * extent6`); returns `(min, max)`.
+#[inline(always)]
+#[allow(dead_code)]
+pub unsafe fn get_6d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f64]) -> (f64, f64) {
+    match noise_type {
+        NoiseType::Fbm(s) => get_6d_noise_into_helper_f64::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => get_6d_noise_into_helper_f64::<S, RidgeSettings>(*s, result),
+        NoiseType::Turbulence(s) => {
+            get_6d_noise_into_helper_f64::<S, TurbulenceSettings>(*s, result)
+        }
+        NoiseType::Gradient(s) => get_6d_noise_into_helper_f64::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => get_6d_noise_into_helper_f64::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => get_6d_noise_into_helper_f64::<S, Cellular2Settings>(*s, result),
     }
 }

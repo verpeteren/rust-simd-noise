@@ -1,10 +1,12 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
-use crate::noise::simplex_32::{simplex_1d, simplex_2d, simplex_3d, simplex_4d};
+use crate::noise::simplex_32::{
+    simplex_1d, simplex_2d, simplex_3d, simplex_4d, simplex_5d, simplex_6d,
+};
 use crate::noise::simplex_64::{
     simplex_1d as simplex_1d_f64, simplex_2d as simplex_2d_f64, simplex_3d as simplex_3d_f64,
-    simplex_4d as simplex_4d_f64,
+    simplex_4d as simplex_4d_f64, simplex_5d as simplex_5d_f64, simplex_6d as simplex_6d_f64,
 };
 pub use crate::noise_dimensions::NoiseDimensions;
 use crate::noise_helpers_32::Sample32;
@@ -12,7 +14,8 @@ use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
     get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
-    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise,
+    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise,
+    get_6d_noise, get_6d_scaled_noise,
 };
 
 use crate::settings::Settings;
@@ -24,6 +27,8 @@ pub struct GradientSettings {
     pub freq_y: f32,
     pub freq_z: f32,
     pub freq_w: f32,
+    pub freq_u: f32,
+    pub freq_v: f32,
 }
 
 impl DimensionalBeing for GradientSettings {
@@ -40,6 +45,8 @@ impl Settings for GradientSettings {
             freq_y: 0.02,
             freq_z: 0.02,
             freq_w: 0.02,
+            freq_u: 0.02,
+            freq_v: 0.02,
         }
     }
     fn with_seed(&mut self, seed: i32) -> &mut GradientSettings {
@@ -52,6 +59,8 @@ impl Settings for GradientSettings {
         self.freq_y = freq;
         self.freq_z = freq;
         self.freq_w = freq;
+        self.freq_u = freq;
+        self.freq_v = freq;
         self
     }
 
@@ -82,6 +91,40 @@ impl Settings for GradientSettings {
         self
     }
 
+    fn with_freq_5d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+        freq_u: f32,
+    ) -> &mut GradientSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
+        self.freq_u = freq_u;
+        self
+    }
+
+    fn with_freq_6d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+        freq_u: f32,
+        freq_v: f32,
+    ) -> &mut GradientSettings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
+        self.freq_u = freq_u;
+        self.freq_v = freq_v;
+        self
+    }
+
     fn get_freq_x(&self) -> f32 {
         self.freq_x
     }
@@ -96,6 +139,14 @@ impl Settings for GradientSettings {
 
     fn get_freq_w(&self) -> f32 {
         self.freq_w
+    }
+
+    fn get_freq_u(&self) -> f32 {
+        self.freq_u
+    }
+
+    fn get_freq_v(&self) -> f32 {
+        self.freq_v
     }
 
     fn wrap(self) -> NoiseType {
@@ -114,6 +165,8 @@ impl Settings for GradientSettings {
             2 => get_2d_noise(&NoiseType::Gradient(self)),
             3 => get_3d_noise(&NoiseType::Gradient(self)),
             4 => get_4d_noise(&NoiseType::Gradient(self)),
+            5 => get_5d_noise(&NoiseType::Gradient(self)),
+            6 => get_6d_noise(&NoiseType::Gradient(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -128,6 +181,8 @@ impl Settings for GradientSettings {
             2 => get_2d_scaled_noise(&NoiseType::Gradient(new_self)),
             3 => get_3d_scaled_noise(&NoiseType::Gradient(new_self)),
             4 => get_4d_scaled_noise(&NoiseType::Gradient(new_self)),
+            5 => get_5d_scaled_noise(&NoiseType::Gradient(new_self)),
+            6 => get_6d_scaled_noise(&NoiseType::Gradient(new_self)),
             _ => panic!("not implemented"),
         }
     }
@@ -139,6 +194,8 @@ impl Settings for GradientSettings {
             2 => crate::get_2d_noise_64(&NoiseType::Gradient(self)),
             3 => crate::get_3d_noise_64(&NoiseType::Gradient(self)),
             4 => crate::get_4d_noise_64(&NoiseType::Gradient(self)),
+            5 => crate::get_5d_noise_64(&NoiseType::Gradient(self)),
+            6 => crate::get_6d_noise_64(&NoiseType::Gradient(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -150,6 +207,8 @@ impl Settings for GradientSettings {
             2 => crate::get_2d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
             3 => crate::get_3d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
             4 => crate::get_4d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
+            5 => crate::get_5d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
+            6 => crate::get_6d_scaled_noise_64(&NoiseType::Gradient(self), min, max),
             _ => panic!("not implemented"),
         }
     }
@@ -161,6 +220,8 @@ impl Settings for GradientSettings {
             2 => crate::get_2d_noise_into(&NoiseType::Gradient(self), out),
             3 => crate::get_3d_noise_into(&NoiseType::Gradient(self), out),
             4 => crate::get_4d_noise_into(&NoiseType::Gradient(self), out),
+            5 => crate::get_5d_noise_into(&NoiseType::Gradient(self), out),
+            6 => crate::get_6d_noise_into(&NoiseType::Gradient(self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -175,6 +236,8 @@ impl Settings for GradientSettings {
             2 => crate::get_2d_scaled_noise_into(&NoiseType::Gradient(new_self), out),
             3 => crate::get_3d_scaled_noise_into(&NoiseType::Gradient(new_self), out),
             4 => crate::get_4d_scaled_noise_into(&NoiseType::Gradient(new_self), out),
+            5 => crate::get_5d_scaled_noise_into(&NoiseType::Gradient(new_self), out),
+            6 => crate::get_6d_scaled_noise_into(&NoiseType::Gradient(new_self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -186,6 +249,8 @@ impl Settings for GradientSettings {
             2 => crate::get_2d_noise_into_64(&NoiseType::Gradient(self), out),
             3 => crate::get_3d_noise_into_64(&NoiseType::Gradient(self), out),
             4 => crate::get_4d_noise_into_64(&NoiseType::Gradient(self), out),
+            5 => crate::get_5d_noise_into_64(&NoiseType::Gradient(self), out),
+            6 => crate::get_6d_noise_into_64(&NoiseType::Gradient(self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -197,6 +262,8 @@ impl Settings for GradientSettings {
             2 => crate::get_2d_scaled_noise_into_64(&NoiseType::Gradient(self), min, max, out),
             3 => crate::get_3d_scaled_noise_into_64(&NoiseType::Gradient(self), min, max, out),
             4 => crate::get_4d_scaled_noise_into_64(&NoiseType::Gradient(self), min, max, out),
+            5 => crate::get_5d_scaled_noise_into_64(&NoiseType::Gradient(self), min, max, out),
+            6 => crate::get_6d_scaled_noise_into_64(&NoiseType::Gradient(self), min, max, out),
             _ => panic!("not implemented"),
         }
     }
@@ -228,6 +295,18 @@ impl Settings for GradientSettings {
                 src_max,
                 out,
             ),
+            5 => crate::get_5d_noise_range_into::<T>(
+                &NoiseType::Gradient(self),
+                src_min,
+                src_max,
+                out,
+            ),
+            6 => crate::get_6d_noise_range_into::<T>(
+                &NoiseType::Gradient(self),
+                src_min,
+                src_max,
+                out,
+            ),
             _ => panic!("not implemented"),
         }
     }
@@ -253,6 +332,24 @@ impl<S: Simd> Sample32<S> for GradientSettings {
     fn sample_4d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32) -> S::Vf32 {
         simplex_4d::<S>(x, y, z, w, self.dim.seed)
     }
+
+    #[inline(always)]
+    fn sample_5d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, u: S::Vf32) -> S::Vf32 {
+        simplex_5d::<S>(x, y, z, w, u, self.dim.seed)
+    }
+
+    #[inline(always)]
+    fn sample_6d(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+        t: S::Vf32,
+    ) -> S::Vf32 {
+        simplex_6d::<S>(x, y, z, w, u, t, self.dim.seed)
+    }
 }
 
 impl<S: Simd> Sample64<S> for GradientSettings {
@@ -274,6 +371,24 @@ impl<S: Simd> Sample64<S> for GradientSettings {
     #[inline(always)]
     fn sample_4d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64) -> S::Vf64 {
         simplex_4d_f64::<S>(x, y, z, w, self.dim.seed.into())
+    }
+
+    #[inline(always)]
+    fn sample_5d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, u: S::Vf64) -> S::Vf64 {
+        simplex_5d_f64::<S>(x, y, z, w, u, self.dim.seed.into())
+    }
+
+    #[inline(always)]
+    fn sample_6d(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+        u: S::Vf64,
+        t: S::Vf64,
+    ) -> S::Vf64 {
+        simplex_6d_f64::<S>(x, y, z, w, u, t, self.dim.seed.into())
     }
 }
 

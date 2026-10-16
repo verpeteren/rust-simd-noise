@@ -184,6 +184,132 @@ macro_rules! cellular {
             result.$transmute_to()
         }
     };
+    ("5d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 5d cellular/voroni noise
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            distance_function: CellDistanceFunction,
+            return_type: CellReturnType,
+            jitter: $f_type,
+            seed: $seed_type,
+        ) -> $f_type {
+            use $crate::noise::cell_strategy as cs;
+            let xt = $transmute_from(x);
+            let yt = $transmute_from(y);
+            let zt = $transmute_from(z);
+            let wt = $transmute_from(w);
+            let ut = $transmute_from(u);
+            let jt = $transmute_from(jitter);
+            let result = match (distance_function, return_type) {
+                (CellDistanceFunction::Euclidean, CellReturnType::Distance) => {
+                    $mod::cellular_5d::<S, cs::Euclidean, cs::Distance>(
+                        xt, yt, zt, wt, ut, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Euclidean, CellReturnType::CellValue) => {
+                    $mod::cellular_5d::<S, cs::Euclidean, cs::CellValue>(
+                        xt, yt, zt, wt, ut, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::Distance) => {
+                    $mod::cellular_5d::<S, cs::Manhattan, cs::Distance>(
+                        xt, yt, zt, wt, ut, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::CellValue) => {
+                    $mod::cellular_5d::<S, cs::Manhattan, cs::CellValue>(
+                        xt, yt, zt, wt, ut, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Natural, CellReturnType::Distance) => {
+                    $mod::cellular_5d::<S, cs::Natural, cs::Distance>(xt, yt, zt, wt, ut, jt, seed)
+                }
+                (CellDistanceFunction::Natural, CellReturnType::CellValue) => {
+                    $mod::cellular_5d::<S, cs::Natural, cs::CellValue>(xt, yt, zt, wt, ut, jt, seed)
+                }
+            };
+            result.$transmute_to()
+        }
+    };
+    ("6d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 6d cellular/voroni noise
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            t: $f_type,
+            distance_function: CellDistanceFunction,
+            return_type: CellReturnType,
+            jitter: $f_type,
+            seed: $seed_type,
+        ) -> $f_type {
+            use $crate::noise::cell_strategy as cs;
+            let xt = $transmute_from(x);
+            let yt = $transmute_from(y);
+            let zt = $transmute_from(z);
+            let wt = $transmute_from(w);
+            let ut = $transmute_from(u);
+            let tt = $transmute_from(t);
+            let jt = $transmute_from(jitter);
+            let result = match (distance_function, return_type) {
+                (CellDistanceFunction::Euclidean, CellReturnType::Distance) => {
+                    $mod::cellular_6d::<S, cs::Euclidean, cs::Distance>(
+                        xt, yt, zt, wt, ut, tt, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Euclidean, CellReturnType::CellValue) => {
+                    $mod::cellular_6d::<S, cs::Euclidean, cs::CellValue>(
+                        xt, yt, zt, wt, ut, tt, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::Distance) => {
+                    $mod::cellular_6d::<S, cs::Manhattan, cs::Distance>(
+                        xt, yt, zt, wt, ut, tt, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Manhattan, CellReturnType::CellValue) => {
+                    $mod::cellular_6d::<S, cs::Manhattan, cs::CellValue>(
+                        xt, yt, zt, wt, ut, tt, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Natural, CellReturnType::Distance) => {
+                    $mod::cellular_6d::<S, cs::Natural, cs::Distance>(
+                        xt, yt, zt, wt, ut, tt, jt, seed,
+                    )
+                }
+                (CellDistanceFunction::Natural, CellReturnType::CellValue) => {
+                    $mod::cellular_6d::<S, cs::Natural, cs::CellValue>(
+                        xt, yt, zt, wt, ut, tt, jt, seed,
+                    )
+                }
+            };
+            result.$transmute_to()
+        }
+    };
 }
 
 macro_rules! simplex {
@@ -266,6 +392,66 @@ macro_rules! simplex {
                 $transmute_from(y),
                 $transmute_from(z),
                 $transmute_from(w),
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
+    ("5d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 5d simplex noise, results are not scaled.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::simplex_5d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
+    ("6d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 6d simplex noise, results are not scaled.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            t: $f_type,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::simplex_6d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                $transmute_from(t),
                 seed,
             )
             .$transmute_to()
@@ -387,6 +573,80 @@ macro_rules! fbm {
                 $transmute_from(y),
                 $transmute_from(z),
                 $transmute_from(w),
+                $transmute_from(lacunarity),
+                $transmute_from(gain),
+                octaves,
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
+    ("5d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 5d fractal brownian motion.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            lacunarity: $f_type,
+            gain: $f_type,
+            octaves: u8,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::fbm_5d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                $transmute_from(lacunarity),
+                $transmute_from(gain),
+                octaves,
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
+    ("6d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 6d fractal brownian motion.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            t: $f_type,
+            lacunarity: $f_type,
+            gain: $f_type,
+            octaves: u8,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::fbm_6d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                $transmute_from(t),
                 $transmute_from(lacunarity),
                 $transmute_from(gain),
                 octaves,
@@ -518,6 +778,80 @@ macro_rules! ridge {
             .$transmute_to()
         }
     };
+    ("5d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 5d ridge noise.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            lacunarity: $f_type,
+            gain: $f_type,
+            octaves: u8,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::ridge_5d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                $transmute_from(lacunarity),
+                $transmute_from(gain),
+                octaves,
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
+    ("6d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 6d ridge noise.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            t: $f_type,
+            lacunarity: $f_type,
+            gain: $f_type,
+            octaves: u8,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::ridge_6d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                $transmute_from(t),
+                $transmute_from(lacunarity),
+                $transmute_from(gain),
+                octaves,
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
 }
 
 macro_rules! turbulence {
@@ -634,6 +968,80 @@ macro_rules! turbulence {
                 $transmute_from(y),
                 $transmute_from(z),
                 $transmute_from(w),
+                $transmute_from(lacunarity),
+                $transmute_from(gain),
+                octaves,
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
+    ("5d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 5d turbulence.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            lacunarity: $f_type,
+            gain: $f_type,
+            octaves: u8,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::turbulence_5d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                $transmute_from(lacunarity),
+                $transmute_from(gain),
+                octaves,
+                seed,
+            )
+            .$transmute_to()
+        }
+    };
+    ("6d", $fn_name: ident, $f_type: ty, $transmute_from: path, $seed_type: ty, $mod: ident, $transmute_to: ident) => {
+        #[cfg(any(
+            target_feature = "sse2",
+            target_feature = "sse4.1",
+            target_feature = "avx2"
+        ))]
+        /// Get a single value of 6d turbulence.
+        /// # Safety
+        /// `S` must be a SIMD instruction set supported by the running CPU;
+        /// calling this with an unsupported `Simd` type is undefined behavior.
+        #[allow(clippy::too_many_arguments)]
+        pub unsafe fn $fn_name<S: simdeez::Simd>(
+            x: $f_type,
+            y: $f_type,
+            z: $f_type,
+            w: $f_type,
+            u: $f_type,
+            t: $f_type,
+            lacunarity: $f_type,
+            gain: $f_type,
+            octaves: u8,
+            seed: $seed_type,
+        ) -> $f_type {
+            $mod::turbulence_6d::<S>(
+                $transmute_from(x),
+                $transmute_from(y),
+                $transmute_from(z),
+                $transmute_from(w),
+                $transmute_from(u),
+                $transmute_from(t),
                 $transmute_from(lacunarity),
                 $transmute_from(gain),
                 octaves,

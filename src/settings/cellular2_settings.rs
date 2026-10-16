@@ -1,10 +1,13 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
-use crate::noise::cell2_32::{cellular2_1d, cellular2_2d, cellular2_3d, cellular2_4d};
+use crate::noise::cell2_32::{
+    cellular2_1d, cellular2_2d, cellular2_3d, cellular2_4d, cellular2_5d, cellular2_6d,
+};
 use crate::noise::cell2_64::{
     cellular2_1d as cellular2_1d_f64, cellular2_2d as cellular2_2d_f64,
     cellular2_3d as cellular2_3d_f64, cellular2_4d as cellular2_4d_f64,
+    cellular2_5d as cellular2_5d_f64, cellular2_6d as cellular2_6d_f64,
 };
 pub use crate::noise::cell2_return_type::Cell2ReturnType;
 pub use crate::noise::cell_distance_function::CellDistanceFunction;
@@ -14,7 +17,8 @@ use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
     get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
-    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise,
+    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise,
+    get_6d_noise, get_6d_scaled_noise,
 };
 
 use super::Settings;
@@ -55,6 +59,8 @@ pub struct Cellular2Settings {
     pub freq_y: f32,
     pub freq_z: f32,
     pub freq_w: f32,
+    pub freq_u: f32,
+    pub freq_v: f32,
     pub distance_function: CellDistanceFunction,
     pub return_type: Cell2ReturnType,
     pub jitter: f32,
@@ -76,6 +82,8 @@ impl Settings for Cellular2Settings {
             freq_y: 0.02,
             freq_z: 0.02,
             freq_w: 0.02,
+            freq_u: 0.02,
+            freq_v: 0.02,
             distance_function: CellDistanceFunction::Euclidean,
             return_type: Cell2ReturnType::Distance2,
             jitter: 0.25,
@@ -93,6 +101,8 @@ impl Settings for Cellular2Settings {
         self.freq_y = freq;
         self.freq_z = freq;
         self.freq_w = freq;
+        self.freq_u = freq;
+        self.freq_v = freq;
         self
     }
 
@@ -122,6 +132,40 @@ impl Settings for Cellular2Settings {
         self
     }
 
+    fn with_freq_5d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+        freq_u: f32,
+    ) -> &mut Cellular2Settings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
+        self.freq_u = freq_u;
+        self
+    }
+
+    fn with_freq_6d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+        freq_u: f32,
+        freq_v: f32,
+    ) -> &mut Cellular2Settings {
+        self.freq_x = freq_x;
+        self.freq_y = freq_y;
+        self.freq_z = freq_z;
+        self.freq_w = freq_w;
+        self.freq_u = freq_u;
+        self.freq_v = freq_v;
+        self
+    }
+
     fn get_freq_x(&self) -> f32 {
         self.freq_x
     }
@@ -138,6 +182,14 @@ impl Settings for Cellular2Settings {
         self.freq_w
     }
 
+    fn get_freq_u(&self) -> f32 {
+        self.freq_u
+    }
+
+    fn get_freq_v(&self) -> f32 {
+        self.freq_v
+    }
+
     fn wrap(self) -> NoiseType {
         self.validate();
         NoiseType::Cellular2(self)
@@ -150,6 +202,8 @@ impl Settings for Cellular2Settings {
             2 => get_2d_noise(&NoiseType::Cellular2(self)),
             3 => get_3d_noise(&NoiseType::Cellular2(self)),
             4 => get_4d_noise(&NoiseType::Cellular2(self)),
+            5 => get_5d_noise(&NoiseType::Cellular2(self)),
+            6 => get_6d_noise(&NoiseType::Cellular2(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -176,6 +230,8 @@ impl Settings for Cellular2Settings {
             2 => get_2d_scaled_noise(&NoiseType::Cellular2(new_self)),
             3 => get_3d_scaled_noise(&NoiseType::Cellular2(new_self)),
             4 => get_4d_scaled_noise(&NoiseType::Cellular2(new_self)),
+            5 => get_5d_scaled_noise(&NoiseType::Cellular2(new_self)),
+            6 => get_6d_scaled_noise(&NoiseType::Cellular2(new_self)),
             _ => panic!("not implemented"),
         }
     }
@@ -187,6 +243,8 @@ impl Settings for Cellular2Settings {
             2 => crate::get_2d_noise_64(&NoiseType::Cellular2(self)),
             3 => crate::get_3d_noise_64(&NoiseType::Cellular2(self)),
             4 => crate::get_4d_noise_64(&NoiseType::Cellular2(self)),
+            5 => crate::get_5d_noise_64(&NoiseType::Cellular2(self)),
+            6 => crate::get_6d_noise_64(&NoiseType::Cellular2(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -199,6 +257,8 @@ impl Settings for Cellular2Settings {
             2 => crate::get_2d_scaled_noise_64(&NoiseType::Cellular2(self), min, max),
             3 => crate::get_3d_scaled_noise_64(&NoiseType::Cellular2(self), min, max),
             4 => crate::get_4d_scaled_noise_64(&NoiseType::Cellular2(self), min, max),
+            5 => crate::get_5d_scaled_noise_64(&NoiseType::Cellular2(self), min, max),
+            6 => crate::get_6d_scaled_noise_64(&NoiseType::Cellular2(self), min, max),
             _ => panic!("not implemented"),
         }
     }
@@ -210,6 +270,8 @@ impl Settings for Cellular2Settings {
             2 => crate::get_2d_noise_into(&NoiseType::Cellular2(self), out),
             3 => crate::get_3d_noise_into(&NoiseType::Cellular2(self), out),
             4 => crate::get_4d_noise_into(&NoiseType::Cellular2(self), out),
+            5 => crate::get_5d_noise_into(&NoiseType::Cellular2(self), out),
+            6 => crate::get_6d_noise_into(&NoiseType::Cellular2(self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -225,6 +287,8 @@ impl Settings for Cellular2Settings {
             2 => crate::get_2d_scaled_noise_into(&NoiseType::Cellular2(new_self), out),
             3 => crate::get_3d_scaled_noise_into(&NoiseType::Cellular2(new_self), out),
             4 => crate::get_4d_scaled_noise_into(&NoiseType::Cellular2(new_self), out),
+            5 => crate::get_5d_scaled_noise_into(&NoiseType::Cellular2(new_self), out),
+            6 => crate::get_6d_scaled_noise_into(&NoiseType::Cellular2(new_self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -236,6 +300,8 @@ impl Settings for Cellular2Settings {
             2 => crate::get_2d_noise_into_64(&NoiseType::Cellular2(self), out),
             3 => crate::get_3d_noise_into_64(&NoiseType::Cellular2(self), out),
             4 => crate::get_4d_noise_into_64(&NoiseType::Cellular2(self), out),
+            5 => crate::get_5d_noise_into_64(&NoiseType::Cellular2(self), out),
+            6 => crate::get_6d_noise_into_64(&NoiseType::Cellular2(self), out),
             _ => panic!("not implemented"),
         }
     }
@@ -248,6 +314,8 @@ impl Settings for Cellular2Settings {
             2 => crate::get_2d_scaled_noise_into_64(&NoiseType::Cellular2(self), min, max, out),
             3 => crate::get_3d_scaled_noise_into_64(&NoiseType::Cellular2(self), min, max, out),
             4 => crate::get_4d_scaled_noise_into_64(&NoiseType::Cellular2(self), min, max, out),
+            5 => crate::get_5d_scaled_noise_into_64(&NoiseType::Cellular2(self), min, max, out),
+            6 => crate::get_6d_scaled_noise_into_64(&NoiseType::Cellular2(self), min, max, out),
             _ => panic!("not implemented"),
         }
     }
@@ -275,6 +343,18 @@ impl Settings for Cellular2Settings {
                 out,
             ),
             4 => crate::get_4d_noise_range_into::<T>(
+                &NoiseType::Cellular2(self),
+                src_min,
+                src_max,
+                out,
+            ),
+            5 => crate::get_5d_noise_range_into::<T>(
+                &NoiseType::Cellular2(self),
+                src_min,
+                src_max,
+                out,
+            ),
+            6 => crate::get_6d_noise_range_into::<T>(
                 &NoiseType::Cellular2(self),
                 src_min,
                 src_max,
@@ -347,6 +427,51 @@ impl<S: Simd> Sample32<S> for Cellular2Settings {
             self.dim.seed
         )
     }
+
+    #[inline(always)]
+    fn sample_5d(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, u: S::Vf32) -> S::Vf32 {
+        dispatch_cell2!(
+            cellular2_5d,
+            self.distance_function,
+            self.return_type,
+            x,
+            y,
+            z,
+            w,
+            u,
+            S::Vf32::set1(self.jitter),
+            self.index0,
+            self.index1,
+            self.dim.seed
+        )
+    }
+
+    #[inline(always)]
+    fn sample_6d(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+        t: S::Vf32,
+    ) -> S::Vf32 {
+        dispatch_cell2!(
+            cellular2_6d,
+            self.distance_function,
+            self.return_type,
+            x,
+            y,
+            z,
+            w,
+            u,
+            t,
+            S::Vf32::set1(self.jitter),
+            self.index0,
+            self.index1,
+            self.dim.seed
+        )
+    }
 }
 
 impl<S: Simd> Sample64<S> for Cellular2Settings {
@@ -405,6 +530,51 @@ impl<S: Simd> Sample64<S> for Cellular2Settings {
             y,
             z,
             w,
+            S::Vf64::set1(self.jitter.into()),
+            self.index0,
+            self.index1,
+            self.dim.seed.into()
+        )
+    }
+
+    #[inline(always)]
+    fn sample_5d(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64, w: S::Vf64, u: S::Vf64) -> S::Vf64 {
+        dispatch_cell2!(
+            cellular2_5d_f64,
+            self.distance_function,
+            self.return_type,
+            x,
+            y,
+            z,
+            w,
+            u,
+            S::Vf64::set1(self.jitter.into()),
+            self.index0,
+            self.index1,
+            self.dim.seed.into()
+        )
+    }
+
+    #[inline(always)]
+    fn sample_6d(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+        u: S::Vf64,
+        t: S::Vf64,
+    ) -> S::Vf64 {
+        dispatch_cell2!(
+            cellular2_6d_f64,
+            self.distance_function,
+            self.return_type,
+            x,
+            y,
+            z,
+            w,
+            u,
+            t,
             S::Vf64::set1(self.jitter.into()),
             self.index0,
             self.index1,

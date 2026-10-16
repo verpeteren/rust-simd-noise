@@ -8,11 +8,30 @@ pub trait Settings {
     fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut Self;
     fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut Self;
     fn with_freq_4d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32, freq_w: f32) -> &mut Self;
+    fn with_freq_5d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+        freq_u: f32,
+    ) -> &mut Self;
+    fn with_freq_6d(
+        &mut self,
+        freq_x: f32,
+        freq_y: f32,
+        freq_z: f32,
+        freq_w: f32,
+        freq_u: f32,
+        freq_v: f32,
+    ) -> &mut Self;
 
     fn get_freq_x(&self) -> f32;
     fn get_freq_y(&self) -> f32;
     fn get_freq_z(&self) -> f32;
     fn get_freq_w(&self) -> f32;
+    fn get_freq_u(&self) -> f32;
+    fn get_freq_v(&self) -> f32;
 
     /// If you want to call noise functions by hand, call wrap on the settings
     /// to get back a NoiseType to call the noise functions with

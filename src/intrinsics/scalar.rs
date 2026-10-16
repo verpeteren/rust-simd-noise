@@ -93,6 +93,24 @@ cellular!(
     try_transmute_scalar
 );
 cellular!(
+    "5d",
+    cellular_5d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    cell_32,
+    try_transmute_scalar
+);
+cellular!(
+    "6d",
+    cellular_6d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    cell_32,
+    try_transmute_scalar
+);
+cellular!(
     "1d",
     cellular_1d_f64,
     f64,
@@ -104,6 +122,24 @@ cellular!(
 cellular!(
     "4d",
     cellular_4d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    cell_64,
+    try_transmute_scalar
+);
+cellular!(
+    "5d",
+    cellular_5d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    cell_64,
+    try_transmute_scalar
+);
+cellular!(
+    "6d",
+    cellular_6d_f64,
     f64,
     SimdTransmuteF64::try_transmute_from_scalar,
     i64,
@@ -148,6 +184,24 @@ simplex!(
     try_transmute_scalar
 );
 simplex!(
+    "5d",
+    simplex_5d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    simplex_32,
+    try_transmute_scalar
+);
+simplex!(
+    "6d",
+    simplex_6d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    simplex_32,
+    try_transmute_scalar
+);
+simplex!(
     "1d",
     simplex_1d_f64,
     f64,
@@ -177,6 +231,24 @@ simplex!(
 simplex!(
     "4d",
     simplex_4d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    simplex_64,
+    try_transmute_scalar
+);
+simplex!(
+    "5d",
+    simplex_5d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    simplex_64,
+    try_transmute_scalar
+);
+simplex!(
+    "6d",
+    simplex_6d_f64,
     f64,
     SimdTransmuteF64::try_transmute_from_scalar,
     i64,
@@ -220,6 +292,24 @@ fbm!(
     try_transmute_scalar
 );
 fbm!(
+    "5d",
+    fbm_5d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    fbm_32,
+    try_transmute_scalar
+);
+fbm!(
+    "6d",
+    fbm_6d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    fbm_32,
+    try_transmute_scalar
+);
+fbm!(
     "1d",
     fbm_1d_f64,
     f64,
@@ -249,6 +339,24 @@ fbm!(
 fbm!(
     "4d",
     fbm_4d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    fbm_64,
+    try_transmute_scalar
+);
+fbm!(
+    "5d",
+    fbm_5d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    fbm_64,
+    try_transmute_scalar
+);
+fbm!(
+    "6d",
+    fbm_6d_f64,
     f64,
     SimdTransmuteF64::try_transmute_from_scalar,
     i64,
@@ -293,6 +401,24 @@ ridge!(
     try_transmute_scalar
 );
 ridge!(
+    "5d",
+    ridge_5d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    ridge_32,
+    try_transmute_scalar
+);
+ridge!(
+    "6d",
+    ridge_6d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    ridge_32,
+    try_transmute_scalar
+);
+ridge!(
     "1d",
     ridge_1d_f64,
     f64,
@@ -322,6 +448,24 @@ ridge!(
 ridge!(
     "4d",
     ridge_4d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    simplex_ridge_64,
+    try_transmute_scalar
+);
+ridge!(
+    "5d",
+    ridge_5d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    simplex_ridge_64,
+    try_transmute_scalar
+);
+ridge!(
+    "6d",
+    ridge_6d_f64,
     f64,
     SimdTransmuteF64::try_transmute_from_scalar,
     i64,
@@ -366,6 +510,24 @@ turbulence!(
     try_transmute_scalar
 );
 turbulence!(
+    "5d",
+    turbulenece_5d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    turbulence_32,
+    try_transmute_scalar
+);
+turbulence!(
+    "6d",
+    turbulenece_6d,
+    f32,
+    SimdTransmuteF32::try_transmute_from_scalar,
+    i32,
+    turbulence_32,
+    try_transmute_scalar
+);
+turbulence!(
     "1d",
     turbulenece_1d_f64,
     f64,
@@ -401,16 +563,40 @@ turbulence!(
     turbulence_64,
     try_transmute_scalar
 );
+turbulence!(
+    "5d",
+    turbulenece_5d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    turbulence_64,
+    try_transmute_scalar
+);
+turbulence!(
+    "6d",
+    turbulenece_6d_f64,
+    f64,
+    SimdTransmuteF64::try_transmute_from_scalar,
+    i64,
+    turbulence_64,
+    try_transmute_scalar
+);
 
 get_noise!(get_1d_noise, get_1d_noise, f32, noise_helpers_32);
 get_noise!(get_2d_noise, get_2d_noise, f32, noise_helpers_32);
 get_noise!(get_3d_noise, get_3d_noise, f32, noise_helpers_32);
 get_noise!(get_4d_noise, get_4d_noise, f32, noise_helpers_32);
+get_noise!(get_5d_noise, get_5d_noise, f32, noise_helpers_32);
+get_noise!(get_6d_noise, get_6d_noise, f32, noise_helpers_32);
 get_noise!(get_1d_noise, get_1d_noise_64, f64, noise_helpers_64);
 get_noise!(get_2d_noise, get_2d_noise_64, f64, noise_helpers_64);
 get_noise!(get_3d_noise, get_3d_noise_64, f64, noise_helpers_64);
 get_noise!(get_4d_noise, get_4d_noise_64, f64, noise_helpers_64);
+get_noise!(get_5d_noise, get_5d_noise_64, f64, noise_helpers_64);
+get_noise!(get_6d_noise, get_6d_noise_64, f64, noise_helpers_64);
 get_noise_scaled!(get_1d_noise, get_1d_scaled_noise, f32);
 get_noise_scaled!(get_2d_noise, get_2d_scaled_noise, f32);
 get_noise_scaled!(get_3d_noise, get_3d_scaled_noise, f32);
 get_noise_scaled!(get_4d_noise, get_4d_scaled_noise, f32);
+get_noise_scaled!(get_5d_noise, get_5d_scaled_noise, f32);
+get_noise_scaled!(get_6d_noise, get_6d_scaled_noise, f32);

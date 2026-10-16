@@ -8,8 +8,8 @@
 //!* SSE2, SSE41, AVX2, AVX-512, and NEON instruction sets, along with a non-SIMD fallback
 //!* Runtime detection picks the best available instruction set
 //!* Simplex noise, fractal brownian motion, turbulence, and ridge
-//!* 1D, 2D, 3D, and 4D
-//!* Cellular / Voroni Noise  1D, 2D, 3D, and 4D
+//!* 1D, 2D, 3D, 4D, 5D, and 6D
+//!* Cellular / Voroni Noise  1D, 2D, 3D, 4D, 5D, and 6D
 //!
 //!## The `scalar` cargo feature
 //!
@@ -188,6 +188,28 @@ pub fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
+    pub fn get_5d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::get_5d_noise::<S>(noise_type)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    unsafe { noise_helpers_32::get_5d_noise::<simdeez::scalar::Scalar>(noise_type) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::get_6d_noise::<S>(noise_type)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+    unsafe { noise_helpers_32::get_6d_noise::<simdeez::scalar::Scalar>(noise_type) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
     pub fn get_1d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
         unsafe { get_scaled_noise::<S, _>(noise_type, get_1d_noise) }
     }
@@ -228,6 +250,28 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn get_4d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
     unsafe { get_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, get_4d_noise) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_5d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+        unsafe { get_scaled_noise::<S, _>(noise_type, get_5d_noise) }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    unsafe { get_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, get_5d_noise) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+        unsafe { get_scaled_noise::<S, _>(noise_type, get_6d_noise) }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_scaled_noise(noise_type: &NoiseType) -> Vec<f32> {
+    unsafe { get_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, get_6d_noise) }
 }
 
 // ---------------------------------------------------------------------------
@@ -282,6 +326,28 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn get_4d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
     unsafe { noise_helpers_64::get_4d_noise::<simdeez::scalar::Scalar>(noise_type) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_5d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_5d_noise::<S>(noise_type)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+    unsafe { noise_helpers_64::get_5d_noise::<simdeez::scalar::Scalar>(noise_type) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::get_6d_noise::<S>(noise_type)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+    unsafe { noise_helpers_64::get_6d_noise::<simdeez::scalar::Scalar>(noise_type) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -372,6 +438,50 @@ pub fn get_4d_scaled_noise_64(noise_type: &NoiseType, scale_min: f64, scale_max:
     }
 }
 
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_5d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_5d_noise_64) }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_scaled_noise_64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+    unsafe {
+        get_scaled_noise_64::<simdeez::scalar::Scalar, _>(
+            noise_type,
+            scale_min,
+            scale_max,
+            get_5d_noise_64,
+        )
+    }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_scaled_noise_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+    ) -> Vec<f64> {
+        unsafe { get_scaled_noise_64::<S, _>(noise_type, scale_min, scale_max, get_6d_noise_64) }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_scaled_noise_64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+    unsafe {
+        get_scaled_noise_64::<simdeez::scalar::Scalar, _>(
+            noise_type,
+            scale_min,
+            scale_max,
+            get_6d_noise_64,
+        )
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Emplace API (#5): write noise into a caller-provided slice instead of
 // returning a fresh Vec. The unscaled variants return the slice's (min, max);
@@ -420,6 +530,28 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn get_4d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
     unsafe { noise_helpers_32::get_4d_noise_into::<simdeez::scalar::Scalar>(noise_type, out) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_5d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_5d_noise_into::<S>(noise_type, out)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+    unsafe { noise_helpers_32::get_5d_noise_into::<simdeez::scalar::Scalar>(noise_type, out) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+        noise_helpers_32::get_6d_noise_into::<S>(noise_type, out)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_noise_into(noise_type: &NoiseType, out: &mut [f32]) -> (f32, f32) {
+    unsafe { noise_helpers_32::get_6d_noise_into::<simdeez::scalar::Scalar>(noise_type, out) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -476,6 +608,32 @@ pub fn get_4d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
+    pub fn get_5d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_5d_noise_into) }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+    unsafe {
+        get_scaled_noise_into::<simdeez::scalar::Scalar, _>(noise_type, out, get_5d_noise_into)
+    }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+        unsafe { get_scaled_noise_into::<S, _>(noise_type, out, get_6d_noise_into) }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_scaled_noise_into(noise_type: &NoiseType, out: &mut [f32]) {
+    unsafe {
+        get_scaled_noise_into::<simdeez::scalar::Scalar, _>(noise_type, out, get_6d_noise_into)
+    }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
     pub fn get_1d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
         noise_helpers_64::get_1d_noise_into::<S>(noise_type, out)
     }
@@ -516,6 +674,28 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn get_4d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
     unsafe { noise_helpers_64::get_4d_noise_into::<simdeez::scalar::Scalar>(noise_type, out) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_5d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_5d_noise_into::<S>(noise_type, out)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+    unsafe { noise_helpers_64::get_5d_noise_into::<simdeez::scalar::Scalar>(noise_type, out) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+        noise_helpers_64::get_6d_noise_into::<S>(noise_type, out)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_noise_into_64(noise_type: &NoiseType, out: &mut [f64]) -> (f64, f64) {
+    unsafe { noise_helpers_64::get_6d_noise_into::<simdeez::scalar::Scalar>(noise_type, out) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -666,6 +846,80 @@ pub fn get_4d_scaled_noise_into_64(
     }
 }
 
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_5d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_5d_noise_into_64,
+            )
+        }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_5d_scaled_noise_into_64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+    out: &mut [f64],
+) {
+    unsafe {
+        get_scaled_noise_into_64::<simdeez::scalar::Scalar, _>(
+            noise_type,
+            scale_min,
+            scale_max,
+            out,
+            get_5d_noise_into_64,
+        )
+    }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_6d_scaled_noise_into_64(
+        noise_type: &NoiseType,
+        scale_min: f64,
+        scale_max: f64,
+        out: &mut [f64],
+    ) {
+        unsafe {
+            get_scaled_noise_into_64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                out,
+                get_6d_noise_into_64,
+            )
+        }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_6d_scaled_noise_into_64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+    out: &mut [f64],
+) {
+    unsafe {
+        get_scaled_noise_into_64::<simdeez::scalar::Scalar, _>(
+            noise_type,
+            scale_min,
+            scale_max,
+            out,
+            get_6d_noise_into_64,
+        )
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Typed emplace (#5): generate noise and quantize it directly into a
 // caller-provided integer slice (`&mut [u16]`, `&mut [u8]`, ...), with no
@@ -685,6 +939,10 @@ struct RangeInto2d<T>(PhantomData<T>);
 struct RangeInto3d<T>(PhantomData<T>);
 #[cfg(not(feature = "scalar"))]
 struct RangeInto4d<T>(PhantomData<T>);
+#[cfg(not(feature = "scalar"))]
+struct RangeInto5d<T>(PhantomData<T>);
+#[cfg(not(feature = "scalar"))]
+struct RangeInto6d<T>(PhantomData<T>);
 
 #[cfg(not(feature = "scalar"))]
 impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> for RangeInto1d<T> {
@@ -716,6 +974,22 @@ impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> 
     unsafe fn run<S: Simd>(args: (&NoiseType, f32, f32, &mut [T])) {
         let (nt, lo, hi, out) = args;
         noise_helpers_32::get_4d_noise_range_into::<S, T>(nt, lo, hi, out)
+    }
+}
+#[cfg(not(feature = "scalar"))]
+impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> for RangeInto5d<T> {
+    #[inline(always)]
+    unsafe fn run<S: Simd>(args: (&NoiseType, f32, f32, &mut [T])) {
+        let (nt, lo, hi, out) = args;
+        noise_helpers_32::get_5d_noise_range_into::<S, T>(nt, lo, hi, out)
+    }
+}
+#[cfg(not(feature = "scalar"))]
+impl<'a, T: NoiseInto> __SimdRunner<(&'a NoiseType, f32, f32, &'a mut [T]), ()> for RangeInto6d<T> {
+    #[inline(always)]
+    unsafe fn run<S: Simd>(args: (&NoiseType, f32, f32, &mut [T])) {
+        let (nt, lo, hi, out) = args;
+        noise_helpers_32::get_6d_noise_range_into::<S, T>(nt, lo, hi, out)
     }
 }
 
@@ -822,6 +1096,60 @@ pub fn get_4d_noise_range_into<T: NoiseInto>(
 ) {
     unsafe {
         noise_helpers_32::get_4d_noise_range_into::<simdeez::scalar::Scalar, T>(
+            noise_type, src_min, src_max, out,
+        )
+    }
+}
+
+/// Emplace 5d noise quantized into `out` (length `width * height * depth * time * extent5`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+#[cfg(not(feature = "scalar"))]
+pub fn get_5d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    __run_simd_runtime_decide::<RangeInto5d<T>, _, _>((noise_type, src_min, src_max, out))
+}
+/// Emplace 5d noise quantized into `out` (length `width * height * depth * time * extent5`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+#[cfg(feature = "scalar")]
+pub fn get_5d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    unsafe {
+        noise_helpers_32::get_5d_noise_range_into::<simdeez::scalar::Scalar, T>(
+            noise_type, src_min, src_max, out,
+        )
+    }
+}
+
+/// Emplace 6d noise quantized into `out` (length `width * height * depth * time * extent5 * extent6`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+#[cfg(not(feature = "scalar"))]
+pub fn get_6d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    __run_simd_runtime_decide::<RangeInto6d<T>, _, _>((noise_type, src_min, src_max, out))
+}
+/// Emplace 6d noise quantized into `out` (length `width * height * depth * time * extent5 * extent6`),
+/// mapping `[src_min, src_max]` onto `T`'s full range (see [`NoiseInto`]).
+#[cfg(feature = "scalar")]
+pub fn get_6d_noise_range_into<T: NoiseInto>(
+    noise_type: &NoiseType,
+    src_min: f32,
+    src_max: f32,
+    out: &mut [T],
+) {
+    unsafe {
+        noise_helpers_32::get_6d_noise_range_into::<simdeez::scalar::Scalar, T>(
             noise_type, src_min, src_max, out,
         )
     }
