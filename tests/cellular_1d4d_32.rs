@@ -60,6 +60,10 @@ fn check(file_name: String, noise: &[f32]) {
     }
 }
 
+// Used by the x86 module below; on aarch64 that module is cfg'd out and the
+// neon suite is written directly (NEON's wrappers are non-generic), so the
+// macro is unused there.
+#[allow(unused_macros)]
 macro_rules! cell_engine {
     ($name:ident, $m:ident, $eng:ty, $engname:literal $(, $tf:literal)?) => {
         #[test]
@@ -146,18 +150,62 @@ mod x86 {
     );
 }
 
+// NEON's `get_*_noise` wrappers are safe and **non-generic** (the engine is
+// bound internally via `simd_compiletime_select!`), so unlike the x86 engines
+// they are called without a turbofish — the shared `cell_engine!` macro's
+// `::<Eng>` form does not apply, hence this hand-written suite.
 #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 mod neon_engine {
     use super::*;
     use simdnoise::intrinsics::neon;
 
-    cell_engine!(
-        cellular_1d4d_32_neon,
-        neon,
-        simdeez::engines::neon::Neon,
-        "neon",
-        "neon"
-    );
+    #[test]
+    fn cellular_1d4d_32_neon() {
+        #[target_feature(enable = "neon")]
+        unsafe fn run() {
+            for (dim, dim_str, w, h, d, t) in DIMS {
+                for (df, dfn) in CELL_DF {
+                    for (rt, rtn) in CELL_RT {
+                        let nt = CellularSettings::default(dims_of(dim, w, h, d, t))
+                            .with_seed(1337)
+                            .with_distance_function(df)
+                            .with_return_type(rt)
+                            .wrap();
+                        let noise = if dim == 1 {
+                            neon::get_1d_noise(&nt).0
+                        } else {
+                            neon::get_4d_noise(&nt).0
+                        };
+                        let file_name = format!(
+                            "{}/intrinsics_cellular_32_{}_neon_{}_{}_{}.bin",
+                            BIN_PATH, dim_str, dfn, rtn, ARCH
+                        );
+                        check(file_name, &noise);
+                    }
+                }
+                for (rt, rtn) in CELL2_RT {
+                    for (df, dfn) in CELL_DF {
+                        let nt = Cellular2Settings::default(dims_of(dim, w, h, d, t))
+                            .with_seed(1337)
+                            .with_distance_function(df)
+                            .with_return_type(rt)
+                            .wrap();
+                        let noise = if dim == 1 {
+                            neon::get_1d_noise(&nt).0
+                        } else {
+                            neon::get_4d_noise(&nt).0
+                        };
+                        let file_name = format!(
+                            "{}/intrinsics_cellular2_32_{}_neon_{}_{}_{}.bin",
+                            BIN_PATH, dim_str, dfn, rtn, ARCH
+                        );
+                        check(file_name, &noise);
+                    }
+                }
+            }
+        }
+        unsafe { run() }
+    }
 }
 
 /// Correctness sanity on the scalar reference engine: 1D/4D cellular `Distance`
