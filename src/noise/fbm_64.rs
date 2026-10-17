@@ -9,16 +9,25 @@ pub fn fbm_1d<S: Simd>(
     mut x: S::Vf64,
     lacunarity: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut amp = S::Vf64::set1(1.0);
     let mut result = simplex_1d::<S>(x, seed);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lacunarity;
         amp *= gain;
         result = (simplex_1d::<S>(x, seed) * amp) + result;
+    }
+
+    if frac > 0.0 {
+        x *= lacunarity;
+        amp *= gain;
+        result = (simplex_1d::<S>(x, seed) * amp * S::Vf64::set1(frac.into())) + result;
     }
 
     result
@@ -30,17 +39,27 @@ pub fn fbm_2d<S: Simd>(
     mut y: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_2d::<S>(x, y, seed);
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         amp *= gain;
         result = (simplex_2d::<S>(x, y, seed) * amp) + result;
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        amp *= gain;
+        result = (simplex_2d::<S>(x, y, seed) * amp * S::Vf64::set1(frac.into())) + result;
     }
 
     result
@@ -53,18 +72,30 @@ pub fn fbm_3d<S: Simd>(
     mut z: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_3d::<S>(x, y, z, seed);
     let mut amp = S::Vf64::set1(1.0);
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
         amp *= gain;
         result = (simplex_3d::<S>(x, y, z, seed) * amp) + result;
     }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        amp *= gain;
+        result = (simplex_3d::<S>(x, y, z, seed) * amp * S::Vf64::set1(frac.into())) + result;
+    }
+
     result
 }
 
@@ -77,19 +108,31 @@ pub fn fbm_4d<S: Simd>(
     mut w: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_4d::<S>(x, y, z, w, seed);
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
         w *= lac;
         amp *= gain;
         result += simplex_4d::<S>(x, y, z, w, seed) * amp;
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        amp *= gain;
+        result += simplex_4d::<S>(x, y, z, w, seed) * amp * S::Vf64::set1(frac.into());
     }
 
     result
@@ -105,13 +148,16 @@ pub fn fbm_5d<S: Simd>(
     mut u: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_5d::<S>(x, y, z, w, u, seed);
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
@@ -119,6 +165,16 @@ pub fn fbm_5d<S: Simd>(
         u *= lac;
         amp *= gain;
         result += simplex_5d::<S>(x, y, z, w, u, seed) * amp;
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        amp *= gain;
+        result += simplex_5d::<S>(x, y, z, w, u, seed) * amp * S::Vf64::set1(frac.into());
     }
 
     result
@@ -135,13 +191,16 @@ pub fn fbm_6d<S: Simd>(
     mut t: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = simplex_6d::<S>(x, y, z, w, u, t, seed);
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
@@ -150,6 +209,17 @@ pub fn fbm_6d<S: Simd>(
         t *= lac;
         amp *= gain;
         result += simplex_6d::<S>(x, y, z, w, u, t, seed) * amp;
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        t *= lac;
+        amp *= gain;
+        result += simplex_6d::<S>(x, y, z, w, u, t, seed) * amp * S::Vf64::set1(frac.into());
     }
 
     result

@@ -9,16 +9,25 @@ pub fn ridge_1d<S: Simd>(
     mut x: S::Vf64,
     lacunarity: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut amp = S::Vf64::set1(1.0);
     let mut result = S::Vf64::set1(1.0) - simplex_1d::<S>(x, seed).abs();
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lacunarity;
         amp *= gain;
         result = result + S::Vf64::set1(1.0) - simplex_1d::<S>(x, seed).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lacunarity;
+        result +=
+            (S::Vf64::set1(1.0) - simplex_1d::<S>(x, seed).abs()) * S::Vf64::set1(frac.into());
     }
 
     result
@@ -30,17 +39,28 @@ pub fn ridge_2d<S: Simd>(
     mut y: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = S::Vf64::set1(1.0) - simplex_2d::<S>(x, y, seed).abs();
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         amp *= gain;
         result += S::Vf64::neg_mul_add(simplex_2d::<S>(x, y, seed).abs(), amp, S::Vf64::set1(1.0));
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        amp *= gain;
+        result += S::Vf64::neg_mul_add(simplex_2d::<S>(x, y, seed).abs(), amp, S::Vf64::set1(1.0))
+            * S::Vf64::set1(frac.into());
     }
 
     result
@@ -53,13 +73,16 @@ pub fn ridge_3d<S: Simd>(
     mut z: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = S::Vf64::set1(1.0) - simplex_3d::<S>(x, y, z, seed).abs();
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
@@ -69,6 +92,18 @@ pub fn ridge_3d<S: Simd>(
             amp,
             S::Vf64::set1(1.0),
         );
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        amp *= gain;
+        result += S::Vf64::neg_mul_add(
+            simplex_3d::<S>(x, y, z, seed).abs(),
+            amp,
+            S::Vf64::set1(1.0),
+        ) * S::Vf64::set1(frac.into());
     }
 
     result
@@ -83,19 +118,32 @@ pub fn ridge_4d<S: Simd>(
     mut w: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = S::Vf64::set1(1.0) - simplex_4d::<S>(x, y, z, w, seed).abs();
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
         w *= lac;
         amp *= gain;
         result = result + S::Vf64::set1(1.0) - (simplex_4d::<S>(x, y, z, w, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        amp *= gain;
+        result += (S::Vf64::set1(1.0) - (simplex_4d::<S>(x, y, z, w, seed) * amp).abs())
+            * S::Vf64::set1(frac.into());
     }
 
     result
@@ -111,13 +159,16 @@ pub fn ridge_5d<S: Simd>(
     mut u: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = S::Vf64::set1(1.0) - simplex_5d::<S>(x, y, z, w, u, seed).abs();
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
@@ -125,6 +176,17 @@ pub fn ridge_5d<S: Simd>(
         u *= lac;
         amp *= gain;
         result = result + S::Vf64::set1(1.0) - (simplex_5d::<S>(x, y, z, w, u, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        amp *= gain;
+        result += (S::Vf64::set1(1.0) - (simplex_5d::<S>(x, y, z, w, u, seed) * amp).abs())
+            * S::Vf64::set1(frac.into());
     }
 
     result
@@ -141,13 +203,16 @@ pub fn ridge_6d<S: Simd>(
     mut t: S::Vf64,
     lac: S::Vf64,
     gain: S::Vf64,
-    octaves: u8,
+    octaves: f32,
     seed: i64,
 ) -> S::Vf64 {
     let mut result = S::Vf64::set1(1.0) - simplex_6d::<S>(x, y, z, w, u, t, seed).abs();
     let mut amp = S::Vf64::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
@@ -157,6 +222,18 @@ pub fn ridge_6d<S: Simd>(
         amp *= gain;
         result =
             result + S::Vf64::set1(1.0) - (simplex_6d::<S>(x, y, z, w, u, t, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        t *= lac;
+        amp *= gain;
+        result += (S::Vf64::set1(1.0) - (simplex_6d::<S>(x, y, z, w, u, t, seed) * amp).abs())
+            * S::Vf64::set1(frac.into());
     }
 
     result

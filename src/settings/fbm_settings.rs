@@ -29,7 +29,7 @@ pub struct FbmSettings {
     pub freq_v: f32,
     pub lacunarity: f32,
     pub gain: f32,
-    pub octaves: u8,
+    pub octaves: f32,
 }
 
 impl DimensionalBeing for FbmSettings {
@@ -50,7 +50,7 @@ impl Settings for FbmSettings {
             freq_v: 0.02,
             lacunarity: 0.5,
             gain: 2.0,
-            octaves: 3,
+            octaves: 3.0,
         }
     }
     fn with_seed(&mut self, seed: i32) -> &mut FbmSettings {
@@ -297,7 +297,7 @@ impl SimplexSettings for FbmSettings {
         self
     }
 
-    fn with_octaves(&mut self, octaves: u8) -> &mut FbmSettings {
+    fn with_octaves(&mut self, octaves: f32) -> &mut FbmSettings {
         self.octaves = octaves;
         self
     }

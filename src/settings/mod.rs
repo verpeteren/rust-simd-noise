@@ -75,7 +75,7 @@ pub trait Settings {
 pub trait SimplexSettings {
     fn with_lacunarity(&mut self, lacunarity: f32) -> &mut Self;
     fn with_gain(&mut self, gain: f32) -> &mut Self;
-    fn with_octaves(&mut self, octaves: u8) -> &mut Self;
+    fn with_octaves(&mut self, octaves: f32) -> &mut Self;
 }
 
 mod cellular2_settings;

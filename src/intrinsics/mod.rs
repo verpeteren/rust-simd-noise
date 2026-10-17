@@ -474,7 +474,7 @@ macro_rules! fbm {
             x: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::fbm_1d::<S>(
@@ -502,7 +502,7 @@ macro_rules! fbm {
             y: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::fbm_2d::<S>(
@@ -532,7 +532,7 @@ macro_rules! fbm {
             z: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::fbm_3d::<S>(
@@ -565,7 +565,7 @@ macro_rules! fbm {
             w: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::fbm_4d::<S>(
@@ -600,7 +600,7 @@ macro_rules! fbm {
             u: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::fbm_5d::<S>(
@@ -637,7 +637,7 @@ macro_rules! fbm {
             t: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::fbm_6d::<S>(
@@ -671,7 +671,7 @@ macro_rules! ridge {
             x: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::ridge_1d::<S>(
@@ -699,7 +699,7 @@ macro_rules! ridge {
             y: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::ridge_2d::<S>(
@@ -729,7 +729,7 @@ macro_rules! ridge {
             z: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::ridge_3d::<S>(
@@ -762,7 +762,7 @@ macro_rules! ridge {
             w: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::ridge_4d::<S>(
@@ -797,7 +797,7 @@ macro_rules! ridge {
             u: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::ridge_5d::<S>(
@@ -834,7 +834,7 @@ macro_rules! ridge {
             t: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::ridge_6d::<S>(
@@ -869,7 +869,7 @@ macro_rules! turbulence {
             x: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::turbulence_1d::<S>(
@@ -897,7 +897,7 @@ macro_rules! turbulence {
             y: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::turbulence_2d::<S>(
@@ -927,7 +927,7 @@ macro_rules! turbulence {
             z: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::turbulence_3d::<S>(
@@ -960,7 +960,7 @@ macro_rules! turbulence {
             w: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::turbulence_4d::<S>(
@@ -995,7 +995,7 @@ macro_rules! turbulence {
             u: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::turbulence_5d::<S>(
@@ -1032,7 +1032,7 @@ macro_rules! turbulence {
             t: $f_type,
             lacunarity: $f_type,
             gain: $f_type,
-            octaves: u8,
+            octaves: f32,
             seed: $seed_type,
         ) -> $f_type {
             $mod::turbulence_6d::<S>(

@@ -15,7 +15,7 @@ const DEFAULT_FREQUENCY: f32 = 1.2;
 const DEFAULT_JITTER: f32 = 1.2;
 const DEFAULT_LACUNARITY: f32 = 0.5;
 const DEFAULT_GAIN: f32 = 2.0;
-const DEFAULT_OCTAVES: u8 = 3;
+const DEFAULT_OCTAVES: f32 = 3.0;
 
 const SCALE_MIN: f32 = 0.0;
 const SCALE_MAX: f32 = 255.0;
@@ -157,7 +157,7 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_GAIN)]
         gain: f32,
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
-        octaves: u8,
+        octaves: f32,
     },
     #[command(arg_required_else_help = false)]
     Ridge {
@@ -168,7 +168,7 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_GAIN)]
         gain: f32,
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
-        octaves: u8,
+        octaves: f32,
     },
     #[command(arg_required_else_help = false)]
     Turbulence {
@@ -179,7 +179,7 @@ enum Commands {
         #[arg(short, long, value_parser, default_value_t = DEFAULT_GAIN)]
         gain: f32,
         #[arg(short, long, value_parser, default_value_t = DEFAULT_OCTAVES)]
-        octaves: u8,
+        octaves: f32,
     },
     #[command(arg_required_else_help = false)]
     Gradient {},
