@@ -14,7 +14,7 @@ use simdnoise::noise::{fbm_32, fbm_64, ridge_32, ridge_64, turbulence_32, turbul
 
 const LAC: f32 = 0.5;
 const GAIN: f32 = 2.0;
-const OCTAVES: u8 = 3;
+const OCTAVES: f32 = 3.0;
 const SEED: i32 = 1337;
 
 // Deterministic walk through 6D space (the 5D helpers drop the last axis).

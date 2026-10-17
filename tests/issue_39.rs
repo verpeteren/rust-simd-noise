@@ -15,7 +15,7 @@ use simdnoise::{NoiseBuilder, Settings, SimplexSettings};
 const W: usize = 64;
 const H: usize = 16;
 const FREQ: f32 = 0.125;
-const OCTAVES: u8 = 8;
+const OCTAVES: f32 = 8.0;
 
 /// `build(x_offset, width)` returns a `width x H` scaled block. Asserts the left
 /// and right halves (as separate offset blocks) match the full block.

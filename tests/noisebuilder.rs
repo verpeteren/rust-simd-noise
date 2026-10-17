@@ -183,7 +183,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::ridge_1d(64)
                         .with_freq(0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -201,7 +201,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::ridge_2d(64, 32)
                         .with_freq_2d(0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -219,7 +219,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::ridge_3d(64, 32, 16)
                         .with_freq_3d(0.05, 0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -237,7 +237,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::ridge_4d(64, 32, 16, 8)
                         .with_freq_4d(0.10, 0.05, 0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -260,7 +260,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::ridge_1d_offset(16.0, 64)
                         .with_freq(0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -278,7 +278,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::ridge_2d_offset(16.0, 64, 32.0, 32)
                         .with_freq_2d(0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -297,7 +297,7 @@ mod noise {
                         NoiseBuilder::ridge_3d_offset(16.0, 64, 32.0, 32, 64.0, 16)
                             .with_freq_3d(0.05, 0.04, 0.01)
                             .with_seed(1337)
-                            .with_octaves(5)
+                            .with_octaves(5.0)
                             .with_gain(2.0)
                             .with_lacunarity(0.5)
                             .generate();
@@ -316,7 +316,7 @@ mod noise {
                         NoiseBuilder::ridge_4d_offset(16.0, 64, 32.0, 32, 64.0, 16, 128.0, 8)
                             .with_freq_4d(0.10, 0.05, 0.04, 0.01)
                             .with_seed(1337)
-                            .with_octaves(5)
+                            .with_octaves(5.0)
                             .with_gain(2.0)
                             .with_lacunarity(0.5)
                             .generate();
@@ -345,7 +345,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::turbulence_1d(64)
                         .with_freq(0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -363,7 +363,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::turbulence_2d(64, 32)
                         .with_freq_2d(0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -381,7 +381,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::turbulence_3d(64, 32, 16)
                         .with_freq_3d(0.05, 0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -399,7 +399,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::turbulence_4d(64, 32, 16, 8)
                         .with_freq_4d(0.10, 0.05, 0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -422,7 +422,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::turbulence_1d_offset(16.0, 64)
                         .with_freq(0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -441,7 +441,7 @@ mod noise {
                         NoiseBuilder::turbulence_2d_offset(16.0, 64, 32.0, 32)
                             .with_freq_2d(0.04, 0.01)
                             .with_seed(1337)
-                            .with_octaves(5)
+                            .with_octaves(5.0)
                             .with_gain(2.0)
                             .with_lacunarity(0.5)
                             .generate();
@@ -460,7 +460,7 @@ mod noise {
                         NoiseBuilder::turbulence_3d_offset(16.0, 64, 32.0, 32, 64.0, 16)
                             .with_freq_3d(0.05, 0.04, 0.01)
                             .with_seed(1337)
-                            .with_octaves(5)
+                            .with_octaves(5.0)
                             .with_gain(2.0)
                             .with_lacunarity(0.5)
                             .generate();
@@ -479,7 +479,7 @@ mod noise {
                         NoiseBuilder::turbulence_4d_offset(16.0, 64, 32.0, 32, 64.0, 16, 128.0, 8)
                             .with_freq_4d(0.10, 0.05, 0.04, 0.01)
                             .with_seed(1337)
-                            .with_octaves(5)
+                            .with_octaves(5.0)
                             .with_gain(2.0)
                             .with_lacunarity(0.5)
                             .generate();
@@ -508,7 +508,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::fbm_1d(64)
                         .with_freq(0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -526,7 +526,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::fbm_2d(64, 32)
                         .with_freq_2d(0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -544,7 +544,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::fbm_3d(64, 32, 16)
                         .with_freq_3d(0.05, 0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -562,7 +562,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::fbm_4d(64, 32, 16, 8)
                         .with_freq_4d(0.10, 0.05, 0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -585,7 +585,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::fbm_1d_offset(16.0, 64)
                         .with_freq(0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -603,7 +603,7 @@ mod noise {
                     let (noise, _min, _max) = NoiseBuilder::fbm_2d_offset(16.0, 64, 32.0, 32)
                         .with_freq_2d(0.04, 0.01)
                         .with_seed(1337)
-                        .with_octaves(5)
+                        .with_octaves(5.0)
                         .with_gain(2.0)
                         .with_lacunarity(0.5)
                         .generate();
@@ -622,7 +622,7 @@ mod noise {
                         NoiseBuilder::fbm_3d_offset(16.0, 64, 32.0, 32, 64.0, 16)
                             .with_freq_3d(0.05, 0.04, 0.01)
                             .with_seed(1337)
-                            .with_octaves(5)
+                            .with_octaves(5.0)
                             .with_gain(2.0)
                             .with_lacunarity(0.5)
                             .generate();
@@ -641,7 +641,7 @@ mod noise {
                         NoiseBuilder::fbm_4d_offset(16.0, 648, 32.0, 32, 64.0, 16, 128.0, 8)
                             .with_freq_4d(0.10, 0.05, 0.04, 0.01)
                             .with_seed(1337)
-                            .with_octaves(5)
+                            .with_octaves(5.0)
                             .with_gain(2.0)
                             .with_lacunarity(0.5)
                             .generate();

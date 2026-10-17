@@ -70,19 +70,19 @@ fn simplex_nt(kind: &str, dims: NoiseDimensions) -> NoiseType {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap(),
         "ridge" => RidgeSettings::default(dims)
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap(),
         "turbulence" => TurbulenceSettings::default(dims)
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap(),
         _ => unreachable!(),
     }

@@ -5982,7 +5982,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_1d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -6012,7 +6012,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -6043,7 +6043,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_1d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6073,7 +6073,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_1d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6104,7 +6104,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_1d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -6135,7 +6135,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -6167,7 +6167,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -6199,7 +6199,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -6232,7 +6232,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_2d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -6264,7 +6264,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -6296,7 +6296,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_2d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6327,7 +6327,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_2d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6359,7 +6359,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_2d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -6391,7 +6391,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -6424,7 +6424,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -6457,7 +6457,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -6491,7 +6491,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_3d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -6524,7 +6524,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -6557,7 +6557,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_3d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6589,7 +6589,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_3d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6622,7 +6622,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_3d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -6655,7 +6655,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -6689,7 +6689,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -6723,7 +6723,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -6758,7 +6758,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_4d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -6792,7 +6792,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -6826,7 +6826,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_4d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6859,7 +6859,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_4d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -6893,7 +6893,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_4d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -6927,7 +6927,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -6962,7 +6962,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -6997,7 +6997,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -7029,7 +7029,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_1d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -7060,7 +7060,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -7091,7 +7091,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_1d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7121,7 +7121,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_1d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7152,7 +7152,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_1d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -7183,7 +7183,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -7215,7 +7215,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -7247,7 +7247,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -7279,7 +7279,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_2d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -7311,7 +7311,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -7343,7 +7343,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_2d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7374,7 +7374,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_2d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7406,7 +7406,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_2d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -7438,7 +7438,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -7471,7 +7471,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -7504,7 +7504,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -7538,7 +7538,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_3d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -7571,7 +7571,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -7604,7 +7604,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_3d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7636,7 +7636,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_3d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7669,7 +7669,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_3d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -7702,7 +7702,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -7736,7 +7736,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -7770,7 +7770,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -7805,7 +7805,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_4d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -7839,7 +7839,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -7873,7 +7873,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_4d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7906,7 +7906,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_4d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -7940,7 +7940,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_4d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -7974,7 +7974,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -8009,7 +8009,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8044,7 +8044,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8076,7 +8076,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_1d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -8107,7 +8107,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_1d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -8138,7 +8138,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_1d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8168,7 +8168,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_1d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8199,7 +8199,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_1d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -8230,7 +8230,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_1d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -8262,7 +8262,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8294,7 +8294,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_1d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8327,7 +8327,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_2d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -8359,7 +8359,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_2d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -8391,7 +8391,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_2d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8422,7 +8422,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_2d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8454,7 +8454,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_2d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -8486,7 +8486,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_2d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -8519,7 +8519,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8552,7 +8552,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_2d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8586,7 +8586,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_3d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -8619,7 +8619,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_3d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -8652,7 +8652,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_3d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8684,7 +8684,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_3d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8717,7 +8717,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_3d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -8750,7 +8750,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_3d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -8784,7 +8784,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8818,7 +8818,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_3d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -8853,7 +8853,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = avx2::get_4d_noise::<simdeez::engines::avx2::Avx2>(&noise_type);
         noise
@@ -8887,7 +8887,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             avx2::get_4d_noise_64::<simdeez::engines::avx2::Avx2>(&noise_type);
@@ -8921,7 +8921,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_4d_noise::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8954,7 +8954,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = scalar::get_4d_noise_64::<simdeez::scalar::Scalar>(&noise_type);
         noise
@@ -8988,7 +8988,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = sse2::get_4d_noise::<simdeez::engines::sse2::Sse2>(&noise_type);
         noise
@@ -9022,7 +9022,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse2::get_4d_noise_64::<simdeez::engines::sse2::Sse2>(&noise_type);
@@ -9057,7 +9057,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&noise_type);
@@ -9092,7 +9092,7 @@ mod x86 {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) =
             sse41::get_4d_noise_64::<simdeez::engines::sse41::Sse41>(&noise_type);
