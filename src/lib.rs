@@ -79,7 +79,7 @@
 //! // Get a block of 4d ridge noise, custom settings, 32x32x32x32 unscaled
 //! let (noise,min,max) =  NoiseBuilder::ridge_4d(32,32,32,32)
 //!        .with_freq(0.05)
-//!        .with_octaves(5)
+//!        .with_octaves(5.0)
 //!        .with_gain(2.0)
 //!        .with_seed(1337)
 //!        .with_lacunarity(0.5)
@@ -124,7 +124,7 @@
 //!   let y = _mm256_set1_ps(10.0);
 //!   let lacunarity = _mm256_set1_ps(0.5);
 //!   let gain = _mm256_set1_ps(2.0);
-//!   let octaves = 3;
+//!   let octaves = 3.0f32;
 //!   let f_turbulence : __m256 = simdnoise::intrinsics::avx2::turbulence_2d::<simdeez::engines::avx2::Avx2>(x,y,lacunarity,gain,octaves,seed);
 //!
 //! }

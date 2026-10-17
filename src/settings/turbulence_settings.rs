@@ -32,7 +32,7 @@ pub struct TurbulenceSettings {
     pub freq_v: f32,
     pub lacunarity: f32,
     pub gain: f32,
-    pub octaves: u8,
+    pub octaves: f32,
 }
 
 impl DimensionalBeing for TurbulenceSettings {
@@ -53,7 +53,7 @@ impl Settings for TurbulenceSettings {
             freq_v: 0.02,
             lacunarity: 0.5,
             gain: 2.0,
-            octaves: 3,
+            octaves: 3.0,
         }
     }
 
@@ -331,7 +331,7 @@ impl SimplexSettings for TurbulenceSettings {
         self
     }
 
-    fn with_octaves(&mut self, octaves: u8) -> &mut TurbulenceSettings {
+    fn with_octaves(&mut self, octaves: f32) -> &mut TurbulenceSettings {
         self.octaves = octaves;
         self
     }

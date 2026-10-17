@@ -1460,7 +1460,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_1d_noise(&noise_type);
         noise
@@ -1491,7 +1491,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_1d_noise_64(&noise_type);
         noise
@@ -1523,7 +1523,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_2d_noise(&noise_type);
         noise
@@ -1555,7 +1555,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_2d_noise_64(&noise_type);
         noise
@@ -1588,7 +1588,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_3d_noise(&noise_type);
         noise
@@ -1621,7 +1621,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_3d_noise_64(&noise_type);
         noise
@@ -1655,7 +1655,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_4d_noise(&noise_type);
         noise
@@ -1689,7 +1689,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_4d_noise_64(&noise_type);
         noise
@@ -1720,7 +1720,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_1d_noise(&noise_type);
         noise
@@ -1751,7 +1751,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_1d_noise_64(&noise_type);
         noise
@@ -1783,7 +1783,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_2d_noise(&noise_type);
         noise
@@ -1815,7 +1815,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_2d_noise_64(&noise_type);
         noise
@@ -1848,7 +1848,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_3d_noise(&noise_type);
         noise
@@ -1881,7 +1881,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_3d_noise_64(&noise_type);
         noise
@@ -1915,7 +1915,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_4d_noise(&noise_type);
         noise
@@ -1949,7 +1949,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_4d_noise_64(&noise_type);
         noise
@@ -1980,7 +1980,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_1d_noise(&noise_type);
         noise
@@ -2011,7 +2011,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_1d_noise_64(&noise_type);
         noise
@@ -2043,7 +2043,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_2d_noise(&noise_type);
         noise
@@ -2075,7 +2075,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_2d_noise_64(&noise_type);
         noise
@@ -2108,7 +2108,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_3d_noise(&noise_type);
         noise
@@ -2141,7 +2141,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_3d_noise_64(&noise_type);
         noise
@@ -2175,7 +2175,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_4d_noise(&noise_type);
         noise
@@ -2209,7 +2209,7 @@ mod neon {
             .with_seed(1337)
             .with_lacunarity(0.5)
             .with_gain(2.0)
-            .with_octaves(5)
+            .with_octaves(5.0)
             .wrap();
         let (noise, _min, _max) = neon::get_4d_noise_64(&noise_type);
         noise

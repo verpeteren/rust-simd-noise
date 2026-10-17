@@ -27,16 +27,28 @@ impl DimensionalBeing for NoiseType {
     }
 }
 
-/// Sum of the per-octave amplitudes: `1 + gain + gain^2 + ... + gain^(octaves-1)`.
+/// Sum of the per-octave amplitudes: `1 + gain + ... + gain^(n-1) + frac*gain^n`,
+/// where `octaves = n + frac`. The fractional top octave contributes `frac` of
+/// its amplitude `gain^n`, matching the fractional-octave kernels; an integer
+/// `octaves` (frac == 0) reduces to `1 + gain + ... + gain^(octaves-1)`.
 ///
 /// At least one octave always contributes (the base octave runs before the
-/// `1..octaves` loop), so a 0 octave count is treated as 1.
-fn amplitude_sum(octaves: u8, gain: f32) -> f32 {
+/// octave loop), so an octave count below 1 is treated as 1.
+fn amplitude_sum(octaves: f32, gain: f32) -> f32 {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
     let mut amp = 1.0;
     let mut sum = 1.0;
-    for _ in 1..octaves.max(1) {
+    let mut k = 1.0;
+    while k < n {
         amp *= gain;
         sum += amp;
+        k += 1.0;
+    }
+    if frac > 0.0 {
+        amp *= gain;
+        sum += frac * amp;
     }
     sum
 }
@@ -69,7 +81,7 @@ impl NoiseType {
             // so each of its `octaves` terms is just in [0, 1].
             NoiseType::Turbulence(s) => {
                 if self.get_dimensions().dim == 1 {
-                    Some((0.0, s.octaves.max(1) as f32))
+                    Some((0.0, s.octaves.max(1.0)))
                 } else {
                     Some((0.0, amplitude_sum(s.octaves, s.gain)))
                 }
@@ -77,7 +89,7 @@ impl NoiseType {
             // Sum of `1 - |simplex| * amp`; max when every `|simplex|` is 0. The
             // 1D path does not apply `amp`, so each term is in [0, 1].
             NoiseType::Ridge(s) => {
-                let oct = s.octaves.max(1) as f32;
+                let oct = s.octaves.max(1.0);
                 if self.get_dimensions().dim == 1 {
                     Some((0.0, oct))
                 } else {

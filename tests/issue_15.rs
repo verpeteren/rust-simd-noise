@@ -33,7 +33,7 @@ use simdnoise::{NoiseBuilder, Settings, SimplexSettings};
 const W: usize = 256;
 const H: usize = 256;
 const FREQ: f32 = 0.3;
-const OCTAVES: u8 = 2;
+const OCTAVES: f32 = 2.0;
 
 /// Separable box blur, radius `r`, edge-clamped. Iterated, it approximates a
 /// Gaussian; three radius-3 passes give sigma ~= 3.5 px, matching the

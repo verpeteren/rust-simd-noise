@@ -9,16 +9,24 @@ pub fn turbulence_1d<S: Simd>(
     mut x: S::Vf32,
     lacunarity: S::Vf32,
     gain: S::Vf32,
-    octaves: u8,
+    octaves: f32,
     seed: i32,
 ) -> S::Vf32 {
     let mut amp = S::Vf32::set1(1.0);
     let mut result = simplex_1d::<S>(x, seed).abs();
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lacunarity;
         amp *= gain;
         result += simplex_1d::<S>(x, seed).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lacunarity;
+        result += simplex_1d::<S>(x, seed).abs() * S::Vf32::set1(frac);
     }
 
     result
@@ -30,18 +38,28 @@ pub fn turbulence_2d<S: Simd>(
     mut y: S::Vf32,
     lac: S::Vf32,
     gain: S::Vf32,
-    octaves: u8,
+    octaves: f32,
     seed: i32,
 ) -> S::Vf32 {
     let mut result = simplex_2d::<S>(x, y, seed).abs();
 
     let mut amp = S::Vf32::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         amp *= gain;
         result += (simplex_2d::<S>(x, y, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        amp *= gain;
+        result += (simplex_2d::<S>(x, y, seed) * amp).abs() * S::Vf32::set1(frac);
     }
 
     result
@@ -54,18 +72,29 @@ pub fn turbulence_3d<S: Simd>(
     mut z: S::Vf32,
     lac: S::Vf32,
     gain: S::Vf32,
-    octaves: u8,
+    octaves: f32,
     seed: i32,
 ) -> S::Vf32 {
     let mut result = simplex_3d::<S>(x, y, z, seed).abs();
     let mut amp = S::Vf32::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
         amp *= gain;
         result += (simplex_3d::<S>(x, y, z, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        amp *= gain;
+        result += (simplex_3d::<S>(x, y, z, seed) * amp).abs() * S::Vf32::set1(frac);
     }
 
     result
@@ -80,19 +109,31 @@ pub fn turbulence_4d<S: Simd>(
     mut w: S::Vf32,
     lac: S::Vf32,
     gain: S::Vf32,
-    octaves: u8,
+    octaves: f32,
     seed: i32,
 ) -> S::Vf32 {
     let mut result = simplex_4d::<S>(x, y, z, w, seed).abs();
     let mut amp = S::Vf32::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
         w *= lac;
         amp *= gain;
         result += (simplex_4d::<S>(x, y, z, w, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        amp *= gain;
+        result += (simplex_4d::<S>(x, y, z, w, seed) * amp).abs() * S::Vf32::set1(frac);
     }
 
     result
@@ -108,13 +149,16 @@ pub fn turbulence_5d<S: Simd>(
     mut u: S::Vf32,
     lac: S::Vf32,
     gain: S::Vf32,
-    octaves: u8,
+    octaves: f32,
     seed: i32,
 ) -> S::Vf32 {
     let mut result = simplex_5d::<S>(x, y, z, w, u, seed).abs();
     let mut amp = S::Vf32::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
@@ -122,6 +166,16 @@ pub fn turbulence_5d<S: Simd>(
         u *= lac;
         amp *= gain;
         result += (simplex_5d::<S>(x, y, z, w, u, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        amp *= gain;
+        result += (simplex_5d::<S>(x, y, z, w, u, seed) * amp).abs() * S::Vf32::set1(frac);
     }
 
     result
@@ -138,13 +192,16 @@ pub fn turbulence_6d<S: Simd>(
     mut t: S::Vf32,
     lac: S::Vf32,
     gain: S::Vf32,
-    octaves: u8,
+    octaves: f32,
     seed: i32,
 ) -> S::Vf32 {
     let mut result = simplex_6d::<S>(x, y, z, w, u, t, seed).abs();
     let mut amp = S::Vf32::set1(1.0);
 
-    for _ in 1..octaves {
+    let oct = octaves.max(1.0);
+    let n = oct.floor();
+    let frac = oct - n;
+    for _ in 1..(n as usize) {
         x *= lac;
         y *= lac;
         z *= lac;
@@ -153,6 +210,17 @@ pub fn turbulence_6d<S: Simd>(
         t *= lac;
         amp *= gain;
         result += (simplex_6d::<S>(x, y, z, w, u, t, seed) * amp).abs();
+    }
+
+    if frac > 0.0 {
+        x *= lac;
+        y *= lac;
+        z *= lac;
+        w *= lac;
+        u *= lac;
+        t *= lac;
+        amp *= gain;
+        result += (simplex_6d::<S>(x, y, z, w, u, t, seed) * amp).abs() * S::Vf32::set1(frac);
     }
 
     result
