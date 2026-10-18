@@ -29,6 +29,19 @@ pub trait Sample32<S: Simd>: DimensionalBeing + Settings {
     ) -> S::Vf32;
 }
 
+/// Value + analytic gradient sampling for the fractal variants (issue #24),
+/// the `Sample32` analogue used by the `get_*_fractal_gradient` helpers. Each
+/// method returns the sampled value and its gradient **with respect to the
+/// coordinate(s) passed in** (the per-axis frequency factor is applied by the
+/// grid helper, not here). Implemented for the fractal settings whose octave
+/// stack has a closed-form derivative (ridge/turbulence; FBM uses its own
+/// dedicated `get_*_fbm_gradient` helpers).
+pub trait SampleFractalDeriv32<S: Simd>: DimensionalBeing + Settings {
+    fn sample_1d_deriv(&self, x: S::Vf32) -> (S::Vf32, S::Vf32);
+    fn sample_2d_deriv(&self, x: S::Vf32, y: S::Vf32) -> (S::Vf32, [S::Vf32; 2]);
+    fn sample_3d_deriv(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> (S::Vf32, [S::Vf32; 3]);
+}
+
 #[inline(always)]
 unsafe fn get_1d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
@@ -985,6 +998,197 @@ pub unsafe fn get_3d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGr
                     octaves,
                     seed,
                 );
+                let count = (width - col).min(vector_width);
+                for j in 0..count {
+                    let v = f[j];
+                    values[i] = v;
+                    gradients[i * 3] = d[0][j] * freq_x;
+                    gradients[i * 3 + 1] = d[1][j] * freq_y;
+                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    if v < min {
+                        min = v;
+                    }
+                    if v > max {
+                        max = v;
+                    }
+                    i += 1;
+                }
+                x += S::Vf32::set1(vector_width as f32);
+                col += vector_width;
+            }
+            y += S::Vf32::set1(1.0);
+        }
+        z += S::Vf32::set1(1.0);
+    }
+    NoiseAndGradient {
+        values,
+        gradients,
+        stride: 3,
+        min,
+        max,
+    }
+}
+
+// Ridge/turbulence value + gradient. Same grid loops as the FBM helpers above,
+// but generic over `SampleFractalDeriv32` so one set of helpers serves both
+// variants; each sample's kernel-space gradient is scaled by the per-axis
+// frequency on the way out.
+
+#[inline(always)]
+pub unsafe fn get_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+    settings: &T,
+) -> NoiseAndGradient {
+    let dim = settings.get_dimensions();
+    let freq_x = settings.get_freq_x();
+    let freq_x_s = S::Vf32::set1(freq_x);
+    let start_x = dim.x;
+    let width = dim.width;
+
+    let mut values = vec![0.0f32; width];
+    let mut gradients = vec![0.0f32; width];
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let vector_width = S::Vf32::WIDTH;
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f32);
+    }
+    x_arr.set_len(vector_width);
+
+    let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
+    let mut i = 0;
+    while i < width {
+        let (f, d) = settings.sample_1d_deriv(x * freq_x_s);
+        let count = (width - i).min(vector_width);
+        for j in 0..count {
+            let v = f[j];
+            values[i] = v;
+            gradients[i] = d[j] * freq_x;
+            if v < min {
+                min = v;
+            }
+            if v > max {
+                max = v;
+            }
+            i += 1;
+        }
+        x += S::Vf32::set1(vector_width as f32);
+    }
+    NoiseAndGradient {
+        values,
+        gradients,
+        stride: 1,
+        min,
+        max,
+    }
+}
+
+#[inline(always)]
+pub unsafe fn get_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+    settings: &T,
+) -> NoiseAndGradient {
+    let dim = settings.get_dimensions();
+    let freq_x = settings.get_freq_x();
+    let freq_y = settings.get_freq_y();
+    let freq_x_s = S::Vf32::set1(freq_x);
+    let freq_y_s = S::Vf32::set1(freq_y);
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+
+    let len = width * height;
+    let mut values = vec![0.0f32; len];
+    let mut gradients = vec![0.0f32; len * 2];
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let vector_width = S::Vf32::WIDTH;
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f32);
+    }
+    x_arr.set_len(vector_width);
+
+    let mut i = 0;
+    let mut y = S::Vf32::set1(start_y);
+    for _ in 0..height {
+        let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
+        let mut col = 0;
+        while col < width {
+            let (f, d) = settings.sample_2d_deriv(x * freq_x_s, y * freq_y_s);
+            let count = (width - col).min(vector_width);
+            for j in 0..count {
+                let v = f[j];
+                values[i] = v;
+                gradients[i * 2] = d[0][j] * freq_x;
+                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                if v < min {
+                    min = v;
+                }
+                if v > max {
+                    max = v;
+                }
+                i += 1;
+            }
+            x += S::Vf32::set1(vector_width as f32);
+            col += vector_width;
+        }
+        y += S::Vf32::set1(1.0);
+    }
+    NoiseAndGradient {
+        values,
+        gradients,
+        stride: 2,
+        min,
+        max,
+    }
+}
+
+#[inline(always)]
+pub unsafe fn get_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+    settings: &T,
+) -> NoiseAndGradient {
+    let dim = settings.get_dimensions();
+    let freq_x = settings.get_freq_x();
+    let freq_y = settings.get_freq_y();
+    let freq_z = settings.get_freq_z();
+    let freq_x_s = S::Vf32::set1(freq_x);
+    let freq_y_s = S::Vf32::set1(freq_y);
+    let freq_z_s = S::Vf32::set1(freq_z);
+    let start_x = dim.x;
+    let width = dim.width;
+    let start_y = dim.y;
+    let height = dim.height;
+    let start_z = dim.z;
+    let depth = dim.depth;
+
+    let len = width * height * depth;
+    let mut values = vec![0.0f32; len];
+    let mut gradients = vec![0.0f32; len * 3];
+    let mut min = f32::MAX;
+    let mut max = f32::MIN;
+
+    let vector_width = S::Vf32::WIDTH;
+    let mut x_arr = Vec::<f32>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f32);
+    }
+    x_arr.set_len(vector_width);
+
+    let mut i = 0;
+    let mut z = S::Vf32::set1(start_z);
+    for _ in 0..depth {
+        let mut y = S::Vf32::set1(start_y);
+        for _ in 0..height {
+            let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
+            let mut col = 0;
+            while col < width {
+                let (f, d) = settings.sample_3d_deriv(x * freq_x_s, y * freq_y_s, z * freq_z_s);
                 let count = (width - col).min(vector_width);
                 for j in 0..count {
                     let v = f[j];

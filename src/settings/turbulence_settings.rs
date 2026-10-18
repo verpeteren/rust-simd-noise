@@ -2,7 +2,8 @@ use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
 use crate::noise::turbulence_32::{
-    turbulence_1d, turbulence_2d, turbulence_3d, turbulence_4d, turbulence_5d, turbulence_6d,
+    turbulence_1d, turbulence_1d_deriv, turbulence_2d, turbulence_2d_deriv, turbulence_3d,
+    turbulence_3d_deriv, turbulence_4d, turbulence_5d, turbulence_6d,
 };
 use crate::noise::turbulence_64::{
     turbulence_1d as turbulence_1d_f64, turbulence_2d as turbulence_2d_f64,
@@ -10,13 +11,14 @@ use crate::noise::turbulence_64::{
     turbulence_5d as turbulence_5d_f64, turbulence_6d as turbulence_6d_f64,
 };
 pub use crate::noise_dimensions::NoiseDimensions;
-use crate::noise_helpers_32::Sample32;
+use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
-    get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
-    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise,
-    get_6d_noise, get_6d_scaled_noise,
+    get_1d_noise, get_1d_scaled_noise, get_1d_turbulence_gradient, get_2d_noise,
+    get_2d_scaled_noise, get_2d_turbulence_gradient, get_3d_noise, get_3d_scaled_noise,
+    get_3d_turbulence_gradient, get_4d_noise, get_4d_scaled_noise, get_5d_noise,
+    get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise, NoiseAndGradient,
 };
 
 use super::{Settings, SimplexSettings};
@@ -550,4 +552,71 @@ impl<S: Simd> Sample64<S> for TurbulenceSettings {
     }
 }
 
-impl TurbulenceSettings {}
+impl TurbulenceSettings {
+    /// Generate turbulence noise **together with its analytic gradient** in a
+    /// single pass (issue #24).
+    ///
+    /// Like [`GradientSettings::generate_with_derivative`](crate::GradientSettings::generate_with_derivative),
+    /// but for turbulence. Turbulence stacks `|simplex|` octaves, so its gradient
+    /// uses the sign of each octave's value (the derivative of `|·|`); the
+    /// returned [`NoiseAndGradient`] carries values identical to
+    /// [`generate`](Settings::generate) plus the matching per-sample gradients.
+    /// The gradient is continuous except at the valleys, where `|·|` has a kink.
+    /// See [`NoiseAndGradient`] for the layout and coordinate convention.
+    ///
+    /// Only 1D, 2D and 3D are implemented so far; higher dimensions are future
+    /// work.
+    ///
+    /// # Panics
+    /// Panics if the configured dimensionality is not 1, 2 or 3.
+    pub fn generate_with_derivative(self) -> NoiseAndGradient {
+        let d = self.dim.dim;
+        match d {
+            1 => get_1d_turbulence_gradient(&self),
+            2 => get_2d_turbulence_gradient(&self),
+            3 => get_3d_turbulence_gradient(&self),
+            _ => panic!(
+                "generate_with_derivative is only implemented for 1-3 dimensions (got {})",
+                d
+            ),
+        }
+    }
+}
+
+impl<S: Simd> SampleFractalDeriv32<S> for TurbulenceSettings {
+    #[inline(always)]
+    fn sample_1d_deriv(&self, x: S::Vf32) -> (S::Vf32, S::Vf32) {
+        turbulence_1d_deriv::<S>(
+            x,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_2d_deriv(&self, x: S::Vf32, y: S::Vf32) -> (S::Vf32, [S::Vf32; 2]) {
+        turbulence_2d_deriv::<S>(
+            x,
+            y,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d_deriv(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> (S::Vf32, [S::Vf32; 3]) {
+        turbulence_3d_deriv::<S>(
+            x,
+            y,
+            z,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+}
