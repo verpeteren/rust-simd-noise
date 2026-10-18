@@ -11,9 +11,10 @@ use crate::noise_helpers_32::Sample32;
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
-    get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
-    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise,
-    get_6d_noise, get_6d_scaled_noise,
+    get_1d_fbm_gradient, get_1d_noise, get_1d_scaled_noise, get_2d_fbm_gradient, get_2d_noise,
+    get_2d_scaled_noise, get_3d_fbm_gradient, get_3d_noise, get_3d_scaled_noise, get_4d_noise,
+    get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise,
+    NoiseAndGradient,
 };
 
 use super::{Settings, SimplexSettings};
@@ -525,4 +526,34 @@ impl<S: Simd> Sample64<S> for FbmSettings {
     }
 }
 
-impl FbmSettings {}
+impl FbmSettings {
+    /// Generate fBm (fractal) noise **together with its analytic gradient** in a
+    /// single pass (issue #24).
+    ///
+    /// Like [`GradientSettings::generate_with_derivative`](crate::GradientSettings::generate_with_derivative),
+    /// but for the full octave stack: the returned [`NoiseAndGradient`] carries
+    /// the fBm `values` (identical to [`generate`](Settings::generate)) and the
+    /// matching per-sample `gradients`, obtained by differentiating every octave
+    /// and summing (each octave contributes `gain^k * lacunarity^k` times its
+    /// simplex gradient). This gives smooth analytic normals/slopes for layered
+    /// noise without finite differencing. See [`NoiseAndGradient`] for the exact
+    /// layout and coordinate convention.
+    ///
+    /// Only 1D, 2D and 3D are implemented so far; higher dimensions are future
+    /// work.
+    ///
+    /// # Panics
+    /// Panics if the configured dimensionality is not 1, 2 or 3.
+    pub fn generate_with_derivative(self) -> NoiseAndGradient {
+        let d = self.dim.dim;
+        match d {
+            1 => get_1d_fbm_gradient(&self),
+            2 => get_2d_fbm_gradient(&self),
+            3 => get_3d_fbm_gradient(&self),
+            _ => panic!(
+                "generate_with_derivative is only implemented for 1-3 dimensions (got {})",
+                d
+            ),
+        }
+    }
+}
