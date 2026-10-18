@@ -34,4 +34,10 @@ name = "benchmarks"
 harness = false
 
 [workspace]
-members = ["example"]
+members = ["generate"]
+# Keep the root lib (".") in the default set alongside the member app so a bare
+# `cargo run` lists the binaries and `cargo test` still runs the library suite.
+default-members = [".", "generate"]
+# `generate/fuzz` is a cargo-fuzz crate (its own workspace, nightly + libFuzzer);
+# see generate/fuzz/README.md.
+exclude = ["generate/fuzz"]
