@@ -258,6 +258,39 @@ pub fn get_3d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
+    pub fn get_1d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_1d_fbm_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_1d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_1d_fbm_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_2d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_2d_fbm_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_2d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_2d_fbm_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_3d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_3d_fbm_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_3d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_3d_fbm_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
     pub fn get_1d_ridge_gradient(settings: &RidgeSettings) -> NoiseAndGradient {
         noise_helpers_32::get_1d_fractal_gradient::<S, RidgeSettings>(settings)
     }
