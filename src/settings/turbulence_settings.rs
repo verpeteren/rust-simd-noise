@@ -32,6 +32,9 @@ use super::{Settings, SimplexSettings};
 ///
 /// Output is biased positive, so a `generate_scaled` / scaling pass is usually
 /// wanted. See [`FbmSettings`](crate::FbmSettings) for the shared layering knobs.
+///
+/// **Output range:** `[0, A]`, with `A` the per-octave amplitude sum (as for
+/// [`FbmSettings`](crate::FbmSettings)).
 #[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
     dim: NoiseDimensions,

@@ -34,6 +34,9 @@ use crate::settings::Settings;
 /// natural detail (terrain, clouds, marble) layer it with a fractal variant.
 ///
 /// See [Gradient noise](https://en.wikipedia.org/wiki/Gradient_noise).
+///
+/// **Output range:** `[-1, 1]` — a single normalized simplex octave. Query it at
+/// runtime with [`output_range`](crate::Settings::output_range).
 #[derive(Copy, Clone)]
 pub struct GradientSettings {
     dim: NoiseDimensions,

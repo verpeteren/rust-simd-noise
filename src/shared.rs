@@ -113,13 +113,21 @@ pub unsafe fn scale_noise_64<S: Simd>(
 
 /// f64 counterpart of [`get_scaled_noise`]. The target range is passed
 /// explicitly (as f64) rather than read from the f32 `NoiseDimensions`.
+///
+/// Like the f32 path, the *source* range is the offset-independent theoretical
+/// range (widened from f32) so adjacent blocks line up seamlessly (#39/#23);
+/// cellular returns without a closed form fall back to the observed range.
 pub(crate) unsafe fn get_scaled_noise_64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>, f64, f64)>(
     noise_type: &NoiseType,
     scale_min: f64,
     scale_max: f64,
     noise_fn: F,
 ) -> Vec<f64> {
-    let (mut noise, min, max) = noise_fn(noise_type);
+    let (mut noise, observed_min, observed_max) = noise_fn(noise_type);
+    let (min, max) = noise_type
+        .theoretical_min_max()
+        .map(|(mn, mx)| (mn as f64, mx as f64))
+        .unwrap_or((observed_min, observed_max));
     scale_noise_64::<S>(scale_min, scale_max, min, max, &mut noise);
     noise
 }
@@ -144,7 +152,9 @@ pub(crate) unsafe fn get_scaled_noise_into<S: Simd, F: Fn(&NoiseType, &mut [f32]
     scale_noise::<S>(dim.min, dim.max, min, max, out);
 }
 
-/// Emplace+scale helper for f64; the target range is passed explicitly.
+/// Emplace+scale helper for f64; the target range is passed explicitly. Mirrors
+/// [`get_scaled_noise_64`]: scales by the offset-independent theoretical range
+/// (observed fallback for cellular) so emplace matches the Vec path seamlessly.
 pub(crate) unsafe fn get_scaled_noise_into_64<
     S: Simd,
     F: Fn(&NoiseType, &mut [f64]) -> (f64, f64),
@@ -155,6 +165,10 @@ pub(crate) unsafe fn get_scaled_noise_into_64<
     out: &mut [f64],
     noise_fn: F,
 ) {
-    let (min, max) = noise_fn(noise_type, out);
+    let (observed_min, observed_max) = noise_fn(noise_type, out);
+    let (min, max) = noise_type
+        .theoretical_min_max()
+        .map(|(mn, mx)| (mn as f64, mx as f64))
+        .unwrap_or((observed_min, observed_max));
     scale_noise_64::<S>(scale_min, scale_max, min, max, out);
 }

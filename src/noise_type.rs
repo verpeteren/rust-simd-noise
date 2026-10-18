@@ -1,6 +1,6 @@
 use super::{
-    Cellular2Settings, CellularSettings, DimensionalBeing, FbmSettings, GradientSettings,
-    NoiseDimensions, RidgeSettings, TurbulenceSettings,
+    Cell2ReturnType, CellReturnType, Cellular2Settings, CellularSettings, DimensionalBeing,
+    FbmSettings, GradientSettings, NoiseDimensions, RidgeSettings, TurbulenceSettings,
 };
 
 /// Specifies what type of noise to generate and contains any relevant settings.
@@ -65,9 +65,10 @@ impl NoiseType {
     /// little less contrast than scaling to the per-block observed range would
     /// give — that is the price of a consistent mapping across blocks.
     ///
-    /// Returns `None` for cellular noise, whose range has no simple closed form
-    /// (it depends on the distance function, return type and jitter); callers
-    /// fall back to the observed range for those.
+    /// For cellular noise most returns have no simple closed form (they depend on
+    /// the distance function, return type and jitter) and yield `None`, so callers
+    /// fall back to the observed range; the exceptions are `CellValue` (`[-1, 1]`)
+    /// and `Distance2Div` (`[0, 1]`), which are bounded regardless of jitter.
     pub fn theoretical_min_max(&self) -> Option<(f32, f32)> {
         match self {
             // A single simplex octave is normalized to [-1, 1].
@@ -77,26 +78,28 @@ impl NoiseType {
                 let a = amplitude_sum(s.octaves, s.gain);
                 Some((-a, a))
             }
-            // Sum of `|simplex| * amp` (>= 0). The 1D path does not apply `amp`,
-            // so each of its `octaves` terms is just in [0, 1].
-            NoiseType::Turbulence(s) => {
-                if self.get_dimensions().dim == 1 {
-                    Some((0.0, s.octaves.max(1.0)))
-                } else {
-                    Some((0.0, amplitude_sum(s.octaves, s.gain)))
-                }
-            }
-            // Sum of `1 - |simplex| * amp`; max when every `|simplex|` is 0. The
-            // 1D path does not apply `amp`, so each term is in [0, 1].
+            // Sum of `|simplex| * amp` (>= 0) over every octave, 1D included (all
+            // dimensions apply `amp` per octave).
+            NoiseType::Turbulence(s) => Some((0.0, amplitude_sum(s.octaves, s.gain))),
+            // Sum of `1 - |simplex| * amp`: the max is `octaves` (reached when every
+            // `|simplex|` is 0), the min when each octave hits its amplitude.
             NoiseType::Ridge(s) => {
                 let oct = s.octaves.max(1.0);
-                if self.get_dimensions().dim == 1 {
-                    Some((0.0, oct))
-                } else {
-                    Some((oct - amplitude_sum(s.octaves, s.gain), oct))
-                }
+                Some((oct - amplitude_sum(s.octaves, s.gain), oct))
             }
-            NoiseType::Cellular(_) | NoiseType::Cellular2(_) => None,
+            // Cellular has a closed-form range only for a couple of return types;
+            // the rest are jitter/metric-dependent, so callers fall back to the
+            // observed per-block range for those.
+            NoiseType::Cellular(s) => match s.return_type {
+                // CellValue = hash * 2^-31, independent of jitter and metric.
+                CellReturnType::CellValue => Some((-1.0, 1.0)),
+                CellReturnType::Distance => None,
+            },
+            NoiseType::Cellular2(s) => match s.return_type {
+                // F1/F2 with ascending-sorted distances lands in [0, 1].
+                Cell2ReturnType::Distance2Div => Some((0.0, 1.0)),
+                _ => None,
+            },
         }
     }
 }
