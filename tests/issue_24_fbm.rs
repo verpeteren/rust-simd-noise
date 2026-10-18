@@ -228,12 +228,3 @@ fn fbm_1d_high_lacunarity_values_match_plain_generator() {
         d
     );
 }
-
-#[test]
-#[should_panic]
-fn fbm_4d_is_unsupported() {
-    let mut s = NoiseBuilder::fbm_4d(4, 4, 4, 4);
-    s.with_seed(1);
-    // Only 1-3 dimensions have derivative kernels so far.
-    let _ = s.generate_with_derivative();
-}

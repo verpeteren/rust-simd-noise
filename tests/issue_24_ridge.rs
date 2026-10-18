@@ -208,11 +208,3 @@ fn ridge_3d_matches_finite_difference() {
     let frac = good_fraction_3d(&ng.values, &ng.gradients, w, h, d);
     assert!(frac > 0.8, "3D ridge FD good fraction {}", frac);
 }
-
-#[test]
-#[should_panic]
-fn ridge_4d_is_unsupported() {
-    let mut s = NoiseBuilder::ridge_4d(4, 4, 4, 4);
-    s.with_seed(1);
-    let _ = s.generate_with_derivative();
-}

@@ -6,6 +6,130 @@ use crate::noise::cell_strategy::{CellDistance, CellReturn};
 
 use simdeez::prelude::*;
 
+// ---------------------------------------------------------------------------
+// Euclidean F1-distance value + analytic gradient (issue #24).
+//
+// The cellular `Distance` return under the Euclidean metric is the squared
+// distance to the nearest jittered feature point, `F1 = Σ dₖ²` where
+// `dₖ = featureₖ − sampleₖ` (the `xd`/`yd`/… the value kernel already forms).
+// The feature point is piecewise-constant in the sample (it depends only on the
+// integer cell), so `∂dₖ/∂sampleₖ = −1` and `∇F1 = −2·(d₀, d₁, …)` at the
+// winning cell — discontinuous only at the Voronoi borders. We track the
+// winning cell's delta with the same `cmp_lt` mask the `CellValue` accumulator
+// uses, then scale by −2 on the way out. These kernels hard-code
+// Euclidean + F1 (the only cellular configuration with a smooth gradient).
+// ---------------------------------------------------------------------------
+
+#[inline]
+pub fn cellular_2d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    jitter: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 2]) {
+    let mut min_dist = S::Vf32::set1(999_999.0);
+    let mut gx = S::Vf32::zeroes();
+    let mut gy = S::Vf32::zeroes();
+
+    let mut xc = x.cast_i32() - S::Vi32::set1(1);
+    let mut yc_base = y.cast_i32() - S::Vi32::set1(1);
+    let mut xcf = xc.cast_f32() - x;
+    let ycf_base = yc_base.cast_f32() - y;
+    xc *= S::Vi32::set1(X_PRIME_32);
+    yc_base *= S::Vi32::set1(Y_PRIME_32);
+
+    for _x in 0..3 {
+        let mut ycf = ycf_base;
+        let mut yc = yc_base;
+        for _y in 0..3 {
+            let hash = hash_2d::<S>(seed, xc, yc);
+            let mut xd = (hash & S::Vi32::set1(BIT_10_MASK_32)).cast_f32() - S::Vf32::set1(511.5);
+            let mut yd =
+                ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32() - S::Vf32::set1(511.5);
+            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+            xd = (xd * inv_mag) + xcf;
+            yd = (yd * inv_mag) + ycf;
+
+            let new_distance = (xd * xd) + (yd * yd);
+            let closer = new_distance.cmp_lt(min_dist);
+            min_dist = new_distance.min(min_dist);
+            gx = closer.blendv(gx, xd);
+            gy = closer.blendv(gy, yd);
+
+            ycf += S::Vf32::set1(1.0);
+            yc += S::Vi32::set1(Y_PRIME_32);
+        }
+        xcf += S::Vf32::set1(1.0);
+        xc += S::Vi32::set1(X_PRIME_32);
+    }
+
+    let m2 = S::Vf32::set1(-2.0);
+    (min_dist, [gx * m2, gy * m2])
+}
+
+#[inline]
+pub fn cellular_3d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    jitter: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 3]) {
+    let mut min_dist = S::Vf32::set1(999_999.0);
+    let mut gx = S::Vf32::zeroes();
+    let mut gy = S::Vf32::zeroes();
+    let mut gz = S::Vf32::zeroes();
+
+    let mut xc = x.cast_i32() - S::Vi32::set1(1);
+    let mut yc_base = y.cast_i32() - S::Vi32::set1(1);
+    let mut zc_base = z.cast_i32() - S::Vi32::set1(1);
+    let mut xcf = xc.cast_f32() - x;
+    let ycf_base = yc_base.cast_f32() - y;
+    let zcf_base = zc_base.cast_f32() - z;
+    xc *= S::Vi32::set1(X_PRIME_32);
+    yc_base *= S::Vi32::set1(Y_PRIME_32);
+    zc_base *= S::Vi32::set1(Z_PRIME_32);
+
+    for _x in 0..3 {
+        let mut ycf = ycf_base;
+        let mut yc = yc_base;
+        for _y in 0..3 {
+            let mut zcf = zcf_base;
+            let mut zc = zc_base;
+            for _z in 0..3 {
+                let hash = hash_3d::<S>(seed, xc, yc, zc);
+                let mut xd =
+                    (hash & S::Vi32::set1(BIT_10_MASK_32)).cast_f32() - S::Vf32::set1(511.5);
+                let mut yd = ((hash >> 10) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32()
+                    - S::Vf32::set1(511.5);
+                let mut zd = ((hash >> 20) & S::Vi32::set1(BIT_10_MASK_32)).cast_f32()
+                    - S::Vf32::set1(511.5);
+                let inv_mag = jitter * ((xd * xd) + ((yd * yd) + (zd * zd))).rsqrt();
+                xd = (xd * inv_mag) + xcf;
+                yd = (yd * inv_mag) + ycf;
+                zd = (zd * inv_mag) + zcf;
+
+                let new_distance = (xd * xd) + ((yd * yd) + (zd * zd));
+                let closer = new_distance.cmp_lt(min_dist);
+                min_dist = new_distance.min(min_dist);
+                gx = closer.blendv(gx, xd);
+                gy = closer.blendv(gy, yd);
+                gz = closer.blendv(gz, zd);
+
+                zcf += S::Vf32::set1(1.0);
+                zc += S::Vi32::set1(Z_PRIME_32);
+            }
+            ycf += S::Vf32::set1(1.0);
+            yc += S::Vi32::set1(Y_PRIME_32);
+        }
+        xcf += S::Vf32::set1(1.0);
+        xc += S::Vi32::set1(X_PRIME_32);
+    }
+
+    let m2 = S::Vf32::set1(-2.0);
+    (min_dist, [gx * m2, gy * m2, gz * m2])
+}
+
 // `#[inline]` rather than `#[inline(always)]`: the call boundary now dispatches
 // over the (distance, return) strategy types, so force-inlining would splice
 // every instantiation into one frame and overflow small stacks in debug

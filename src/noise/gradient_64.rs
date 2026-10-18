@@ -201,3 +201,79 @@ pub fn grad6<S: Simd>(
         + keep(sign(u, 17), 4)
         + keep(sign(t, 18), 5)
 }
+
+/// f64 twin of `gradient_32::grad4_vec`: the gradient vector picked by [`grad4`]
+/// (`[gx, gy, gz, gt]`), for derivatives.
+#[inline(always)]
+pub fn grad4_vec<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 4] {
+    let h = seed_hash::<S>(seed, hash) & S::Vi64::set1(31);
+    let one = S::Vf64::set1(1.0);
+    let zero = S::Vf64::zeroes();
+    let sign = |bit: i32| -> S::Vf64 {
+        ((h & S::Vi64::set1(1i64 << bit)).cmp_eq(S::Vi64::zeroes()))
+            .bitcast_f64()
+            .blendv(zero - one, one)
+    };
+    let s1 = sign(0);
+    let s2 = sign(1);
+    let s4 = sign(2);
+    let m24 = (S::Vi64::set1(24).cmp_gt(h)).bitcast_f64();
+    let m16 = (S::Vi64::set1(16).cmp_gt(h)).bitcast_f64();
+    let m8 = (S::Vi64::set1(8).cmp_gt(h)).bitcast_f64();
+    let gx = m24.blendv(zero, s1);
+    let gy = m24.blendv(s1, m16.blendv(zero, s2));
+    let gz = m16.blendv(s2, m8.blendv(zero, s4));
+    let gt = m8.blendv(s4, zero);
+    [gx, gy, gz, gt]
+}
+
+/// f64 twin of `gradient_32::grad5_vec`: the gradient vector picked by [`grad5`].
+#[inline(always)]
+pub fn grad5_vec<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 5] {
+    let h = seed_hash::<S>(seed, hash);
+    let zero_axis = ((h & S::Vi64::set1(0x3FFF)) * S::Vi64::set1(5)) >> 14;
+    let one = S::Vf64::set1(1.0);
+    let zero = S::Vf64::zeroes();
+    let comp = |bit: i32, axis: i64| -> S::Vf64 {
+        let s = ((h & S::Vi64::set1(1i64 << bit)).cmp_eq(S::Vi64::zeroes()))
+            .bitcast_f64()
+            .blendv(zero - one, one);
+        zero_axis
+            .cmp_eq(S::Vi64::set1(axis))
+            .bitcast_f64()
+            .blendv(s, zero)
+    };
+    [
+        comp(14, 0),
+        comp(15, 1),
+        comp(16, 2),
+        comp(17, 3),
+        comp(18, 4),
+    ]
+}
+
+/// f64 twin of `gradient_32::grad6_vec`: the gradient vector picked by [`grad6`].
+#[inline(always)]
+pub fn grad6_vec<S: Simd>(seed: i64, hash: S::Vi64) -> [S::Vf64; 6] {
+    let h = seed_hash::<S>(seed, hash);
+    let zero_axis = ((h & S::Vi64::set1(0x1FFF)) * S::Vi64::set1(6)) >> 13;
+    let one = S::Vf64::set1(1.0);
+    let zero = S::Vf64::zeroes();
+    let comp = |bit: i32, axis: i64| -> S::Vf64 {
+        let s = ((h & S::Vi64::set1(1i64 << bit)).cmp_eq(S::Vi64::zeroes()))
+            .bitcast_f64()
+            .blendv(zero - one, one);
+        zero_axis
+            .cmp_eq(S::Vi64::set1(axis))
+            .bitcast_f64()
+            .blendv(s, zero)
+    };
+    [
+        comp(13, 0),
+        comp(14, 1),
+        comp(15, 2),
+        comp(16, 3),
+        comp(17, 4),
+        comp(18, 5),
+    ]
+}

@@ -61,6 +61,33 @@ pub enum Colormap {
     Heatmap,
 }
 
+/// What the canvas draws: the scalar noise value, or a view derived from the
+/// analytic gradient (`generate_with_derivative`). Gradient views are a 2D
+/// heightfield visualization, so they apply only at `dim == 2` (see
+/// [`gradient_capable`]); other configurations fall back to [`RenderMode::Value`].
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum RenderMode {
+    /// The scalar noise value through the colormap (the default).
+    Value,
+    /// Gradient magnitude `sqrt(Σ gₖ²)` through the colormap.
+    GradMag,
+    /// Lambert shading of the heightfield normal `normalize((-gx, -gy, 1))`.
+    SlopeShade,
+    /// The heightfield normal encoded as an RGB normal map.
+    NormalMap,
+}
+
+impl RenderMode {
+    pub fn from_index(i: i32) -> Self {
+        match i {
+            1 => RenderMode::GradMag,
+            2 => RenderMode::SlopeShade,
+            3 => RenderMode::NormalMap,
+            _ => RenderMode::Value,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Engine {
     Auto,
@@ -160,6 +187,9 @@ pub struct Params {
     /// Cross-section indices for the fixed higher axes: [w (axis4), u (axis5), v (axis6)].
     pub cross: [usize; 3],
     pub colormap: Colormap,
+    /// Value vs. gradient-derived view. Only ever non-`Value` when the
+    /// configuration is [`gradient_capable`]; `build_params` enforces this.
+    pub render: RenderMode,
 }
 
 impl Params {
@@ -260,6 +290,12 @@ impl Params {
             Colormap::Grayscale => 0,
             Colormap::Heatmap => 1,
         });
+        k.push(match self.render {
+            RenderMode::Value => 0,
+            RenderMode::GradMag => 1,
+            RenderMode::SlopeShade => 2,
+            RenderMode::NormalMap => 3,
+        });
         k
     }
 
@@ -292,7 +328,29 @@ impl Params {
             engine: Engine::Auto,
             cross: [0, 0, 0],
             colormap: Colormap::Grayscale,
+            render: RenderMode::Value,
         }
+    }
+}
+
+/// Whether the analytic-gradient render modes ([`RenderMode`] other than
+/// `Value`) are available for this configuration. They are a 2D heightfield
+/// visualization driven by `generate_with_derivative`, which the viewer wires
+/// up only through the auto engine, so they require `dim == 2`, the auto engine,
+/// and a derivative-capable algorithm (every simplex-family variant; cellular
+/// only under the Euclidean metric with the smooth `Distance` return; cellular2
+/// only under the Euclidean metric).
+pub fn gradient_capable(algo: Algo, dim: usize, engine: Engine, cellular: &Cellular) -> bool {
+    if engine != Engine::Auto || dim != 2 {
+        return false;
+    }
+    match algo {
+        Algo::Gradient | Algo::Fbm | Algo::Ridge | Algo::Turbulence => true,
+        Algo::Cellular => {
+            matches!(cellular.dist_fn, CellDistanceFunction::Euclidean)
+                && matches!(cellular.return_type, CellReturnType::Distance)
+        }
+        Algo::Cellular2 => matches!(cellular.dist_fn, CellDistanceFunction::Euclidean),
     }
 }
 

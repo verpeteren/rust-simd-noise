@@ -3,22 +3,28 @@ use simdeez::prelude::*;
 use crate::dimensional_being::DimensionalBeing;
 use crate::noise::turbulence_32::{
     turbulence_1d, turbulence_1d_deriv, turbulence_2d, turbulence_2d_deriv, turbulence_3d,
-    turbulence_3d_deriv, turbulence_4d, turbulence_5d, turbulence_6d,
+    turbulence_3d_deriv, turbulence_4d, turbulence_4d_deriv, turbulence_5d, turbulence_5d_deriv,
+    turbulence_6d, turbulence_6d_deriv,
 };
 use crate::noise::turbulence_64::{
-    turbulence_1d as turbulence_1d_f64, turbulence_2d as turbulence_2d_f64,
-    turbulence_3d as turbulence_3d_f64, turbulence_4d as turbulence_4d_f64,
-    turbulence_5d as turbulence_5d_f64, turbulence_6d as turbulence_6d_f64,
+    turbulence_1d as turbulence_1d_f64, turbulence_1d_deriv as turbulence_1d_deriv_f64,
+    turbulence_2d as turbulence_2d_f64, turbulence_2d_deriv as turbulence_2d_deriv_f64,
+    turbulence_3d as turbulence_3d_f64, turbulence_3d_deriv as turbulence_3d_deriv_f64,
+    turbulence_4d as turbulence_4d_f64, turbulence_4d_deriv as turbulence_4d_deriv_f64,
+    turbulence_5d as turbulence_5d_f64, turbulence_5d_deriv as turbulence_5d_deriv_f64,
+    turbulence_6d as turbulence_6d_f64, turbulence_6d_deriv as turbulence_6d_deriv_f64,
 };
 pub use crate::noise_dimensions::NoiseDimensions;
 use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
-use crate::noise_helpers_64::Sample64;
+use crate::noise_helpers_64::{Sample64, SampleFractalDeriv64};
 pub use crate::noise_type::NoiseType;
 use crate::{
     get_1d_noise, get_1d_scaled_noise, get_1d_turbulence_gradient, get_2d_noise,
     get_2d_scaled_noise, get_2d_turbulence_gradient, get_3d_noise, get_3d_scaled_noise,
-    get_3d_turbulence_gradient, get_4d_noise, get_4d_scaled_noise, get_5d_noise,
-    get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise, NoiseAndGradient,
+    get_3d_turbulence_gradient, get_4d_noise, get_4d_scaled_noise, get_4d_turbulence_gradient,
+    get_5d_noise, get_5d_scaled_noise, get_5d_turbulence_gradient, get_6d_noise,
+    get_6d_scaled_noise, get_6d_turbulence_gradient, get_turbulence_gradient_64, NoiseAndGradient,
+    NoiseAndGradient64,
 };
 
 use super::{Settings, SimplexSettings};
@@ -552,6 +558,105 @@ impl<S: Simd> Sample64<S> for TurbulenceSettings {
     }
 }
 
+impl<S: Simd> SampleFractalDeriv64<S> for TurbulenceSettings {
+    #[inline(always)]
+    fn sample_1d_deriv(&self, x: S::Vf64) -> (S::Vf64, S::Vf64) {
+        turbulence_1d_deriv_f64::<S>(
+            x,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+    #[inline(always)]
+    fn sample_2d_deriv(&self, x: S::Vf64, y: S::Vf64) -> (S::Vf64, [S::Vf64; 2]) {
+        turbulence_2d_deriv_f64::<S>(
+            x,
+            y,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+    #[inline(always)]
+    fn sample_3d_deriv(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> (S::Vf64, [S::Vf64; 3]) {
+        turbulence_3d_deriv_f64::<S>(
+            x,
+            y,
+            z,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+    #[inline(always)]
+    fn sample_4d_deriv(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+    ) -> (S::Vf64, [S::Vf64; 4]) {
+        turbulence_4d_deriv_f64::<S>(
+            x,
+            y,
+            z,
+            w,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+    #[inline(always)]
+    fn sample_5d_deriv(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+        u: S::Vf64,
+    ) -> (S::Vf64, [S::Vf64; 5]) {
+        turbulence_5d_deriv_f64::<S>(
+            x,
+            y,
+            z,
+            w,
+            u,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+    #[inline(always)]
+    fn sample_6d_deriv(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+        u: S::Vf64,
+        t: S::Vf64,
+    ) -> (S::Vf64, [S::Vf64; 6]) {
+        turbulence_6d_deriv_f64::<S>(
+            x,
+            y,
+            z,
+            w,
+            u,
+            t,
+            S::Vf64::set1(self.lacunarity.into()),
+            S::Vf64::set1(self.gain.into()),
+            self.octaves,
+            self.dim.seed.into(),
+        )
+    }
+}
+
 impl TurbulenceSettings {
     /// Generate turbulence noise **together with its analytic gradient** in a
     /// single pass (issue #24).
@@ -564,22 +669,30 @@ impl TurbulenceSettings {
     /// The gradient is continuous except at the valleys, where `|·|` has a kink.
     /// See [`NoiseAndGradient`] for the layout and coordinate convention.
     ///
-    /// Only 1D, 2D and 3D are implemented so far; higher dimensions are future
-    /// work.
+    /// Supported for all dimensions 1D–6D.
     ///
     /// # Panics
-    /// Panics if the configured dimensionality is not 1, 2 or 3.
+    /// Panics if the configured dimensionality is not in 1..=6.
     pub fn generate_with_derivative(self) -> NoiseAndGradient {
         let d = self.dim.dim;
         match d {
             1 => get_1d_turbulence_gradient(&self),
             2 => get_2d_turbulence_gradient(&self),
             3 => get_3d_turbulence_gradient(&self),
-            _ => panic!(
-                "generate_with_derivative is only implemented for 1-3 dimensions (got {})",
-                d
-            ),
+            4 => get_4d_turbulence_gradient(&self),
+            5 => get_5d_turbulence_gradient(&self),
+            6 => get_6d_turbulence_gradient(&self),
+            _ => panic!("generate_with_derivative: invalid dimension {}", d),
         }
+    }
+
+    /// f64 counterpart of [`generate_with_derivative`](Self::generate_with_derivative),
+    /// returning a [`NoiseAndGradient64`]. Supported for all dimensions 1D–6D.
+    ///
+    /// # Panics
+    /// Panics if the configured dimensionality is not in 1..=6.
+    pub fn generate_with_derivative_64(self) -> NoiseAndGradient64 {
+        get_turbulence_gradient_64(&self)
     }
 }
 
@@ -613,6 +726,72 @@ impl<S: Simd> SampleFractalDeriv32<S> for TurbulenceSettings {
             x,
             y,
             z,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 4]) {
+        turbulence_4d_deriv::<S>(
+            x,
+            y,
+            z,
+            w,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_5d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 5]) {
+        turbulence_5d_deriv::<S>(
+            x,
+            y,
+            z,
+            w,
+            u,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_6d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+        t: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 6]) {
+        turbulence_6d_deriv::<S>(
+            x,
+            y,
+            z,
+            w,
+            u,
+            t,
             S::Vf32::set1(self.lacunarity),
             S::Vf32::set1(self.gain),
             self.octaves,

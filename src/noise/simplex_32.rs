@@ -4,7 +4,9 @@
 //! interfaces.
 
 use crate::noise::cellular_32::{X_PRIME_32, Y_PRIME_32, Z_PRIME_32};
-use crate::noise::gradient_32::{grad1, grad2, grad3d, grad3d_dot, grad4, grad5, grad6};
+use crate::noise::gradient_32::{
+    grad1, grad2, grad3d, grad3d_dot, grad4, grad4_vec, grad5, grad5_vec, grad6, grad6_vec,
+};
 use crate::noise::ops::gather_32;
 
 use simdeez::prelude::*;
@@ -468,12 +470,23 @@ pub fn simplex_3d_deriv<S: Simd>(
     (result, derivative)
 }
 
-/// Samples 4-dimensional simplex noise
-///
-/// Produces a value -1 ≤ n ≤ 1.
-// Not `#[inline(always)]`: see `simplex_3d_deriv` (issue #38).
+/// Samples 4-dimensional simplex noise. Produces a value -1 ≤ n ≤ 1.
 #[inline]
 pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed: i32) -> S::Vf32 {
+    simplex_4d_deriv::<S>(x, y, z, w, seed).0
+}
+
+/// Like `simplex_4d`, but also returns the analytic gradient
+/// `[∂n/∂x, ∂n/∂y, ∂n/∂z, ∂n/∂w]` (issue #24).
+// Not `#[inline(always)]`: see `simplex_3d_deriv` (issue #38).
+#[inline]
+pub fn simplex_4d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 4]) {
     // ImproveXYZ domain rotation (issue #15): a pure orthonormal rotation that
     // maps world-w onto the lattice (1,1,1,1) diagonal, with world-x/y/z spanning
     // the orthogonal 3-space. Constant-w slices (and the xy/xz/yz/xyz slices
@@ -622,43 +635,90 @@ pub fn simplex_4d<S: Simd>(x: S::Vf32, y: S::Vf32, z: S::Vf32, w: S::Vf32, seed:
     // Compute base weight factors associated with each vertex
     //
 
-    let t0 = S::Vf32::set1(0.5) - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0);
-    let t1 = S::Vf32::set1(0.5) - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1);
-    let t2 = S::Vf32::set1(0.5) - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2);
-    let t3 = S::Vf32::set1(0.5) - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3);
-    let t4 = S::Vf32::set1(0.5) - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4);
-    // Cube each weight
-    let mut t0q = t0 * t0;
-    t0q = t0q * t0q;
-    let mut t1q = t1 * t1;
-    t1q = t1q * t1q;
-    let mut t2q = t2 * t2;
-    t2q = t2q * t2q;
-    let mut t3q = t3 * t3;
-    t3q = t3q * t3q;
-    let mut t4q = t4 * t4;
-    t4q = t4q * t4q;
+    // Base weights `0.5 - d·d`, clamped to 0 up front so negative corners drop
+    // out of both the value and the derivative. Equivalent to the value kernel's
+    // post-multiply mask (for t>=0 identical; for t<0 the quartic is 0 either
+    // way), but it also makes the cubed/quartic weights vanish for the excluded
+    // corners in the derivative.
+    let zero = S::Vf32::zeroes();
+    let mut t0 = S::Vf32::set1(0.5) - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0);
+    let mut t1 = S::Vf32::set1(0.5) - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1);
+    let mut t2 = S::Vf32::set1(0.5) - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2);
+    let mut t3 = S::Vf32::set1(0.5) - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3);
+    let mut t4 = S::Vf32::set1(0.5) - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4);
+    t0 &= t0.cmp_gte(zero);
+    t1 &= t1.cmp_gte(zero);
+    t2 &= t2.cmp_gte(zero);
+    t3 &= t3.cmp_gte(zero);
+    t4 &= t4.cmp_gte(zero);
 
-    let mut n0 = t0q * grad4::<S>(seed, gi0, x0, y0, z0, w0);
-    let mut n1 = t1q * grad4::<S>(seed, gi1, x1, y1, z1, w1);
-    let mut n2 = t2q * grad4::<S>(seed, gi2, x2, y2, z2, w2);
-    let mut n3 = t3q * grad4::<S>(seed, gi3, x3, y3, z3, w3);
-    let mut n4 = t4q * grad4::<S>(seed, gi4, x4, y4, z4, w4);
+    let t20 = t0 * t0;
+    let t21 = t1 * t1;
+    let t22 = t2 * t2;
+    let t23 = t3 * t3;
+    let t24 = t4 * t4;
+    let t40 = t20 * t20;
+    let t41 = t21 * t21;
+    let t42 = t22 * t22;
+    let t43 = t23 * t23;
+    let t44 = t24 * t24;
 
-    // Discard contributions whose base weight factors are negative
-    let mut cond = t0.cmp_lt(S::Vf32::zeroes());
-    n0 = n0.and_not(cond);
-    cond = t1.cmp_lt(S::Vf32::zeroes());
-    n1 = n1.and_not(cond);
-    cond = t2.cmp_lt(S::Vf32::zeroes());
-    n2 = n2.and_not(cond);
-    cond = t3.cmp_lt(S::Vf32::zeroes());
-    n3 = n3.and_not(cond);
-    cond = t4.cmp_lt(S::Vf32::zeroes());
-    n4 = n4.and_not(cond);
+    let g0 = grad4::<S>(seed, gi0, x0, y0, z0, w0);
+    let g1 = grad4::<S>(seed, gi1, x1, y1, z1, w1);
+    let g2 = grad4::<S>(seed, gi2, x2, y2, z2, w2);
+    let g3 = grad4::<S>(seed, gi3, x3, y3, z3, w3);
+    let g4 = grad4::<S>(seed, gi4, x4, y4, z4, w4);
 
     // Scaling factor found by numerical approximation
-    (n0 + n1 + n2 + n3 + n4) * S::Vf32::set1(62.777_72)
+    let scale = S::Vf32::set1(62.777_72);
+    let result = (t40 * g0 + t41 * g1 + t42 * g2 + t43 * g3 + t44 * g4) * scale;
+
+    let derivative = {
+        // −8 t³ (g·d) d
+        let c0 = t20 * t0 * g0;
+        let c1 = t21 * t1 * g1;
+        let c2 = t22 * t2 * g2;
+        let c3 = t23 * t3 * g3;
+        let c4 = t24 * t4 * g4;
+        let mut dx = c0 * x0 + c1 * x1 + c2 * x2 + c3 * x3 + c4 * x4;
+        let mut dy = c0 * y0 + c1 * y1 + c2 * y2 + c3 * y3 + c4 * y4;
+        let mut dz = c0 * z0 + c1 * z1 + c2 * z2 + c3 * z3 + c4 * z4;
+        let mut dw = c0 * w0 + c1 * w1 + c2 * w2 + c3 * w3 + c4 * w4;
+        let m8 = S::Vf32::set1(-8.0);
+        dx *= m8;
+        dy *= m8;
+        dz *= m8;
+        dw *= m8;
+        // + t⁴ g
+        let [gx0, gy0, gz0, gw0] = grad4_vec::<S>(seed, gi0);
+        let [gx1, gy1, gz1, gw1] = grad4_vec::<S>(seed, gi1);
+        let [gx2, gy2, gz2, gw2] = grad4_vec::<S>(seed, gi2);
+        let [gx3, gy3, gz3, gw3] = grad4_vec::<S>(seed, gi3);
+        let [gx4, gy4, gz4, gw4] = grad4_vec::<S>(seed, gi4);
+        dx += t40 * gx0 + t41 * gx1 + t42 * gx2 + t43 * gx3 + t44 * gx4;
+        dy += t40 * gy0 + t41 * gy1 + t42 * gy2 + t43 * gy3 + t44 * gy4;
+        dz += t40 * gz0 + t41 * gz1 + t42 * gz2 + t43 * gz3 + t44 * gz4;
+        dw += t40 * gw0 + t41 * gw1 + t42 * gw2 + t43 * gw3 + t44 * gw4;
+        dx *= scale;
+        dy *= scale;
+        dz *= scale;
+        dw *= scale;
+        // Rotate the gradient back through the ImproveXYZ rotation's transpose,
+        // since the value depends on the caller's (x,y,z,w) through that rotation.
+        let r00 = S::Vf32::set1(0.707_106_77);
+        let r01 = S::Vf32::set1(0.408_248_3);
+        let r02 = S::Vf32::set1(0.288_675_14);
+        let half = S::Vf32::set1(0.5);
+        let r12 = S::Vf32::set1(-0.816_496_6);
+        let r23 = S::Vf32::set1(-0.866_025_4);
+        [
+            r00 * dx - r00 * dy,
+            r01 * dx + r01 * dy + r12 * dz,
+            r02 * dx + r02 * dy + r02 * dz + r23 * dw,
+            half * dx + half * dy + half * dz + half * dw,
+        ]
+    };
+    (result, derivative)
 }
 
 /// Empirical normalisation for 5D simplex (calibrated so output lands in
@@ -682,6 +742,22 @@ pub fn simplex_5d<S: Simd>(
     u: S::Vf32,
     seed: i32,
 ) -> S::Vf32 {
+    simplex_5d_deriv::<S>(x, y, z, w, u, seed).0
+}
+
+/// Like `simplex_5d`, but also returns the analytic gradient
+/// `[∂n/∂x, ∂n/∂y, ∂n/∂z, ∂n/∂w, ∂n/∂u]` (issue #24). No domain rotation (as the
+/// value kernel), so the gradient is already in the caller's coordinates.
+#[inline]
+#[allow(clippy::too_many_arguments)]
+pub fn simplex_5d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    u: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 5]) {
     let s = S::Vf32::set1(F5_32) * (x + y + z + w + u);
     let ips = (x + s).floor();
     let jps = (y + s).floor();
@@ -815,36 +891,81 @@ pub fn simplex_5d<S: Simd>(
     };
 
     let r2 = S::Vf32::set1(0.5);
-    let t0 = r2 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0) - (v0 * v0);
-    let t1 = r2 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1) - (v1 * v1);
-    let t2 = r2 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2) - (v2 * v2);
-    let t3 = r2 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3) - (v3 * v3);
-    let t4 = r2 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4) - (v4 * v4);
-    let t5 = r2 - (x5 * x5) - (y5 * y5) - (z5 * z5) - (w5 * w5) - (v5 * v5);
+    let zero = S::Vf32::zeroes();
+    // Base weights, clamped to 0 up front (see `simplex_4d_deriv`).
+    let mut t0 = r2 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0) - (v0 * v0);
+    let mut t1 = r2 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1) - (v1 * v1);
+    let mut t2 = r2 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2) - (v2 * v2);
+    let mut t3 = r2 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3) - (v3 * v3);
+    let mut t4 = r2 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4) - (v4 * v4);
+    let mut t5 = r2 - (x5 * x5) - (y5 * y5) - (z5 * z5) - (w5 * w5) - (v5 * v5);
+    t0 &= t0.cmp_gte(zero);
+    t1 &= t1.cmp_gte(zero);
+    t2 &= t2.cmp_gte(zero);
+    t3 &= t3.cmp_gte(zero);
+    t4 &= t4.cmp_gte(zero);
+    t5 &= t5.cmp_gte(zero);
 
-    // Each weight to the 4th power.
-    let q = |t: S::Vf32| -> S::Vf32 {
-        let tt = t * t;
-        tt * tt
+    let t20 = t0 * t0;
+    let t21 = t1 * t1;
+    let t22 = t2 * t2;
+    let t23 = t3 * t3;
+    let t24 = t4 * t4;
+    let t25 = t5 * t5;
+    let t40 = t20 * t20;
+    let t41 = t21 * t21;
+    let t42 = t22 * t22;
+    let t43 = t23 * t23;
+    let t44 = t24 * t24;
+    let t45 = t25 * t25;
+
+    let g0 = grad5::<S>(seed, gi0, x0, y0, z0, w0, v0);
+    let g1 = grad5::<S>(seed, gi1, x1, y1, z1, w1, v1);
+    let g2 = grad5::<S>(seed, gi2, x2, y2, z2, w2, v2);
+    let g3 = grad5::<S>(seed, gi3, x3, y3, z3, w3, v3);
+    let g4 = grad5::<S>(seed, gi4, x4, y4, z4, w4, v4);
+    let g5 = grad5::<S>(seed, gi5, x5, y5, z5, w5, v5);
+
+    let scale = S::Vf32::set1(SIMPLEX_5D_SCALE_32);
+    let result = (t40 * g0 + t41 * g1 + t42 * g2 + t43 * g3 + t44 * g4 + t45 * g5) * scale;
+
+    let derivative = {
+        let c0 = t20 * t0 * g0;
+        let c1 = t21 * t1 * g1;
+        let c2 = t22 * t2 * g2;
+        let c3 = t23 * t3 * g3;
+        let c4 = t24 * t4 * g4;
+        let c5 = t25 * t5 * g5;
+        let mut dx = c0 * x0 + c1 * x1 + c2 * x2 + c3 * x3 + c4 * x4 + c5 * x5;
+        let mut dy = c0 * y0 + c1 * y1 + c2 * y2 + c3 * y3 + c4 * y4 + c5 * y5;
+        let mut dz = c0 * z0 + c1 * z1 + c2 * z2 + c3 * z3 + c4 * z4 + c5 * z5;
+        let mut dw = c0 * w0 + c1 * w1 + c2 * w2 + c3 * w3 + c4 * w4 + c5 * w5;
+        let mut dv = c0 * v0 + c1 * v1 + c2 * v2 + c3 * v3 + c4 * v4 + c5 * v5;
+        let m8 = S::Vf32::set1(-8.0);
+        dx *= m8;
+        dy *= m8;
+        dz *= m8;
+        dw *= m8;
+        dv *= m8;
+        let [gx0, gy0, gz0, gw0, gv0] = grad5_vec::<S>(seed, gi0);
+        let [gx1, gy1, gz1, gw1, gv1] = grad5_vec::<S>(seed, gi1);
+        let [gx2, gy2, gz2, gw2, gv2] = grad5_vec::<S>(seed, gi2);
+        let [gx3, gy3, gz3, gw3, gv3] = grad5_vec::<S>(seed, gi3);
+        let [gx4, gy4, gz4, gw4, gv4] = grad5_vec::<S>(seed, gi4);
+        let [gx5, gy5, gz5, gw5, gv5] = grad5_vec::<S>(seed, gi5);
+        dx += t40 * gx0 + t41 * gx1 + t42 * gx2 + t43 * gx3 + t44 * gx4 + t45 * gx5;
+        dy += t40 * gy0 + t41 * gy1 + t42 * gy2 + t43 * gy3 + t44 * gy4 + t45 * gy5;
+        dz += t40 * gz0 + t41 * gz1 + t42 * gz2 + t43 * gz3 + t44 * gz4 + t45 * gz5;
+        dw += t40 * gw0 + t41 * gw1 + t42 * gw2 + t43 * gw3 + t44 * gw4 + t45 * gw5;
+        dv += t40 * gv0 + t41 * gv1 + t42 * gv2 + t43 * gv3 + t44 * gv4 + t45 * gv5;
+        dx *= scale;
+        dy *= scale;
+        dz *= scale;
+        dw *= scale;
+        dv *= scale;
+        [dx, dy, dz, dw, dv]
     };
-
-    let mut n0 = q(t0) * grad5::<S>(seed, gi0, x0, y0, z0, w0, v0);
-    let mut n1 = q(t1) * grad5::<S>(seed, gi1, x1, y1, z1, w1, v1);
-    let mut n2 = q(t2) * grad5::<S>(seed, gi2, x2, y2, z2, w2, v2);
-    let mut n3 = q(t3) * grad5::<S>(seed, gi3, x3, y3, z3, w3, v3);
-    let mut n4 = q(t4) * grad5::<S>(seed, gi4, x4, y4, z4, w4, v4);
-    let mut n5 = q(t5) * grad5::<S>(seed, gi5, x5, y5, z5, w5, v5);
-
-    // Discard contributions whose base weight is negative.
-    let zf = S::Vf32::zeroes();
-    n0 = n0.and_not(t0.cmp_lt(zf));
-    n1 = n1.and_not(t1.cmp_lt(zf));
-    n2 = n2.and_not(t2.cmp_lt(zf));
-    n3 = n3.and_not(t3.cmp_lt(zf));
-    n4 = n4.and_not(t4.cmp_lt(zf));
-    n5 = n5.and_not(t5.cmp_lt(zf));
-
-    (n0 + n1 + n2 + n3 + n4 + n5) * S::Vf32::set1(SIMPLEX_5D_SCALE_32)
+    (result, derivative)
 }
 
 /// Empirical normalization for 6D simplex: maps the raw kernel into ~[-1, 1].
@@ -868,6 +989,23 @@ pub fn simplex_6d<S: Simd>(
     t: S::Vf32,
     seed: i32,
 ) -> S::Vf32 {
+    simplex_6d_deriv::<S>(x, y, z, w, u, t, seed).0
+}
+
+/// Like `simplex_6d`, but also returns the analytic gradient
+/// `[∂n/∂x, ∂n/∂y, ∂n/∂z, ∂n/∂w, ∂n/∂u, ∂n/∂t]` (issue #24). No domain rotation.
+// Not `#[inline(always)]`: see `simplex_3d_deriv` (issue #38).
+#[inline]
+#[allow(clippy::too_many_arguments)]
+pub fn simplex_6d_deriv<S: Simd>(
+    x: S::Vf32,
+    y: S::Vf32,
+    z: S::Vf32,
+    w: S::Vf32,
+    u: S::Vf32,
+    t: S::Vf32,
+    seed: i32,
+) -> (S::Vf32, [S::Vf32; 6]) {
     let sk = S::Vf32::set1(F6_32) * (x + y + z + w + u + t);
     let ips = (x + sk).floor();
     let jps = (y + sk).floor();
@@ -1042,39 +1180,92 @@ pub fn simplex_6d<S: Simd>(
     };
 
     let r2 = S::Vf32::set1(0.5);
-    let s0 = r2 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0) - (u0 * u0) - (t0c * t0c);
-    let s1 = r2 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1) - (u1 * u1) - (t1 * t1);
-    let s2 = r2 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2) - (u2 * u2) - (t2 * t2);
-    let s3 = r2 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3) - (u3 * u3) - (t3 * t3);
-    let s4 = r2 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4) - (u4 * u4) - (t4 * t4);
-    let s5 = r2 - (x5 * x5) - (y5 * y5) - (z5 * z5) - (w5 * w5) - (u5 * u5) - (t5 * t5);
-    let s6 = r2 - (x6 * x6) - (y6 * y6) - (z6 * z6) - (w6 * w6) - (u6 * u6) - (t6 * t6);
+    let zero = S::Vf32::zeroes();
+    // Base weights, clamped to 0 up front (see `simplex_4d_deriv`).
+    let mut s0 = r2 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0) - (u0 * u0) - (t0c * t0c);
+    let mut s1 = r2 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1) - (u1 * u1) - (t1 * t1);
+    let mut s2 = r2 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2) - (u2 * u2) - (t2 * t2);
+    let mut s3 = r2 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3) - (u3 * u3) - (t3 * t3);
+    let mut s4 = r2 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4) - (u4 * u4) - (t4 * t4);
+    let mut s5 = r2 - (x5 * x5) - (y5 * y5) - (z5 * z5) - (w5 * w5) - (u5 * u5) - (t5 * t5);
+    let mut s6 = r2 - (x6 * x6) - (y6 * y6) - (z6 * z6) - (w6 * w6) - (u6 * u6) - (t6 * t6);
+    s0 &= s0.cmp_gte(zero);
+    s1 &= s1.cmp_gte(zero);
+    s2 &= s2.cmp_gte(zero);
+    s3 &= s3.cmp_gte(zero);
+    s4 &= s4.cmp_gte(zero);
+    s5 &= s5.cmp_gte(zero);
+    s6 &= s6.cmp_gte(zero);
 
-    // Each weight to the 4th power.
-    let q = |t: S::Vf32| -> S::Vf32 {
-        let tt = t * t;
-        tt * tt
+    let p0 = s0 * s0;
+    let p1 = s1 * s1;
+    let p2 = s2 * s2;
+    let p3 = s3 * s3;
+    let p4 = s4 * s4;
+    let p5 = s5 * s5;
+    let p6 = s6 * s6;
+    let q0 = p0 * p0;
+    let q1 = p1 * p1;
+    let q2 = p2 * p2;
+    let q3 = p3 * p3;
+    let q4 = p4 * p4;
+    let q5 = p5 * p5;
+    let q6 = p6 * p6;
+
+    let g0 = grad6::<S>(seed, gi0, x0, y0, z0, w0, u0, t0c);
+    let g1 = grad6::<S>(seed, gi1, x1, y1, z1, w1, u1, t1);
+    let g2 = grad6::<S>(seed, gi2, x2, y2, z2, w2, u2, t2);
+    let g3 = grad6::<S>(seed, gi3, x3, y3, z3, w3, u3, t3);
+    let g4 = grad6::<S>(seed, gi4, x4, y4, z4, w4, u4, t4);
+    let g5 = grad6::<S>(seed, gi5, x5, y5, z5, w5, u5, t5);
+    let g6 = grad6::<S>(seed, gi6, x6, y6, z6, w6, u6, t6);
+
+    let scale = S::Vf32::set1(SIMPLEX_6D_SCALE_32);
+    let result = (q0 * g0 + q1 * g1 + q2 * g2 + q3 * g3 + q4 * g4 + q5 * g5 + q6 * g6) * scale;
+
+    let derivative = {
+        let c0 = p0 * s0 * g0;
+        let c1 = p1 * s1 * g1;
+        let c2 = p2 * s2 * g2;
+        let c3 = p3 * s3 * g3;
+        let c4 = p4 * s4 * g4;
+        let c5 = p5 * s5 * g5;
+        let c6 = p6 * s6 * g6;
+        let mut dx = c0 * x0 + c1 * x1 + c2 * x2 + c3 * x3 + c4 * x4 + c5 * x5 + c6 * x6;
+        let mut dy = c0 * y0 + c1 * y1 + c2 * y2 + c3 * y3 + c4 * y4 + c5 * y5 + c6 * y6;
+        let mut dz = c0 * z0 + c1 * z1 + c2 * z2 + c3 * z3 + c4 * z4 + c5 * z5 + c6 * z6;
+        let mut dw = c0 * w0 + c1 * w1 + c2 * w2 + c3 * w3 + c4 * w4 + c5 * w5 + c6 * w6;
+        let mut du = c0 * u0 + c1 * u1 + c2 * u2 + c3 * u3 + c4 * u4 + c5 * u5 + c6 * u6;
+        let mut dt = c0 * t0c + c1 * t1 + c2 * t2 + c3 * t3 + c4 * t4 + c5 * t5 + c6 * t6;
+        let m8 = S::Vf32::set1(-8.0);
+        dx *= m8;
+        dy *= m8;
+        dz *= m8;
+        dw *= m8;
+        du *= m8;
+        dt *= m8;
+        let [gx0, gy0, gz0, gw0, gu0, gt0] = grad6_vec::<S>(seed, gi0);
+        let [gx1, gy1, gz1, gw1, gu1, gt1] = grad6_vec::<S>(seed, gi1);
+        let [gx2, gy2, gz2, gw2, gu2, gt2] = grad6_vec::<S>(seed, gi2);
+        let [gx3, gy3, gz3, gw3, gu3, gt3] = grad6_vec::<S>(seed, gi3);
+        let [gx4, gy4, gz4, gw4, gu4, gt4] = grad6_vec::<S>(seed, gi4);
+        let [gx5, gy5, gz5, gw5, gu5, gt5] = grad6_vec::<S>(seed, gi5);
+        let [gx6, gy6, gz6, gw6, gu6, gt6] = grad6_vec::<S>(seed, gi6);
+        dx += q0 * gx0 + q1 * gx1 + q2 * gx2 + q3 * gx3 + q4 * gx4 + q5 * gx5 + q6 * gx6;
+        dy += q0 * gy0 + q1 * gy1 + q2 * gy2 + q3 * gy3 + q4 * gy4 + q5 * gy5 + q6 * gy6;
+        dz += q0 * gz0 + q1 * gz1 + q2 * gz2 + q3 * gz3 + q4 * gz4 + q5 * gz5 + q6 * gz6;
+        dw += q0 * gw0 + q1 * gw1 + q2 * gw2 + q3 * gw3 + q4 * gw4 + q5 * gw5 + q6 * gw6;
+        du += q0 * gu0 + q1 * gu1 + q2 * gu2 + q3 * gu3 + q4 * gu4 + q5 * gu5 + q6 * gu6;
+        dt += q0 * gt0 + q1 * gt1 + q2 * gt2 + q3 * gt3 + q4 * gt4 + q5 * gt5 + q6 * gt6;
+        dx *= scale;
+        dy *= scale;
+        dz *= scale;
+        dw *= scale;
+        du *= scale;
+        dt *= scale;
+        [dx, dy, dz, dw, du, dt]
     };
-
-    let mut n0 = q(s0) * grad6::<S>(seed, gi0, x0, y0, z0, w0, u0, t0c);
-    let mut na = q(s1) * grad6::<S>(seed, gi1, x1, y1, z1, w1, u1, t1);
-    let mut nb = q(s2) * grad6::<S>(seed, gi2, x2, y2, z2, w2, u2, t2);
-    let mut nc = q(s3) * grad6::<S>(seed, gi3, x3, y3, z3, w3, u3, t3);
-    let mut nd = q(s4) * grad6::<S>(seed, gi4, x4, y4, z4, w4, u4, t4);
-    let mut ne = q(s5) * grad6::<S>(seed, gi5, x5, y5, z5, w5, u5, t5);
-    let mut nf = q(s6) * grad6::<S>(seed, gi6, x6, y6, z6, w6, u6, t6);
-
-    // Discard contributions whose base weight is negative.
-    let zf = S::Vf32::zeroes();
-    n0 = n0.and_not(s0.cmp_lt(zf));
-    na = na.and_not(s1.cmp_lt(zf));
-    nb = nb.and_not(s2.cmp_lt(zf));
-    nc = nc.and_not(s3.cmp_lt(zf));
-    nd = nd.and_not(s4.cmp_lt(zf));
-    ne = ne.and_not(s5.cmp_lt(zf));
-    nf = nf.and_not(s6.cmp_lt(zf));
-
-    (n0 + na + nb + nc + nd + ne + nf) * S::Vf32::set1(SIMPLEX_6D_SCALE_32)
+    (result, derivative)
 }
 
 #[cfg(test)]
@@ -1271,5 +1462,195 @@ mod tests {
             }
         }
         check_bounds(min, max);
+    }
+
+    // Forward/backward Taylor consistency: f(p ± H·e) ≈ value ± d·H. Points are
+    // offset off the lattice so we don't probe the simplex-cell boundaries where
+    // the gradient is discontinuous. A structural error (wrong grad vector or 4D
+    // back-rotation) produces errors orders of magnitude above the threshold.
+    #[test]
+    fn test_noise_simplex32_4d_deriv_sanity() {
+        const SEED: i32 = 0;
+        const H: f32 = 0.01;
+        const POINTS: i32 = 6;
+        let f = |x: f32, y: f32, z: f32, w: f32| {
+            simplex_4d::<Scalar>(F32x1(x), F32x1(y), F32x1(z), F32x1(w), SEED).0
+        };
+        let mut sum = 0.0f32;
+        let mut n = 0.0f32;
+        for wi in 0..POINTS {
+            for zi in 0..POINTS {
+                for yi in 0..POINTS {
+                    for xi in 0..POINTS {
+                        let cx = xi as f32 / 5.0 + 0.1234;
+                        let cy = yi as f32 / 5.0 + 0.1234;
+                        let cz = zi as f32 / 5.0 + 0.1234;
+                        let cw = wi as f32 / 5.0 + 0.1234;
+                        let (value, d) = simplex_4d_deriv::<Scalar>(
+                            F32x1(cx),
+                            F32x1(cy),
+                            F32x1(cz),
+                            F32x1(cw),
+                            SEED,
+                        );
+                        let value = value.0;
+                        let d = [d[0].0, d[1].0, d[2].0, d[3].0];
+                        let axes = [
+                            (f(cx + H, cy, cz, cw), f(cx - H, cy, cz, cw), d[0]),
+                            (f(cx, cy + H, cz, cw), f(cx, cy - H, cz, cw), d[1]),
+                            (f(cx, cy, cz + H, cw), f(cx, cy, cz - H, cw), d[2]),
+                            (f(cx, cy, cz, cw + H), f(cx, cy, cz, cw - H), d[3]),
+                        ];
+                        for &(fp, fm, da) in axes.iter() {
+                            sum += (fp - (value + da * H)).abs() + (fm - (value - da * H)).abs();
+                            n += 2.0;
+                        }
+                    }
+                }
+            }
+        }
+        let avg = sum / n;
+        assert!(avg < 2e-3, "4D deriv avg error {}", avg);
+    }
+
+    #[test]
+    fn test_noise_simplex32_5d_deriv_sanity() {
+        const SEED: i32 = 0;
+        const H: f32 = 0.01;
+        const POINTS: i32 = 4;
+        let f = |x: f32, y: f32, z: f32, w: f32, u: f32| {
+            simplex_5d::<Scalar>(F32x1(x), F32x1(y), F32x1(z), F32x1(w), F32x1(u), SEED).0
+        };
+        let mut sum = 0.0f32;
+        let mut n = 0.0f32;
+        for ui in 0..POINTS {
+            for wi in 0..POINTS {
+                for zi in 0..POINTS {
+                    for yi in 0..POINTS {
+                        for xi in 0..POINTS {
+                            let cx = xi as f32 / 4.0 + 0.1234;
+                            let cy = yi as f32 / 4.0 + 0.1234;
+                            let cz = zi as f32 / 4.0 + 0.1234;
+                            let cw = wi as f32 / 4.0 + 0.1234;
+                            let cu = ui as f32 / 4.0 + 0.1234;
+                            let (value, d) = simplex_5d_deriv::<Scalar>(
+                                F32x1(cx),
+                                F32x1(cy),
+                                F32x1(cz),
+                                F32x1(cw),
+                                F32x1(cu),
+                                SEED,
+                            );
+                            let value = value.0;
+                            let d = [d[0].0, d[1].0, d[2].0, d[3].0, d[4].0];
+                            let axes = [
+                                (f(cx + H, cy, cz, cw, cu), f(cx - H, cy, cz, cw, cu), d[0]),
+                                (f(cx, cy + H, cz, cw, cu), f(cx, cy - H, cz, cw, cu), d[1]),
+                                (f(cx, cy, cz + H, cw, cu), f(cx, cy, cz - H, cw, cu), d[2]),
+                                (f(cx, cy, cz, cw + H, cu), f(cx, cy, cz, cw - H, cu), d[3]),
+                                (f(cx, cy, cz, cw, cu + H), f(cx, cy, cz, cw, cu - H), d[4]),
+                            ];
+                            for &(fp, fm, da) in axes.iter() {
+                                sum +=
+                                    (fp - (value + da * H)).abs() + (fm - (value - da * H)).abs();
+                                n += 2.0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        let avg = sum / n;
+        assert!(avg < 2e-3, "5D deriv avg error {}", avg);
+    }
+
+    #[test]
+    fn test_noise_simplex32_6d_deriv_sanity() {
+        const SEED: i32 = 0;
+        const H: f32 = 0.01;
+        const POINTS: i32 = 3;
+        #[allow(clippy::too_many_arguments)]
+        let f = |x: f32, y: f32, z: f32, w: f32, u: f32, t: f32| {
+            simplex_6d::<Scalar>(
+                F32x1(x),
+                F32x1(y),
+                F32x1(z),
+                F32x1(w),
+                F32x1(u),
+                F32x1(t),
+                SEED,
+            )
+            .0
+        };
+        let mut sum = 0.0f32;
+        let mut n = 0.0f32;
+        for ti in 0..POINTS {
+            for ui in 0..POINTS {
+                for wi in 0..POINTS {
+                    for zi in 0..POINTS {
+                        for yi in 0..POINTS {
+                            for xi in 0..POINTS {
+                                let cx = xi as f32 / 3.0 + 0.1234;
+                                let cy = yi as f32 / 3.0 + 0.1234;
+                                let cz = zi as f32 / 3.0 + 0.1234;
+                                let cw = wi as f32 / 3.0 + 0.1234;
+                                let cu = ui as f32 / 3.0 + 0.1234;
+                                let ct = ti as f32 / 3.0 + 0.1234;
+                                let (value, d) = simplex_6d_deriv::<Scalar>(
+                                    F32x1(cx),
+                                    F32x1(cy),
+                                    F32x1(cz),
+                                    F32x1(cw),
+                                    F32x1(cu),
+                                    F32x1(ct),
+                                    SEED,
+                                );
+                                let value = value.0;
+                                let d = [d[0].0, d[1].0, d[2].0, d[3].0, d[4].0, d[5].0];
+                                let axes = [
+                                    (
+                                        f(cx + H, cy, cz, cw, cu, ct),
+                                        f(cx - H, cy, cz, cw, cu, ct),
+                                        d[0],
+                                    ),
+                                    (
+                                        f(cx, cy + H, cz, cw, cu, ct),
+                                        f(cx, cy - H, cz, cw, cu, ct),
+                                        d[1],
+                                    ),
+                                    (
+                                        f(cx, cy, cz + H, cw, cu, ct),
+                                        f(cx, cy, cz - H, cw, cu, ct),
+                                        d[2],
+                                    ),
+                                    (
+                                        f(cx, cy, cz, cw + H, cu, ct),
+                                        f(cx, cy, cz, cw - H, cu, ct),
+                                        d[3],
+                                    ),
+                                    (
+                                        f(cx, cy, cz, cw, cu + H, ct),
+                                        f(cx, cy, cz, cw, cu - H, ct),
+                                        d[4],
+                                    ),
+                                    (
+                                        f(cx, cy, cz, cw, cu, ct + H),
+                                        f(cx, cy, cz, cw, cu, ct - H),
+                                        d[5],
+                                    ),
+                                ];
+                                for &(fp, fm, da) in axes.iter() {
+                                    sum += (fp - (value + da * H)).abs()
+                                        + (fm - (value - da * H)).abs();
+                                    n += 2.0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        let avg = sum / n;
+        assert!(avg < 2e-3, "6D deriv avg error {}", avg);
     }
 }

@@ -174,6 +174,8 @@ export component AppWindow inherits Window {
 
     // ---- View ----
     in-out property <int> colormap-idx: 0;
+    // 0 Value · 1 Gradient magnitude · 2 Slope shaded · 3 Normal map (issue #24).
+    in-out property <int> render-mode-idx: 0;
     in-out property <int> engine-idx: 0;
     in-out property <[string]> engine-model: ["auto"];
     // Cross-section slice indices (as float, for the slice Sliders; Rust rounds).
@@ -293,6 +295,7 @@ export component AppWindow inherits Window {
     }
     changed quant-idx => { root.regenerate(); }
     changed colormap-idx => { root.regenerate(); }
+    changed render-mode-idx => { root.regenerate(); }
     changed engine-idx => { root.regenerate(); }
     changed cross0 => { root.regenerate(); }
     changed cross1 => { root.regenerate(); }
@@ -541,6 +544,22 @@ export component AppWindow inherits Window {
                                 current-index <=> root.colormap-idx;
                                 enabled: root.dim <= 2;
                                 Tooltip { text: @markdown("Display-only mapping of value → colour (Grayscale or a heatmap ramp). Applies to 1D/2D; at 3D+ the view encodes depth as hue instead, so this is disabled."); }
+                            }
+                        }
+                        HorizontalBox {
+                            padding: 0px;
+                            Text {
+                                text: "Output mode";
+                                width: 90px;
+                                vertical-alignment: center;
+                                // Gradient views are a 2D heightfield visualization.
+                                color: root.dim == 2 ? white : gray;
+                            }
+                            ComboBox {
+                                model: ["Value", "Gradient magnitude", "Slope shaded", "Normal map"];
+                                current-index <=> root.render-mode-idx;
+                                enabled: root.dim == 2;
+                                Tooltip { text: @markdown("What the canvas draws from the analytic gradient (`generate_with_derivative`). **Value** is the plain noise; **Gradient magnitude** maps ‖∇‖ through the colormap; **Slope shaded** is Lambert shading of the heightfield; **Normal map** encodes the surface normal as RGB. 2D only; cellular needs the Euclidean metric (and `Distance` for Cellular), otherwise it falls back to Value."); }
                             }
                         }
                         HorizontalBox {

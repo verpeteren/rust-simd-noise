@@ -16,9 +16,10 @@ use crate::noise_helpers_32::Sample32;
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
-    get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
-    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise,
-    get_6d_noise, get_6d_scaled_noise,
+    get_1d_noise, get_1d_scaled_noise, get_2d_cellular2_gradient, get_2d_cellular2_gradient_64,
+    get_2d_noise, get_2d_scaled_noise, get_3d_cellular2_gradient, get_3d_cellular2_gradient_64,
+    get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise,
+    get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise, NoiseAndGradient, NoiseAndGradient64,
 };
 
 use super::Settings;
@@ -648,5 +649,59 @@ impl Cellular2Settings {
     pub fn with_index1(&mut self, i: usize) -> &mut Cellular2Settings {
         self.index1 = i;
         self
+    }
+
+    /// Value + analytic gradient of cellular2 (Worley F1/F2) noise (issue #24).
+    ///
+    /// Supported only for the **Euclidean** distance function, where each
+    /// selected distance is a squared distance `Fₖ = Σ dₖ²` with gradient
+    /// `−2·(sample − feature)`. The configured [`return_type`](Self::return_type)
+    /// combination of `F1 = distance[index0]` and `F2 = distance[index1]`
+    /// (F2, F1±F2, F1·F2, F1/F2) is differentiated by the product/quotient rule.
+    /// The gradient is defined everywhere except on the Voronoi cell borders,
+    /// where a feature point switches sorted slots (the same kinks the value
+    /// has); `Distance2Div` additionally diverges where `F2 → 0`.
+    ///
+    /// Only 2D and 3D are implemented.
+    ///
+    /// # Panics
+    /// Panics unless `distance_function` is `Euclidean` and the dimensionality
+    /// is 2 or 3.
+    pub fn generate_with_derivative(self) -> NoiseAndGradient {
+        assert!(
+            matches!(self.distance_function, CellDistanceFunction::Euclidean),
+            "cellular2 generate_with_derivative requires the Euclidean distance function"
+        );
+        match self.dim.dim {
+            2 => get_2d_cellular2_gradient(&self),
+            3 => get_3d_cellular2_gradient(&self),
+            d => panic!(
+                "cellular2 generate_with_derivative is only implemented for 2D/3D (got {})",
+                d
+            ),
+        }
+    }
+
+    /// `f64` twin of [`generate_with_derivative`](Self::generate_with_derivative).
+    ///
+    /// Same Euclidean restriction, 2D/3D support and border semantics, computed
+    /// and returned in double precision ([`NoiseAndGradient64`]).
+    ///
+    /// # Panics
+    /// Panics unless `distance_function` is `Euclidean` and the dimensionality
+    /// is 2 or 3.
+    pub fn generate_with_derivative_64(self) -> NoiseAndGradient64 {
+        assert!(
+            matches!(self.distance_function, CellDistanceFunction::Euclidean),
+            "cellular2 generate_with_derivative_64 requires the Euclidean distance function"
+        );
+        match self.dim.dim {
+            2 => get_2d_cellular2_gradient_64(&self),
+            3 => get_3d_cellular2_gradient_64(&self),
+            d => panic!(
+                "cellular2 generate_with_derivative_64 is only implemented for 2D/3D (got {})",
+                d
+            ),
+        }
     }
 }
