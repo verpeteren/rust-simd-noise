@@ -35,6 +35,3 @@ harness = false
 
 [workspace]
 members = ["example"]
-# `wasm-example` targets wasm32 and depends on wasm-bindgen; it is built on its
-# own (see wasm-example/README.md) and kept out of the host workspace build.
-exclude = ["wasm-example"]
