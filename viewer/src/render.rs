@@ -198,11 +198,38 @@ pub fn to_image(buf: &Buffers, p: &Params) -> Rendered {
             }
         }
     } else if p.dim == 2 {
+        // Gradient render modes draw the 2D field as a heightfield (issue #24).
+        // `build_params` only enables them for dim==2 derivative-capable configs,
+        // so the gradient buffer is present with stride 2 here.
+        let grad_mode = p.render != RenderMode::Value
+            && buf.grad_stride >= 2
+            && buf.grad.len() >= img_w * img_h * buf.grad_stride;
+        // Steepest in-plane gradient over the image, to normalize the relief so
+        // the shading/normal/magnitude is visible regardless of frequency scale.
+        let gmax = if grad_mode {
+            let st = buf.grad_stride;
+            let mut m = 0.0f32;
+            for i in 0..img_w * img_h {
+                let (gx, gy) = (buf.grad[i * st], buf.grad[i * st + 1]);
+                let mag = (gx * gx + gy * gy).sqrt();
+                if mag > m {
+                    m = mag;
+                }
+            }
+            m
+        } else {
+            0.0
+        };
         for y in 0..img_h {
             for x in 0..img_w {
-                let raw = fetch(y * w + x);
-                px[y * img_w + x] = colormap(p.colormap, norm(raw));
+                let i = y * w + x;
+                let raw = fetch(i);
                 values[y * img_w + x] = raw;
+                px[y * img_w + x] = if grad_mode {
+                    grad_color(p, &buf.grad, i, buf.grad_stride, gmax)
+                } else {
+                    colormap(p.colormap, norm(raw))
+                };
             }
         }
     } else {
@@ -261,6 +288,51 @@ pub fn to_image(buf: &Buffers, p: &Params) -> Rendered {
         pixels: px,
         probe,
     }
+}
+
+/// Colour for one pixel of a gradient render mode. `grad` holds `stride`
+/// components per sample; `gmax` is the image's steepest in-plane gradient,
+/// used to normalize the relief. The field is treated as a heightfield
+/// `z = value`, whose surface normal is `normalize((-gx, -gy, 1))` after the
+/// gradient is scaled to unit relief.
+fn grad_color(p: &Params, grad: &[f32], i: usize, stride: usize, gmax: f32) -> Rgb8Pixel {
+    let gx = grad[i * stride];
+    let gy = grad[i * stride + 1];
+    match p.render {
+        RenderMode::GradMag => {
+            let mag = (gx * gx + gy * gy).sqrt();
+            let t = if gmax > 0.0 { mag / gmax } else { 0.0 };
+            colormap(p.colormap, t.clamp(0.0, 1.0))
+        }
+        RenderMode::SlopeShade => {
+            let (nx, ny, nz) = heightfield_normal(gx, gy, gmax);
+            // Light from the upper-left, slightly in front: normalize((-1,-1,1)).
+            const L: [f32; 3] = [-0.577_35, -0.577_35, 0.577_35];
+            let d = (nx * L[0] + ny * L[1] + nz * L[2]).max(0.0);
+            let v = (d * 255.0) as u8;
+            Rgb8Pixel { r: v, g: v, b: v }
+        }
+        RenderMode::NormalMap => {
+            let (nx, ny, nz) = heightfield_normal(gx, gy, gmax);
+            Rgb8Pixel {
+                r: ((nx * 0.5 + 0.5) * 255.0) as u8,
+                g: ((ny * 0.5 + 0.5) * 255.0) as u8,
+                b: ((nz * 0.5 + 0.5) * 255.0) as u8,
+            }
+        }
+        // `grad_mode` in `to_image` is false for `Value`, so this is unreachable;
+        // return the flat normal/black rather than panicking if that ever changes.
+        RenderMode::Value => Rgb8Pixel { r: 0, g: 0, b: 0 },
+    }
+}
+
+/// Unit surface normal of the heightfield `z = value`, with the gradient scaled
+/// by `1/gmax` so the steepest pixel tilts ~45° (visible relief at any scale).
+fn heightfield_normal(gx: f32, gy: f32, gmax: f32) -> (f32, f32, f32) {
+    let s = if gmax > 0.0 { 1.0 / gmax } else { 0.0 };
+    let (ex, ey) = (-gx * s, -gy * s);
+    let inv = 1.0 / (ex * ex + ey * ey + 1.0).sqrt();
+    (ex * inv, ey * inv, inv)
 }
 
 fn colormap(kind: Colormap, t: f32) -> Rgb8Pixel {

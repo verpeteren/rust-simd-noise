@@ -696,6 +696,20 @@ fn build_params(ui: &AppWindow, engines: &[Engine]) -> Params {
         OutMode::Raw
     };
 
+    // Gradient render modes (issue #24): a 2D heightfield view driven by the
+    // analytic gradient. Available only for derivative-capable 2D configs on the
+    // auto engine (see `gradient_capable`); anything else falls back to Value.
+    // They consume the unscaled derivative output, so force Raw buffers.
+    let mut render = RenderMode::from_index(ui.get_render_mode_idx());
+    if !gradient_capable(algo, dim, engine, &cellular) {
+        render = RenderMode::Value;
+    }
+    let out = if render != RenderMode::Value {
+        OutMode::Raw
+    } else {
+        out
+    };
+
     let cross = [
         ui.get_cross0().max(0.0).round() as usize,
         ui.get_cross1().max(0.0).round() as usize,
@@ -722,6 +736,7 @@ fn build_params(ui: &AppWindow, engines: &[Engine]) -> Params {
         engine,
         cross,
         colormap,
+        render,
     }
 }
 
@@ -1089,5 +1104,101 @@ mod tests {
             assert!(r.probe.at(-1, 0).is_none());
             assert!(r.probe.at(r.width as i32, 0).is_none());
         });
+    }
+
+    /// Every gradient render mode (issue #24) populates the gradient buffer and
+    /// drives a non-degenerate image, for every derivative-capable 2D algorithm
+    /// in both float types. The `preset` cellular config is Euclidean+Distance,
+    /// so all six algorithms are gradient-capable at dim 2.
+    #[test]
+    fn gradient_render_modes() {
+        let mut buf = dispatch::Buffers::default();
+        for algo in each_algo() {
+            for float in [Float::F32, Float::F64] {
+                for render in [
+                    RenderMode::GradMag,
+                    RenderMode::SlopeShade,
+                    RenderMode::NormalMap,
+                ] {
+                    let mut p = Params::preset();
+                    p.algo = algo;
+                    p.dim = 2;
+                    p.float = float;
+                    p.render = render;
+                    assert!(
+                        gradient_capable(p.algo, p.dim, p.engine, &p.cellular),
+                        "preset config should be gradient-capable"
+                    );
+                    dispatch::generate(&p, &mut buf);
+                    assert_eq!(buf.grad_stride, 2, "2D gradient stride");
+                    assert_eq!(
+                        buf.grad.len(),
+                        p.count() * 2,
+                        "gradient buffer length (count*stride)"
+                    );
+                    assert!(
+                        buf.grad.iter().any(|&g| g != 0.0 && g.is_finite()),
+                        "gradient buffer is identically zero"
+                    );
+                    let r = render::to_image(&buf, &p);
+                    assert_eq!(r.pixels.len(), (r.width * r.height) as usize);
+                    // The gradient varies across a 16×16 block, so the image must too.
+                    let first = r.pixels[0];
+                    assert!(
+                        r.pixels
+                            .iter()
+                            .any(|px| px.r != first.r || px.g != first.g || px.b != first.b),
+                        "gradient render produced a flat image"
+                    );
+                }
+            }
+        }
+    }
+
+    /// `gradient_capable` gates exactly the configurations the derivative path
+    /// supports: auto engine, 2D, derivative-capable algorithm (cellular only
+    /// Euclidean + `Distance`; cellular2 only Euclidean).
+    #[test]
+    fn gradient_capability_gating() {
+        use simdnoise::{CellDistanceFunction, CellReturnType};
+        let base = Params::preset().cellular; // Euclidean, Distance, Distance2
+        assert!(gradient_capable(Algo::Gradient, 2, Engine::Auto, &base));
+        assert!(gradient_capable(Algo::Turbulence, 2, Engine::Auto, &base));
+        // Wrong dimension / forced engine are not supported.
+        assert!(!gradient_capable(Algo::Gradient, 3, Engine::Auto, &base));
+        assert!(!gradient_capable(Algo::Gradient, 1, Engine::Auto, &base));
+        assert!(!gradient_capable(Algo::Gradient, 2, Engine::Scalar, &base));
+        // Cellular: Euclidean + Distance only.
+        assert!(gradient_capable(Algo::Cellular, 2, Engine::Auto, &base));
+        assert!(gradient_capable(Algo::Cellular2, 2, Engine::Auto, &base));
+        let mut manhattan = base;
+        manhattan.dist_fn = CellDistanceFunction::Manhattan;
+        assert!(!gradient_capable(
+            Algo::Cellular,
+            2,
+            Engine::Auto,
+            &manhattan
+        ));
+        assert!(!gradient_capable(
+            Algo::Cellular2,
+            2,
+            Engine::Auto,
+            &manhattan
+        ));
+        let mut cell_value = base;
+        cell_value.return_type = CellReturnType::CellValue;
+        assert!(!gradient_capable(
+            Algo::Cellular,
+            2,
+            Engine::Auto,
+            &cell_value
+        ));
+        // Cellular2 ignores the single-cell return type for capability.
+        assert!(gradient_capable(
+            Algo::Cellular2,
+            2,
+            Engine::Auto,
+            &cell_value
+        ));
     }
 }

@@ -4,9 +4,44 @@
 //! to ~18 hand-written arms: `by_dim!` resolves the builder arity, one generic
 //! `emplace::<S: Settings>` covers float × output mode, and `run` picks the engine.
 
-use simdnoise::{NoiseBuilder as NB, NoiseType, Settings, SimplexSettings};
+use simdnoise::{
+    Cellular2Settings, CellularSettings, FbmSettings, GradientSettings, NoiseAndGradient,
+    NoiseAndGradient64, NoiseBuilder as NB, NoiseType, RidgeSettings, Settings, SimplexSettings,
+    TurbulenceSettings,
+};
 
 use crate::params::*;
+
+/// Settings types that expose `generate_with_derivative{,_64}` (issue #24). The
+/// methods are inherent (not part of `Settings`), so this local trait lets the
+/// generic gradient path call them without 6 near-identical arms. Only invoked
+/// when [`gradient_capable`] holds, so cellular's Euclidean/2D asserts never fire.
+trait Deriv {
+    fn gen_deriv(self) -> NoiseAndGradient;
+    fn gen_deriv_64(self) -> NoiseAndGradient64;
+}
+
+macro_rules! impl_deriv {
+    ($($t:ty),* $(,)?) => {
+        $(impl Deriv for $t {
+            fn gen_deriv(self) -> NoiseAndGradient {
+                self.generate_with_derivative()
+            }
+            fn gen_deriv_64(self) -> NoiseAndGradient64 {
+                self.generate_with_derivative_64()
+            }
+        })*
+    };
+}
+
+impl_deriv!(
+    GradientSettings,
+    FbmSettings,
+    RidgeSettings,
+    TurbulenceSettings,
+    CellularSettings,
+    Cellular2Settings,
+);
 
 /// Persistent output buffers, reused across regenerations (`ui.md` §7.0). Only the
 /// buffer the current (engine, float, output-mode) will write is resized.
@@ -19,6 +54,11 @@ pub struct Buffers {
     pub v_u32: Vec<u32>,
     pub v_i16: Vec<i16>,
     pub v_i32: Vec<i32>,
+    /// Per-sample analytic gradient (issue #24), `grad_stride` components per
+    /// sample, laid out like `v_f32`. Populated only for gradient render modes;
+    /// f64 gradients are down-cast to f32 here (display only).
+    pub grad: Vec<f32>,
+    pub grad_stride: usize,
     /// (min, max) of the generated block, used to normalize Raw output for display.
     pub stats: (f32, f32),
 }
@@ -84,7 +124,7 @@ pub fn generate(p: &Params, buf: &mut Buffers) {
             );
             s.with_seed(p.seed);
             apply_freq(&mut s, p);
-            run(s, p, buf);
+            run_or_grad(s, p, buf);
         }
         Algo::Fbm => {
             let mut s = by_dim!(
@@ -103,7 +143,7 @@ pub fn generate(p: &Params, buf: &mut Buffers) {
                 .with_lacunarity(p.fractal.lacunarity)
                 .with_gain(p.fractal.gain);
             apply_freq(&mut s, p);
-            run(s, p, buf);
+            run_or_grad(s, p, buf);
         }
         Algo::Ridge => {
             let mut s = by_dim!(
@@ -122,7 +162,7 @@ pub fn generate(p: &Params, buf: &mut Buffers) {
                 .with_lacunarity(p.fractal.lacunarity)
                 .with_gain(p.fractal.gain);
             apply_freq(&mut s, p);
-            run(s, p, buf);
+            run_or_grad(s, p, buf);
         }
         Algo::Turbulence => {
             let mut s = by_dim!(
@@ -141,7 +181,7 @@ pub fn generate(p: &Params, buf: &mut Buffers) {
                 .with_lacunarity(p.fractal.lacunarity)
                 .with_gain(p.fractal.gain);
             apply_freq(&mut s, p);
-            run(s, p, buf);
+            run_or_grad(s, p, buf);
         }
         Algo::Cellular => {
             let mut s = by_dim!(
@@ -160,7 +200,7 @@ pub fn generate(p: &Params, buf: &mut Buffers) {
                 .with_distance_function(p.cellular.dist_fn)
                 .with_return_type(p.cellular.return_type);
             apply_freq(&mut s, p);
-            run(s, p, buf);
+            run_or_grad(s, p, buf);
         }
         Algo::Cellular2 => {
             let mut s = by_dim!(
@@ -181,7 +221,7 @@ pub fn generate(p: &Params, buf: &mut Buffers) {
                 .with_index0(p.cellular.index0)
                 .with_index1(p.cellular.index1);
             apply_freq(&mut s, p);
-            run(s, p, buf);
+            run_or_grad(s, p, buf);
         }
     }
 }
@@ -216,6 +256,39 @@ fn run<S: Settings>(s: S, p: &Params, buf: &mut Buffers) {
     match p.engine {
         Engine::Auto => emplace(s, p, buf),
         _ => forced(s.wrap(), p, buf),
+    }
+}
+
+/// A gradient render mode takes the derivative path; otherwise the normal value
+/// path. `build_params` only sets a non-`Value` render mode when
+/// [`gradient_capable`] holds (auto engine, 2D, derivative-capable algo), so the
+/// `Deriv` call here is always valid.
+fn run_or_grad<S: Settings + Deriv>(s: S, p: &Params, buf: &mut Buffers) {
+    if p.render == RenderMode::Value {
+        run(s, p, buf);
+    } else {
+        emit_grad(s, p, buf);
+    }
+}
+
+/// Value + analytic gradient into the buffers: values into `v_f32`/`v_f64` (so
+/// the probe and the value fallback keep working) and the gradient into `grad`.
+fn emit_grad<S: Deriv>(s: S, p: &Params, buf: &mut Buffers) {
+    match p.float {
+        Float::F32 => {
+            let ng = s.gen_deriv();
+            buf.stats = (ng.min, ng.max);
+            buf.grad_stride = ng.stride;
+            buf.grad = ng.gradients;
+            buf.v_f32 = ng.values;
+        }
+        Float::F64 => {
+            let ng = s.gen_deriv_64();
+            buf.stats = (ng.min as f32, ng.max as f32);
+            buf.grad_stride = ng.stride;
+            buf.grad = ng.gradients.iter().map(|&g| g as f32).collect();
+            buf.v_f64 = ng.values;
+        }
     }
 }
 
