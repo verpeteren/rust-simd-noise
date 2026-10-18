@@ -30,6 +30,11 @@ use super::{Settings, SimplexSettings};
 /// The three knobs below ([`octaves`](Self::octaves), [`lacunarity`](Self::lacunarity),
 /// [`gain`](Self::gain)) control that layering. See
 /// [fractional Brownian motion](https://en.wikipedia.org/wiki/Fractional_Brownian_motion).
+///
+/// **Output range:** `[-A, A]`, where `A` is the sum of the per-octave amplitudes
+/// (`1 + gain + … + gain^(octaves-1)`, plus the fractional top octave). The bound
+/// is loose — the field rarely reaches the extremes. Query it with
+/// [`output_range`](crate::Settings::output_range).
 #[derive(Copy, Clone)]
 pub struct FbmSettings {
     dim: NoiseDimensions,

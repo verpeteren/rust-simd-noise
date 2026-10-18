@@ -30,6 +30,9 @@ use super::{Settings, SimplexSettings};
 /// Note that (unlike fBm) output is biased positive and can exceed 1, so you will
 /// usually want `generate_scaled` / a scaling pass. See [`FbmSettings`](crate::FbmSettings) for the
 /// shared layering knobs.
+///
+/// **Output range:** `[octaves - A, octaves]`, with `A` the per-octave amplitude
+/// sum (as for [`FbmSettings`](crate::FbmSettings)); the maximum is `octaves`.
 #[derive(Copy, Clone)]
 pub struct RidgeSettings {
     dim: NoiseDimensions,

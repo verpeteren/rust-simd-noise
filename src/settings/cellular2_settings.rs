@@ -66,6 +66,9 @@ macro_rules! dispatch_cell2 {
 /// density ([`freq_x`](Self::freq_x) …), and [`jitter`](Self::jitter) controls
 /// with [`CellularSettings`](crate::CellularSettings). See
 /// [Worley / cellular noise](https://en.wikipedia.org/wiki/Worley_noise).
+///
+/// **Output range:** `Distance2Div` is `[0, 1]`; the other combinations are
+/// jitter/metric-dependent with no closed form and so are scaled per-block.
 #[derive(Copy, Clone)]
 pub struct Cellular2Settings {
     dim: NoiseDimensions,

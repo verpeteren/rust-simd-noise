@@ -65,6 +65,10 @@ macro_rules! dispatch_cell {
 /// For the richer Worley patterns that combine the two nearest points (edges,
 /// crack networks), use [`Cellular2Settings`](crate::Cellular2Settings). See
 /// [Worley / cellular noise](https://en.wikipedia.org/wiki/Worley_noise).
+///
+/// **Output range:** `CellValue` is `[-1, 1)` (jitter-independent); `Distance`
+/// has no closed form (it depends on jitter and the distance function) and so is
+/// scaled per-block. See [`output_range`](crate::Settings::output_range).
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
     dim: NoiseDimensions,
