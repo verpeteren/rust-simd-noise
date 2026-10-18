@@ -253,3 +253,88 @@ pub fn grad6<S: Simd>(
         + keep(sign(u, 17), 4)
         + keep(sign(t, 18), 5)
 }
+
+/// The gradient vector picked by [`grad4`] (its `[gx, gy, gz, gt]`), needed for
+/// derivatives. Mirrors `grad4`'s hash / sign / axis selection exactly so the
+/// value and gradient stay consistent: one axis is zero and the other three are
+/// `±1`.
+#[inline(always)]
+pub fn grad4_vec<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 4] {
+    let h = seed_hash::<S>(seed, hash) & S::Vi32::set1(31);
+    let one = S::Vf32::set1(1.0);
+    let zero = S::Vf32::zeroes();
+    // +1 when the sign bit is clear, -1 when set (matching `grad4`).
+    let sign = |bit: i32| -> S::Vf32 {
+        ((h & S::Vi32::set1(1 << bit)).cmp_eq(S::Vi32::zeroes()))
+            .bitcast_f32()
+            .blendv(zero - one, one)
+    };
+    let s1 = sign(0);
+    let s2 = sign(1);
+    let s4 = sign(2);
+    let m24 = (S::Vi32::set1(24).cmp_gt(h)).bitcast_f32(); // h < 24
+    let m16 = (S::Vi32::set1(16).cmp_gt(h)).bitcast_f32(); // h < 16
+    let m8 = (S::Vi32::set1(8).cmp_gt(h)).bitcast_f32(); // h < 8
+                                                         // Same routing as `grad4`: u = h<24 ? x : y, v = h<16 ? y : z, w = h<8 ? z : t;
+                                                         // result = s1*u + s2*v + s4*w. Collect the per-axis coefficient of each.
+    let gx = m24.blendv(zero, s1);
+    let gy = m24.blendv(s1, m16.blendv(zero, s2));
+    let gz = m16.blendv(s2, m8.blendv(zero, s4));
+    let gt = m8.blendv(s4, zero);
+    [gx, gy, gz, gt]
+}
+
+/// The gradient vector picked by [`grad5`] (its `[gx, gy, gz, gw, gu]`), needed
+/// for derivatives. One axis (the hash-chosen `zero_axis`) is zero and the rest
+/// are `±1`; identical hash/bit layout to `grad5`.
+#[inline(always)]
+pub fn grad5_vec<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 5] {
+    let h = seed_hash::<S>(seed, hash);
+    let zero_axis = ((h & S::Vi32::set1(0x3FFF)) * S::Vi32::set1(5)) >> 14;
+    let one = S::Vf32::set1(1.0);
+    let zero = S::Vf32::zeroes();
+    let comp = |bit: i32, axis: i32| -> S::Vf32 {
+        let s = ((h & S::Vi32::set1(1 << bit)).cmp_eq(S::Vi32::zeroes()))
+            .bitcast_f32()
+            .blendv(zero - one, one);
+        zero_axis
+            .cmp_eq(S::Vi32::set1(axis))
+            .bitcast_f32()
+            .blendv(s, zero)
+    };
+    [
+        comp(14, 0),
+        comp(15, 1),
+        comp(16, 2),
+        comp(17, 3),
+        comp(18, 4),
+    ]
+}
+
+/// The gradient vector picked by [`grad6`] (its `[gx, gy, gz, gw, gu, gt]`),
+/// needed for derivatives. One axis (`zero_axis`) is zero and the rest are `±1`;
+/// identical hash/bit layout to `grad6`.
+#[inline(always)]
+pub fn grad6_vec<S: Simd>(seed: i32, hash: S::Vi32) -> [S::Vf32; 6] {
+    let h = seed_hash::<S>(seed, hash);
+    let zero_axis = ((h & S::Vi32::set1(0x1FFF)) * S::Vi32::set1(6)) >> 13;
+    let one = S::Vf32::set1(1.0);
+    let zero = S::Vf32::zeroes();
+    let comp = |bit: i32, axis: i32| -> S::Vf32 {
+        let s = ((h & S::Vi32::set1(1 << bit)).cmp_eq(S::Vi32::zeroes()))
+            .bitcast_f32()
+            .blendv(zero - one, one);
+        zero_axis
+            .cmp_eq(S::Vi32::set1(axis))
+            .bitcast_f32()
+            .blendv(s, zero)
+    };
+    [
+        comp(13, 0),
+        comp(14, 1),
+        comp(15, 2),
+        comp(16, 3),
+        comp(17, 4),
+        comp(18, 5),
+    ]
+}
