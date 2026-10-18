@@ -6,18 +6,23 @@ use crate::noise::simplex_32::{
     simplex_4d, simplex_4d_deriv, simplex_5d, simplex_5d_deriv, simplex_6d, simplex_6d_deriv,
 };
 use crate::noise::simplex_64::{
-    simplex_1d as simplex_1d_f64, simplex_2d as simplex_2d_f64, simplex_3d as simplex_3d_f64,
-    simplex_4d as simplex_4d_f64, simplex_5d as simplex_5d_f64, simplex_6d as simplex_6d_f64,
+    simplex_1d as simplex_1d_f64, simplex_1d_deriv as simplex_1d_deriv_f64,
+    simplex_2d as simplex_2d_f64, simplex_2d_deriv as simplex_2d_deriv_f64,
+    simplex_3d as simplex_3d_f64, simplex_3d_deriv as simplex_3d_deriv_f64,
+    simplex_4d as simplex_4d_f64, simplex_4d_deriv as simplex_4d_deriv_f64,
+    simplex_5d as simplex_5d_f64, simplex_5d_deriv as simplex_5d_deriv_f64,
+    simplex_6d as simplex_6d_f64, simplex_6d_deriv as simplex_6d_deriv_f64,
 };
 pub use crate::noise_dimensions::NoiseDimensions;
 use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
-use crate::noise_helpers_64::Sample64;
+use crate::noise_helpers_64::{Sample64, SampleFractalDeriv64};
 pub use crate::noise_type::NoiseType;
 use crate::{
     get_1d_gradient, get_1d_noise, get_1d_scaled_noise, get_2d_gradient, get_2d_noise,
     get_2d_scaled_noise, get_3d_gradient, get_3d_noise, get_3d_scaled_noise, get_4d_gradient,
     get_4d_noise, get_4d_scaled_noise, get_5d_gradient, get_5d_noise, get_5d_scaled_noise,
-    get_6d_gradient, get_6d_noise, get_6d_scaled_noise, NoiseAndGradient,
+    get_6d_gradient, get_6d_noise, get_6d_scaled_noise, get_gradient_64, NoiseAndGradient,
+    NoiseAndGradient64,
 };
 
 use crate::settings::Settings;
@@ -473,6 +478,54 @@ impl<S: Simd> Sample64<S> for GradientSettings {
     }
 }
 
+impl<S: Simd> SampleFractalDeriv64<S> for GradientSettings {
+    #[inline(always)]
+    fn sample_1d_deriv(&self, x: S::Vf64) -> (S::Vf64, S::Vf64) {
+        simplex_1d_deriv_f64::<S>(x, self.dim.seed.into())
+    }
+    #[inline(always)]
+    fn sample_2d_deriv(&self, x: S::Vf64, y: S::Vf64) -> (S::Vf64, [S::Vf64; 2]) {
+        simplex_2d_deriv_f64::<S>(x, y, self.dim.seed.into())
+    }
+    #[inline(always)]
+    fn sample_3d_deriv(&self, x: S::Vf64, y: S::Vf64, z: S::Vf64) -> (S::Vf64, [S::Vf64; 3]) {
+        simplex_3d_deriv_f64::<S>(x, y, z, self.dim.seed.into())
+    }
+    #[inline(always)]
+    fn sample_4d_deriv(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+    ) -> (S::Vf64, [S::Vf64; 4]) {
+        simplex_4d_deriv_f64::<S>(x, y, z, w, self.dim.seed.into())
+    }
+    #[inline(always)]
+    fn sample_5d_deriv(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+        u: S::Vf64,
+    ) -> (S::Vf64, [S::Vf64; 5]) {
+        simplex_5d_deriv_f64::<S>(x, y, z, w, u, self.dim.seed.into())
+    }
+    #[inline(always)]
+    fn sample_6d_deriv(
+        &self,
+        x: S::Vf64,
+        y: S::Vf64,
+        z: S::Vf64,
+        w: S::Vf64,
+        u: S::Vf64,
+        t: S::Vf64,
+    ) -> (S::Vf64, [S::Vf64; 6]) {
+        simplex_6d_deriv_f64::<S>(x, y, z, w, u, t, self.dim.seed.into())
+    }
+}
+
 impl GradientSettings {
     /// Generate gradient (simplex) noise **together with its analytic gradient**
     /// in a single pass (issue #24).
@@ -500,5 +553,14 @@ impl GradientSettings {
             6 => get_6d_gradient(&self),
             _ => panic!("generate_with_derivative: invalid dimension {}", d),
         }
+    }
+
+    /// f64 counterpart of [`generate_with_derivative`](Self::generate_with_derivative),
+    /// returning a [`NoiseAndGradient64`]. Supported for all dimensions 1D–6D.
+    ///
+    /// # Panics
+    /// Panics if the configured dimensionality is not in 1..=6.
+    pub fn generate_with_derivative_64(self) -> NoiseAndGradient64 {
+        get_gradient_64(&self)
     }
 }

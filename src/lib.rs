@@ -223,6 +223,23 @@ pub struct NoiseAndGradient {
     pub max: f32,
 }
 
+/// f64 twin of [`NoiseAndGradient`] (issue #24), returned by the
+/// `generate_with_derivative_64` methods. Same layout and sample-space gradient
+/// convention, in double precision.
+#[derive(Clone, Debug)]
+pub struct NoiseAndGradient64 {
+    /// Noise values, one per grid sample, row-major.
+    pub values: Vec<f64>,
+    /// Flattened per-sample gradient vectors, `stride` components each.
+    pub gradients: Vec<f64>,
+    /// Number of gradient components per sample (equals the noise dimensionality).
+    pub stride: usize,
+    /// Minimum value in `values`.
+    pub min: f64,
+    /// Maximum value in `values`.
+    pub max: f64,
+}
+
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
     pub fn get_1d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
@@ -552,6 +569,196 @@ pub fn get_6d_turbulence_gradient(settings: &TurbulenceSettings) -> NoiseAndGrad
         noise_helpers_32::get_6d_fractal_gradient::<simdeez::scalar::Scalar, TurbulenceSettings>(
             settings,
         )
+    }
+}
+
+// f64 value + gradient. One runtime-dispatched wrapper per variant dispatches
+// the dimension internally to the generic `noise_helpers_64` helpers.
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_gradient_64(settings: &GradientSettings) -> NoiseAndGradient64 {
+        match settings.get_dimensions().dim {
+            1 => noise_helpers_64::get_1d_fractal_gradient::<S, GradientSettings>(settings),
+            2 => noise_helpers_64::get_2d_fractal_gradient::<S, GradientSettings>(settings),
+            3 => noise_helpers_64::get_3d_fractal_gradient::<S, GradientSettings>(settings),
+            4 => noise_helpers_64::get_4d_fractal_gradient::<S, GradientSettings>(settings),
+            5 => noise_helpers_64::get_5d_fractal_gradient::<S, GradientSettings>(settings),
+            6 => noise_helpers_64::get_6d_fractal_gradient::<S, GradientSettings>(settings),
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_gradient_64(settings: &GradientSettings) -> NoiseAndGradient64 {
+    unsafe {
+        match settings.get_dimensions().dim {
+            1 => noise_helpers_64::get_1d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                GradientSettings,
+            >(settings),
+            2 => noise_helpers_64::get_2d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                GradientSettings,
+            >(settings),
+            3 => noise_helpers_64::get_3d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                GradientSettings,
+            >(settings),
+            4 => noise_helpers_64::get_4d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                GradientSettings,
+            >(settings),
+            5 => noise_helpers_64::get_5d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                GradientSettings,
+            >(settings),
+            6 => noise_helpers_64::get_6d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                GradientSettings,
+            >(settings),
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
+    }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_fbm_gradient_64(settings: &FbmSettings) -> NoiseAndGradient64 {
+        match settings.get_dimensions().dim {
+            1 => noise_helpers_64::get_1d_fractal_gradient::<S, FbmSettings>(settings),
+            2 => noise_helpers_64::get_2d_fractal_gradient::<S, FbmSettings>(settings),
+            3 => noise_helpers_64::get_3d_fractal_gradient::<S, FbmSettings>(settings),
+            4 => noise_helpers_64::get_4d_fractal_gradient::<S, FbmSettings>(settings),
+            5 => noise_helpers_64::get_5d_fractal_gradient::<S, FbmSettings>(settings),
+            6 => noise_helpers_64::get_6d_fractal_gradient::<S, FbmSettings>(settings),
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_fbm_gradient_64(settings: &FbmSettings) -> NoiseAndGradient64 {
+    unsafe {
+        match settings.get_dimensions().dim {
+            1 => noise_helpers_64::get_1d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+                settings,
+            ),
+            2 => noise_helpers_64::get_2d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+                settings,
+            ),
+            3 => noise_helpers_64::get_3d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+                settings,
+            ),
+            4 => noise_helpers_64::get_4d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+                settings,
+            ),
+            5 => noise_helpers_64::get_5d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+                settings,
+            ),
+            6 => noise_helpers_64::get_6d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+                settings,
+            ),
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
+    }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_ridge_gradient_64(settings: &RidgeSettings) -> NoiseAndGradient64 {
+        match settings.get_dimensions().dim {
+            1 => noise_helpers_64::get_1d_fractal_gradient::<S, RidgeSettings>(settings),
+            2 => noise_helpers_64::get_2d_fractal_gradient::<S, RidgeSettings>(settings),
+            3 => noise_helpers_64::get_3d_fractal_gradient::<S, RidgeSettings>(settings),
+            4 => noise_helpers_64::get_4d_fractal_gradient::<S, RidgeSettings>(settings),
+            5 => noise_helpers_64::get_5d_fractal_gradient::<S, RidgeSettings>(settings),
+            6 => noise_helpers_64::get_6d_fractal_gradient::<S, RidgeSettings>(settings),
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_ridge_gradient_64(settings: &RidgeSettings) -> NoiseAndGradient64 {
+    unsafe {
+        match settings.get_dimensions().dim {
+            1 => {
+                noise_helpers_64::get_1d_fractal_gradient::<simdeez::scalar::Scalar, RidgeSettings>(
+                    settings,
+                )
+            }
+            2 => {
+                noise_helpers_64::get_2d_fractal_gradient::<simdeez::scalar::Scalar, RidgeSettings>(
+                    settings,
+                )
+            }
+            3 => {
+                noise_helpers_64::get_3d_fractal_gradient::<simdeez::scalar::Scalar, RidgeSettings>(
+                    settings,
+                )
+            }
+            4 => {
+                noise_helpers_64::get_4d_fractal_gradient::<simdeez::scalar::Scalar, RidgeSettings>(
+                    settings,
+                )
+            }
+            5 => {
+                noise_helpers_64::get_5d_fractal_gradient::<simdeez::scalar::Scalar, RidgeSettings>(
+                    settings,
+                )
+            }
+            6 => {
+                noise_helpers_64::get_6d_fractal_gradient::<simdeez::scalar::Scalar, RidgeSettings>(
+                    settings,
+                )
+            }
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
+    }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_turbulence_gradient_64(settings: &TurbulenceSettings) -> NoiseAndGradient64 {
+        match settings.get_dimensions().dim {
+            1 => noise_helpers_64::get_1d_fractal_gradient::<S, TurbulenceSettings>(settings),
+            2 => noise_helpers_64::get_2d_fractal_gradient::<S, TurbulenceSettings>(settings),
+            3 => noise_helpers_64::get_3d_fractal_gradient::<S, TurbulenceSettings>(settings),
+            4 => noise_helpers_64::get_4d_fractal_gradient::<S, TurbulenceSettings>(settings),
+            5 => noise_helpers_64::get_5d_fractal_gradient::<S, TurbulenceSettings>(settings),
+            6 => noise_helpers_64::get_6d_fractal_gradient::<S, TurbulenceSettings>(settings),
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_turbulence_gradient_64(settings: &TurbulenceSettings) -> NoiseAndGradient64 {
+    unsafe {
+        match settings.get_dimensions().dim {
+            1 => noise_helpers_64::get_1d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                TurbulenceSettings,
+            >(settings),
+            2 => noise_helpers_64::get_2d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                TurbulenceSettings,
+            >(settings),
+            3 => noise_helpers_64::get_3d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                TurbulenceSettings,
+            >(settings),
+            4 => noise_helpers_64::get_4d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                TurbulenceSettings,
+            >(settings),
+            5 => noise_helpers_64::get_5d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                TurbulenceSettings,
+            >(settings),
+            6 => noise_helpers_64::get_6d_fractal_gradient::<
+                simdeez::scalar::Scalar,
+                TurbulenceSettings,
+            >(settings),
+            d => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
     }
 }
 
