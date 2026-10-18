@@ -247,6 +247,8 @@ pub fn backend() -> String {
 
 ## Viewer and CLI
 
+![The simdnoise viewer](viewer/viewer.png)
+
 Two workspace apps are included:
 
 - [`viewer/`](viewer/) — an interactive Slint inspector with a live preview and
