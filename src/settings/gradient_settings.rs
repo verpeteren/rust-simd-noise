@@ -2,21 +2,22 @@ use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
 use crate::noise::simplex_32::{
-    simplex_1d, simplex_2d, simplex_3d, simplex_4d, simplex_5d, simplex_6d,
+    simplex_1d, simplex_1d_deriv, simplex_2d, simplex_2d_deriv, simplex_3d, simplex_3d_deriv,
+    simplex_4d, simplex_4d_deriv, simplex_5d, simplex_5d_deriv, simplex_6d, simplex_6d_deriv,
 };
 use crate::noise::simplex_64::{
     simplex_1d as simplex_1d_f64, simplex_2d as simplex_2d_f64, simplex_3d as simplex_3d_f64,
     simplex_4d as simplex_4d_f64, simplex_5d as simplex_5d_f64, simplex_6d as simplex_6d_f64,
 };
 pub use crate::noise_dimensions::NoiseDimensions;
-use crate::noise_helpers_32::Sample32;
+use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
     get_1d_gradient, get_1d_noise, get_1d_scaled_noise, get_2d_gradient, get_2d_noise,
-    get_2d_scaled_noise, get_3d_gradient, get_3d_noise, get_3d_scaled_noise, get_4d_noise,
-    get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise,
-    NoiseAndGradient,
+    get_2d_scaled_noise, get_3d_gradient, get_3d_noise, get_3d_scaled_noise, get_4d_gradient,
+    get_4d_noise, get_4d_scaled_noise, get_5d_gradient, get_5d_noise, get_5d_scaled_noise,
+    get_6d_gradient, get_6d_noise, get_6d_scaled_noise, NoiseAndGradient,
 };
 
 use crate::settings::Settings;
@@ -379,6 +380,59 @@ impl<S: Simd> Sample32<S> for GradientSettings {
     }
 }
 
+impl<S: Simd> SampleFractalDeriv32<S> for GradientSettings {
+    #[inline(always)]
+    fn sample_1d_deriv(&self, x: S::Vf32) -> (S::Vf32, S::Vf32) {
+        simplex_1d_deriv::<S>(x, self.dim.seed)
+    }
+
+    #[inline(always)]
+    fn sample_2d_deriv(&self, x: S::Vf32, y: S::Vf32) -> (S::Vf32, [S::Vf32; 2]) {
+        simplex_2d_deriv::<S>(x, y, self.dim.seed)
+    }
+
+    #[inline(always)]
+    fn sample_3d_deriv(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> (S::Vf32, [S::Vf32; 3]) {
+        simplex_3d_deriv::<S>(x, y, z, self.dim.seed)
+    }
+
+    #[inline(always)]
+    fn sample_4d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 4]) {
+        simplex_4d_deriv::<S>(x, y, z, w, self.dim.seed)
+    }
+
+    #[inline(always)]
+    fn sample_5d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 5]) {
+        simplex_5d_deriv::<S>(x, y, z, w, u, self.dim.seed)
+    }
+
+    #[inline(always)]
+    fn sample_6d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+        t: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 6]) {
+        simplex_6d_deriv::<S>(x, y, z, w, u, t, self.dim.seed)
+    }
+}
+
 impl<S: Simd> Sample64<S> for GradientSettings {
     #[inline(always)]
     fn sample_1d(&self, x: S::Vf64) -> S::Vf64 {
@@ -431,22 +485,20 @@ impl GradientSettings {
     /// finite-difference sampling. See [`NoiseAndGradient`] for the exact layout
     /// and coordinate convention.
     ///
-    /// Only 1D, 2D and 3D are implemented so far (the dimensions for which the
-    /// simplex derivative kernels exist); higher dimensions and the fractal
-    /// variants are future work.
+    /// Supported for all dimensions 1D–6D.
     ///
     /// # Panics
-    /// Panics if the configured dimensionality is not 1, 2 or 3.
+    /// Panics if the configured dimensionality is not in 1..=6.
     pub fn generate_with_derivative(self) -> NoiseAndGradient {
         let d = self.dim.dim;
         match d {
             1 => get_1d_gradient(&self),
             2 => get_2d_gradient(&self),
             3 => get_3d_gradient(&self),
-            _ => panic!(
-                "generate_with_derivative is only implemented for 1-3 dimensions (got {})",
-                d
-            ),
+            4 => get_4d_gradient(&self),
+            5 => get_5d_gradient(&self),
+            6 => get_6d_gradient(&self),
+            _ => panic!("generate_with_derivative: invalid dimension {}", d),
         }
     }
 }

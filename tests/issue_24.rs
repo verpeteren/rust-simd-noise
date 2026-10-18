@@ -175,12 +175,3 @@ fn gradient_3d_matches_finite_difference() {
         avg_mag
     );
 }
-
-#[test]
-#[should_panic]
-fn gradient_4d_is_unsupported() {
-    let mut s = NoiseBuilder::gradient_4d(4, 4, 4, 4);
-    s.with_seed(1);
-    // Only 1-3 dimensions have derivative kernels so far.
-    let _ = s.generate_with_derivative();
-}

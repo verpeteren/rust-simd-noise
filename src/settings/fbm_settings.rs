@@ -1,20 +1,23 @@
 use simdeez::prelude::*;
 
 use crate::dimensional_being::DimensionalBeing;
-use crate::noise::fbm_32::{fbm_1d, fbm_2d, fbm_3d, fbm_4d, fbm_5d, fbm_6d};
+use crate::noise::fbm_32::{
+    fbm_1d, fbm_1d_deriv, fbm_2d, fbm_2d_deriv, fbm_3d, fbm_3d_deriv, fbm_4d, fbm_4d_deriv, fbm_5d,
+    fbm_5d_deriv, fbm_6d, fbm_6d_deriv,
+};
 use crate::noise::fbm_64::{
     fbm_1d as fbm_1d_f64, fbm_2d as fbm_2d_f64, fbm_3d as fbm_3d_f64, fbm_4d as fbm_4d_f64,
     fbm_5d as fbm_5d_f64, fbm_6d as fbm_6d_f64,
 };
 pub use crate::noise_dimensions::NoiseDimensions;
-use crate::noise_helpers_32::Sample32;
+use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
     get_1d_fbm_gradient, get_1d_noise, get_1d_scaled_noise, get_2d_fbm_gradient, get_2d_noise,
-    get_2d_scaled_noise, get_3d_fbm_gradient, get_3d_noise, get_3d_scaled_noise, get_4d_noise,
-    get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise,
-    NoiseAndGradient,
+    get_2d_scaled_noise, get_3d_fbm_gradient, get_3d_noise, get_3d_scaled_noise,
+    get_4d_fbm_gradient, get_4d_noise, get_4d_scaled_noise, get_5d_fbm_gradient, get_5d_noise,
+    get_5d_scaled_noise, get_6d_fbm_gradient, get_6d_noise, get_6d_scaled_noise, NoiseAndGradient,
 };
 
 use super::{Settings, SimplexSettings};
@@ -435,6 +438,110 @@ impl<S: Simd> Sample32<S> for FbmSettings {
     }
 }
 
+impl<S: Simd> SampleFractalDeriv32<S> for FbmSettings {
+    #[inline(always)]
+    fn sample_1d_deriv(&self, x: S::Vf32) -> (S::Vf32, S::Vf32) {
+        fbm_1d_deriv::<S>(
+            x,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_2d_deriv(&self, x: S::Vf32, y: S::Vf32) -> (S::Vf32, [S::Vf32; 2]) {
+        fbm_2d_deriv::<S>(
+            x,
+            y,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_3d_deriv(&self, x: S::Vf32, y: S::Vf32, z: S::Vf32) -> (S::Vf32, [S::Vf32; 3]) {
+        fbm_3d_deriv::<S>(
+            x,
+            y,
+            z,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_4d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 4]) {
+        fbm_4d_deriv::<S>(
+            x,
+            y,
+            z,
+            w,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_5d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 5]) {
+        fbm_5d_deriv::<S>(
+            x,
+            y,
+            z,
+            w,
+            u,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+
+    #[inline(always)]
+    fn sample_6d_deriv(
+        &self,
+        x: S::Vf32,
+        y: S::Vf32,
+        z: S::Vf32,
+        w: S::Vf32,
+        u: S::Vf32,
+        t: S::Vf32,
+    ) -> (S::Vf32, [S::Vf32; 6]) {
+        fbm_6d_deriv::<S>(
+            x,
+            y,
+            z,
+            w,
+            u,
+            t,
+            S::Vf32::set1(self.lacunarity),
+            S::Vf32::set1(self.gain),
+            self.octaves,
+            self.dim.seed,
+        )
+    }
+}
+
 impl<S: Simd> Sample64<S> for FbmSettings {
     #[inline(always)]
     fn sample_1d(&self, x: S::Vf64) -> S::Vf64 {
@@ -539,21 +646,20 @@ impl FbmSettings {
     /// noise without finite differencing. See [`NoiseAndGradient`] for the exact
     /// layout and coordinate convention.
     ///
-    /// Only 1D, 2D and 3D are implemented so far; higher dimensions are future
-    /// work.
+    /// Supported for all dimensions 1D–6D.
     ///
     /// # Panics
-    /// Panics if the configured dimensionality is not 1, 2 or 3.
+    /// Panics if the configured dimensionality is not in 1..=6.
     pub fn generate_with_derivative(self) -> NoiseAndGradient {
         let d = self.dim.dim;
         match d {
             1 => get_1d_fbm_gradient(&self),
             2 => get_2d_fbm_gradient(&self),
             3 => get_3d_fbm_gradient(&self),
-            _ => panic!(
-                "generate_with_derivative is only implemented for 1-3 dimensions (got {})",
-                d
-            ),
+            4 => get_4d_fbm_gradient(&self),
+            5 => get_5d_fbm_gradient(&self),
+            6 => get_6d_fbm_gradient(&self),
+            _ => panic!("generate_with_derivative: invalid dimension {}", d),
         }
     }
 }
