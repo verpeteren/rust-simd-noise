@@ -21,13 +21,14 @@ pub fn ridge_1d<S: Simd>(
     for _ in 1..(n as usize) {
         x *= lacunarity;
         amp *= gain;
-        result = result + S::Vf64::set1(1.0) - simplex_1d::<S>(x, seed).abs();
+        result += S::Vf64::neg_mul_add(simplex_1d::<S>(x, seed).abs(), amp, S::Vf64::set1(1.0));
     }
 
     if frac > 0.0 {
         x *= lacunarity;
-        result +=
-            (S::Vf64::set1(1.0) - simplex_1d::<S>(x, seed).abs()) * S::Vf64::set1(frac.into());
+        amp *= gain;
+        result += S::Vf64::neg_mul_add(simplex_1d::<S>(x, seed).abs(), amp, S::Vf64::set1(1.0))
+            * S::Vf64::set1(frac.into());
     }
 
     result

@@ -18,17 +18,52 @@ use crate::{
 
 use super::{Settings, SimplexSettings};
 
+/// **Fractional Brownian motion (fBm)** — the classic layered "natural" noise.
+///
+/// fBm sums several [octaves](Self::octaves) of plain gradient noise
+/// ([`GradientSettings`](crate::GradientSettings)), each at a different frequency and amplitude, into one
+/// field. The big low-frequency octaves give the overall shape and the small
+/// high-frequency ones add fine detail, the way real terrain, clouds, and many
+/// textures combine features at many scales. It is the most common general-purpose
+/// noise — a good default when you want something that simply looks natural.
+///
+/// The three knobs below ([`octaves`](Self::octaves), [`lacunarity`](Self::lacunarity),
+/// [`gain`](Self::gain)) control that layering. See
+/// [fractional Brownian motion](https://en.wikipedia.org/wiki/Fractional_Brownian_motion).
 #[derive(Copy, Clone)]
 pub struct FbmSettings {
     dim: NoiseDimensions,
+    /// Frequency along the X axis: how quickly the base noise varies per sample
+    /// step (this is the frequency of the *first* octave). Higher = finer detail,
+    /// lower = larger features. See [`GradientSettings::freq_x`](crate::GradientSettings::freq_x).
     pub freq_x: f32,
+    /// Frequency along the Y axis; see [`freq_x`](Self::freq_x).
     pub freq_y: f32,
+    /// Frequency along the Z axis; see [`freq_x`](Self::freq_x).
     pub freq_z: f32,
+    /// Frequency along the 4th (W) axis; see [`freq_x`](Self::freq_x).
     pub freq_w: f32,
+    /// Frequency along the 5th (U) axis; see [`freq_x`](Self::freq_x).
     pub freq_u: f32,
+    /// Frequency along the 6th (V) axis; see [`freq_x`](Self::freq_x).
     pub freq_v: f32,
+    /// Frequency ratio between successive octaves: each octave multiplies the
+    /// sample coordinates by this factor (`coord *= lacunarity` per octave), so it
+    /// controls how much finer (or coarser) each layer is than the last. The
+    /// conventional choice is `> 1` (e.g. `2.0`, doubling the frequency each
+    /// octave); this crate's default is `0.5`. Larger gaps between octave
+    /// frequencies look rougher. See [Lacunarity](https://en.wikipedia.org/wiki/Lacunarity).
     pub lacunarity: f32,
+    /// Amplitude ratio between successive octaves, a.k.a. *persistence*: each
+    /// octave's contribution is multiplied by this factor (`amplitude *= gain` per
+    /// octave). The conventional choice is `< 1` (e.g. `0.5`) so each finer octave
+    /// adds less, keeping the result smooth; this crate's default is `2.0`.
+    /// Together with `lacunarity` it sets how rough vs. smooth the field looks.
     pub gain: f32,
+    /// How many layers of noise to sum. `1` is plain gradient noise; each extra
+    /// octave adds another, more detailed layer (and costs another noise
+    /// evaluation per sample). A fractional value blends in a partial last octave.
+    /// Typical values are `1`–`8`; the default is `3`.
     pub octaves: f32,
 }
 

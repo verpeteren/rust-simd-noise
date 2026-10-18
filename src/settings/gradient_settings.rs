@@ -20,14 +20,37 @@ use crate::{
 
 use crate::settings::Settings;
 
+/// Plain **gradient (simplex) noise** — the smooth, cloud-like "base" noise.
+///
+/// Gradient noise interpolates between pseudo-random gradients placed on a grid,
+/// producing a continuous, organically wavy field with no sharp edges and no
+/// visible grid alignment (this crate uses the *simplex* construction, which
+/// avoids the directional artifacts of classic Perlin noise). It is the simplest
+/// variant and the building block the fractal variants ([`FbmSettings`](crate::FbmSettings),
+/// [`RidgeSettings`](crate::RidgeSettings), [`TurbulenceSettings`](crate::TurbulenceSettings)) stack on top of.
+///
+/// Reach for it when you want one smooth layer of noise — gentle gradients,
+/// a single blobby mask, a wobble to offset something by. For richer, more
+/// natural detail (terrain, clouds, marble) layer it with a fractal variant.
+///
+/// See [Gradient noise](https://en.wikipedia.org/wiki/Gradient_noise).
 #[derive(Copy, Clone)]
 pub struct GradientSettings {
     dim: NoiseDimensions,
+    /// Frequency along the X axis: how quickly the noise varies per sample step.
+    /// Higher means finer, busier detail (features packed closer together); lower
+    /// means larger, smoother blobs. Think of it as the inverse of feature size.
     pub freq_x: f32,
+    /// Frequency along the Y axis; see [`freq_x`](Self::freq_x). Setting the axes
+    /// to different values stretches or squashes the pattern in that direction.
     pub freq_y: f32,
+    /// Frequency along the Z axis; see [`freq_x`](Self::freq_x).
     pub freq_z: f32,
+    /// Frequency along the 4th (W) axis; see [`freq_x`](Self::freq_x).
     pub freq_w: f32,
+    /// Frequency along the 5th (U) axis; see [`freq_x`](Self::freq_x).
     pub freq_u: f32,
+    /// Frequency along the 6th (V) axis; see [`freq_x`](Self::freq_x).
     pub freq_v: f32,
 }
 

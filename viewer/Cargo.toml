@@ -1,0 +1,34 @@
+[package]
+name = "simdnoise-viewer"
+version = "0.1.0"
+authors = ["Peter Reijnders <peter.reijnders@verpeteren.nl>"]
+description = "Interactive Slint viewer/inspector for the simdnoise crate"
+license = "Apache-2.0/MIT"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "viewer"
+path = "src/main.rs"
+
+[dependencies]
+simdnoise = { path = ".." }
+# Reuse the `generate` tool's CLI definitions (Args/resolve/Opts) so the viewer
+# accepts the same parameters and opens pre-populated. default-features = false
+# keeps the binary-only minifb display dependency out of the viewer build.
+simdnoise-generate = { path = "../generate", default-features = false }
+# For `Args::parse()` (the `clap::Parser` trait); kept in lockstep with generate's clap.
+clap = { version = "4.6.7", features = ["derive"] }
+# Direct dependency so the viewer can name engine types (e.g. simdeez::scalar::Scalar)
+# for the forced-engine dropdown. Kept in lockstep with simdnoise's own simdeez dep.
+simdeez = "3.0.1"
+slint = "1.8"
+# Clipboard access for the "copy point JSON" button.
+arboard = "3.4"
+# Native "Save image" file dialog.
+rfd = "0.15"
+# PNG encoding for the saved image.
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[build-dependencies]
+slint-build = "1.8"

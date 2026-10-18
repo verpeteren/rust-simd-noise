@@ -1,0 +1,30 @@
+[package]
+name = "simdnoise-generate"
+version = "1.0.0"
+authors = [
+    "Jack Mott <jack.mott@gmail.com>",
+    "Peter Reijnders <peter.reijnders@verpeteren.nl>",
+]
+description = "CLI noise generator/viewer for simdnoise (mirrors the Slint viewer options)"
+license = "Apache-2.0/MIT"
+repository = "https://github.com/verpeteren/rust-simd-noise"
+categories = ["game-engines", "multimedia::images"]
+edition = "2018"
+
+
+[[bin]]
+name = "generate"
+path = "src/main.rs"
+# The binary needs the minifb display window; the library (Args/resolve/generate,
+# reused by the viewer) does not, so library-only dependents can turn it off.
+required-features = ["display"]
+
+[features]
+default = ["display"]
+# Pulls in minifb for the `generate` binary's preview window.
+display = ["dep:minifb"]
+
+[dependencies]
+simdnoise = { path = ".." }
+minifb = { version = "0.29.0", optional = true }
+clap = { version = "4.6.7", features = ["derive"] }

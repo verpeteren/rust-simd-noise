@@ -21,12 +21,13 @@ pub fn turbulence_1d<S: Simd>(
     for _ in 1..(n as usize) {
         x *= lacunarity;
         amp *= gain;
-        result += simplex_1d::<S>(x, seed).abs();
+        result += (simplex_1d::<S>(x, seed) * amp).abs();
     }
 
     if frac > 0.0 {
         x *= lacunarity;
-        result += simplex_1d::<S>(x, seed).abs() * S::Vf64::set1(frac.into());
+        amp *= gain;
+        result += (simplex_1d::<S>(x, seed) * amp).abs() * S::Vf64::set1(frac.into());
     }
 
     result

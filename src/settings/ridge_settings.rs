@@ -18,17 +18,47 @@ use crate::{
 
 use super::{Settings, SimplexSettings};
 
+/// **Ridged noise** — fBm's sharp-crested cousin, for ridgelines and creases.
+///
+/// Like [`FbmSettings`](crate::FbmSettings) it sums several [octaves](Self::octaves) of gradient
+/// noise, but each octave contributes `1 - |noise|` instead of the raw value.
+/// Taking the absolute value folds the field at every zero-crossing, and the
+/// `1 -` flips those folds into **sharp peaks with smooth valleys** between them.
+/// The result looks like mountain ridgelines, canyon networks, river/vein
+/// patterns, or cracks — anywhere you want crisp lines rather than soft blobs.
+///
+/// Note that (unlike fBm) output is biased positive and can exceed 1, so you will
+/// usually want `generate_scaled` / a scaling pass. See [`FbmSettings`](crate::FbmSettings) for the
+/// shared layering knobs.
 #[derive(Copy, Clone)]
 pub struct RidgeSettings {
     dim: NoiseDimensions,
+    /// Frequency along the X axis of the first octave: higher = finer detail,
+    /// lower = larger features. See [`GradientSettings::freq_x`](crate::GradientSettings::freq_x).
     pub freq_x: f32,
+    /// Frequency along the Y axis; see [`freq_x`](Self::freq_x).
     pub freq_y: f32,
+    /// Frequency along the Z axis; see [`freq_x`](Self::freq_x).
     pub freq_z: f32,
+    /// Frequency along the 4th (W) axis; see [`freq_x`](Self::freq_x).
     pub freq_w: f32,
+    /// Frequency along the 5th (U) axis; see [`freq_x`](Self::freq_x).
     pub freq_u: f32,
+    /// Frequency along the 6th (V) axis; see [`freq_x`](Self::freq_x).
     pub freq_v: f32,
+    /// Frequency ratio between successive octaves (`coord *= lacunarity` per
+    /// octave): how much finer/coarser each layer is than the last. Default `0.5`.
+    /// See [`FbmSettings::lacunarity`](crate::FbmSettings::lacunarity) and
+    /// [Lacunarity](https://en.wikipedia.org/wiki/Lacunarity).
     pub lacunarity: f32,
+    /// Amplitude ratio between successive octaves (*persistence*): the running
+    /// amplitude starts at 1 and is multiplied by `gain` each octave, scaling that
+    /// octave's noise before the `1 - |…|` fold. Default `2.0`. See
+    /// [`FbmSettings::gain`](crate::FbmSettings::gain).
     pub gain: f32,
+    /// How many octaves to sum: `1` is a single ridged layer; more octaves add
+    /// finer ridges (and cost more). Fractional values blend a partial last
+    /// octave. Default `3`. See [`FbmSettings::octaves`](crate::FbmSettings::octaves).
     pub octaves: f32,
 }
 

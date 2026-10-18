@@ -1,0 +1,26 @@
+[package]
+name = "simdnoise-generate-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+
+[dependencies.simdnoise-generate]
+path = ".."
+default-features = false
+
+[[bin]]
+name = "generate_params"
+path = "fuzz_targets/generate_params.rs"
+test = false
+doc = false
+bench = false
+
+# Keep this crate out of the parent workspace (nightly + libFuzzer only).
+[workspace]
