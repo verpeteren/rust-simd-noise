@@ -34,10 +34,14 @@ name = "benchmarks"
 harness = false
 
 [workspace]
-members = ["generate"]
-# Keep the root lib (".") in the default set alongside the member app so a bare
-# `cargo run` lists the binaries and `cargo test` still runs the library suite.
-default-members = [".", "generate"]
+members = ["generate", "viewer"]
+# Include the member apps (and the root lib, ".") in the default set so their
+# binaries are discoverable from the workspace root:
+#   cargo run --bin viewer      # the Slint inspector
+#   cargo run --bin generate    # the minifb CLI generator
+# A bare `cargo run` then lists the available binaries. Keeping "." in the set
+# means `cargo test` still runs the library's own test suite by default.
+default-members = [".", "generate", "viewer"]
 # `generate/fuzz` is a cargo-fuzz crate (its own workspace, nightly + libFuzzer);
 # see generate/fuzz/README.md.
 exclude = ["generate/fuzz"]

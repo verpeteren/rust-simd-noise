@@ -1,0 +1,749 @@
+import { ComboBox, SpinBox, Slider, GroupBox, ScrollView, HorizontalBox, VerticalBox, Button, TextEdit } from "std-widgets.slint";
+
+// One domain-axis row: extent (int), offset and frequency (float). Two-way
+// bindings (<=>) throughout so both user edits and Rust-driven changes (Reset,
+// Play animation) always reflect in the widgets — a one-way `value:` binding is
+// overwritten the first time the widget writes to itself, and then stops tracking.
+component AxisRow inherits HorizontalBox {
+    in property <string> label;
+    in property <bool> active: true;
+    // Fixed higher axes (w/u/v) show a cross-section "slice" slider; x/y/z don't.
+    in property <bool> has-slice: false;
+    in-out property <int> extent;
+    in-out property <float> offset;
+    in-out property <float> freq;
+    in-out property <float> slice;
+
+    spacing: 6px;
+    padding: 0px;
+
+    Text {
+        text: root.label;
+        width: 104px;
+        vertical-alignment: center;
+        color: root.active ? white : gray;
+    }
+    SpinBox {
+        enabled: root.active;
+        minimum: 1;
+        maximum: 4096;
+        width: 92px;
+        value <=> root.extent;
+        Tooltip {
+            text: @markdown("Extent: how many samples to generate along this axis (its grid size). The total number of values is the product of the active axes' extents.");
+        }
+    }
+    // Offset shifts the sampling origin in grid/pixel units, so panning a whole
+    // image needs a range as wide as the axis itself (±extent).
+    Slider {
+        enabled: root.active;
+        minimum: -1.0 * root.extent;
+        maximum: 1.0 * root.extent;
+        value <=> root.offset;
+        Tooltip {
+            text: @markdown("Offset: shifts the sampling origin along this axis, in pixel units — i.e. pans the pattern. The range is ±extent, enough to pan a whole image.");
+        }
+    }
+    // Live numeric readout so an offset change — whether dragged or driven by the
+    // Play animation — is always visible.
+    Text {
+        text: round(root.offset * 1000) / 1000;
+        width: 44px;
+        horizontal-alignment: right;
+        vertical-alignment: center;
+        color: root.active ? white : gray;
+    }
+    Slider {
+        enabled: root.active;
+        minimum: 0.001;
+        maximum: 0.5;
+        value <=> root.freq;
+        Tooltip {
+            text: @markdown("Frequency: how fast the noise varies along this axis. Higher = finer, busier detail; lower = larger, smoother features.");
+        }
+    }
+    Text {
+        text: round(root.freq * 1000) / 1000;
+        width: 44px;
+        horizontal-alignment: right;
+        vertical-alignment: center;
+        color: root.active ? white : gray;
+    }
+    // Slice column: the cross-section index along this fixed higher axis. A plain
+    // placeholder keeps x/y/z rows aligned with the header.
+    if root.has-slice: Slider {
+        enabled: root.active;
+        minimum: 0;
+        maximum: max(root.extent - 1, 0);
+        value <=> root.slice;
+        Tooltip {
+            text: @markdown("Slice: which cross-section index along this fixed higher axis is shown in the 2D view.");
+        }
+    }
+    if !root.has-slice: Rectangle { horizontal-stretch: 1; }
+    if root.has-slice: Text {
+        text: round(root.slice);
+        width: 44px;
+        horizontal-alignment: right;
+        vertical-alignment: center;
+        color: root.active ? white : gray;
+    }
+    if !root.has-slice: Rectangle { width: 44px; }
+}
+
+component LabeledSlider inherits HorizontalBox {
+    in property <string> label;
+    in property <string> help;
+    in property <float> minimum;
+    in property <float> maximum;
+    in-out property <float> value;
+    spacing: 6px;
+    padding: 0px;
+    Text {
+        text: root.label;
+        width: 90px;
+        vertical-alignment: center;
+    }
+    Slider {
+        minimum: root.minimum;
+        maximum: root.maximum;
+        value <=> root.value;
+        if root.help != "": Tooltip { text: @markdown("\{root.help}"); }
+    }
+    Text {
+        text: round(root.value * 1000) / 1000;
+        width: 52px;
+        vertical-alignment: center;
+    }
+}
+
+export component AppWindow inherits Window {
+    title: "simdnoise viewer";
+    preferred-width: 1340px;
+    // Open tall enough to show the fullest side panel (Cellular2) without
+    // scrolling; the panel is in a ScrollView so shorter screens still reach
+    // everything.
+    preferred-height: 1040px;
+    min-width: 960px;
+    min-height: 720px;
+
+    // ---- Noise ----
+    in-out property <int> algo-idx: 3; // Turbulence by default (2D) — looks good on open
+    in-out property <int> float-idx: 0;
+    in-out property <int> seed: 1;
+
+    // ---- Domain / grid ----
+    in-out property <int> dim: 2;
+    in-out property <int> ext0: 256;
+    in-out property <int> ext1: 256;
+    in-out property <int> ext2: 8;
+    in-out property <int> ext3: 4;
+    in-out property <int> ext4: 2;
+    in-out property <int> ext5: 2;
+    in-out property <float> off0: 0;
+    in-out property <float> off1: 0;
+    in-out property <float> off2: 0;
+    in-out property <float> off3: 0;
+    in-out property <float> off4: 0;
+    in-out property <float> off5: 0;
+    in-out property <float> frq0: 0.02;
+    in-out property <float> frq1: 0.02;
+    in-out property <float> frq2: 0.02;
+    in-out property <float> frq3: 0.02;
+    in-out property <float> frq4: 0.02;
+    in-out property <float> frq5: 0.02;
+
+    // ---- Fractal ----
+    in-out property <float> octaves: 3;
+    in-out property <float> lacunarity: 0.5;
+    in-out property <float> gain: 2.0;
+
+    // ---- Cellular ----
+    in-out property <float> jitter: 0.25;
+    in-out property <int> dist-idx: 0;
+    in-out property <int> ret-idx: 1;
+    in-out property <int> ret2-idx: 0;
+    in-out property <int> index0: 0;
+    in-out property <int> index1: 1;
+
+    // ---- Output ----
+    in-out property <int> scaling-idx: 0;
+    in-out property <float> scale-min: -1;
+    in-out property <float> scale-max: 1;
+    in-out property <int> quant-idx: 0;
+
+    // ---- View ----
+    in-out property <int> colormap-idx: 0;
+    in-out property <int> engine-idx: 0;
+    in-out property <[string]> engine-model: ["auto"];
+    // Cross-section slice indices (as float, for the slice Sliders; Rust rounds).
+    in-out property <float> cross0: 0;
+    in-out property <float> cross1: 0;
+    in-out property <float> cross2: 0;
+
+    // ---- Animation (Play sweeps one axis' offset or freq over time; driven from Rust) ----
+    in-out property <bool> anim-playing: false;
+    // Which axis the Play control drives. Model is the active axes, kept in sync
+    // from Rust as `dim` changes.
+    in-out property <[string]> anim-axis-model: ["1 · x"];
+    in-out property <int> anim-axis-idx: 0;
+    // What Play drives: 0 = offset (pan), 1 = freq (zoom).
+    in-out property <int> anim-drive-idx: 0;
+    // 0..1; mapped to a rate in Rust.
+    in-out property <float> anim-speed: 0.3;
+    // The driven quantity's current value (offset or freq of the chosen axis).
+    // The scrubber binds to this two-way; Rust keeps it in sync (sync-t) and the
+    // scrubber / Play write back through `scrub`.
+    in-out property <float> anim-t: 0;
+    // Extent of the chosen animation axis, so the offset scrubber spans ±extent.
+    property <int> anim-axis-extent:
+        root.anim-axis-idx == 0 ? root.ext0 :
+        root.anim-axis-idx == 1 ? root.ext1 :
+        root.anim-axis-idx == 2 ? root.ext2 :
+        root.anim-axis-idx == 3 ? root.ext3 :
+        root.anim-axis-idx == 4 ? root.ext4 : root.ext5;
+
+    // ---- canvas / probe (set from Rust) ----
+    in-out property <image> canvas;
+    in-out property <bool> busy: true;
+    in-out property <int> img-w: 0;
+    in-out property <int> img-h: 0;
+    in-out property <string> probe-text: "";
+    in-out property <string> point-json: "";
+    // canvas TouchArea size, for the hover -> pixel mapping done in Rust.
+    out property <length> area-w: ta.width;
+    out property <length> area-h: ta.height;
+    // ms the last frame took to compute (0 for a cache hit); set from Rust.
+    in-out property <int> last-render-ms: 0;
+    // True for a debug build (rendering is much slower); set from Rust.
+    in-out property <bool> debug-build: false;
+
+    // Resizable side panel. Dragged via the splitter handle.
+    in-out property <length> panel-width: 660px;
+    property <length> drag-start-width;
+    property <length> drag-start-x;
+
+    callback regenerate();
+    callback reset();
+    callback submit();
+    callback save();
+    // Write the scrubber value (anim-t) onto the chosen axis' offset/freq.
+    callback scrub();
+    // Refresh anim-t from the chosen axis' current offset/freq (on axis/drive change).
+    callback sync-t();
+    // Re-evaluate the hover readout at the last cursor position (after a new frame).
+    callback reprobe();
+    // mouse position within the canvas TouchArea, in logical pixels.
+    callback point-hover(length, length);
+    callback point-click(length, length) -> bool;
+    callback copy(string);
+
+    changed anim-t => { root.scrub(); }
+    changed anim-axis-idx => { root.sync-t(); }
+    changed anim-drive-idx => { root.sync-t(); }
+    // A new frame landed: refresh the hover readout for a stationary cursor.
+    changed canvas => { root.reprobe(); }
+
+    // Any state change re-renders (Rust debounces + coalesces).
+    changed algo-idx => { root.regenerate(); }
+    changed float-idx => { root.regenerate(); }
+    changed seed => { root.regenerate(); }
+    changed dim => { root.regenerate(); }
+    changed ext0 => { root.regenerate(); }
+    changed ext1 => { root.regenerate(); }
+    changed ext2 => { root.regenerate(); }
+    changed ext3 => { root.regenerate(); }
+    changed ext4 => { root.regenerate(); }
+    changed ext5 => { root.regenerate(); }
+    changed off0 => { root.regenerate(); }
+    changed off1 => { root.regenerate(); }
+    changed off2 => { root.regenerate(); }
+    changed off3 => { root.regenerate(); }
+    changed off4 => { root.regenerate(); }
+    changed off5 => { root.regenerate(); }
+    changed frq0 => { root.regenerate(); }
+    changed frq1 => { root.regenerate(); }
+    changed frq2 => { root.regenerate(); }
+    changed frq3 => { root.regenerate(); }
+    changed frq4 => { root.regenerate(); }
+    changed frq5 => { root.regenerate(); }
+    changed octaves => { root.regenerate(); }
+    changed lacunarity => { root.regenerate(); }
+    changed gain => { root.regenerate(); }
+    changed jitter => { root.regenerate(); }
+    changed dist-idx => { root.regenerate(); }
+    changed ret-idx => { root.regenerate(); }
+    changed ret2-idx => { root.regenerate(); }
+    changed index0 => { root.regenerate(); }
+    changed index1 => { root.regenerate(); }
+    changed scaling-idx => { root.regenerate(); }
+    // Keep min <= max by clamping whichever thumb was dragged past the other
+    // (it stops at the other's value; the other thumb never jumps).
+    changed scale-min => {
+        if (root.scale-min > root.scale-max) {
+            root.scale-min = root.scale-max;
+        }
+        root.regenerate();
+    }
+    changed scale-max => {
+        if (root.scale-max < root.scale-min) {
+            root.scale-max = root.scale-min;
+        }
+        root.regenerate();
+    }
+    changed quant-idx => { root.regenerate(); }
+    changed colormap-idx => { root.regenerate(); }
+    changed engine-idx => { root.regenerate(); }
+    changed cross0 => { root.regenerate(); }
+    changed cross1 => { root.regenerate(); }
+    changed cross2 => { root.regenerate(); }
+
+    property <bool> is-fractal: root.algo-idx >= 1 && root.algo-idx <= 3;
+    property <bool> is-cellular: root.algo-idx >= 4;
+    property <bool> is-cellular2: root.algo-idx == 5;
+
+    // Pulsing busy indicator (Rectangle has no rotation-angle, so animate opacity).
+    property <float> pulse: root.busy ? 0.25 : 1.0;
+    animate pulse {
+        duration: 600ms;
+        iteration-count: -1;
+        direction: alternate;
+        easing: ease-in-out;
+    }
+
+    HorizontalBox {
+        padding: 8px;
+        spacing: 4px;
+
+        // ===== Side panel (resizable: drag the splitter handle) =====
+        Rectangle {
+            width: root.panel-width;
+            ScrollView {
+                width: 100%;
+                height: 100%;
+                VerticalBox {
+                spacing: 8px;
+                // Keep controls clear of the ScrollView's scrollbar on the right.
+                padding-right: 16px;
+
+                if root.debug-build: Text {
+                    text: "⚠ debug build — rendering is slow; build with --release for full speed";
+                    color: orange;
+                    wrap: word-wrap;
+                }
+
+                GroupBox {
+                    title: "Noise";
+                    VerticalBox {
+                        // Algorithm + Dimensions drive most of the UI and defaults,
+                        // so they sit together up top; Reset restores the rest.
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Algorithm"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                model: ["Gradient", "FBM", "Ridge", "Turbulence", "Cellular", "Cellular2"];
+                                current-index <=> root.algo-idx;
+                                Tooltip {
+                                    text: @markdown("Which noise algorithm to generate. Gradient = smooth base noise; FBM = layered natural noise; Ridge = sharp ridgelines; Turbulence = billowy; Cellular = Worley cells; Cellular2 = two-nearest-point Worley.");
+                                }
+                            }
+                            ComboBox {
+                                model: ["1D", "2D", "3D", "4D", "5D", "6D"];
+                                current-index: root.dim - 1;
+                                selected => { root.dim = self.current-index + 1; }
+                                Tooltip {
+                                    text: @markdown("Number of dimensions (1–6). Noise is sampled on a grid with this many axes; it sets which axis rows below are active.");
+                                }
+                            }
+                            Button { text: "Reset"; clicked => { root.reset(); } }
+                        }
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Value type"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                model: ["f32", "f64"];
+                                current-index <=> root.float-idx;
+                                Tooltip { text: @markdown("Floating-point precision of the computation: 32-bit (faster) or 64-bit."); }
+                            }
+                        }
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Seed"; width: 90px; vertical-alignment: center; }
+                            SpinBox {
+                                minimum: -2147483647;
+                                maximum: 2147483647;
+                                value <=> root.seed;
+                                Tooltip { text: @markdown("Seed for the pseudo-random gradients/cells. A different seed gives a completely different-looking field with the same character; the same seed always reproduces the same noise."); }
+                            }
+                        }
+                    }
+                }
+
+                GroupBox {
+                    title: "Domain / grid";
+                    VerticalBox {
+                        HorizontalBox {
+                            padding: 0px;
+                            spacing: 6px;
+                            Text { text: "axis"; width: 104px; color: gray; }
+                            Text { text: "extent"; width: 92px; color: gray; horizontal-alignment: center; }
+                            Text { text: "offset"; horizontal-stretch: 1; color: gray; horizontal-alignment: center; }
+                            Text { text: ""; width: 44px; }
+                            Text { text: "freq"; horizontal-stretch: 1; color: gray; horizontal-alignment: center; }
+                            Text { text: ""; width: 44px; }
+                            Text { text: "slice"; horizontal-stretch: 1; color: gray; horizontal-alignment: center; }
+                            Text { text: ""; width: 44px; }
+                        }
+                        AxisRow {
+                            label: "1 · x / width"; active: true;
+                            extent <=> root.ext0; offset <=> root.off0; freq <=> root.frq0;
+                        }
+                        AxisRow {
+                            label: "2 · y / height"; active: root.dim >= 2;
+                            extent <=> root.ext1; offset <=> root.off1; freq <=> root.frq1;
+                        }
+                        AxisRow {
+                            label: "3 · z / depth"; active: root.dim >= 3;
+                            extent <=> root.ext2; offset <=> root.off2; freq <=> root.frq2;
+                        }
+                        AxisRow {
+                            label: "4 · w / time"; active: root.dim >= 4;
+                            has-slice: true;
+                            extent <=> root.ext3; offset <=> root.off3; freq <=> root.frq3;
+                            slice <=> root.cross0;
+                        }
+                        AxisRow {
+                            label: "5 · u / ext5"; active: root.dim >= 5;
+                            has-slice: true;
+                            extent <=> root.ext4; offset <=> root.off4; freq <=> root.frq4;
+                            slice <=> root.cross1;
+                        }
+                        AxisRow {
+                            label: "6 · v / ext6"; active: root.dim >= 6;
+                            has-slice: true;
+                            extent <=> root.ext5; offset <=> root.off5; freq <=> root.frq5;
+                            slice <=> root.cross2;
+                        }
+                    }
+                }
+
+                if root.is-fractal: GroupBox {
+                    title: "Fractal";
+                    VerticalBox {
+                        LabeledSlider { label: "Octaves"; help: "How many layers of noise to sum. 1 = plain gradient noise; each extra octave adds finer detail (and costs more). Fractional values blend a partial last octave."; minimum: 1; maximum: 8; value <=> root.octaves; }
+                        LabeledSlider { label: "Lacunarity"; help: "Frequency ratio between successive octaves (each octave multiplies the sample coordinates by this). Textbook fBm uses > 1 for finer detail each octave; this crate's default is 0.5."; minimum: 0.1; maximum: 4; value <=> root.lacunarity; }
+                        LabeledSlider { label: "Gain"; help: "Amplitude ratio between successive octaves (a.k.a. persistence): each octave's contribution is multiplied by this. Textbook fBm uses < 1; this crate's default is 2.0."; minimum: 0.1; maximum: 4; value <=> root.gain; }
+                    }
+                }
+
+                if root.is-cellular: GroupBox {
+                    title: "Cellular";
+                    VerticalBox {
+                        LabeledSlider { label: "Jitter"; help: "How far each cell's feature point is randomly nudged from its grid-cell centre: 0 = perfectly regular lattice, 1 = fully randomized (most organic)."; minimum: 0; maximum: 1; value <=> root.jitter; }
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Distance"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                model: ["Euclidean", "Manhattan", "Natural"];
+                                current-index <=> root.dist-idx;
+                                Tooltip { text: @markdown("How distance to a feature point is measured — the cell shape. Euclidean = round cells; Manhattan = diamond/axis-aligned; Natural = an organic blend."); }
+                            }
+                        }
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Return"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                model: ["CellValue", "Distance"];
+                                current-index <=> root.ret-idx;
+                                Tooltip { text: @markdown("What each sample returns: CellValue = one flat random value per cell (Voronoi tiles); Distance = distance to the nearest feature point (rounded bumps with dark seams)."); }
+                            }
+                        }
+                        if root.is-cellular2: HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Return2"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                model: ["Distance2", "Distance2Add", "Distance2Sub", "Distance2Mul", "Distance2Div"];
+                                current-index <=> root.ret2-idx;
+                                Tooltip { text: @markdown("How the two chosen feature-point distances F1 (index0) and F2 (index1) are combined: Distance2 = F2; Add = F1+F2; Sub = F1−F2 (the classic cell-edge / crack look); Mul = F1·F2; Div = F1/F2."); }
+                            }
+                        }
+                        if root.is-cellular2: HorizontalBox {
+                            padding: 0px;
+                            Text { text: "index0 / index1"; width: 90px; vertical-alignment: center; }
+                            SpinBox {
+                                minimum: 0;
+                                maximum: 2;
+                                value <=> root.index0;
+                                Tooltip { text: @markdown("index0: rank of the first feature point to use (0 = nearest, 1 = 2nd-nearest, 2 = 3rd). Must be less than index1."); }
+                            }
+                            SpinBox {
+                                minimum: 1;
+                                maximum: 3;
+                                value <=> root.index1;
+                                Tooltip { text: @markdown("index1: rank of the second feature point (1 = 2nd-nearest, 2 = 3rd, 3 = 4th). Combined with index0 per the Return2 mode."); }
+                            }
+                        }
+                    }
+                }
+
+                GroupBox {
+                    title: "Output";
+                    VerticalBox {
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Scaling"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                model: ["Raw", "Scaled"];
+                                current-index <=> root.scaling-idx;
+                                Tooltip { text: @markdown("Raw = the generator's natural output range; Scaled = remap it into [Range min, Range max]."); }
+                            }
+                        }
+                        // Fixed, independent bounds (the min<=max invariant is kept
+                        // by clamping in the changed handlers below, so neither
+                        // slider's range shifts under the other as you drag).
+                        if root.scaling-idx == 1 || root.quant-idx > 0: LabeledSlider {
+                            label: "Range min"; minimum: -4; maximum: 4;
+                            help: "Lower bound the output is mapped into (Scaled) or quantized from. Clamped to stay ≤ Range max.";
+                            value <=> root.scale-min;
+                        }
+                        if root.scaling-idx == 1 || root.quant-idx > 0: LabeledSlider {
+                            label: "Range max"; minimum: -4; maximum: 4;
+                            help: "Upper bound the output is mapped into (Scaled) or quantized from. Clamped to stay ≥ Range min.";
+                            value <=> root.scale-max;
+                        }
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Quantize"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                enabled: root.float-idx == 0;
+                                model: ["none (f32)", "u8", "u16", "u32", "i16", "i32"];
+                                current-index <=> root.quant-idx;
+                                Tooltip { text: @markdown("Quantize the [Range min, Range max] band straight into an integer type (u8/u16/u32/i16/i32) instead of returning floats. f32 only."); }
+                            }
+                        }
+                    }
+                }
+
+                GroupBox {
+                    title: "View";
+                    VerticalBox {
+                        HorizontalBox {
+                            padding: 0px;
+                            Text {
+                                text: "Colormap";
+                                width: 90px;
+                                vertical-alignment: center;
+                                // Colormap only applies to 1D/2D; 3D+ encodes depth as hue.
+                                color: root.dim <= 2 ? white : gray;
+                            }
+                            ComboBox {
+                                model: ["Grayscale", "Heatmap"];
+                                current-index <=> root.colormap-idx;
+                                enabled: root.dim <= 2;
+                                Tooltip { text: @markdown("Display-only mapping of value → colour (Grayscale or a heatmap ramp). Applies to 1D/2D; at 3D+ the view encodes depth as hue instead, so this is disabled."); }
+                            }
+                        }
+                        HorizontalBox {
+                            padding: 0px;
+                            Text { text: "Engine"; width: 90px; vertical-alignment: center; }
+                            ComboBox {
+                                model: root.engine-model;
+                                current-index <=> root.engine-idx;
+                                Tooltip { text: @markdown("Which SIMD backend computes the noise. 'auto' picks the fastest available at runtime; the others force a specific instruction set (same values, display-only choice here)."); }
+                            }
+                        }
+                    }
+                }
+            }
+            }
+            // While playing, a click anywhere on the panel pauses the animation
+            // (so editing a control doesn't fight it). Transparent; only active
+            // during playback, so it never blocks the controls otherwise.
+            if root.anim-playing: TouchArea {
+                width: 100%;
+                height: 100%;
+                mouse-cursor: pointer;
+                clicked => { root.anim-playing = false; }
+            }
+        }
+
+        // Splitter: drag to resize the side panel's width.
+        Rectangle {
+            width: 8px;
+            background: splitter.has-hover || splitter.pressed ? #5aa0ff : #333333;
+            border-radius: 2px;
+            splitter := TouchArea {
+                mouse-cursor: ew-resize;
+                pointer-event(e) => {
+                    if (e.kind == PointerEventKind.down) {
+                        root.drag-start-width = root.panel-width;
+                        root.drag-start-x = self.absolute-position.x + self.mouse-x;
+                    }
+                }
+                moved => {
+                    root.panel-width = clamp(
+                        root.drag-start-width + (self.absolute-position.x + self.mouse-x - root.drag-start-x),
+                        300px,
+                        1100px);
+                }
+            }
+        }
+
+        // ===== Canvas =====
+        VerticalBox {
+            horizontal-stretch: 1;
+            spacing: 6px;
+            Rectangle {
+                background: #141414;
+                border-color: #333333;
+                border-width: 1px;
+                vertical-stretch: 1;
+                Image {
+                    source: root.canvas;
+                    image-fit: contain;
+                    image-rendering: pixelated;
+                    width: 100%;
+                    height: 100%;
+                }
+                // busy overlay + spinner (hidden during playback, where frames
+                // land continuously and the overlay would just strobe)
+                Rectangle {
+                    visible: root.busy && !root.anim-playing;
+                    background: #00000099;
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 12px;
+                        HorizontalLayout {
+                            alignment: center;
+                            Rectangle {
+                                width: 42px;
+                                height: 42px;
+                                border-radius: 21px;
+                                background: #5aa0ff;
+                                opacity: root.pulse;
+                            }
+                        }
+                        HorizontalLayout {
+                            alignment: center;
+                            Text { text: "rendering…"; color: white; }
+                        }
+                    }
+                }
+                // hover/click probe (on top of the image)
+                ta := TouchArea {
+                    width: 100%;
+                    height: 100%;
+                    mouse-cursor: crosshair;
+                    changed mouse-x => { root.point-hover(self.mouse-x, self.mouse-y); }
+                    changed mouse-y => { root.point-hover(self.mouse-x, self.mouse-y); }
+                    clicked => {
+                        // Clicking the image while playing just pauses (so you can
+                        // inspect the frame); otherwise it opens the point popup.
+                        if (root.anim-playing) {
+                            root.anim-playing = false;
+                        } else if (root.point-click(self.mouse-x, self.mouse-y)) {
+                            probe-popup.show();
+                        }
+                    }
+                }
+                probe-popup := PopupWindow {
+                    x: 24px;
+                    y: 24px;
+                    width: 460px;
+                    height: 210px;
+                    close-policy: close-on-click-outside;
+                    Rectangle {
+                        background: #222733;
+                        border-color: #4a4f5c;
+                        border-width: 1px;
+                        border-radius: 6px;
+                        VerticalLayout {
+                            padding: 12px;
+                            spacing: 10px;
+                            Text { text: "Point details (JSON)"; color: white; font-weight: 700; }
+                            TextEdit {
+                                read-only: true;
+                                text: root.point-json;
+                                vertical-stretch: 1;
+                            }
+                            HorizontalLayout {
+                                spacing: 8px;
+                                alignment: end;
+                                Button {
+                                    text: "📋 Copy";
+                                    clicked => { root.copy(root.point-json); }
+                                }
+                                Button {
+                                    text: "Close";
+                                    clicked => { probe-popup.close(); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // single status line: point under the cursor
+            Text {
+                text: root.probe-text == "" ? "hover the image for point details · click for JSON" : root.probe-text;
+                color: root.probe-text == "" ? gray : #9ad0ff;
+            }
+            // Row 1: Play + what it drives (offset/freq) + which axis; Submit/Save
+            // pushed to the right edge of the same row.
+            HorizontalBox {
+                padding: 0px;
+                spacing: 8px;
+                Button {
+                    text: root.anim-playing ? "⏸ Pause" : "▶ Play";
+                    clicked => { root.anim-playing = !root.anim-playing; }
+                }
+                ComboBox {
+                    model: ["offset", "freq"];
+                    current-index <=> root.anim-drive-idx;
+                    min-width: 86px;
+                }
+                ComboBox {
+                    model: root.anim-axis-model;
+                    current-index <=> root.anim-axis-idx;
+                    min-width: 86px;
+                }
+                // Affordance: the renderer can't keep up with playback (frame time
+                // exceeds the ~33 ms animation tick, so frames are being dropped).
+                if root.anim-playing && root.last-render-ms > 33: Text {
+                    text: "⏳ " + root.last-render-ms + " ms/frame — can't keep up";
+                    color: orange;
+                    vertical-alignment: center;
+                }
+                // Spacer: pushes Submit/Save to the right edge.
+                Rectangle { horizontal-stretch: 1; }
+                Button { text: "Submit"; clicked => { root.submit(); } }
+                Button { text: "Save…"; clicked => { root.save(); } }
+            }
+            // Row 2: speed and the t scrubber. The scrubber moves while playing and
+            // can be dragged to scrub the driven quantity (offset or freq).
+            HorizontalBox {
+                padding: 0px;
+                spacing: 8px;
+                Text { text: "speed"; vertical-alignment: center; color: gray; }
+                Slider {
+                    minimum: 0;
+                    maximum: 1;
+                    value <=> root.anim-speed;
+                    min-width: 90px;
+                }
+                Text { text: "t"; vertical-alignment: center; color: gray; }
+                Slider {
+                    minimum: root.anim-drive-idx == 0 ? -1.0 * root.anim-axis-extent : 0.001;
+                    maximum: root.anim-drive-idx == 0 ? 1.0 * root.anim-axis-extent : 0.5;
+                    value <=> root.anim-t;
+                    horizontal-stretch: 1;
+                }
+                Text {
+                    text: "= " + (round(root.anim-t * 1000) / 1000);
+                    vertical-alignment: center;
+                    color: #9ad0ff;
+                    width: 86px;
+                }
+            }
+        }
+    }
+}

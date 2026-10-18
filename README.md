@@ -245,6 +245,31 @@ pub fn backend() -> String {
 }
 ```
 
+## Viewer and CLI
+
+Two workspace apps are included:
+
+- [`viewer/`](viewer/) — an interactive Slint inspector with a live preview and
+  controls for every option (algorithm, dimensions 1–6, per-axis frequency,
+  f32/f64, scaling/quantize, colormap, engine). Hover any control for a short
+  explanation; hover the image for a point's value, click for its JSON, and
+  **Save…** writes a PNG. Its **Submit** button prints the equivalent `generate`
+  command (and copies it to the clipboard); the viewer also accepts those same
+  CLI options to open pre-populated.
+- [`generate/`](generate/) — a headless-ish CLI that generates and displays the
+  same noise; handy for reproducible/scripted output.
+
+```bash
+# Launch the interactive viewer
+cargo run --bin viewer
+
+# Open the viewer pre-populated, or render one-shot with the CLI (same options)
+cargo run --bin generate -- --dim 2 --width 512 --height 512 --seed 1 --freq 0.02 \
+    fbm --lacunarity 0.5 --gain 2 --octaves 3
+
+# A bare `cargo run` lists the available binaries.
+```
+
 ## Get a block of noise with runtime SIMD detection
 
 The library will, at runtime, pick the fastest available options between SSE2, SSE41, and AVX2.
