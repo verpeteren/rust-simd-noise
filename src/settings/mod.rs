@@ -37,6 +37,23 @@ pub trait Settings {
     /// to get back a NoiseType to call the noise functions with
     fn wrap(self) -> NoiseType;
 
+    /// The analytic, **offset-independent** output range `(min, max)` of the
+    /// unscaled noise for these settings, or `None` when it has no closed form
+    /// (the jitter/metric-dependent cellular returns).
+    ///
+    /// This is the range [`generate_scaled`](Settings::generate_scaled) maps onto
+    /// your target range, so it is identical regardless of a block's offset/size
+    /// — which is what makes adjacent blocks line up. It differs from the
+    /// per-block observed `(min, max)` returned by [`generate`](Settings::generate),
+    /// which varies from block to block. See each settings type's docs for the
+    /// formula.
+    fn output_range(&self) -> Option<(f32, f32)>
+    where
+        Self: Copy,
+    {
+        (*self).wrap().theoretical_min_max()
+    }
+
     /// Generate a chunk of noise based on your settings, and the min and max value
     /// generated, so you can scale it as you wish
     fn generate(self) -> (Vec<f32>, f32, f32);
