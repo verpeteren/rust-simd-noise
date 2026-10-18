@@ -191,6 +191,71 @@ pub fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     unsafe { noise_helpers_32::get_3d_noise::<simdeez::scalar::Scalar>(noise_type) }
 }
 
+/// Noise **values together with their analytic gradient**, produced by
+/// [`GradientSettings::generate_with_derivative`].
+///
+/// `values` holds one noise value per grid sample, row-major, exactly as
+/// [`generate`](Settings::generate) returns. `gradients` holds the matching
+/// gradient vectors, flattened: the gradient of sample `i` occupies
+/// `gradients[i * stride .. i * stride + stride]`, where `stride` is the noise
+/// dimensionality (1, 2 or 3). Component `k` is the partial derivative of the
+/// value with respect to the sample position along axis `k` — how fast the
+/// field changes as you step across the grid — and already includes that axis's
+/// frequency factor (the kernel is sampled at `position * frequency`, so this is
+/// `frequency * dnoise/dcoord` by the chain rule). Multiply a component by
+/// `1.0 / frequency` to recover the derivative in the noise function's own
+/// coordinate space.
+///
+/// `min`/`max` are the observed bounds of `values` (the same pair
+/// [`generate`](Settings::generate) returns), convenient for scaling the value
+/// channel.
+#[derive(Clone, Debug)]
+pub struct NoiseAndGradient {
+    /// Noise values, one per grid sample, row-major.
+    pub values: Vec<f32>,
+    /// Flattened per-sample gradient vectors, `stride` components each.
+    pub gradients: Vec<f32>,
+    /// Number of gradient components per sample (equals the noise dimensionality).
+    pub stride: usize,
+    /// Minimum value in `values`.
+    pub min: f32,
+    /// Maximum value in `values`.
+    pub max: f32,
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_1d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_1d_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_1d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_1d_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_2d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_2d_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_2d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_2d_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_3d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_3d_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_3d_gradient(settings: &GradientSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_3d_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
     pub fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {

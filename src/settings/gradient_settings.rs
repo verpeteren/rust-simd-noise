@@ -13,9 +13,10 @@ use crate::noise_helpers_32::Sample32;
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
-    get_1d_noise, get_1d_scaled_noise, get_2d_noise, get_2d_scaled_noise, get_3d_noise,
-    get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise,
-    get_6d_noise, get_6d_scaled_noise,
+    get_1d_gradient, get_1d_noise, get_1d_scaled_noise, get_2d_gradient, get_2d_noise,
+    get_2d_scaled_noise, get_3d_gradient, get_3d_noise, get_3d_scaled_noise, get_4d_noise,
+    get_4d_scaled_noise, get_5d_noise, get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise,
+    NoiseAndGradient,
 };
 
 use crate::settings::Settings;
@@ -418,4 +419,34 @@ impl<S: Simd> Sample64<S> for GradientSettings {
     }
 }
 
-impl GradientSettings {}
+impl GradientSettings {
+    /// Generate gradient (simplex) noise **together with its analytic gradient**
+    /// in a single pass (issue #24).
+    ///
+    /// The returned [`NoiseAndGradient`] carries the noise `values` (identical to
+    /// what [`generate`](Settings::generate) produces for these settings) and a
+    /// flattened array of per-sample `gradients`. Each gradient component is the
+    /// derivative of the value with respect to the sample position along that
+    /// axis — ideal for analytic surface normals or displacement without
+    /// finite-difference sampling. See [`NoiseAndGradient`] for the exact layout
+    /// and coordinate convention.
+    ///
+    /// Only 1D, 2D and 3D are implemented so far (the dimensions for which the
+    /// simplex derivative kernels exist); higher dimensions and the fractal
+    /// variants are future work.
+    ///
+    /// # Panics
+    /// Panics if the configured dimensionality is not 1, 2 or 3.
+    pub fn generate_with_derivative(self) -> NoiseAndGradient {
+        let d = self.dim.dim;
+        match d {
+            1 => get_1d_gradient(&self),
+            2 => get_2d_gradient(&self),
+            3 => get_3d_gradient(&self),
+            _ => panic!(
+                "generate_with_derivative is only implemented for 1-3 dimensions (got {})",
+                d
+            ),
+        }
+    }
+}
