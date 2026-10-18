@@ -1,8 +1,12 @@
+/// What a [`CellularSettings`](crate::CellularSettings) sample returns once the
+/// nearest feature point has been found.
 #[derive(Copy, Clone)]
-/// Determines what final value is returned for the cell noise
 pub enum CellReturnType {
-    /// Will return solid colors in each cell
+    /// One random value per cell, identical across the whole cell — a flat mosaic
+    /// of tiles (a Voronoi diagram).
     CellValue,
-    /// Color will be a gradient as you approach edge of cell
+    /// The distance from the sample to the nearest feature point: smallest at the
+    /// point itself and rising toward the cell borders, so each cell looks like a
+    /// rounded bump with dark seams between cells.
     Distance,
 }

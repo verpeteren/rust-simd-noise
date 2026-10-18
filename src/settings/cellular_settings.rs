@@ -52,17 +52,51 @@ macro_rules! dispatch_cell {
     }};
 }
 
+/// **Cellular noise** (a.k.a. Worley / Voronoi noise) — cell-based, not wavy.
+///
+/// Instead of interpolating gradients, cellular noise scatters one random
+/// *feature point* in each grid cell and, for every sample, looks at the nearest
+/// feature point. Depending on [`return_type`](Self::return_type) it returns the
+/// **distance** to that point (giving rounded cell interiors and dark seams along
+/// the boundaries) or a flat **per-cell value** (a mosaic of randomly shaded
+/// tiles — a Voronoi diagram). It produces the stone, scales, cracked-mud,
+/// dried-earth, and biome-region looks that gradient noise can't.
+///
+/// For the richer Worley patterns that combine the two nearest points (edges,
+/// crack networks), use [`Cellular2Settings`](crate::Cellular2Settings). See
+/// [Worley / cellular noise](https://en.wikipedia.org/wiki/Worley_noise).
 #[derive(Copy, Clone)]
 pub struct CellularSettings {
     dim: NoiseDimensions,
+    /// Frequency along the X axis: here it sets the **cell density** — higher
+    /// means smaller, more numerous cells; lower means fewer, larger cells. See
+    /// [`GradientSettings::freq_x`](crate::GradientSettings::freq_x).
     pub freq_x: f32,
+    /// Frequency along the Y axis; see [`freq_x`](Self::freq_x).
     pub freq_y: f32,
+    /// Frequency along the Z axis; see [`freq_x`](Self::freq_x).
     pub freq_z: f32,
+    /// Frequency along the 4th (W) axis; see [`freq_x`](Self::freq_x).
     pub freq_w: f32,
+    /// Frequency along the 5th (U) axis; see [`freq_x`](Self::freq_x).
     pub freq_u: f32,
+    /// Frequency along the 6th (V) axis; see [`freq_x`](Self::freq_x).
     pub freq_v: f32,
+    /// How distance to a feature point is measured, which sets the **shape of the
+    /// cells**: [`Euclidean`](CellDistanceFunction::Euclidean) (straight-line →
+    /// round cells), [`Manhattan`](CellDistanceFunction::Manhattan) (sum of axis
+    /// distances → diamond/blocky cells), or
+    /// [`Natural`](CellDistanceFunction::Natural) (a blend of the two → more
+    /// organic cells).
     pub distance_function: CellDistanceFunction,
+    /// What each sample returns:
+    /// [`Distance`](CellReturnType::Distance) — distance to the nearest feature
+    /// point (bumps/seams), or [`CellValue`](CellReturnType::CellValue) — one
+    /// random value shared by the whole cell (flat Voronoi tiles).
     pub return_type: CellReturnType,
+    /// How far each feature point is randomly nudged from its cell centre, `0.0`
+    /// (perfectly regular grid of points) to `1.0` (fully randomized, most
+    /// organic). Lower values look more lattice-like. Default `0.25`.
     pub jitter: f32,
 }
 

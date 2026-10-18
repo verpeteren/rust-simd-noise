@@ -21,17 +21,45 @@ use crate::{
 
 use super::{Settings, SimplexSettings};
 
+/// **Turbulence noise** — billowy, puffy noise with soft creases.
+///
+/// Like [`FbmSettings`](crate::FbmSettings) it sums several [octaves](Self::octaves) of gradient
+/// noise, but each octave contributes `|noise|` (its absolute value). Folding the
+/// field at every zero-crossing turns the smooth waves into rolling, puffy lobes
+/// separated by sharp creases — the classic look of smoke, clouds, fire, and
+/// marble veining. (It is the same idea as [`RidgeSettings`](crate::RidgeSettings) without the `1 -`
+/// flip, so the creases point down into valleys instead of up into ridges.)
+///
+/// Output is biased positive, so a `generate_scaled` / scaling pass is usually
+/// wanted. See [`FbmSettings`](crate::FbmSettings) for the shared layering knobs.
 #[derive(Copy, Clone)]
 pub struct TurbulenceSettings {
     dim: NoiseDimensions,
+    /// Frequency along the X axis of the first octave: higher = finer detail,
+    /// lower = larger features. See [`GradientSettings::freq_x`](crate::GradientSettings::freq_x).
     pub freq_x: f32,
+    /// Frequency along the Y axis; see [`freq_x`](Self::freq_x).
     pub freq_y: f32,
+    /// Frequency along the Z axis; see [`freq_x`](Self::freq_x).
     pub freq_z: f32,
+    /// Frequency along the 4th (W) axis; see [`freq_x`](Self::freq_x).
     pub freq_w: f32,
+    /// Frequency along the 5th (U) axis; see [`freq_x`](Self::freq_x).
     pub freq_u: f32,
+    /// Frequency along the 6th (V) axis; see [`freq_x`](Self::freq_x).
     pub freq_v: f32,
+    /// Frequency ratio between successive octaves (`coord *= lacunarity` per
+    /// octave). Default `0.5`. See [`FbmSettings::lacunarity`](crate::FbmSettings::lacunarity) and
+    /// [Lacunarity](https://en.wikipedia.org/wiki/Lacunarity).
     pub lacunarity: f32,
+    /// Amplitude ratio between successive octaves (*persistence*): the running
+    /// amplitude starts at 1 and is multiplied by `gain` each octave, scaling that
+    /// octave's noise before the `|…|` fold. Default `2.0`. See
+    /// [`FbmSettings::gain`](crate::FbmSettings::gain).
     pub gain: f32,
+    /// How many octaves to sum: `1` is a single turbulent layer; more octaves add
+    /// finer puffs (and cost more). Fractional values blend a partial last octave.
+    /// Default `3`. See [`FbmSettings::octaves`](crate::FbmSettings::octaves).
     pub octaves: f32,
 }
 

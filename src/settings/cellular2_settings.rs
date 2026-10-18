@@ -52,19 +52,57 @@ macro_rules! dispatch_cell2 {
     }};
 }
 
+/// **Second-order cellular noise** — Worley patterns from the *two* nearest cells.
+///
+/// Where [`CellularSettings`](crate::CellularSettings) looks only at the single nearest feature point,
+/// this variant finds the two points you pick with [`index0`](Self::index0) and
+/// [`index1`](Self::index1) (by default the 1st- and 2nd-nearest) and **combines
+/// their distances** with [`return_type`](Self::return_type). The most useful
+/// combination, F2 − F1 ([`Distance2Sub`](Cell2ReturnType::Distance2Sub)), is
+/// near zero right at a cell border and larger inside, which draws the crisp
+/// cell-edge / crack-network / cracked-glass patterns Worley noise is known for.
+///
+/// It shares the cell shape ([`distance_function`](Self::distance_function)),
+/// density ([`freq_x`](Self::freq_x) …), and [`jitter`](Self::jitter) controls
+/// with [`CellularSettings`](crate::CellularSettings). See
+/// [Worley / cellular noise](https://en.wikipedia.org/wiki/Worley_noise).
 #[derive(Copy, Clone)]
 pub struct Cellular2Settings {
     dim: NoiseDimensions,
+    /// Frequency along the X axis: sets the **cell density** (higher = smaller,
+    /// more numerous cells). See [`GradientSettings::freq_x`](crate::GradientSettings::freq_x).
     pub freq_x: f32,
+    /// Frequency along the Y axis; see [`freq_x`](Self::freq_x).
     pub freq_y: f32,
+    /// Frequency along the Z axis; see [`freq_x`](Self::freq_x).
     pub freq_z: f32,
+    /// Frequency along the 4th (W) axis; see [`freq_x`](Self::freq_x).
     pub freq_w: f32,
+    /// Frequency along the 5th (U) axis; see [`freq_x`](Self::freq_x).
     pub freq_u: f32,
+    /// Frequency along the 6th (V) axis; see [`freq_x`](Self::freq_x).
     pub freq_v: f32,
+    /// How distance to a feature point is measured (the cell shape): Euclidean,
+    /// Manhattan, or Natural. See [`CellularSettings::distance_function`](crate::CellularSettings::distance_function).
     pub distance_function: CellDistanceFunction,
+    /// How the two selected distances (F1 at `index0`, F2 at `index1`) are
+    /// combined: [`Distance2`](Cell2ReturnType::Distance2) (just F2),
+    /// [`Distance2Add`](Cell2ReturnType::Distance2Add) (F1+F2),
+    /// [`Distance2Sub`](Cell2ReturnType::Distance2Sub) (F2−F1 — the classic
+    /// cell-edge/crack look), [`Distance2Mul`](Cell2ReturnType::Distance2Mul)
+    /// (F1·F2), or [`Distance2Div`](Cell2ReturnType::Distance2Div) (F1/F2).
     pub return_type: Cell2ReturnType,
+    /// How far each feature point is nudged from its cell centre, `0.0` (regular
+    /// grid) to `1.0` (fully random). Default `0.25`. See
+    /// [`CellularSettings::jitter`](crate::CellularSettings::jitter).
     pub jitter: f32,
+    /// Rank of the **first** feature point to use, 0-based: `0` = nearest (F1),
+    /// `1` = 2nd-nearest, `2` = 3rd. Must be less than [`index1`](Self::index1).
+    /// Default `0`.
     pub index0: usize,
+    /// Rank of the **second** feature point to use: `1` = 2nd-nearest (F2), `2` =
+    /// 3rd, `3` = 4th. Must be greater than [`index0`](Self::index0). The two
+    /// distances are combined per [`return_type`](Self::return_type). Default `1`.
     pub index1: usize,
 }
 
