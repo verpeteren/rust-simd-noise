@@ -2,6 +2,9 @@ use simdeez::prelude::*;
 
 use super::NoiseType;
 use crate::dimensional_being::DimensionalBeing;
+use crate::noise::cell2_64::{cellular2_2d_deriv, cellular2_3d_deriv};
+use crate::noise::cell_64::{cellular_2d_deriv, cellular_3d_deriv};
+use crate::Cell2ReturnType;
 
 use crate::{
     Cellular2Settings, CellularSettings, FbmSettings, GradientSettings, NoiseAndGradient64,
@@ -1121,6 +1124,367 @@ pub unsafe fn get_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
         values,
         gradients,
         stride: 6,
+        min,
+        max,
+    }
+}
+
+/// Euclidean F1-distance cellular value + analytic gradient, 2D (f64 twin of
+/// [`crate::noise_helpers_32::get_2d_cellular_gradient`]).
+#[inline(always)]
+pub unsafe fn get_2d_cellular_gradient<S: Simd>(settings: &CellularSettings) -> NoiseAndGradient64 {
+    let dim = settings.get_dimensions();
+    let seed = dim.seed as i64;
+    let jitter = S::Vf64::set1(settings.jitter as f64);
+    let freq_x = settings.get_freq_x() as f64;
+    let freq_y = settings.get_freq_y() as f64;
+    let freq_x_s = S::Vf64::set1(freq_x);
+    let freq_y_s = S::Vf64::set1(freq_y);
+    let start_x = dim.x as f64;
+    let width = dim.width;
+    let start_y = dim.y as f64;
+    let height = dim.height;
+
+    let len = width * height;
+    let mut values = vec![0.0f64; len];
+    let mut gradients = vec![0.0f64; len * 2];
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+
+    let vector_width = S::Vf64::WIDTH;
+    let mut x_arr = Vec::<f64>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f64);
+    }
+    x_arr.set_len(vector_width);
+
+    let mut i = 0;
+    let mut y = S::Vf64::set1(start_y);
+    for _ in 0..height {
+        let mut x = S::Vf64::load_from_ptr_unaligned(x_ptr);
+        let mut col = 0;
+        while col < width {
+            let (f, d) = cellular_2d_deriv::<S>(x * freq_x_s, y * freq_y_s, jitter, seed);
+            let count = (width - col).min(vector_width);
+            for j in 0..count {
+                let v = f[j];
+                values[i] = v;
+                gradients[i * 2] = d[0][j] * freq_x;
+                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                if v < min {
+                    min = v;
+                }
+                if v > max {
+                    max = v;
+                }
+                i += 1;
+            }
+            x += S::Vf64::set1(vector_width as f64);
+            col += vector_width;
+        }
+        y += S::Vf64::set1(1.0);
+    }
+    NoiseAndGradient64 {
+        values,
+        gradients,
+        stride: 2,
+        min,
+        max,
+    }
+}
+
+/// Euclidean F1-distance cellular value + analytic gradient, 3D (f64 twin of
+/// [`crate::noise_helpers_32::get_3d_cellular_gradient`]).
+#[inline(always)]
+pub unsafe fn get_3d_cellular_gradient<S: Simd>(settings: &CellularSettings) -> NoiseAndGradient64 {
+    let dim = settings.get_dimensions();
+    let seed = dim.seed as i64;
+    let jitter = S::Vf64::set1(settings.jitter as f64);
+    let freq_x = settings.get_freq_x() as f64;
+    let freq_y = settings.get_freq_y() as f64;
+    let freq_z = settings.get_freq_z() as f64;
+    let freq_x_s = S::Vf64::set1(freq_x);
+    let freq_y_s = S::Vf64::set1(freq_y);
+    let freq_z_s = S::Vf64::set1(freq_z);
+    let start_x = dim.x as f64;
+    let width = dim.width;
+    let start_y = dim.y as f64;
+    let height = dim.height;
+    let start_z = dim.z as f64;
+    let depth = dim.depth;
+
+    let len = width * height * depth;
+    let mut values = vec![0.0f64; len];
+    let mut gradients = vec![0.0f64; len * 3];
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+
+    let vector_width = S::Vf64::WIDTH;
+    let mut x_arr = Vec::<f64>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f64);
+    }
+    x_arr.set_len(vector_width);
+
+    let mut i = 0;
+    let mut z = S::Vf64::set1(start_z);
+    for _ in 0..depth {
+        let mut y = S::Vf64::set1(start_y);
+        for _ in 0..height {
+            let mut x = S::Vf64::load_from_ptr_unaligned(x_ptr);
+            let mut col = 0;
+            while col < width {
+                let (f, d) =
+                    cellular_3d_deriv::<S>(x * freq_x_s, y * freq_y_s, z * freq_z_s, jitter, seed);
+                let count = (width - col).min(vector_width);
+                for j in 0..count {
+                    let v = f[j];
+                    values[i] = v;
+                    gradients[i * 3] = d[0][j] * freq_x;
+                    gradients[i * 3 + 1] = d[1][j] * freq_y;
+                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    if v < min {
+                        min = v;
+                    }
+                    if v > max {
+                        max = v;
+                    }
+                    i += 1;
+                }
+                x += S::Vf64::set1(vector_width as f64);
+                col += vector_width;
+            }
+            y += S::Vf64::set1(1.0);
+        }
+        z += S::Vf64::set1(1.0);
+    }
+    NoiseAndGradient64 {
+        values,
+        gradients,
+        stride: 3,
+        min,
+        max,
+    }
+}
+
+/// The scalar `return_type` combination of the two selected cellular2 distances
+/// (f64 twin of [`crate::noise_helpers_32`]'s `cellular2_combine_value`).
+#[inline(always)]
+fn cellular2_combine_value(ret: Cell2ReturnType, a: f64, b: f64) -> f64 {
+    match ret {
+        Cell2ReturnType::Distance2 => b,
+        Cell2ReturnType::Distance2Add => a + b,
+        Cell2ReturnType::Distance2Sub => a - b,
+        Cell2ReturnType::Distance2Mul => a * b,
+        Cell2ReturnType::Distance2Div => a / b,
+    }
+}
+
+/// The derivative of [`cellular2_combine_value`] along one axis (f64).
+#[inline(always)]
+fn cellular2_combine_grad(ret: Cell2ReturnType, a: f64, b: f64, ga: f64, gb: f64) -> f64 {
+    match ret {
+        Cell2ReturnType::Distance2 => gb,
+        Cell2ReturnType::Distance2Add => ga + gb,
+        Cell2ReturnType::Distance2Sub => ga - gb,
+        Cell2ReturnType::Distance2Mul => b * ga + a * gb,
+        Cell2ReturnType::Distance2Div => (ga * b - a * gb) / (b * b),
+    }
+}
+
+/// Euclidean cellular2 value + analytic gradient, 2D (f64 twin of
+/// [`crate::noise_helpers_32::get_2d_cellular2_gradient`]).
+#[inline(always)]
+pub unsafe fn get_2d_cellular2_gradient<S: Simd>(
+    settings: &Cellular2Settings,
+) -> NoiseAndGradient64 {
+    let dim = settings.get_dimensions();
+    let seed = dim.seed as i64;
+    let jitter = S::Vf64::set1(settings.jitter as f64);
+    let ret = settings.return_type;
+    let i0 = settings.index0;
+    let i1 = settings.index1;
+    let freq_x = settings.get_freq_x() as f64;
+    let freq_y = settings.get_freq_y() as f64;
+    let freq_x_s = S::Vf64::set1(freq_x);
+    let freq_y_s = S::Vf64::set1(freq_y);
+    let start_x = dim.x as f64;
+    let width = dim.width;
+    let start_y = dim.y as f64;
+    let height = dim.height;
+
+    let len = width * height;
+    let mut values = vec![0.0f64; len];
+    let mut gradients = vec![0.0f64; len * 2];
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+
+    let vector_width = S::Vf64::WIDTH;
+    let mut x_arr = Vec::<f64>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f64);
+    }
+    x_arr.set_len(vector_width);
+
+    let mut i = 0;
+    let mut y = S::Vf64::set1(start_y);
+    for _ in 0..height {
+        let mut x = S::Vf64::load_from_ptr_unaligned(x_ptr);
+        let mut col = 0;
+        while col < width {
+            let (dist, delta) =
+                cellular2_2d_deriv::<S>(x * freq_x_s, y * freq_y_s, jitter, i1, seed);
+            let count = (width - col).min(vector_width);
+            for j in 0..count {
+                let a = dist[i0][j];
+                let b = dist[i1][j];
+                let v = cellular2_combine_value(ret, a, b);
+                values[i] = v;
+                let gx = cellular2_combine_grad(
+                    ret,
+                    a,
+                    b,
+                    -2.0 * delta[0][i0][j],
+                    -2.0 * delta[0][i1][j],
+                );
+                let gy = cellular2_combine_grad(
+                    ret,
+                    a,
+                    b,
+                    -2.0 * delta[1][i0][j],
+                    -2.0 * delta[1][i1][j],
+                );
+                gradients[i * 2] = gx * freq_x;
+                gradients[i * 2 + 1] = gy * freq_y;
+                if v < min {
+                    min = v;
+                }
+                if v > max {
+                    max = v;
+                }
+                i += 1;
+            }
+            x += S::Vf64::set1(vector_width as f64);
+            col += vector_width;
+        }
+        y += S::Vf64::set1(1.0);
+    }
+    NoiseAndGradient64 {
+        values,
+        gradients,
+        stride: 2,
+        min,
+        max,
+    }
+}
+
+/// Euclidean cellular2 value + analytic gradient, 3D (f64 twin of
+/// [`crate::noise_helpers_32::get_3d_cellular2_gradient`]).
+#[inline(always)]
+pub unsafe fn get_3d_cellular2_gradient<S: Simd>(
+    settings: &Cellular2Settings,
+) -> NoiseAndGradient64 {
+    let dim = settings.get_dimensions();
+    let seed = dim.seed as i64;
+    let jitter = S::Vf64::set1(settings.jitter as f64);
+    let ret = settings.return_type;
+    let i0 = settings.index0;
+    let i1 = settings.index1;
+    let freq_x = settings.get_freq_x() as f64;
+    let freq_y = settings.get_freq_y() as f64;
+    let freq_z = settings.get_freq_z() as f64;
+    let freq_x_s = S::Vf64::set1(freq_x);
+    let freq_y_s = S::Vf64::set1(freq_y);
+    let freq_z_s = S::Vf64::set1(freq_z);
+    let start_x = dim.x as f64;
+    let width = dim.width;
+    let start_y = dim.y as f64;
+    let height = dim.height;
+    let start_z = dim.z as f64;
+    let depth = dim.depth;
+
+    let len = width * height * depth;
+    let mut values = vec![0.0f64; len];
+    let mut gradients = vec![0.0f64; len * 3];
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+
+    let vector_width = S::Vf64::WIDTH;
+    let mut x_arr = Vec::<f64>::with_capacity(vector_width);
+    let x_ptr = x_arr.as_mut_ptr();
+    for i in (0..vector_width).rev() {
+        x_ptr.add(i).write(start_x + i as f64);
+    }
+    x_arr.set_len(vector_width);
+
+    let mut i = 0;
+    let mut z = S::Vf64::set1(start_z);
+    for _ in 0..depth {
+        let mut y = S::Vf64::set1(start_y);
+        for _ in 0..height {
+            let mut x = S::Vf64::load_from_ptr_unaligned(x_ptr);
+            let mut col = 0;
+            while col < width {
+                let (dist, delta) = cellular2_3d_deriv::<S>(
+                    x * freq_x_s,
+                    y * freq_y_s,
+                    z * freq_z_s,
+                    jitter,
+                    i1,
+                    seed,
+                );
+                let count = (width - col).min(vector_width);
+                for j in 0..count {
+                    let a = dist[i0][j];
+                    let b = dist[i1][j];
+                    let v = cellular2_combine_value(ret, a, b);
+                    values[i] = v;
+                    let gx = cellular2_combine_grad(
+                        ret,
+                        a,
+                        b,
+                        -2.0 * delta[0][i0][j],
+                        -2.0 * delta[0][i1][j],
+                    );
+                    let gy = cellular2_combine_grad(
+                        ret,
+                        a,
+                        b,
+                        -2.0 * delta[1][i0][j],
+                        -2.0 * delta[1][i1][j],
+                    );
+                    let gz = cellular2_combine_grad(
+                        ret,
+                        a,
+                        b,
+                        -2.0 * delta[2][i0][j],
+                        -2.0 * delta[2][i1][j],
+                    );
+                    gradients[i * 3] = gx * freq_x;
+                    gradients[i * 3 + 1] = gy * freq_y;
+                    gradients[i * 3 + 2] = gz * freq_z;
+                    if v < min {
+                        min = v;
+                    }
+                    if v > max {
+                        max = v;
+                    }
+                    i += 1;
+                }
+                x += S::Vf64::set1(vector_width as f64);
+                col += vector_width;
+            }
+            y += S::Vf64::set1(1.0);
+        }
+        z += S::Vf64::set1(1.0);
+    }
+    NoiseAndGradient64 {
+        values,
+        gradients,
+        stride: 3,
         min,
         max,
     }

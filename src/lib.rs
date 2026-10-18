@@ -762,6 +762,98 @@ pub fn get_turbulence_gradient_64(settings: &TurbulenceSettings) -> NoiseAndGrad
     }
 }
 
+// Euclidean F1-distance cellular value + gradient (f32), 2D/3D.
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_2d_cellular_gradient(settings: &CellularSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_2d_cellular_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_2d_cellular_gradient(settings: &CellularSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_2d_cellular_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_3d_cellular_gradient(settings: &CellularSettings) -> NoiseAndGradient {
+        noise_helpers_32::get_3d_cellular_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_3d_cellular_gradient(settings: &CellularSettings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_3d_cellular_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+// Euclidean cellular2 (F1/F2 combination) value + gradient (f32), 2D/3D.
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_2d_cellular2_gradient(settings: &Cellular2Settings) -> NoiseAndGradient {
+        noise_helpers_32::get_2d_cellular2_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_2d_cellular2_gradient(settings: &Cellular2Settings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_2d_cellular2_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_3d_cellular2_gradient(settings: &Cellular2Settings) -> NoiseAndGradient {
+        noise_helpers_32::get_3d_cellular2_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_3d_cellular2_gradient(settings: &Cellular2Settings) -> NoiseAndGradient {
+    unsafe { noise_helpers_32::get_3d_cellular2_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+// Euclidean F1-distance cellular value + gradient (f64), 2D/3D.
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_2d_cellular_gradient_64(settings: &CellularSettings) -> NoiseAndGradient64 {
+        noise_helpers_64::get_2d_cellular_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_2d_cellular_gradient_64(settings: &CellularSettings) -> NoiseAndGradient64 {
+    unsafe { noise_helpers_64::get_2d_cellular_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_3d_cellular_gradient_64(settings: &CellularSettings) -> NoiseAndGradient64 {
+        noise_helpers_64::get_3d_cellular_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_3d_cellular_gradient_64(settings: &CellularSettings) -> NoiseAndGradient64 {
+    unsafe { noise_helpers_64::get_3d_cellular_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+// Euclidean cellular2 (F1/F2 combination) value + gradient (f64), 2D/3D.
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_2d_cellular2_gradient_64(settings: &Cellular2Settings) -> NoiseAndGradient64 {
+        noise_helpers_64::get_2d_cellular2_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_2d_cellular2_gradient_64(settings: &Cellular2Settings) -> NoiseAndGradient64 {
+    unsafe { noise_helpers_64::get_2d_cellular2_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn get_3d_cellular2_gradient_64(settings: &Cellular2Settings) -> NoiseAndGradient64 {
+        noise_helpers_64::get_3d_cellular2_gradient::<S>(settings)
+    }
+);
+#[cfg(feature = "scalar")]
+pub fn get_3d_cellular2_gradient_64(settings: &Cellular2Settings) -> NoiseAndGradient64 {
+    unsafe { noise_helpers_64::get_3d_cellular2_gradient::<simdeez::scalar::Scalar>(settings) }
+}
+
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
     pub fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {

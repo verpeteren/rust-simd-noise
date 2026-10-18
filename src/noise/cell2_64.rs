@@ -6,6 +6,144 @@ use crate::noise::cell_strategy::{Cell2Return, CellDistance};
 
 use simdeez::prelude::*;
 
+// Euclidean cellular2 value + analytic gradient (issue #24), 2D/3D — f64 twin of
+// `cell2_32::cellular2_{2,3}d_deriv`. Each sorted `distance[k]` has gradient
+// `−2·deltaₖ`; the delta rides the identical `min`/`max` selections of the value
+// sort. See the f32 module header for the full derivation.
+#[inline]
+pub fn cellular2_2d_deriv<S: Simd>(
+    x: S::Vf64,
+    y: S::Vf64,
+    jitter: S::Vf64,
+    index1: usize,
+    seed: i64,
+) -> ([S::Vf64; 4], [[S::Vf64; 4]; 2]) {
+    let mut distance = [S::Vf64::set1(999999.0); 4];
+    let mut dxv = [S::Vf64::zeroes(); 4];
+    let mut dyv = [S::Vf64::zeroes(); 4];
+
+    let mut xc = x.cast_i64() - S::Vi64::set1(1);
+    let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
+    let mut xcf = xc.cast_f64() - x;
+    let ycf_base = yc_base.cast_f64() - y;
+    xc *= S::Vi64::set1(X_PRIME_64);
+    yc_base *= S::Vi64::set1(Y_PRIME_64);
+
+    for _x in 0..3 {
+        let mut ycf = ycf_base;
+        let mut yc = yc_base;
+        for _y in 0..3 {
+            let hash = hash_2d::<S>(seed, xc, yc);
+            let mut xd = (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64() - S::Vf64::set1(511.5);
+            let mut yd =
+                ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64() - S::Vf64::set1(511.5);
+            let inv_mag = jitter * ((xd * xd) + (yd * yd)).rsqrt();
+            xd = (xd * inv_mag) + xcf;
+            yd = (yd * inv_mag) + ycf;
+
+            let new_distance = (xd * xd) + (yd * yd);
+            let mut i = index1;
+            while i > 0 {
+                let a_new_wins = new_distance.cmp_lt(distance[i]);
+                let min_i = distance[i].min(new_distance);
+                let tmp_dx = a_new_wins.blendv(dxv[i], xd);
+                let tmp_dy = a_new_wins.blendv(dyv[i], yd);
+                let prev_wins = min_i.cmp_lt(distance[i - 1]);
+                distance[i] = min_i.max(distance[i - 1]);
+                dxv[i] = prev_wins.blendv(tmp_dx, dxv[i - 1]);
+                dyv[i] = prev_wins.blendv(tmp_dy, dyv[i - 1]);
+                let c_new_wins = new_distance.cmp_lt(distance[0]);
+                distance[0] = distance[0].min(new_distance);
+                dxv[0] = c_new_wins.blendv(dxv[0], xd);
+                dyv[0] = c_new_wins.blendv(dyv[0], yd);
+                i -= 1;
+            }
+            ycf += S::Vf64::set1(1.0);
+            yc += S::Vi64::set1(Y_PRIME_64);
+        }
+        xcf += S::Vf64::set1(1.0);
+        xc += S::Vi64::set1(X_PRIME_64);
+    }
+
+    (distance, [dxv, dyv])
+}
+
+#[inline]
+pub fn cellular2_3d_deriv<S: Simd>(
+    x: S::Vf64,
+    y: S::Vf64,
+    z: S::Vf64,
+    jitter: S::Vf64,
+    index1: usize,
+    seed: i64,
+) -> ([S::Vf64; 4], [[S::Vf64; 4]; 3]) {
+    let mut distance = [S::Vf64::set1(999999.0); 4];
+    let mut dxv = [S::Vf64::zeroes(); 4];
+    let mut dyv = [S::Vf64::zeroes(); 4];
+    let mut dzv = [S::Vf64::zeroes(); 4];
+
+    let mut xc = x.cast_i64() - S::Vi64::set1(1);
+    let mut yc_base = y.cast_i64() - S::Vi64::set1(1);
+    let mut zc_base = z.cast_i64() - S::Vi64::set1(1);
+    let mut xcf = xc.cast_f64() - x;
+    let ycf_base = yc_base.cast_f64() - y;
+    let zcf_base = zc_base.cast_f64() - z;
+    xc *= S::Vi64::set1(X_PRIME_64);
+    yc_base *= S::Vi64::set1(Y_PRIME_64);
+    zc_base *= S::Vi64::set1(Z_PRIME_64);
+
+    for _x in 0..3 {
+        let mut ycf = ycf_base;
+        let mut yc = yc_base;
+        for _y in 0..3 {
+            let mut zcf = zcf_base;
+            let mut zc = zc_base;
+            for _z in 0..3 {
+                let hash = hash_3d::<S>(seed, xc, yc, zc);
+                let mut xd =
+                    (hash & S::Vi64::set1(BIT_10_MASK_64)).cast_f64() - S::Vf64::set1(511.5);
+                let mut yd = ((hash >> 10) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                    - S::Vf64::set1(511.5);
+                let mut zd = ((hash >> 20) & S::Vi64::set1(BIT_10_MASK_64)).cast_f64()
+                    - S::Vf64::set1(511.5);
+                let inv_mag = jitter * ((xd * xd) + ((yd * yd) + (zd * zd))).rsqrt();
+                xd = (xd * inv_mag) + xcf;
+                yd = (yd * inv_mag) + ycf;
+                zd = (zd * inv_mag) + zcf;
+
+                let new_distance = (xd * xd) + ((yd * yd) + (zd * zd));
+                let mut i = index1;
+                while i > 0 {
+                    let a_new_wins = new_distance.cmp_lt(distance[i]);
+                    let min_i = distance[i].min(new_distance);
+                    let tmp_dx = a_new_wins.blendv(dxv[i], xd);
+                    let tmp_dy = a_new_wins.blendv(dyv[i], yd);
+                    let tmp_dz = a_new_wins.blendv(dzv[i], zd);
+                    let prev_wins = min_i.cmp_lt(distance[i - 1]);
+                    distance[i] = min_i.max(distance[i - 1]);
+                    dxv[i] = prev_wins.blendv(tmp_dx, dxv[i - 1]);
+                    dyv[i] = prev_wins.blendv(tmp_dy, dyv[i - 1]);
+                    dzv[i] = prev_wins.blendv(tmp_dz, dzv[i - 1]);
+                    let c_new_wins = new_distance.cmp_lt(distance[0]);
+                    distance[0] = distance[0].min(new_distance);
+                    dxv[0] = c_new_wins.blendv(dxv[0], xd);
+                    dyv[0] = c_new_wins.blendv(dyv[0], yd);
+                    dzv[0] = c_new_wins.blendv(dzv[0], zd);
+                    i -= 1;
+                }
+                zcf += S::Vf64::set1(1.0);
+                zc += S::Vi64::set1(Z_PRIME_64);
+            }
+            ycf += S::Vf64::set1(1.0);
+            yc += S::Vi64::set1(Y_PRIME_64);
+        }
+        xcf += S::Vf64::set1(1.0);
+        xc += S::Vi64::set1(X_PRIME_64);
+    }
+
+    (distance, [dxv, dyv, dzv])
+}
+
 // `#[inline]` rather than `#[inline(always)]`: the call boundary now dispatches
 // over the (distance, return) strategy types, so force-inlining would splice
 // every instantiation into one frame and overflow small stacks in debug
