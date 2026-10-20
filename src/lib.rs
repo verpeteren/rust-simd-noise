@@ -9,7 +9,7 @@
 //!* Runtime detection picks the best available instruction set
 //!* Simplex noise, fractal brownian motion, turbulence, and ridge
 //!* 1D, 2D, 3D, 4D, 5D, and 6D
-//!* Cellular / Voroni Noise  1D, 2D, 3D, 4D, 5D, and 6D
+//!* Cellular / Voronoi Noise  1D, 2D, 3D, 4D, 5D, and 6D
 //!
 //!## ⚠️ Experimental: 5D and 6D
 //!
@@ -42,7 +42,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! simdnoise = { version = "3", features = ["scalar"] }
+//! simdnoise = { version = "4", features = ["scalar"] }
 //! ```
 //!
 //! This makes the crate usable under such toolchains (e.g. with Cranelift for

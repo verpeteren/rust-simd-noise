@@ -154,7 +154,7 @@ fn emplace_wrong_len_panics_f64() {
         .fill_f64(&mut out);
 }
 
-// --- typed (integer) range emplace: fill_range / get_Nd_noise_range_into ---
+// --- typed (integer) range emplace: fill_range / fill_Nd_noise_range ---
 
 /// Reference: the exact affine map + saturating cast the typed path must produce.
 /// `v * mult + off` then `as T`, with mult/off derived from the source range and

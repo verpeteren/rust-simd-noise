@@ -559,7 +559,7 @@ export component AppWindow inherits Window {
                                 model: ["Value", "Gradient magnitude", "Slope shaded", "Normal map"];
                                 current-index <=> root.render-mode-idx;
                                 enabled: root.dim == 2;
-                                Tooltip { text: @markdown("What the canvas draws from the analytic gradient (`generate_with_derivative`). **Value** is the plain noise; **Gradient magnitude** maps ‖∇‖ through the colormap; **Slope shaded** is Lambert shading of the heightfield; **Normal map** encodes the surface normal as RGB. 2D only; cellular needs the Euclidean metric (and `Distance` for Cellular), otherwise it falls back to Value."); }
+                                Tooltip { text: @markdown("What the canvas draws from the analytic gradient (`generate_with_gradient`). **Value** is the plain noise; **Gradient magnitude** maps ‖∇‖ through the colormap; **Slope shaded** is Lambert shading of the heightfield; **Normal map** encodes the surface normal as RGB. 2D only; cellular needs the Euclidean metric (and `Distance` for Cellular), otherwise it falls back to Value."); }
                             }
                         }
                         HorizontalBox {

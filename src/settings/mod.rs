@@ -92,6 +92,14 @@ pub trait Settings {
 pub trait SimplexSettings {
     fn with_lacunarity(&mut self, lacunarity: f32) -> &mut Self;
     fn with_gain(&mut self, gain: f32) -> &mut Self;
+    /// Number of octaves summed by the fractal.
+    ///
+    /// Intentionally an `f32`, not an integer: a **fractional** octave count is
+    /// supported (issue #14). The whole part contributes full octaves and the
+    /// fractional part fades the next octave in smoothly, which keeps the output
+    /// continuous as the count is animated across integer boundaries instead of
+    /// jumping when a new octave appears. Pass e.g. `5.0` for five octaves, or
+    /// `5.5` to blend halfway into the sixth.
     fn with_octaves(&mut self, octaves: f32) -> &mut Self;
 }
 

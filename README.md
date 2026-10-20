@@ -7,11 +7,15 @@ Super fast SIMD noise library for Rust. PRs welcome!
 This library was created by Jack Mott.
 The current maintainer is Peter Reijnders.
 
+> **Upgrading from 3.1.6?** 4.0 is a breaking release. See
+> [MIGRATION.md](MIGRATION.md) for the 3.1.6 → 4.0 changes (what moved,
+> what was renamed, and what's new).
+
 ## Features
 
 * Gradient Noise (Simplex aka Perlin) 1D,2D,3D,4D, and **5D/6D (experimental)**
 * Fractal Brownian Motion, Ridge, and Turbulence
-* Cellular Noise (aka Voroni) 1D,2D,3D,4D, and **5D/6D (experimental)**
+* Cellular Noise (aka Voronoi) 1D,2D,3D,4D, and **5D/6D (experimental)**
 * `f32` and `f64` output for every algorithm and dimension
 * SSE2, SSE41, AVX2, and AVX-512 instruction sets, plus NEON and a non-SIMD fallback
 * AVX2 version also leverages FMA3
@@ -100,7 +104,7 @@ backend, so no CPU SIMD intrinsic is ever executed:
 
 ```toml
 [dependencies]
-simdnoise = { version = "3", features = ["scalar"] }
+simdnoise = { version = "4", features = ["scalar"] }
 ```
 
 This makes the crate usable under such toolchains (e.g. with Cranelift for
@@ -275,7 +279,7 @@ let noise = NoiseBuilder::fbm_2d(100, 100).generate_scaled(0.0, 1.0);
 // Get a block of 3d ridge noise, custom settings, 32x32x32 unscaled
 let (noise, min, max) = NoiseBuilder::ridge_3d(32, 32, 32)
     .with_freq_3d(0.05, 0.04, 0.01)
-    .with_octaves(5)
+    .with_octaves(5.0)
     .with_gain(2.0)
     .with_seed(1337)
     .with_lacunarity(0.5)
@@ -289,7 +293,7 @@ Sometimes you may want to use SSE41 even with AVX2 is available.
 ```rust
 let noise_setting = NoiseBuilder::ridge_3d(32, 32, 32)
     .with_freq_3d(0.05, 0.04, 0.01)
-    .with_octaves(5)
+    .with_octaves(5.0)
     .with_gain(2.0)
     .with_lacunarity(0.5)
     .wrap();
@@ -317,13 +321,13 @@ unsafe {
 
 ```
 
-## Generating into caller-owned memory (`*_into`)
+## Generating into caller-owned memory (`fill_*`)
 
-Every generator has an `*_into` / `fill` variant that writes into a
+Every generator has a `fill_*` variant that writes into a
 buffer **you already own** (issue #5) instead of returning a freshly allocated
 `Vec`. This lets you fill a preallocated block, split one big buffer across
 threads with no per-chunk allocation or copy-back, scale in place, and quantize
-straight into an integer buffer; `*_into_64` variants exist for `f64`.
+straight into an integer buffer; `fill_*_f64` variants exist for `f64`.
 
 ```rust
 use simdnoise::{NoiseBuilder, Settings};
@@ -371,7 +375,7 @@ fn main() {
         .fill_scaled(0.0, 255.0, &mut scaled);
     println!("3) scaled-in-place sample: {:.3}", scaled[0]);
 
-    // 4. ...and f64 variants exist for every entry point (`*_into_64`).
+    // 4. ...and f64 variants exist for every entry point (`fill_*_f64`).
     let mut doubles = vec![0.0f64; width];
     NoiseBuilder::fbm_1d(width)
         .with_seed(42)

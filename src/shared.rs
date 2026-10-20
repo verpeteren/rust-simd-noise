@@ -2,7 +2,7 @@ use simdeez::prelude::*;
 
 use crate::{dimensional_being::DimensionalBeing, NoiseType};
 
-/// Integer output types that noise can be quantized into by the `*_range_into`
+/// Integer output types that noise can be quantized into by the `fill_*_range`
 /// emplace API. A source noise value in `[src_min, src_max]` is mapped linearly
 /// onto this type's full range `[RANGE_MIN, RANGE_MAX]` and then cast; the cast
 /// saturates (values outside the range clamp to the endpoints) and truncates

@@ -38,7 +38,7 @@ normalization, no golden fixtures yet) · blank = not needed. (All cells below a
 | Cellular2 (Voronoi F2) | + return_type2, index0, index1 | v | v | v | v | v* | v* |
 
 - **Value type:** `f32` and `f64` both work on every `v` cell. The crate is **not** generic over the
-  float — parallel `generate()`/`generate_f64()` twins (also `_scaled_64`, `_into_64`). The UI wraps
+  float — parallel `generate()`/`generate_f64()` twins (also `generate_scaled_f64`, `fill_*_f64`). The UI wraps
   both behind its own generic `T`.
 - **Engines:** Scalar `v` · SSE2 `v` · SSE4.1 `v` · AVX2 `v` · NEON `v` (aarch64) · WASM simd128 `v`
   (wasm32, compile-time) · **AVX-512** runtime `v` / compile-time `x→v`.
@@ -46,7 +46,7 @@ normalization, no golden fixtures yet) · blank = not needed. (All cells below a
   scalar; aarch64: NEON). Compile-time via `scalar` feature or the `intrinsics::{engine}` modules.
 - **Output modes** (Settings trait): `generate` → `(Vec,min,max)` · `generate_scaled` ·
   `fill` · `fill_scaled` · `fill_range::<T>` (u8/u16/u32/i16/i32), each
-  with an f64 twin except `range_into` (f32-only). Per-axis offsets via `*_offset` builders.
+  with an f64 twin except `fill_range` (f32-only). Per-axis offsets via `*_offset` builders.
 - **Defaults** (seed UI controls): seed=1 · freq=0.02 · lacunarity=0.5, gain=2.0, octaves=3 ·
   cellular Euclidean/Distance/jitter=0.25 · cellular2 +Distance2/index0=0/index1=1
   (`validate`: index0≤2, index1≤3, index0<index1).
