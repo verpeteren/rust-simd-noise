@@ -14,7 +14,7 @@
 //! `--features scalar` as well for cross-engine coverage.
 
 use simdnoise::{
-    get_4d_noise, get_5d_noise, get_6d_noise, NoiseBuilder, Settings, SimplexSettings,
+    generate_4d_noise, generate_5d_noise, generate_6d_noise, NoiseBuilder, Settings, SimplexSettings,
 };
 
 fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
@@ -85,8 +85,8 @@ fn gradient_4d() {
     let (a, b, c, e) = (12, 10, 8, 6);
     let mut s = NoiseBuilder::gradient_4d(a, b, c, e);
     s.with_seed(7).with_freq_4d(0.01, 0.012, 0.014, 0.016);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_4d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_4d_noise(&s.wrap());
     assert_eq!(ng.stride, 4);
     assert_eq!(ng.values.len(), a * b * c * e);
     assert_eq!(ng.gradients.len(), a * b * c * e * 4);
@@ -104,8 +104,8 @@ fn gradient_5d() {
     let ext = [8usize, 6, 5, 4, 4];
     let mut s = NoiseBuilder::gradient_5d(ext[0], ext[1], ext[2], ext[3], ext[4]);
     s.with_seed(7).with_freq(0.01);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_5d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_5d_noise(&s.wrap());
     assert_eq!(ng.stride, 5);
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
@@ -122,8 +122,8 @@ fn gradient_6d() {
     let mut s = NoiseBuilder::gradient_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(7)
         .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_6d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_6d_noise(&s.wrap());
     assert_eq!(ng.stride, 6);
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
@@ -145,8 +145,8 @@ fn fbm_4d() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_4d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_4d_noise(&s.wrap());
     assert_eq!(ng.stride, 4);
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
@@ -166,8 +166,8 @@ fn fbm_5d() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_5d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_5d_noise(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
         "5D fbm value mismatch"
@@ -186,8 +186,8 @@ fn fbm_6d() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_6d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_6d_noise(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
         "6D fbm value mismatch"
@@ -214,8 +214,8 @@ fn ridge_4d() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_4d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_4d_noise(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
         "4D ridge value mismatch"
@@ -234,8 +234,8 @@ fn ridge_6d() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_6d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_6d_noise(&s.wrap());
     assert_eq!(ng.stride, 6);
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
@@ -255,8 +255,8 @@ fn turbulence_4d() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_4d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_4d_noise(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
         "4D turbulence value mismatch"
@@ -275,8 +275,8 @@ fn turbulence_5d() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_5d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_5d_noise(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-4,
         "5D turbulence value mismatch"

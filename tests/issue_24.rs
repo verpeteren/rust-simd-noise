@@ -1,6 +1,6 @@
 //! Sanity + regression tests for issue #24: value + analytic gradient output.
 //!
-//! [`GradientSettings::generate_with_derivative`] returns both the noise value
+//! [`GradientSettings::generate_with_gradient`] returns both the noise value
 //! and its analytic gradient in one pass. For each supported dimension we check
 //! two things:
 //!   1. the value channel matches the plain `get_*_noise` generator, and
@@ -11,7 +11,7 @@
 //! Running this suite under `--features scalar` as well exercises the scalar
 //! engine, giving cross-engine coverage (NEON/AVX vs scalar) for the new path.
 
-use simdnoise::{get_1d_noise, get_2d_noise, get_3d_noise, NoiseBuilder, Settings};
+use simdnoise::{generate_1d_noise, generate_2d_noise, generate_3d_noise, NoiseBuilder, Settings};
 
 fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
     assert_eq!(a.len(), b.len());
@@ -30,8 +30,8 @@ fn gradient_1d_values_match_plain_generator() {
     let width = 512;
     let mut s = NoiseBuilder::gradient_1d(width);
     s.with_seed(7).with_freq(0.02);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_1d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_1d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), width);
     assert_eq!(ng.gradients.len(), width);
@@ -45,7 +45,7 @@ fn gradient_1d_matches_finite_difference() {
     let width = 512;
     let mut s = NoiseBuilder::gradient_1d(width);
     s.with_seed(7).with_freq(0.02);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let v = &ng.values;
     let g = &ng.gradients;
 
@@ -73,8 +73,8 @@ fn gradient_2d_values_match_plain_generator() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::gradient_2d(w, h);
     s.with_seed(3).with_freq_2d(0.02, 0.025);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_2d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_2d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), w * h);
     assert_eq!(ng.gradients.len(), w * h * 2);
@@ -90,7 +90,7 @@ fn gradient_2d_matches_finite_difference() {
     // Distinct per-axis frequencies so a swapped axis or a missing frequency
     // factor shows up as a finite-difference mismatch.
     s.with_seed(3).with_freq_2d(0.02, 0.025);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let v = &ng.values;
     let g = &ng.gradients;
     let idx = |x: usize, y: usize| y * w + x;
@@ -123,8 +123,8 @@ fn gradient_3d_values_match_plain_generator() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::gradient_3d(w, h, d);
     s.with_seed(5).with_freq_3d(0.02, 0.025, 0.03);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_3d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_3d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), w * h * d);
     assert_eq!(ng.gradients.len(), w * h * d * 3);
@@ -142,7 +142,7 @@ fn gradient_3d_matches_finite_difference() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::gradient_3d(w, h, d);
     s.with_seed(5).with_freq_3d(0.02, 0.025, 0.03);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let v = &ng.values;
     let g = &ng.gradients;
     let idx = |x: usize, y: usize, z: usize| (z * h + y) * w + x;

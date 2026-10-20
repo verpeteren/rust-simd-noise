@@ -1052,7 +1052,7 @@ macro_rules! turbulence {
     };
 }
 
-macro_rules! get_noise {
+macro_rules! generate_noise {
     ($call: ident, $fn_name: ident, $f_type: ty, $mod: ident) => {
         /// Gets a width sized block of noise, unscaled.
         /// `start_x` can be used to provide an offset in the
@@ -1069,7 +1069,7 @@ macro_rules! get_noise {
         }
     };
 }
-macro_rules! get_noise_scaled {
+macro_rules! generate_noise_scaled {
     ($call: ident, $fn_name: ident, $f_type: ty) => {
         /// Gets a width sized block of scaled noise
         /// `start_x` can be used to provide an offset in the coordinates.
@@ -1080,7 +1080,7 @@ macro_rules! get_noise_scaled {
         /// calling this with an unsupported `Simd` type is undefined behavior.
         pub unsafe fn $fn_name<S: simdeez::Simd>(noise_type: &NoiseType) -> Vec<$f_type> {
             let (mut noise, min, max) = $call::<S>(noise_type);
-            let dim = noise_type.get_dimensions();
+            let dim = noise_type.dimensions();
             scale_noise::<S>(dim.min, dim.max, min, max, &mut noise);
             noise
         }

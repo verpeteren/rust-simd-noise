@@ -12,7 +12,7 @@
 //! `--features scalar` too for cross-engine coverage.
 
 use simdnoise::{
-    get_2d_noise, get_2d_noise_64, get_3d_noise, get_3d_noise_64, Cell2ReturnType, NoiseBuilder,
+    generate_2d_noise, generate_2d_noise_f64, generate_3d_noise, generate_3d_noise_f64, Cell2ReturnType, NoiseBuilder,
     Settings,
 };
 
@@ -118,8 +118,8 @@ fn cellular_2d_value_matches_plain() {
     let (w, h) = (64, 48);
     let mut s = NoiseBuilder::cellular_2d(w, h);
     s.with_seed(9).with_freq_2d(0.03, 0.03);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_2d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_2d_noise(&s.wrap());
     assert_eq!(ng.stride, 2);
     assert_eq!(ng.values.len(), w * h);
     // Both compute the nearest squared-Euclidean distance (F1).
@@ -132,7 +132,7 @@ fn cellular_2d_matches_finite_difference() {
     let (w, h) = (64, 48);
     let mut s = NoiseBuilder::cellular_2d(w, h);
     s.with_seed(9).with_freq_2d(0.03, 0.03).with_jitter(0.3);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let (frac, mag) = fd_good_fraction(&ng.values, &ng.gradients, 2, &[w, h]);
     assert!(mag > 1e-3, "2D cellular gradient degenerate (mag {})", mag);
     // Voronoi borders make some samples miss; most interior samples match.
@@ -144,8 +144,8 @@ fn cellular_3d_value_matches_plain() {
     let (w, h, d) = (24, 20, 18);
     let mut s = NoiseBuilder::cellular_3d(w, h, d);
     s.with_seed(5).with_freq_3d(0.03, 0.03, 0.03);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_3d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_3d_noise(&s.wrap());
     assert_eq!(ng.stride, 3);
     let diff = max_abs_diff(&ng.values, &plain);
     assert!(diff < 1e-4, "3D cellular value vs plain gen diff {}", diff);
@@ -158,7 +158,7 @@ fn cellular_3d_matches_finite_difference() {
     s.with_seed(5)
         .with_freq_3d(0.03, 0.03, 0.03)
         .with_jitter(0.3);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let (frac, mag) = fd_good_fraction(&ng.values, &ng.gradients, 3, &[w, h, d]);
     assert!(mag > 1e-3, "3D cellular gradient degenerate (mag {})", mag);
     assert!(frac > 0.7, "3D cellular FD good fraction {}", frac);
@@ -171,8 +171,8 @@ fn cellular_2d_f64_value_matches_plain() {
     let (w, h) = (64, 48);
     let mut s = NoiseBuilder::cellular_2d(w, h);
     s.with_seed(9).with_freq_2d(0.03, 0.03);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_2d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_2d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 2);
     let d = max_abs_diff_64(&ng.values, &plain);
     assert!(d < 1e-6, "2D f64 cellular value vs plain gen diff {}", d);
@@ -183,7 +183,7 @@ fn cellular_2d_f64_matches_finite_difference() {
     let (w, h) = (64, 48);
     let mut s = NoiseBuilder::cellular_2d(w, h);
     s.with_seed(9).with_freq_2d(0.03, 0.03).with_jitter(0.3);
-    let ng = s.generate_with_derivative_64();
+    let ng = s.generate_with_gradient_f64();
     let (frac, mag) = fd_good_fraction_64(&ng.values, &ng.gradients, 2, &[w, h]);
     assert!(
         mag > 1e-3,
@@ -198,8 +198,8 @@ fn cellular_3d_f64_value_matches_plain() {
     let (w, h, d) = (24, 20, 18);
     let mut s = NoiseBuilder::cellular_3d(w, h, d);
     s.with_seed(5).with_freq_3d(0.03, 0.03, 0.03);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_3d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_3d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 3);
     let diff = max_abs_diff_64(&ng.values, &plain);
     assert!(
@@ -225,8 +225,8 @@ fn cellular2_2d_value_matches_plain_all_returns() {
     for (idx, &rt) in RETURN_TYPES.iter().enumerate() {
         let mut s = NoiseBuilder::cellular2_2d(w, h);
         s.with_seed(3).with_freq_2d(0.03, 0.03).with_return_type(rt);
-        let ng = s.generate_with_derivative();
-        let (plain, _, _) = get_2d_noise(&s.wrap());
+        let ng = s.generate_with_gradient();
+        let (plain, _, _) = generate_2d_noise(&s.wrap());
         assert_eq!(ng.stride, 2);
         let d = max_abs_diff(&ng.values, &plain);
         assert!(
@@ -247,7 +247,7 @@ fn cellular2_2d_sub_matches_finite_difference() {
         .with_freq_2d(0.025, 0.025)
         .with_jitter(0.3)
         .with_return_type(Cell2ReturnType::Distance2Sub);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let (frac, mag) = fd_good_fraction(&ng.values, &ng.gradients, 2, &[w, h]);
     assert!(
         mag > 1e-3,
@@ -267,7 +267,7 @@ fn cellular2_2d_distance2_matches_finite_difference() {
         .with_freq_2d(0.025, 0.025)
         .with_jitter(0.3)
         .with_return_type(Cell2ReturnType::Distance2);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let (frac, mag) = fd_good_fraction(&ng.values, &ng.gradients, 2, &[w, h]);
     assert!(
         mag > 1e-3,
@@ -284,8 +284,8 @@ fn cellular2_3d_sub_value_matches_plain() {
     s.with_seed(3)
         .with_freq_3d(0.03, 0.03, 0.03)
         .with_return_type(Cell2ReturnType::Distance2Sub);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_3d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_3d_noise(&s.wrap());
     assert_eq!(ng.stride, 3);
     let diff = max_abs_diff(&ng.values, &plain);
     assert!(diff < 1e-4, "3D cellular2 Sub value vs plain diff {}", diff);
@@ -299,7 +299,7 @@ fn cellular2_3d_sub_matches_finite_difference() {
         .with_freq_3d(0.025, 0.025, 0.025)
         .with_jitter(0.3)
         .with_return_type(Cell2ReturnType::Distance2Sub);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let (frac, mag) = fd_good_fraction(&ng.values, &ng.gradients, 3, &[w, h, d]);
     assert!(
         mag > 1e-3,
@@ -316,8 +316,8 @@ fn cellular2_2d_f64_sub_value_matches_plain() {
     s.with_seed(3)
         .with_freq_2d(0.03, 0.03)
         .with_return_type(Cell2ReturnType::Distance2Sub);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_2d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_2d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 2);
     let d = max_abs_diff_64(&ng.values, &plain);
     assert!(d < 1e-6, "2D f64 cellular2 Sub value vs plain diff {}", d);
@@ -331,7 +331,7 @@ fn cellular2_2d_f64_sub_matches_finite_difference() {
         .with_freq_2d(0.025, 0.025)
         .with_jitter(0.3)
         .with_return_type(Cell2ReturnType::Distance2Sub);
-    let ng = s.generate_with_derivative_64();
+    let ng = s.generate_with_gradient_f64();
     let (frac, mag) = fd_good_fraction_64(&ng.values, &ng.gradients, 2, &[w, h]);
     assert!(
         mag > 1e-3,
@@ -351,7 +351,7 @@ fn cellular_manhattan_unsupported() {
     use simdnoise::CellDistanceFunction;
     let mut s = NoiseBuilder::cellular_2d(16, 16);
     s.with_distance_function(CellDistanceFunction::Manhattan);
-    let _ = s.generate_with_derivative();
+    let _ = s.generate_with_gradient();
 }
 
 #[test]
@@ -360,5 +360,5 @@ fn cellular2_manhattan_unsupported() {
     use simdnoise::CellDistanceFunction;
     let mut s = NoiseBuilder::cellular2_2d(16, 16);
     s.with_distance_function(CellDistanceFunction::Manhattan);
-    let _ = s.generate_with_derivative();
+    let _ = s.generate_with_gradient();
 }

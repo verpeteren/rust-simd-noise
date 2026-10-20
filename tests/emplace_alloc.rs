@@ -2,7 +2,7 @@
 //! caller-provided integer slice must not allocate an output-sized f32 scratch.
 //!
 //! Uses a counting global allocator (which is why this lives in its own test
-//! binary) and measures bytes allocated across a single `generate_range_into`
+//! binary) and measures bytes allocated across a single `fill_range`
 //! call, after the output buffer is already allocated.
 
 use std::alloc::{GlobalAlloc, Layout, System};
@@ -36,7 +36,7 @@ fn typed_emplace_does_not_allocate_output_sized_scratch() {
     NoiseBuilder::fbm_2d(w, h)
         .with_seed(1)
         .with_freq_2d(0.02, 0.02)
-        .generate_range_into(-1.0, 1.0, &mut out);
+        .fill_range(-1.0, 1.0, &mut out);
     let delta = ALLOCATED.load(Ordering::Relaxed) - before;
 
     // A fused writer only touches the tiny per-call coordinate scratch, never an

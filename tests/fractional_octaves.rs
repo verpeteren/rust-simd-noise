@@ -211,8 +211,8 @@ fn fractional_matches_across_engines() {
         .with_freq_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .wrap();
-    let (runtime, _, _) = simdnoise::get_2d_noise(&nt);
-    let (scalar, _, _) = unsafe { simdnoise::intrinsics::scalar::get_2d_noise::<Scalar>(&nt) };
+    let (runtime, _, _) = simdnoise::generate_2d_noise(&nt);
+    let (scalar, _, _) = unsafe { simdnoise::intrinsics::scalar::generate_2d_noise::<Scalar>(&nt) };
     assert_eq!(runtime.len(), scalar.len());
     let md = runtime
         .iter()

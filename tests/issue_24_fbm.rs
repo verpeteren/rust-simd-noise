@@ -1,6 +1,6 @@
 //! Sanity + regression tests for issue #24, FBM (fractal) derivatives.
 //!
-//! [`FbmSettings::generate_with_derivative`] returns the fBm value and its
+//! [`FbmSettings::generate_with_gradient`] returns the fBm value and its
 //! analytic gradient (the differentiated octave stack). For each supported
 //! dimension we check:
 //!   1. the value channel matches the plain `get_*_noise` FBM generator, and
@@ -16,7 +16,7 @@
 //! Running the suite under `--features scalar` adds cross-engine coverage.
 
 use simdnoise::{
-    get_1d_noise, get_2d_noise, get_3d_noise, NoiseBuilder, Settings, SimplexSettings,
+    generate_1d_noise, generate_2d_noise, generate_3d_noise, NoiseBuilder, Settings, SimplexSettings,
 };
 
 fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
@@ -42,8 +42,8 @@ fn fbm_1d_values_match_plain_generator() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_1d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_1d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), width);
     assert_eq!(ng.gradients.len(), width);
@@ -65,7 +65,7 @@ fn fbm_1d_matches_finite_difference() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let v = &ng.values;
     let g = &ng.gradients;
 
@@ -96,8 +96,8 @@ fn fbm_2d_values_match_plain_generator() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_2d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_2d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), w * h);
     assert_eq!(ng.gradients.len(), w * h * 2);
@@ -119,7 +119,7 @@ fn fbm_2d_matches_finite_difference() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let v = &ng.values;
     let g = &ng.gradients;
     let idx = |x: usize, y: usize| y * w + x;
@@ -153,8 +153,8 @@ fn fbm_3d_values_match_plain_generator() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_3d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_3d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), w * h * d);
     assert_eq!(ng.gradients.len(), w * h * d * 3);
@@ -176,7 +176,7 @@ fn fbm_3d_matches_finite_difference() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     let v = &ng.values;
     let g = &ng.gradients;
     let idx = |x: usize, y: usize, z: usize| (z * h + y) * w + x;
@@ -219,8 +219,8 @@ fn fbm_1d_high_lacunarity_values_match_plain_generator() {
         .with_lacunarity(2.0)
         .with_gain(2.0)
         .with_octaves(4.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_1d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_1d_noise(&s.wrap());
     let d = max_abs_diff(&ng.values, &plain);
     assert!(
         d < 1e-4,

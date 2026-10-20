@@ -64,7 +64,7 @@ pub unsafe fn scale_noise<S: Simd>(
     }
 }
 
-pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f32, f32)>(
+pub(crate) unsafe fn generate_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f32, f32)>(
     noise_type: &NoiseType,
     noise_fn: F,
 ) -> Vec<f32> {
@@ -75,7 +75,7 @@ pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f
     let (min, max) = noise_type
         .theoretical_min_max()
         .unwrap_or((observed_min, observed_max));
-    let dim = noise_type.get_dimensions();
+    let dim = noise_type.dimensions();
     scale_noise::<S>(dim.min, dim.max, min, max, &mut noise);
     noise
 }
@@ -83,7 +83,7 @@ pub(crate) unsafe fn get_scaled_noise<S: Simd, F: Fn(&NoiseType) -> (Vec<f32>, f
 /// f64 counterpart of [`scale_noise`]; affine-maps `[min, max]` onto
 /// `[scale_min, scale_max]` in place over a caller-provided slice.
 #[inline(always)]
-pub unsafe fn scale_noise_64<S: Simd>(
+pub unsafe fn scale_noise_f64<S: Simd>(
     scale_min: f64,
     scale_max: f64,
     min: f64,
@@ -111,13 +111,13 @@ pub unsafe fn scale_noise_64<S: Simd>(
     }
 }
 
-/// f64 counterpart of [`get_scaled_noise`]. The target range is passed
+/// f64 counterpart of [`generate_scaled_noise`]. The target range is passed
 /// explicitly (as f64) rather than read from the f32 `NoiseDimensions`.
 ///
 /// Like the f32 path, the *source* range is the offset-independent theoretical
 /// range (widened from f32) so adjacent blocks line up seamlessly (#39/#23);
 /// cellular returns without a closed form fall back to the observed range.
-pub(crate) unsafe fn get_scaled_noise_64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>, f64, f64)>(
+pub(crate) unsafe fn generate_scaled_noise_f64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>, f64, f64)>(
     noise_type: &NoiseType,
     scale_min: f64,
     scale_max: f64,
@@ -128,18 +128,18 @@ pub(crate) unsafe fn get_scaled_noise_64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>
         .theoretical_min_max()
         .map(|(mn, mx)| (mn as f64, mx as f64))
         .unwrap_or((observed_min, observed_max));
-    scale_noise_64::<S>(scale_min, scale_max, min, max, &mut noise);
+    scale_noise_f64::<S>(scale_min, scale_max, min, max, &mut noise);
     noise
 }
 
 /// Emplace+scale helper for f32: fills `out` via `noise_fn`, then scales it in
 /// place to the target range read from the noise type's dimensions.
 ///
-/// Mirrors [`get_scaled_noise`]: the source range is the offset-independent
+/// Mirrors [`generate_scaled_noise`]: the source range is the offset-independent
 /// theoretical range so adjacent blocks line up seamlessly (#39) and the emplace
 /// result is bit-for-bit identical to the Vec-returning path. Cellular noise has
 /// no closed-form range, so fall back to its observed one.
-pub(crate) unsafe fn get_scaled_noise_into<S: Simd, F: Fn(&NoiseType, &mut [f32]) -> (f32, f32)>(
+pub(crate) unsafe fn fill_scaled_noise<S: Simd, F: Fn(&NoiseType, &mut [f32]) -> (f32, f32)>(
     noise_type: &NoiseType,
     out: &mut [f32],
     noise_fn: F,
@@ -148,14 +148,14 @@ pub(crate) unsafe fn get_scaled_noise_into<S: Simd, F: Fn(&NoiseType, &mut [f32]
     let (min, max) = noise_type
         .theoretical_min_max()
         .unwrap_or((observed_min, observed_max));
-    let dim = noise_type.get_dimensions();
+    let dim = noise_type.dimensions();
     scale_noise::<S>(dim.min, dim.max, min, max, out);
 }
 
 /// Emplace+scale helper for f64; the target range is passed explicitly. Mirrors
-/// [`get_scaled_noise_64`]: scales by the offset-independent theoretical range
+/// [`generate_scaled_noise_f64`]: scales by the offset-independent theoretical range
 /// (observed fallback for cellular) so emplace matches the Vec path seamlessly.
-pub(crate) unsafe fn get_scaled_noise_into_64<
+pub(crate) unsafe fn fill_scaled_noise_f64<
     S: Simd,
     F: Fn(&NoiseType, &mut [f64]) -> (f64, f64),
 >(
@@ -170,5 +170,5 @@ pub(crate) unsafe fn get_scaled_noise_into_64<
         .theoretical_min_max()
         .map(|(mn, mx)| (mn as f64, mx as f64))
         .unwrap_or((observed_min, observed_max));
-    scale_noise_64::<S>(scale_min, scale_max, min, max, out);
+    scale_noise_f64::<S>(scale_min, scale_max, min, max, out);
 }

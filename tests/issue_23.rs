@@ -1,6 +1,6 @@
 //! Regression tests for issue #23: analytic output ranges and f64 scaling.
 //!
-//! 1. f64 `generate_scaled_64` must scale by the offset-independent theoretical
+//! 1. f64 `generate_scaled_f64` must scale by the offset-independent theoretical
 //!    range (like the f32 path, issue #39), so adjacent offset blocks line up.
 //! 2. With `gain > 1` (the crate default is 2), 1D ridge/turbulence scaled output
 //!    must stay within the requested range — the 1D theoretical bound used to be
@@ -46,7 +46,7 @@ fn fbm_2d_scaled_64_is_seamless() {
         NoiseBuilder::fbm_2d_offset(x_off as f32, w, 0.0, H)
             .with_freq(FREQ)
             .with_octaves(OCTAVES)
-            .generate_scaled_64(0.0, 255.0)
+            .generate_scaled_f64(0.0, 255.0)
     });
 }
 
@@ -56,7 +56,7 @@ fn turbulence_2d_scaled_64_is_seamless() {
         NoiseBuilder::turbulence_2d_offset(x_off as f32, w, 0.0, H)
             .with_freq(FREQ)
             .with_octaves(OCTAVES)
-            .generate_scaled_64(0.0, 255.0)
+            .generate_scaled_f64(0.0, 255.0)
     });
 }
 
@@ -66,7 +66,7 @@ fn ridge_3d_scaled_64_is_seamless() {
         NoiseBuilder::ridge_3d_offset(x_off as f32, w, 0.0, H, 0.0, 1)
             .with_freq(FREQ)
             .with_octaves(OCTAVES)
-            .generate_scaled_64(0.0, 255.0)
+            .generate_scaled_f64(0.0, 255.0)
     });
 }
 

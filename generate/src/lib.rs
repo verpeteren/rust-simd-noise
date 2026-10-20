@@ -515,7 +515,7 @@ fn emit<S: Settings>(s: S, o: &Opts) -> (Vec<f32>, f32, f32) {
         },
         FloatKind::F64 => match o.scaling {
             ScalingArg::Raw => {
-                let (v, mn, mx) = s.generate_64();
+                let (v, mn, mx) = s.generate_f64();
                 (
                     v.into_iter().map(|x| x as f32).collect(),
                     mn as f32,
@@ -523,7 +523,7 @@ fn emit<S: Settings>(s: S, o: &Opts) -> (Vec<f32>, f32, f32) {
                 )
             }
             ScalingArg::Scaled => {
-                let v = s.generate_scaled_64(o.scale_min as f64, o.scale_max as f64);
+                let v = s.generate_scaled_f64(o.scale_min as f64, o.scale_max as f64);
                 (
                     v.into_iter().map(|x| x as f32).collect(),
                     o.scale_min,
@@ -539,7 +539,7 @@ fn quant<S: Settings>(s: S, o: &Opts, q: QuantArg) -> (Vec<f32>, f32, f32) {
     macro_rules! go {
         ($t:ty, $lo:expr, $hi:expr) => {{
             let mut b = vec![<$t>::default(); n];
-            s.generate_range_into::<$t>(o.scale_min, o.scale_max, &mut b);
+            s.fill_range::<$t>(o.scale_min, o.scale_max, &mut b);
             (b.into_iter().map(|x| x as f32).collect(), $lo, $hi)
         }};
     }

@@ -3,7 +3,7 @@
 //! These exercise the whole plumbing stack — builder -> settings -> helpers ->
 //! runtime engine dispatch -> kernels — for every noise family at 5D and 6D,
 //! for both float widths, checking block length, finiteness, and that the
-//! preallocated `generate_into` path matches `generate`.
+//! preallocated `fill` path matches `generate`.
 //!
 //! Heavy 6D cellular (a 3^6 = 729-cell neighbourhood) builds a large stack frame
 //! in unoptimized/test builds (no stack-slot reuse; see issue #38), so the work
@@ -39,13 +39,13 @@ fn builder_5d_all_families() {
                 let (v, mn, mx) = $builder.generate();
                 check_block_f32(&v, len, $label);
                 assert!(mn <= mx, concat!($label, ": min>max"));
-                // generate_into must reproduce generate exactly.
+                // fill must reproduce generate exactly.
                 let mut buf = vec![0.0f32; len];
-                let (mn2, mx2) = $builder.generate_into(&mut buf);
-                assert_eq!(buf, v, concat!($label, ": generate_into != generate"));
+                let (mn2, mx2) = $builder.fill(&mut buf);
+                assert_eq!(buf, v, concat!($label, ": fill != generate"));
                 assert_eq!((mn, mx), (mn2, mx2));
                 // f64 path is finite and correctly sized.
-                let (v64, _, _) = $builder.generate_64();
+                let (v64, _, _) = $builder.generate_f64();
                 assert_eq!(v64.len(), len, concat!($label, ": f64 wrong length"));
                 assert!(
                     v64.iter().all(|x| x.is_finite()),
@@ -73,10 +73,10 @@ fn builder_6d_all_families() {
                 check_block_f32(&v, len, $label);
                 assert!(mn <= mx, concat!($label, ": min>max"));
                 let mut buf = vec![0.0f32; len];
-                let (mn2, mx2) = $builder.generate_into(&mut buf);
-                assert_eq!(buf, v, concat!($label, ": generate_into != generate"));
+                let (mn2, mx2) = $builder.fill(&mut buf);
+                assert_eq!(buf, v, concat!($label, ": fill != generate"));
                 assert_eq!((mn, mx), (mn2, mx2));
-                let (v64, _, _) = $builder.generate_64();
+                let (v64, _, _) = $builder.generate_f64();
                 assert_eq!(v64.len(), len, concat!($label, ": f64 wrong length"));
                 assert!(
                     v64.iter().all(|x| x.is_finite()),
@@ -130,9 +130,9 @@ fn cross_engine_block_5d_6d_inner() {
     for (settings, is_6d) in [(settings_5d, false), (settings_6d, true)] {
         let scalar_noise = unsafe {
             if is_6d {
-                scalar::get_6d_scaled_noise::<simdeez::scalar::Scalar>(&settings)
+                scalar::generate_6d_scaled_noise::<simdeez::scalar::Scalar>(&settings)
             } else {
-                scalar::get_5d_scaled_noise::<simdeez::scalar::Scalar>(&settings)
+                scalar::generate_5d_scaled_noise::<simdeez::scalar::Scalar>(&settings)
             }
         };
         let cmp = |other: &[f32]| {
@@ -149,23 +149,23 @@ fn cross_engine_block_5d_6d_inner() {
         unsafe {
             if is_x86_feature_detected!("sse2") {
                 cmp(&if is_6d {
-                    sse2::get_6d_scaled_noise::<simdeez::engines::sse2::Sse2>(&settings)
+                    sse2::generate_6d_scaled_noise::<simdeez::engines::sse2::Sse2>(&settings)
                 } else {
-                    sse2::get_5d_scaled_noise::<simdeez::engines::sse2::Sse2>(&settings)
+                    sse2::generate_5d_scaled_noise::<simdeez::engines::sse2::Sse2>(&settings)
                 });
             }
             if is_x86_feature_detected!("sse4.1") {
                 cmp(&if is_6d {
-                    sse41::get_6d_scaled_noise::<simdeez::engines::sse41::Sse41>(&settings)
+                    sse41::generate_6d_scaled_noise::<simdeez::engines::sse41::Sse41>(&settings)
                 } else {
-                    sse41::get_5d_scaled_noise::<simdeez::engines::sse41::Sse41>(&settings)
+                    sse41::generate_5d_scaled_noise::<simdeez::engines::sse41::Sse41>(&settings)
                 });
             }
             if is_x86_feature_detected!("avx2") {
                 cmp(&if is_6d {
-                    avx2::get_6d_scaled_noise::<simdeez::engines::avx2::Avx2>(&settings)
+                    avx2::generate_6d_scaled_noise::<simdeez::engines::avx2::Avx2>(&settings)
                 } else {
-                    avx2::get_5d_scaled_noise::<simdeez::engines::avx2::Avx2>(&settings)
+                    avx2::generate_5d_scaled_noise::<simdeez::engines::avx2::Avx2>(&settings)
                 });
             }
         }

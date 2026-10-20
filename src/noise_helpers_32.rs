@@ -74,12 +74,12 @@ pub trait SampleFractalDeriv32<S: Simd>: DimensionalBeing + Settings {
 }
 
 #[inline(always)]
-unsafe fn get_1d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn fill_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
     result: &mut [f32],
 ) -> (f32, f32) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
     let start_x = dim.x;
     let width = dim.width;
     assert_eq!(
@@ -139,23 +139,23 @@ unsafe fn get_1d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
 }
 
 #[inline(always)]
-unsafe fn get_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn generate_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
-    let width = settings.get_dimensions().width;
+    let width = settings.dimensions().width;
     let mut result = vec![0.0f32; width];
-    let (min, max) = get_1d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
+    let (min, max) = fill_1d_noise_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_2d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn fill_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
     result: &mut [f32],
 ) -> (f32, f32) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -220,25 +220,25 @@ unsafe fn get_2d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
 }
 
 #[inline(always)]
-unsafe fn get_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn generate_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
-    let dim = settings.get_dimensions();
+    let dim = settings.dimensions();
     let len = dim.width * dim.height;
     let mut result = vec![0.0f32; len];
-    let (min, max) = get_2d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
+    let (min, max) = fill_2d_noise_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_3d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn fill_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
     result: &mut [f32],
 ) -> (f32, f32) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -310,26 +310,26 @@ unsafe fn get_3d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
 }
 
 #[inline(always)]
-unsafe fn get_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn generate_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
-    let dim = settings.get_dimensions();
+    let dim = settings.dimensions();
     let len = dim.width * dim.height * dim.depth;
     let mut result = vec![0.0f32; len];
-    let (min, max) = get_3d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
+    let (min, max) = fill_3d_noise_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_4d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn fill_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
     result: &mut [f32],
 ) -> (f32, f32) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
-    let freq_w = S::Vf32::set1(settings.get_freq_w());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
+    let freq_w = S::Vf32::set1(settings.freq_w());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -407,27 +407,27 @@ unsafe fn get_4d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
 }
 
 #[inline(always)]
-unsafe fn get_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn generate_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
-    let dim = settings.get_dimensions();
+    let dim = settings.dimensions();
     let len = dim.width * dim.height * dim.depth * dim.time;
     let mut result = vec![0.0f32; len];
-    let (min, max) = get_4d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
+    let (min, max) = fill_4d_noise_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_5d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn fill_5d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
     result: &mut [f32],
 ) -> (f32, f32) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
-    let freq_w = S::Vf32::set1(settings.get_freq_w());
-    let freq_u = S::Vf32::set1(settings.get_freq_u());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
+    let freq_w = S::Vf32::set1(settings.freq_w());
+    let freq_u = S::Vf32::set1(settings.freq_u());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -522,28 +522,28 @@ unsafe fn get_5d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
 }
 
 #[inline(always)]
-unsafe fn get_5d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn generate_5d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
-    let dim = settings.get_dimensions();
+    let dim = settings.dimensions();
     let len = dim.width * dim.height * dim.depth * dim.time * dim.extent5;
     let mut result = vec![0.0f32; len];
-    let (min, max) = get_5d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
+    let (min, max) = fill_5d_noise_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
 #[inline(always)]
-unsafe fn get_6d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn fill_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
     result: &mut [f32],
 ) -> (f32, f32) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
-    let freq_w = S::Vf32::set1(settings.get_freq_w());
-    let freq_u = S::Vf32::set1(settings.get_freq_u());
-    let freq_v = S::Vf32::set1(settings.get_freq_v());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
+    let freq_w = S::Vf32::set1(settings.freq_w());
+    let freq_u = S::Vf32::set1(settings.freq_u());
+    let freq_v = S::Vf32::set1(settings.freq_v());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -646,13 +646,13 @@ unsafe fn get_6d_noise_into_helper_f32<S: Simd, Settings: Sample32<S>>(
 }
 
 #[inline(always)]
-unsafe fn get_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
+unsafe fn generate_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     settings: Settings,
 ) -> (Vec<f32>, f32, f32) {
-    let dim = settings.get_dimensions();
+    let dim = settings.dimensions();
     let len = dim.width * dim.height * dim.depth * dim.time * dim.extent5 * dim.extent6;
     let mut result = vec![0.0f32; len];
-    let (min, max) = get_6d_noise_into_helper_f32::<S, Settings>(settings, &mut result);
+    let (min, max) = fill_6d_noise_helper_f32::<S, Settings>(settings, &mut result);
     (result, min, max)
 }
 
@@ -673,10 +673,10 @@ unsafe fn get_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
 // ---------------------------------------------------------------------------
 
 #[inline(always)]
-pub unsafe fn get_1d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_1d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
-    let freq_x = settings.get_freq_x();
+    let freq_x = settings.freq_x();
     let freq_x_s = S::Vf32::set1(freq_x);
     let start_x = dim.x;
     let width = dim.width;
@@ -723,11 +723,11 @@ pub unsafe fn get_1d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndG
 }
 
 #[inline(always)]
-pub unsafe fn get_2d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_2d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let start_x = dim.x;
@@ -785,12 +785,12 @@ pub unsafe fn get_2d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndG
 }
 
 #[inline(always)]
-pub unsafe fn get_3d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_3d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -861,13 +861,13 @@ pub unsafe fn get_3d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndG
 // the gradient on the way out.
 
 #[inline(always)]
-pub unsafe fn get_1d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_1d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
     let lac = S::Vf32::set1(settings.lacunarity);
     let gain = S::Vf32::set1(settings.gain);
     let octaves = settings.octaves;
-    let freq_x = settings.get_freq_x();
+    let freq_x = settings.freq_x();
     let freq_x_s = S::Vf32::set1(freq_x);
     let start_x = dim.x;
     let width = dim.width;
@@ -914,14 +914,14 @@ pub unsafe fn get_1d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGr
 }
 
 #[inline(always)]
-pub unsafe fn get_2d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_2d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
     let lac = S::Vf32::set1(settings.lacunarity);
     let gain = S::Vf32::set1(settings.gain);
     let octaves = settings.octaves;
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let start_x = dim.x;
@@ -979,15 +979,15 @@ pub unsafe fn get_2d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGr
 }
 
 #[inline(always)]
-pub unsafe fn get_3d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_3d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
     let lac = S::Vf32::set1(settings.lacunarity);
     let gain = S::Vf32::set1(settings.gain);
     let octaves = settings.octaves;
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -1066,11 +1066,11 @@ pub unsafe fn get_3d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> NoiseAndGr
 // frequency on the way out.
 
 #[inline(always)]
-pub unsafe fn get_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+pub unsafe fn generate_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
-    let freq_x = settings.get_freq_x();
+    let dim = settings.dimensions();
+    let freq_x = settings.freq_x();
     let freq_x_s = S::Vf32::set1(freq_x);
     let start_x = dim.x;
     let width = dim.width;
@@ -1117,12 +1117,12 @@ pub unsafe fn get_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
 }
 
 #[inline(always)]
-pub unsafe fn get_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+pub unsafe fn generate_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
+    let dim = settings.dimensions();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let start_x = dim.x;
@@ -1180,13 +1180,13 @@ pub unsafe fn get_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
 }
 
 #[inline(always)]
-pub unsafe fn get_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+pub unsafe fn generate_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
+    let dim = settings.dimensions();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -1252,14 +1252,14 @@ pub unsafe fn get_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
 }
 
 #[inline(always)]
-pub unsafe fn get_4d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+pub unsafe fn generate_4d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
-    let freq_w = settings.get_freq_w();
+    let dim = settings.dimensions();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
+    let freq_w = settings.freq_w();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -1338,15 +1338,15 @@ pub unsafe fn get_4d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
 }
 
 #[inline(always)]
-pub unsafe fn get_5d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+pub unsafe fn generate_5d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
-    let freq_w = settings.get_freq_w();
-    let freq_u = settings.get_freq_u();
+    let dim = settings.dimensions();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
+    let freq_w = settings.freq_w();
+    let freq_u = settings.freq_u();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -1434,16 +1434,16 @@ pub unsafe fn get_5d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
 }
 
 #[inline(always)]
-pub unsafe fn get_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
+pub unsafe fn generate_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
-    let freq_w = settings.get_freq_w();
-    let freq_u = settings.get_freq_u();
-    let freq_v = settings.get_freq_v();
+    let dim = settings.dimensions();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
+    let freq_w = settings.freq_w();
+    let freq_u = settings.freq_u();
+    let freq_v = settings.freq_v();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -1544,12 +1544,12 @@ pub unsafe fn get_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
 // with the settings' jitter/seed; the per-axis frequency scales the gradient.
 
 #[inline(always)]
-pub unsafe fn get_2d_cellular_gradient<S: Simd>(settings: &CellularSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_2d_cellular_gradient<S: Simd>(settings: &CellularSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
     let jitter = S::Vf32::set1(settings.jitter);
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let start_x = dim.x;
@@ -1607,13 +1607,13 @@ pub unsafe fn get_2d_cellular_gradient<S: Simd>(settings: &CellularSettings) -> 
 }
 
 #[inline(always)]
-pub unsafe fn get_3d_cellular_gradient<S: Simd>(settings: &CellularSettings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_3d_cellular_gradient<S: Simd>(settings: &CellularSettings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
     let jitter = S::Vf32::set1(settings.jitter);
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -1709,15 +1709,15 @@ fn cellular2_combine_grad(ret: Cell2ReturnType, a: f32, b: f32, ga: f32, gb: f32
 /// combination of F1/F2 and its gradient are applied per lane; borders between
 /// Voronoi cells (and slot switches) are discontinuities, as for the value.
 #[inline(always)]
-pub unsafe fn get_2d_cellular2_gradient<S: Simd>(settings: &Cellular2Settings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_2d_cellular2_gradient<S: Simd>(settings: &Cellular2Settings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
     let jitter = S::Vf32::set1(settings.jitter);
     let ret = settings.return_type;
     let i0 = settings.index0;
     let i1 = settings.index1;
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let start_x = dim.x;
@@ -1793,16 +1793,16 @@ pub unsafe fn get_2d_cellular2_gradient<S: Simd>(settings: &Cellular2Settings) -
 
 /// Euclidean cellular2 value + analytic gradient, 3D.
 #[inline(always)]
-pub unsafe fn get_3d_cellular2_gradient<S: Simd>(settings: &Cellular2Settings) -> NoiseAndGradient {
-    let dim = settings.get_dimensions();
+pub unsafe fn generate_3d_cellular2_gradient<S: Simd>(settings: &Cellular2Settings) -> NoiseAndGradient {
+    let dim = settings.dimensions();
     let seed = dim.seed;
     let jitter = S::Vf32::set1(settings.jitter);
     let ret = settings.return_type;
     let i0 = settings.index0;
     let i1 = settings.index1;
-    let freq_x = settings.get_freq_x();
-    let freq_y = settings.get_freq_y();
-    let freq_z = settings.get_freq_z();
+    let freq_x = settings.freq_x();
+    let freq_y = settings.freq_y();
+    let freq_z = settings.freq_z();
     let freq_x_s = S::Vf32::set1(freq_x);
     let freq_y_s = S::Vf32::set1(freq_y);
     let freq_z_s = S::Vf32::set1(freq_z);
@@ -1899,14 +1899,14 @@ pub unsafe fn get_3d_cellular2_gradient<S: Simd>(settings: &Cellular2Settings) -
 
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+pub unsafe fn generate_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_1d_noise_helper_f32::<S, FbmSettings>(*s),
-        NoiseType::Ridge(s) => get_1d_noise_helper_f32::<S, RidgeSettings>(*s),
-        NoiseType::Turbulence(s) => get_1d_noise_helper_f32::<S, TurbulenceSettings>(*s),
-        NoiseType::Gradient(s) => get_1d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(s) => get_1d_noise_helper_f32::<S, CellularSettings>(*s),
-        NoiseType::Cellular2(s) => get_1d_noise_helper_f32::<S, Cellular2Settings>(*s),
+        NoiseType::Fbm(s) => generate_1d_noise_helper_f32::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => generate_1d_noise_helper_f32::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => generate_1d_noise_helper_f32::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => generate_1d_noise_helper_f32::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => generate_1d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => generate_1d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
@@ -1917,14 +1917,14 @@ pub unsafe fn get_1d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
 /// in a single pass.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+pub unsafe fn generate_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_2d_noise_helper_f32::<S, FbmSettings>(*s),
-        NoiseType::Ridge(s) => get_2d_noise_helper_f32::<S, RidgeSettings>(*s),
-        NoiseType::Turbulence(s) => get_2d_noise_helper_f32::<S, TurbulenceSettings>(*s),
-        NoiseType::Gradient(s) => get_2d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(s) => get_2d_noise_helper_f32::<S, CellularSettings>(*s),
-        NoiseType::Cellular2(s) => get_2d_noise_helper_f32::<S, Cellular2Settings>(*s),
+        NoiseType::Fbm(s) => generate_2d_noise_helper_f32::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => generate_2d_noise_helper_f32::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => generate_2d_noise_helper_f32::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => generate_2d_noise_helper_f32::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => generate_2d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => generate_2d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
@@ -1935,53 +1935,53 @@ pub unsafe fn get_2d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
 /// in a single pass.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+pub unsafe fn generate_3d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_3d_noise_helper_f32::<S, FbmSettings>(*s),
-        NoiseType::Ridge(s) => get_3d_noise_helper_f32::<S, RidgeSettings>(*s),
-        NoiseType::Turbulence(s) => get_3d_noise_helper_f32::<S, TurbulenceSettings>(*s),
-        NoiseType::Gradient(s) => get_3d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(s) => get_3d_noise_helper_f32::<S, CellularSettings>(*s),
-        NoiseType::Cellular2(s) => get_3d_noise_helper_f32::<S, Cellular2Settings>(*s),
+        NoiseType::Fbm(s) => generate_3d_noise_helper_f32::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => generate_3d_noise_helper_f32::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => generate_3d_noise_helper_f32::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => generate_3d_noise_helper_f32::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => generate_3d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => generate_3d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+pub unsafe fn generate_4d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_4d_noise_helper_f32::<S, FbmSettings>(*s),
-        NoiseType::Ridge(s) => get_4d_noise_helper_f32::<S, RidgeSettings>(*s),
-        NoiseType::Turbulence(s) => get_4d_noise_helper_f32::<S, TurbulenceSettings>(*s),
-        NoiseType::Gradient(s) => get_4d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(s) => get_4d_noise_helper_f32::<S, CellularSettings>(*s),
-        NoiseType::Cellular2(s) => get_4d_noise_helper_f32::<S, Cellular2Settings>(*s),
+        NoiseType::Fbm(s) => generate_4d_noise_helper_f32::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => generate_4d_noise_helper_f32::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => generate_4d_noise_helper_f32::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => generate_4d_noise_helper_f32::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => generate_4d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => generate_4d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_5d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+pub unsafe fn generate_5d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_5d_noise_helper_f32::<S, FbmSettings>(*s),
-        NoiseType::Ridge(s) => get_5d_noise_helper_f32::<S, RidgeSettings>(*s),
-        NoiseType::Turbulence(s) => get_5d_noise_helper_f32::<S, TurbulenceSettings>(*s),
-        NoiseType::Gradient(s) => get_5d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(s) => get_5d_noise_helper_f32::<S, CellularSettings>(*s),
-        NoiseType::Cellular2(s) => get_5d_noise_helper_f32::<S, Cellular2Settings>(*s),
+        NoiseType::Fbm(s) => generate_5d_noise_helper_f32::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => generate_5d_noise_helper_f32::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => generate_5d_noise_helper_f32::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => generate_5d_noise_helper_f32::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => generate_5d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => generate_5d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_6d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+pub unsafe fn generate_6d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_6d_noise_helper_f32::<S, FbmSettings>(*s),
-        NoiseType::Ridge(s) => get_6d_noise_helper_f32::<S, RidgeSettings>(*s),
-        NoiseType::Turbulence(s) => get_6d_noise_helper_f32::<S, TurbulenceSettings>(*s),
-        NoiseType::Gradient(s) => get_6d_noise_helper_f32::<S, GradientSettings>(*s),
-        NoiseType::Cellular(s) => get_6d_noise_helper_f32::<S, CellularSettings>(*s),
-        NoiseType::Cellular2(s) => get_6d_noise_helper_f32::<S, Cellular2Settings>(*s),
+        NoiseType::Fbm(s) => generate_6d_noise_helper_f32::<S, FbmSettings>(*s),
+        NoiseType::Ridge(s) => generate_6d_noise_helper_f32::<S, RidgeSettings>(*s),
+        NoiseType::Turbulence(s) => generate_6d_noise_helper_f32::<S, TurbulenceSettings>(*s),
+        NoiseType::Gradient(s) => generate_6d_noise_helper_f32::<S, GradientSettings>(*s),
+        NoiseType::Cellular(s) => generate_6d_noise_helper_f32::<S, CellularSettings>(*s),
+        NoiseType::Cellular2(s) => generate_6d_noise_helper_f32::<S, Cellular2Settings>(*s),
     }
 }
 
@@ -1989,16 +1989,16 @@ pub unsafe fn get_6d_noise<S: Simd>(noise_type: &NoiseType) -> (Vec<f32>, f32, f
 /// slice's `(min, max)`.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_1d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+pub unsafe fn fill_1d_noise<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_1d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
-        NoiseType::Ridge(s) => get_1d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Fbm(s) => fill_1d_noise_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => fill_1d_noise_helper_f32::<S, RidgeSettings>(*s, result),
         NoiseType::Turbulence(s) => {
-            get_1d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+            fill_1d_noise_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
-        NoiseType::Gradient(s) => get_1d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(s) => get_1d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
-        NoiseType::Cellular2(s) => get_1d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+        NoiseType::Gradient(s) => fill_1d_noise_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => fill_1d_noise_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => fill_1d_noise_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -2006,16 +2006,16 @@ pub unsafe fn get_1d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
 /// returns the slice's `(min, max)`.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_2d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+pub unsafe fn fill_2d_noise<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_2d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
-        NoiseType::Ridge(s) => get_2d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Fbm(s) => fill_2d_noise_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => fill_2d_noise_helper_f32::<S, RidgeSettings>(*s, result),
         NoiseType::Turbulence(s) => {
-            get_2d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+            fill_2d_noise_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
-        NoiseType::Gradient(s) => get_2d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(s) => get_2d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
-        NoiseType::Cellular2(s) => get_2d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+        NoiseType::Gradient(s) => fill_2d_noise_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => fill_2d_noise_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => fill_2d_noise_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -2023,16 +2023,16 @@ pub unsafe fn get_2d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
 /// `width * height * depth`); returns the slice's `(min, max)`.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_3d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+pub unsafe fn fill_3d_noise<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_3d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
-        NoiseType::Ridge(s) => get_3d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Fbm(s) => fill_3d_noise_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => fill_3d_noise_helper_f32::<S, RidgeSettings>(*s, result),
         NoiseType::Turbulence(s) => {
-            get_3d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+            fill_3d_noise_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
-        NoiseType::Gradient(s) => get_3d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(s) => get_3d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
-        NoiseType::Cellular2(s) => get_3d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+        NoiseType::Gradient(s) => fill_3d_noise_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => fill_3d_noise_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => fill_3d_noise_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -2040,16 +2040,16 @@ pub unsafe fn get_3d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
 /// `width * height * depth * time`); returns the slice's `(min, max)`.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_4d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+pub unsafe fn fill_4d_noise<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_4d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
-        NoiseType::Ridge(s) => get_4d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Fbm(s) => fill_4d_noise_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => fill_4d_noise_helper_f32::<S, RidgeSettings>(*s, result),
         NoiseType::Turbulence(s) => {
-            get_4d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+            fill_4d_noise_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
-        NoiseType::Gradient(s) => get_4d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(s) => get_4d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
-        NoiseType::Cellular2(s) => get_4d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+        NoiseType::Gradient(s) => fill_4d_noise_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => fill_4d_noise_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => fill_4d_noise_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -2057,16 +2057,16 @@ pub unsafe fn get_4d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
 /// `width * height * depth * time * extent5`); returns the slice's `(min, max)`.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_5d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+pub unsafe fn fill_5d_noise<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_5d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
-        NoiseType::Ridge(s) => get_5d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Fbm(s) => fill_5d_noise_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => fill_5d_noise_helper_f32::<S, RidgeSettings>(*s, result),
         NoiseType::Turbulence(s) => {
-            get_5d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+            fill_5d_noise_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
-        NoiseType::Gradient(s) => get_5d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(s) => get_5d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
-        NoiseType::Cellular2(s) => get_5d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+        NoiseType::Gradient(s) => fill_5d_noise_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => fill_5d_noise_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => fill_5d_noise_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -2074,16 +2074,16 @@ pub unsafe fn get_5d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
 /// `width * height * depth * time * extent5 * extent6`); returns the slice's `(min, max)`.
 #[inline(always)]
 #[allow(dead_code)]
-pub unsafe fn get_6d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
+pub unsafe fn fill_6d_noise<S: Simd>(noise_type: &NoiseType, result: &mut [f32]) -> (f32, f32) {
     match noise_type {
-        NoiseType::Fbm(s) => get_6d_noise_into_helper_f32::<S, FbmSettings>(*s, result),
-        NoiseType::Ridge(s) => get_6d_noise_into_helper_f32::<S, RidgeSettings>(*s, result),
+        NoiseType::Fbm(s) => fill_6d_noise_helper_f32::<S, FbmSettings>(*s, result),
+        NoiseType::Ridge(s) => fill_6d_noise_helper_f32::<S, RidgeSettings>(*s, result),
         NoiseType::Turbulence(s) => {
-            get_6d_noise_into_helper_f32::<S, TurbulenceSettings>(*s, result)
+            fill_6d_noise_helper_f32::<S, TurbulenceSettings>(*s, result)
         }
-        NoiseType::Gradient(s) => get_6d_noise_into_helper_f32::<S, GradientSettings>(*s, result),
-        NoiseType::Cellular(s) => get_6d_noise_into_helper_f32::<S, CellularSettings>(*s, result),
-        NoiseType::Cellular2(s) => get_6d_noise_into_helper_f32::<S, Cellular2Settings>(*s, result),
+        NoiseType::Gradient(s) => fill_6d_noise_helper_f32::<S, GradientSettings>(*s, result),
+        NoiseType::Cellular(s) => fill_6d_noise_helper_f32::<S, CellularSettings>(*s, result),
+        NoiseType::Cellular2(s) => fill_6d_noise_helper_f32::<S, Cellular2Settings>(*s, result),
     }
 }
 
@@ -2094,14 +2094,14 @@ pub unsafe fn get_6d_noise_into<S: Simd>(noise_type: &NoiseType, result: &mut [f
 //     backend-independent and bit-match a manual map+cast. ---
 
 #[inline(always)]
-unsafe fn get_1d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+unsafe fn fill_1d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
     settings: Settings,
     src_min: f32,
     src_max: f32,
     out: &mut [T],
 ) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
     let start_x = dim.x;
     let width = dim.width;
     assert_eq!(
@@ -2142,15 +2142,15 @@ unsafe fn get_1d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sa
 }
 
 #[inline(always)]
-unsafe fn get_2d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+unsafe fn fill_2d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
     settings: Settings,
     src_min: f32,
     src_max: f32,
     out: &mut [T],
 ) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -2197,16 +2197,16 @@ unsafe fn get_2d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sa
 }
 
 #[inline(always)]
-unsafe fn get_3d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+unsafe fn fill_3d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
     settings: Settings,
     src_min: f32,
     src_max: f32,
     out: &mut [T],
 ) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -2259,17 +2259,17 @@ unsafe fn get_3d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sa
 }
 
 #[inline(always)]
-unsafe fn get_4d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+unsafe fn fill_4d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
     settings: Settings,
     src_min: f32,
     src_max: f32,
     out: &mut [T],
 ) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
-    let freq_w = S::Vf32::set1(settings.get_freq_w());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
+    let freq_w = S::Vf32::set1(settings.freq_w());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -2328,18 +2328,18 @@ unsafe fn get_4d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sa
 }
 
 #[inline(always)]
-unsafe fn get_5d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+unsafe fn fill_5d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
     settings: Settings,
     src_min: f32,
     src_max: f32,
     out: &mut [T],
 ) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
-    let freq_w = S::Vf32::set1(settings.get_freq_w());
-    let freq_u = S::Vf32::set1(settings.get_freq_u());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
+    let freq_w = S::Vf32::set1(settings.freq_w());
+    let freq_u = S::Vf32::set1(settings.freq_u());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -2416,19 +2416,19 @@ unsafe fn get_5d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sa
 }
 
 #[inline(always)]
-unsafe fn get_6d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
+unsafe fn fill_6d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample32<S>>(
     settings: Settings,
     src_min: f32,
     src_max: f32,
     out: &mut [T],
 ) {
-    let dim = settings.get_dimensions();
-    let freq_x = S::Vf32::set1(settings.get_freq_x());
-    let freq_y = S::Vf32::set1(settings.get_freq_y());
-    let freq_z = S::Vf32::set1(settings.get_freq_z());
-    let freq_w = S::Vf32::set1(settings.get_freq_w());
-    let freq_u = S::Vf32::set1(settings.get_freq_u());
-    let freq_v = S::Vf32::set1(settings.get_freq_v());
+    let dim = settings.dimensions();
+    let freq_x = S::Vf32::set1(settings.freq_x());
+    let freq_y = S::Vf32::set1(settings.freq_y());
+    let freq_z = S::Vf32::set1(settings.freq_z());
+    let freq_w = S::Vf32::set1(settings.freq_w());
+    let freq_u = S::Vf32::set1(settings.freq_u());
+    let freq_v = S::Vf32::set1(settings.freq_v());
     let start_x = dim.x;
     let width = dim.width;
     let start_y = dim.y;
@@ -2514,7 +2514,7 @@ unsafe fn get_6d_noise_range_into_helper_f32<S: Simd, T: NoiseInto, Settings: Sa
 
 /// Fused typed 1d emplace dispatcher (maps/casts straight into `out`).
 #[inline(always)]
-pub unsafe fn get_1d_noise_range_into<S: Simd, T: NoiseInto>(
+pub unsafe fn fill_1d_noise_range<S: Simd, T: NoiseInto>(
     noise_type: &NoiseType,
     src_min: f32,
     src_max: f32,
@@ -2522,29 +2522,29 @@ pub unsafe fn get_1d_noise_range_into<S: Simd, T: NoiseInto>(
 ) {
     match noise_type {
         NoiseType::Fbm(s) => {
-            get_1d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+            fill_1d_noise_range_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Ridge(s) => {
-            get_1d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+            fill_1d_noise_range_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Turbulence(s) => get_1d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+        NoiseType::Turbulence(s) => fill_1d_noise_range_helper_f32::<S, T, TurbulenceSettings>(
             *s, src_min, src_max, out,
         ),
         NoiseType::Gradient(s) => {
-            get_1d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+            fill_1d_noise_range_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular(s) => {
-            get_1d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+            fill_1d_noise_range_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular2(s) => {
-            get_1d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+            fill_1d_noise_range_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
         }
     }
 }
 
 /// Fused typed 2d emplace dispatcher.
 #[inline(always)]
-pub unsafe fn get_2d_noise_range_into<S: Simd, T: NoiseInto>(
+pub unsafe fn fill_2d_noise_range<S: Simd, T: NoiseInto>(
     noise_type: &NoiseType,
     src_min: f32,
     src_max: f32,
@@ -2552,29 +2552,29 @@ pub unsafe fn get_2d_noise_range_into<S: Simd, T: NoiseInto>(
 ) {
     match noise_type {
         NoiseType::Fbm(s) => {
-            get_2d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+            fill_2d_noise_range_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Ridge(s) => {
-            get_2d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+            fill_2d_noise_range_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Turbulence(s) => get_2d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+        NoiseType::Turbulence(s) => fill_2d_noise_range_helper_f32::<S, T, TurbulenceSettings>(
             *s, src_min, src_max, out,
         ),
         NoiseType::Gradient(s) => {
-            get_2d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+            fill_2d_noise_range_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular(s) => {
-            get_2d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+            fill_2d_noise_range_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular2(s) => {
-            get_2d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+            fill_2d_noise_range_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
         }
     }
 }
 
 /// Fused typed 3d emplace dispatcher.
 #[inline(always)]
-pub unsafe fn get_3d_noise_range_into<S: Simd, T: NoiseInto>(
+pub unsafe fn fill_3d_noise_range<S: Simd, T: NoiseInto>(
     noise_type: &NoiseType,
     src_min: f32,
     src_max: f32,
@@ -2582,29 +2582,29 @@ pub unsafe fn get_3d_noise_range_into<S: Simd, T: NoiseInto>(
 ) {
     match noise_type {
         NoiseType::Fbm(s) => {
-            get_3d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+            fill_3d_noise_range_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Ridge(s) => {
-            get_3d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+            fill_3d_noise_range_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Turbulence(s) => get_3d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+        NoiseType::Turbulence(s) => fill_3d_noise_range_helper_f32::<S, T, TurbulenceSettings>(
             *s, src_min, src_max, out,
         ),
         NoiseType::Gradient(s) => {
-            get_3d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+            fill_3d_noise_range_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular(s) => {
-            get_3d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+            fill_3d_noise_range_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular2(s) => {
-            get_3d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+            fill_3d_noise_range_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
         }
     }
 }
 
 /// Fused typed 4d emplace dispatcher.
 #[inline(always)]
-pub unsafe fn get_4d_noise_range_into<S: Simd, T: NoiseInto>(
+pub unsafe fn fill_4d_noise_range<S: Simd, T: NoiseInto>(
     noise_type: &NoiseType,
     src_min: f32,
     src_max: f32,
@@ -2612,29 +2612,29 @@ pub unsafe fn get_4d_noise_range_into<S: Simd, T: NoiseInto>(
 ) {
     match noise_type {
         NoiseType::Fbm(s) => {
-            get_4d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+            fill_4d_noise_range_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Ridge(s) => {
-            get_4d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+            fill_4d_noise_range_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Turbulence(s) => get_4d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+        NoiseType::Turbulence(s) => fill_4d_noise_range_helper_f32::<S, T, TurbulenceSettings>(
             *s, src_min, src_max, out,
         ),
         NoiseType::Gradient(s) => {
-            get_4d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+            fill_4d_noise_range_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular(s) => {
-            get_4d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+            fill_4d_noise_range_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular2(s) => {
-            get_4d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+            fill_4d_noise_range_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
         }
     }
 }
 
 /// Fused typed 5d emplace dispatcher.
 #[inline(always)]
-pub unsafe fn get_5d_noise_range_into<S: Simd, T: NoiseInto>(
+pub unsafe fn fill_5d_noise_range<S: Simd, T: NoiseInto>(
     noise_type: &NoiseType,
     src_min: f32,
     src_max: f32,
@@ -2642,29 +2642,29 @@ pub unsafe fn get_5d_noise_range_into<S: Simd, T: NoiseInto>(
 ) {
     match noise_type {
         NoiseType::Fbm(s) => {
-            get_5d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+            fill_5d_noise_range_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Ridge(s) => {
-            get_5d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+            fill_5d_noise_range_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Turbulence(s) => get_5d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+        NoiseType::Turbulence(s) => fill_5d_noise_range_helper_f32::<S, T, TurbulenceSettings>(
             *s, src_min, src_max, out,
         ),
         NoiseType::Gradient(s) => {
-            get_5d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+            fill_5d_noise_range_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular(s) => {
-            get_5d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+            fill_5d_noise_range_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular2(s) => {
-            get_5d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+            fill_5d_noise_range_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
         }
     }
 }
 
 /// Fused typed 6d emplace dispatcher.
 #[inline(always)]
-pub unsafe fn get_6d_noise_range_into<S: Simd, T: NoiseInto>(
+pub unsafe fn fill_6d_noise_range<S: Simd, T: NoiseInto>(
     noise_type: &NoiseType,
     src_min: f32,
     src_max: f32,
@@ -2672,22 +2672,22 @@ pub unsafe fn get_6d_noise_range_into<S: Simd, T: NoiseInto>(
 ) {
     match noise_type {
         NoiseType::Fbm(s) => {
-            get_6d_noise_range_into_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
+            fill_6d_noise_range_helper_f32::<S, T, FbmSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Ridge(s) => {
-            get_6d_noise_range_into_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
+            fill_6d_noise_range_helper_f32::<S, T, RidgeSettings>(*s, src_min, src_max, out)
         }
-        NoiseType::Turbulence(s) => get_6d_noise_range_into_helper_f32::<S, T, TurbulenceSettings>(
+        NoiseType::Turbulence(s) => fill_6d_noise_range_helper_f32::<S, T, TurbulenceSettings>(
             *s, src_min, src_max, out,
         ),
         NoiseType::Gradient(s) => {
-            get_6d_noise_range_into_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
+            fill_6d_noise_range_helper_f32::<S, T, GradientSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular(s) => {
-            get_6d_noise_range_into_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
+            fill_6d_noise_range_helper_f32::<S, T, CellularSettings>(*s, src_min, src_max, out)
         }
         NoiseType::Cellular2(s) => {
-            get_6d_noise_range_into_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
+            fill_6d_noise_range_helper_f32::<S, T, Cellular2Settings>(*s, src_min, src_max, out)
         }
     }
 }

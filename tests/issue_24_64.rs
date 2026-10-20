@@ -1,4 +1,4 @@
-//! Issue #24: f64 value + analytic gradient (`generate_with_derivative_64`),
+//! Issue #24: f64 value + analytic gradient (`generate_with_gradient_f64`),
 //! all simplex-family variants, at a low and a high dimension.
 //!
 //! Mirrors `issue_24_highdim.rs` in double precision: the value channel must
@@ -8,7 +8,7 @@
 //! relative bound for the `|·|`-based ridge/turbulence). Run under
 //! `--features scalar` too for cross-engine coverage.
 
-use simdnoise::{get_2d_noise_64, get_6d_noise_64, NoiseBuilder, Settings, SimplexSettings};
+use simdnoise::{generate_2d_noise_f64, generate_6d_noise_f64, NoiseBuilder, Settings, SimplexSettings};
 
 fn max_abs_diff(a: &[f64], b: &[f64]) -> f64 {
     assert_eq!(a.len(), b.len());
@@ -67,8 +67,8 @@ fn gradient_2d_64() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::gradient_2d(w, h);
     s.with_seed(7).with_freq_2d(0.02, 0.025);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_2d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_2d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 2);
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
@@ -84,8 +84,8 @@ fn gradient_6d_64() {
     let mut s = NoiseBuilder::gradient_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(7)
         .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_6d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_6d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 6);
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
@@ -104,8 +104,8 @@ fn fbm_2d_64() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_2d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_2d_noise_f64(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
         "2D f64 fbm value mismatch"
@@ -123,8 +123,8 @@ fn fbm_6d_64() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_6d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_6d_noise_f64(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
         "6D f64 fbm value mismatch"
@@ -142,8 +142,8 @@ fn ridge_2d_64() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_2d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_2d_noise_f64(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
         "2D f64 ridge value mismatch"
@@ -163,8 +163,8 @@ fn ridge_6d_64() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_6d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_6d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 6);
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
@@ -183,8 +183,8 @@ fn turbulence_2d_64() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_2d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_2d_noise_f64(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
         "2D f64 turbulence value mismatch"
@@ -202,8 +202,8 @@ fn turbulence_6d_64() {
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative_64();
-    let (plain, _, _) = get_6d_noise_64(&s.wrap());
+    let ng = s.generate_with_gradient_f64();
+    let (plain, _, _) = generate_6d_noise_f64(&s.wrap());
     assert!(
         max_abs_diff(&ng.values, &plain) < 1e-6,
         "6D f64 turbulence value mismatch"

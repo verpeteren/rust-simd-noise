@@ -15,10 +15,10 @@ use crate::noise_helpers_32::Sample32;
 use crate::noise_helpers_64::Sample64;
 pub use crate::noise_type::NoiseType;
 use crate::{
-    get_1d_noise, get_1d_scaled_noise, get_2d_cellular_gradient, get_2d_cellular_gradient_64,
-    get_2d_noise, get_2d_scaled_noise, get_3d_cellular_gradient, get_3d_cellular_gradient_64,
-    get_3d_noise, get_3d_scaled_noise, get_4d_noise, get_4d_scaled_noise, get_5d_noise,
-    get_5d_scaled_noise, get_6d_noise, get_6d_scaled_noise, NoiseAndGradient, NoiseAndGradient64,
+    generate_1d_noise, generate_1d_scaled_noise, generate_2d_cellular_gradient, generate_2d_cellular_gradient_f64,
+    generate_2d_noise, generate_2d_scaled_noise, generate_3d_cellular_gradient, generate_3d_cellular_gradient_f64,
+    generate_3d_noise, generate_3d_scaled_noise, generate_4d_noise, generate_4d_scaled_noise, generate_5d_noise,
+    generate_5d_scaled_noise, generate_6d_noise, generate_6d_scaled_noise, NoiseAndGradient, NoiseAndGradientF64,
 };
 
 use super::Settings;
@@ -106,7 +106,7 @@ pub struct CellularSettings {
 }
 
 impl DimensionalBeing for CellularSettings {
-    fn get_dimensions(&self) -> NoiseDimensions {
+    fn dimensions(&self) -> NoiseDimensions {
         self.dim
     }
 }
@@ -203,27 +203,27 @@ impl Settings for CellularSettings {
         self
     }
 
-    fn get_freq_x(&self) -> f32 {
+    fn freq_x(&self) -> f32 {
         self.freq_x
     }
 
-    fn get_freq_y(&self) -> f32 {
+    fn freq_y(&self) -> f32 {
         self.freq_y
     }
 
-    fn get_freq_z(&self) -> f32 {
+    fn freq_z(&self) -> f32 {
         self.freq_z
     }
 
-    fn get_freq_w(&self) -> f32 {
+    fn freq_w(&self) -> f32 {
         self.freq_w
     }
 
-    fn get_freq_u(&self) -> f32 {
+    fn freq_u(&self) -> f32 {
         self.freq_u
     }
 
-    fn get_freq_v(&self) -> f32 {
+    fn freq_v(&self) -> f32 {
         self.freq_v
     }
 
@@ -235,12 +235,12 @@ impl Settings for CellularSettings {
     fn generate(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
-            1 => get_1d_noise(&NoiseType::Cellular(self)),
-            2 => get_2d_noise(&NoiseType::Cellular(self)),
-            3 => get_3d_noise(&NoiseType::Cellular(self)),
-            4 => get_4d_noise(&NoiseType::Cellular(self)),
-            5 => get_5d_noise(&NoiseType::Cellular(self)),
-            6 => get_6d_noise(&NoiseType::Cellular(self)),
+            1 => generate_1d_noise(&NoiseType::Cellular(self)),
+            2 => generate_2d_noise(&NoiseType::Cellular(self)),
+            3 => generate_3d_noise(&NoiseType::Cellular(self)),
+            4 => generate_4d_noise(&NoiseType::Cellular(self)),
+            5 => generate_5d_noise(&NoiseType::Cellular(self)),
+            6 => generate_6d_noise(&NoiseType::Cellular(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -255,131 +255,131 @@ impl Settings for CellularSettings {
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
-            1 => get_1d_scaled_noise(&NoiseType::Cellular(new_self)),
-            2 => get_2d_scaled_noise(&NoiseType::Cellular(new_self)),
-            3 => get_3d_scaled_noise(&NoiseType::Cellular(new_self)),
-            4 => get_4d_scaled_noise(&NoiseType::Cellular(new_self)),
-            5 => get_5d_scaled_noise(&NoiseType::Cellular(new_self)),
-            6 => get_6d_scaled_noise(&NoiseType::Cellular(new_self)),
+            1 => generate_1d_scaled_noise(&NoiseType::Cellular(new_self)),
+            2 => generate_2d_scaled_noise(&NoiseType::Cellular(new_self)),
+            3 => generate_3d_scaled_noise(&NoiseType::Cellular(new_self)),
+            4 => generate_4d_scaled_noise(&NoiseType::Cellular(new_self)),
+            5 => generate_5d_scaled_noise(&NoiseType::Cellular(new_self)),
+            6 => generate_6d_scaled_noise(&NoiseType::Cellular(new_self)),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_64(self) -> (Vec<f64>, f64, f64) {
+    fn generate_f64(self) -> (Vec<f64>, f64, f64) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_64(&NoiseType::Cellular(self)),
-            2 => crate::get_2d_noise_64(&NoiseType::Cellular(self)),
-            3 => crate::get_3d_noise_64(&NoiseType::Cellular(self)),
-            4 => crate::get_4d_noise_64(&NoiseType::Cellular(self)),
-            5 => crate::get_5d_noise_64(&NoiseType::Cellular(self)),
-            6 => crate::get_6d_noise_64(&NoiseType::Cellular(self)),
+            1 => crate::generate_1d_noise_f64(&NoiseType::Cellular(self)),
+            2 => crate::generate_2d_noise_f64(&NoiseType::Cellular(self)),
+            3 => crate::generate_3d_noise_f64(&NoiseType::Cellular(self)),
+            4 => crate::generate_4d_noise_f64(&NoiseType::Cellular(self)),
+            5 => crate::generate_5d_noise_f64(&NoiseType::Cellular(self)),
+            6 => crate::generate_6d_noise_f64(&NoiseType::Cellular(self)),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64> {
+    fn generate_scaled_f64(self, min: f64, max: f64) -> Vec<f64> {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
-            2 => crate::get_2d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
-            3 => crate::get_3d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
-            4 => crate::get_4d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
-            5 => crate::get_5d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
-            6 => crate::get_6d_scaled_noise_64(&NoiseType::Cellular(self), min, max),
+            1 => crate::generate_1d_scaled_noise_f64(&NoiseType::Cellular(self), min, max),
+            2 => crate::generate_2d_scaled_noise_f64(&NoiseType::Cellular(self), min, max),
+            3 => crate::generate_3d_scaled_noise_f64(&NoiseType::Cellular(self), min, max),
+            4 => crate::generate_4d_scaled_noise_f64(&NoiseType::Cellular(self), min, max),
+            5 => crate::generate_5d_scaled_noise_f64(&NoiseType::Cellular(self), min, max),
+            6 => crate::generate_6d_scaled_noise_f64(&NoiseType::Cellular(self), min, max),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_into(self, out: &mut [f32]) -> (f32, f32) {
+    fn fill(self, out: &mut [f32]) -> (f32, f32) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_into(&NoiseType::Cellular(self), out),
-            2 => crate::get_2d_noise_into(&NoiseType::Cellular(self), out),
-            3 => crate::get_3d_noise_into(&NoiseType::Cellular(self), out),
-            4 => crate::get_4d_noise_into(&NoiseType::Cellular(self), out),
-            5 => crate::get_5d_noise_into(&NoiseType::Cellular(self), out),
-            6 => crate::get_6d_noise_into(&NoiseType::Cellular(self), out),
+            1 => crate::fill_1d_noise(&NoiseType::Cellular(self), out),
+            2 => crate::fill_2d_noise(&NoiseType::Cellular(self), out),
+            3 => crate::fill_3d_noise(&NoiseType::Cellular(self), out),
+            4 => crate::fill_4d_noise(&NoiseType::Cellular(self), out),
+            5 => crate::fill_5d_noise(&NoiseType::Cellular(self), out),
+            6 => crate::fill_6d_noise(&NoiseType::Cellular(self), out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_scaled_into(self, min: f32, max: f32, out: &mut [f32]) {
+    fn fill_scaled(self, min: f32, max: f32, out: &mut [f32]) {
         let d = self.dim.dim;
         let mut new_self = self;
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
-            1 => crate::get_1d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
-            2 => crate::get_2d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
-            3 => crate::get_3d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
-            4 => crate::get_4d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
-            5 => crate::get_5d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
-            6 => crate::get_6d_scaled_noise_into(&NoiseType::Cellular(new_self), out),
+            1 => crate::fill_1d_scaled_noise(&NoiseType::Cellular(new_self), out),
+            2 => crate::fill_2d_scaled_noise(&NoiseType::Cellular(new_self), out),
+            3 => crate::fill_3d_scaled_noise(&NoiseType::Cellular(new_self), out),
+            4 => crate::fill_4d_scaled_noise(&NoiseType::Cellular(new_self), out),
+            5 => crate::fill_5d_scaled_noise(&NoiseType::Cellular(new_self), out),
+            6 => crate::fill_6d_scaled_noise(&NoiseType::Cellular(new_self), out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_into_64(self, out: &mut [f64]) -> (f64, f64) {
+    fn fill_f64(self, out: &mut [f64]) -> (f64, f64) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_into_64(&NoiseType::Cellular(self), out),
-            2 => crate::get_2d_noise_into_64(&NoiseType::Cellular(self), out),
-            3 => crate::get_3d_noise_into_64(&NoiseType::Cellular(self), out),
-            4 => crate::get_4d_noise_into_64(&NoiseType::Cellular(self), out),
-            5 => crate::get_5d_noise_into_64(&NoiseType::Cellular(self), out),
-            6 => crate::get_6d_noise_into_64(&NoiseType::Cellular(self), out),
+            1 => crate::fill_1d_noise_f64(&NoiseType::Cellular(self), out),
+            2 => crate::fill_2d_noise_f64(&NoiseType::Cellular(self), out),
+            3 => crate::fill_3d_noise_f64(&NoiseType::Cellular(self), out),
+            4 => crate::fill_4d_noise_f64(&NoiseType::Cellular(self), out),
+            5 => crate::fill_5d_noise_f64(&NoiseType::Cellular(self), out),
+            6 => crate::fill_6d_noise_f64(&NoiseType::Cellular(self), out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]) {
+    fn fill_scaled_f64(self, min: f64, max: f64, out: &mut [f64]) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
-            2 => crate::get_2d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
-            3 => crate::get_3d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
-            4 => crate::get_4d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
-            5 => crate::get_5d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
-            6 => crate::get_6d_scaled_noise_into_64(&NoiseType::Cellular(self), min, max, out),
+            1 => crate::fill_1d_scaled_noise_f64(&NoiseType::Cellular(self), min, max, out),
+            2 => crate::fill_2d_scaled_noise_f64(&NoiseType::Cellular(self), min, max, out),
+            3 => crate::fill_3d_scaled_noise_f64(&NoiseType::Cellular(self), min, max, out),
+            4 => crate::fill_4d_scaled_noise_f64(&NoiseType::Cellular(self), min, max, out),
+            5 => crate::fill_5d_scaled_noise_f64(&NoiseType::Cellular(self), min, max, out),
+            6 => crate::fill_6d_scaled_noise_f64(&NoiseType::Cellular(self), min, max, out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
+    fn fill_range<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_range_into::<T>(
+            1 => crate::fill_1d_noise_range::<T>(
                 &NoiseType::Cellular(self),
                 src_min,
                 src_max,
                 out,
             ),
-            2 => crate::get_2d_noise_range_into::<T>(
+            2 => crate::fill_2d_noise_range::<T>(
                 &NoiseType::Cellular(self),
                 src_min,
                 src_max,
                 out,
             ),
-            3 => crate::get_3d_noise_range_into::<T>(
+            3 => crate::fill_3d_noise_range::<T>(
                 &NoiseType::Cellular(self),
                 src_min,
                 src_max,
                 out,
             ),
-            4 => crate::get_4d_noise_range_into::<T>(
+            4 => crate::fill_4d_noise_range::<T>(
                 &NoiseType::Cellular(self),
                 src_min,
                 src_max,
                 out,
             ),
-            5 => crate::get_5d_noise_range_into::<T>(
+            5 => crate::fill_5d_noise_range::<T>(
                 &NoiseType::Cellular(self),
                 src_min,
                 src_max,
                 out,
             ),
-            6 => crate::get_6d_noise_range_into::<T>(
+            6 => crate::fill_6d_noise_range::<T>(
                 &NoiseType::Cellular(self),
                 src_min,
                 src_max,
@@ -614,47 +614,47 @@ impl CellularSettings {
     /// # Panics
     /// Panics unless `distance_function` is `Euclidean`, `return_type` is
     /// `Distance`, and the dimensionality is 2 or 3.
-    pub fn generate_with_derivative(self) -> NoiseAndGradient {
+    pub fn generate_with_gradient(self) -> NoiseAndGradient {
         assert!(
             matches!(self.distance_function, CellDistanceFunction::Euclidean),
-            "cellular generate_with_derivative requires the Euclidean distance function"
+            "cellular generate_with_gradient requires the Euclidean distance function"
         );
         assert!(
             matches!(self.return_type, CellReturnType::Distance),
-            "cellular generate_with_derivative requires the Distance return type"
+            "cellular generate_with_gradient requires the Distance return type"
         );
         match self.dim.dim {
-            2 => get_2d_cellular_gradient(&self),
-            3 => get_3d_cellular_gradient(&self),
+            2 => generate_2d_cellular_gradient(&self),
+            3 => generate_3d_cellular_gradient(&self),
             d => panic!(
-                "cellular generate_with_derivative is only implemented for 2D/3D (got {})",
+                "cellular generate_with_gradient is only implemented for 2D/3D (got {})",
                 d
             ),
         }
     }
 
-    /// `f64` twin of [`generate_with_derivative`](Self::generate_with_derivative).
+    /// `f64` twin of [`generate_with_gradient`](Self::generate_with_gradient).
     ///
     /// Same Euclidean `Distance`, 2D/3D restriction and border semantics, but
-    /// computed and returned in double precision ([`NoiseAndGradient64`]).
+    /// computed and returned in double precision ([`NoiseAndGradientF64`]).
     ///
     /// # Panics
     /// Panics unless `distance_function` is `Euclidean`, `return_type` is
     /// `Distance`, and the dimensionality is 2 or 3.
-    pub fn generate_with_derivative_64(self) -> NoiseAndGradient64 {
+    pub fn generate_with_gradient_f64(self) -> NoiseAndGradientF64 {
         assert!(
             matches!(self.distance_function, CellDistanceFunction::Euclidean),
-            "cellular generate_with_derivative_64 requires the Euclidean distance function"
+            "cellular generate_with_gradient_f64 requires the Euclidean distance function"
         );
         assert!(
             matches!(self.return_type, CellReturnType::Distance),
-            "cellular generate_with_derivative_64 requires the Distance return type"
+            "cellular generate_with_gradient_f64 requires the Distance return type"
         );
         match self.dim.dim {
-            2 => get_2d_cellular_gradient_64(&self),
-            3 => get_3d_cellular_gradient_64(&self),
+            2 => generate_2d_cellular_gradient_f64(&self),
+            3 => generate_3d_cellular_gradient_f64(&self),
             d => panic!(
-                "cellular generate_with_derivative_64 is only implemented for 2D/3D (got {})",
+                "cellular generate_with_gradient_f64 is only implemented for 2D/3D (got {})",
                 d
             ),
         }

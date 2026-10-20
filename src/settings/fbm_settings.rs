@@ -16,11 +16,11 @@ use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
 use crate::noise_helpers_64::{Sample64, SampleFractalDeriv64};
 pub use crate::noise_type::NoiseType;
 use crate::{
-    get_1d_fbm_gradient, get_1d_noise, get_1d_scaled_noise, get_2d_fbm_gradient, get_2d_noise,
-    get_2d_scaled_noise, get_3d_fbm_gradient, get_3d_noise, get_3d_scaled_noise,
-    get_4d_fbm_gradient, get_4d_noise, get_4d_scaled_noise, get_5d_fbm_gradient, get_5d_noise,
-    get_5d_scaled_noise, get_6d_fbm_gradient, get_6d_noise, get_6d_scaled_noise,
-    get_1d_fbm_gradient_64, get_2d_fbm_gradient_64, get_3d_fbm_gradient_64, get_4d_fbm_gradient_64, get_5d_fbm_gradient_64, get_6d_fbm_gradient_64, NoiseAndGradient, NoiseAndGradient64,
+    generate_1d_fbm_gradient, generate_1d_noise, generate_1d_scaled_noise, generate_2d_fbm_gradient, generate_2d_noise,
+    generate_2d_scaled_noise, generate_3d_fbm_gradient, generate_3d_noise, generate_3d_scaled_noise,
+    generate_4d_fbm_gradient, generate_4d_noise, generate_4d_scaled_noise, generate_5d_fbm_gradient, generate_5d_noise,
+    generate_5d_scaled_noise, generate_6d_fbm_gradient, generate_6d_noise, generate_6d_scaled_noise,
+    generate_1d_fbm_gradient_f64, generate_2d_fbm_gradient_f64, generate_3d_fbm_gradient_f64, generate_4d_fbm_gradient_f64, generate_5d_fbm_gradient_f64, generate_6d_fbm_gradient_f64, NoiseAndGradient, NoiseAndGradientF64,
 };
 
 use super::{Settings, SimplexSettings};
@@ -80,7 +80,7 @@ pub struct FbmSettings {
 }
 
 impl DimensionalBeing for FbmSettings {
-    fn get_dimensions(&self) -> NoiseDimensions {
+    fn dimensions(&self) -> NoiseDimensions {
         self.dim
     }
 }
@@ -176,27 +176,27 @@ impl Settings for FbmSettings {
         self
     }
 
-    fn get_freq_x(&self) -> f32 {
+    fn freq_x(&self) -> f32 {
         self.freq_x
     }
 
-    fn get_freq_y(&self) -> f32 {
+    fn freq_y(&self) -> f32 {
         self.freq_y
     }
 
-    fn get_freq_z(&self) -> f32 {
+    fn freq_z(&self) -> f32 {
         self.freq_z
     }
 
-    fn get_freq_w(&self) -> f32 {
+    fn freq_w(&self) -> f32 {
         self.freq_w
     }
 
-    fn get_freq_u(&self) -> f32 {
+    fn freq_u(&self) -> f32 {
         self.freq_u
     }
 
-    fn get_freq_v(&self) -> f32 {
+    fn freq_v(&self) -> f32 {
         self.freq_v
     }
 
@@ -212,12 +212,12 @@ impl Settings for FbmSettings {
     fn generate(self) -> (Vec<f32>, f32, f32) {
         let d = self.dim.dim;
         match d {
-            1 => get_1d_noise(&NoiseType::Fbm(self)),
-            2 => get_2d_noise(&NoiseType::Fbm(self)),
-            3 => get_3d_noise(&NoiseType::Fbm(self)),
-            4 => get_4d_noise(&NoiseType::Fbm(self)),
-            5 => get_5d_noise(&NoiseType::Fbm(self)),
-            6 => get_6d_noise(&NoiseType::Fbm(self)),
+            1 => generate_1d_noise(&NoiseType::Fbm(self)),
+            2 => generate_2d_noise(&NoiseType::Fbm(self)),
+            3 => generate_3d_noise(&NoiseType::Fbm(self)),
+            4 => generate_4d_noise(&NoiseType::Fbm(self)),
+            5 => generate_5d_noise(&NoiseType::Fbm(self)),
+            6 => generate_6d_noise(&NoiseType::Fbm(self)),
             _ => panic!("not implemented"),
         }
     }
@@ -228,106 +228,106 @@ impl Settings for FbmSettings {
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
-            1 => get_1d_scaled_noise(&NoiseType::Fbm(new_self)),
-            2 => get_2d_scaled_noise(&NoiseType::Fbm(new_self)),
-            3 => get_3d_scaled_noise(&NoiseType::Fbm(new_self)),
-            4 => get_4d_scaled_noise(&NoiseType::Fbm(new_self)),
-            5 => get_5d_scaled_noise(&NoiseType::Fbm(new_self)),
-            6 => get_6d_scaled_noise(&NoiseType::Fbm(new_self)),
+            1 => generate_1d_scaled_noise(&NoiseType::Fbm(new_self)),
+            2 => generate_2d_scaled_noise(&NoiseType::Fbm(new_self)),
+            3 => generate_3d_scaled_noise(&NoiseType::Fbm(new_self)),
+            4 => generate_4d_scaled_noise(&NoiseType::Fbm(new_self)),
+            5 => generate_5d_scaled_noise(&NoiseType::Fbm(new_self)),
+            6 => generate_6d_scaled_noise(&NoiseType::Fbm(new_self)),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_64(self) -> (Vec<f64>, f64, f64) {
+    fn generate_f64(self) -> (Vec<f64>, f64, f64) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_64(&NoiseType::Fbm(self)),
-            2 => crate::get_2d_noise_64(&NoiseType::Fbm(self)),
-            3 => crate::get_3d_noise_64(&NoiseType::Fbm(self)),
-            4 => crate::get_4d_noise_64(&NoiseType::Fbm(self)),
-            5 => crate::get_5d_noise_64(&NoiseType::Fbm(self)),
-            6 => crate::get_6d_noise_64(&NoiseType::Fbm(self)),
+            1 => crate::generate_1d_noise_f64(&NoiseType::Fbm(self)),
+            2 => crate::generate_2d_noise_f64(&NoiseType::Fbm(self)),
+            3 => crate::generate_3d_noise_f64(&NoiseType::Fbm(self)),
+            4 => crate::generate_4d_noise_f64(&NoiseType::Fbm(self)),
+            5 => crate::generate_5d_noise_f64(&NoiseType::Fbm(self)),
+            6 => crate::generate_6d_noise_f64(&NoiseType::Fbm(self)),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64> {
+    fn generate_scaled_f64(self, min: f64, max: f64) -> Vec<f64> {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_scaled_noise_64(&NoiseType::Fbm(self), min, max),
-            2 => crate::get_2d_scaled_noise_64(&NoiseType::Fbm(self), min, max),
-            3 => crate::get_3d_scaled_noise_64(&NoiseType::Fbm(self), min, max),
-            4 => crate::get_4d_scaled_noise_64(&NoiseType::Fbm(self), min, max),
-            5 => crate::get_5d_scaled_noise_64(&NoiseType::Fbm(self), min, max),
-            6 => crate::get_6d_scaled_noise_64(&NoiseType::Fbm(self), min, max),
+            1 => crate::generate_1d_scaled_noise_f64(&NoiseType::Fbm(self), min, max),
+            2 => crate::generate_2d_scaled_noise_f64(&NoiseType::Fbm(self), min, max),
+            3 => crate::generate_3d_scaled_noise_f64(&NoiseType::Fbm(self), min, max),
+            4 => crate::generate_4d_scaled_noise_f64(&NoiseType::Fbm(self), min, max),
+            5 => crate::generate_5d_scaled_noise_f64(&NoiseType::Fbm(self), min, max),
+            6 => crate::generate_6d_scaled_noise_f64(&NoiseType::Fbm(self), min, max),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_into(self, out: &mut [f32]) -> (f32, f32) {
+    fn fill(self, out: &mut [f32]) -> (f32, f32) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_into(&NoiseType::Fbm(self), out),
-            2 => crate::get_2d_noise_into(&NoiseType::Fbm(self), out),
-            3 => crate::get_3d_noise_into(&NoiseType::Fbm(self), out),
-            4 => crate::get_4d_noise_into(&NoiseType::Fbm(self), out),
-            5 => crate::get_5d_noise_into(&NoiseType::Fbm(self), out),
-            6 => crate::get_6d_noise_into(&NoiseType::Fbm(self), out),
+            1 => crate::fill_1d_noise(&NoiseType::Fbm(self), out),
+            2 => crate::fill_2d_noise(&NoiseType::Fbm(self), out),
+            3 => crate::fill_3d_noise(&NoiseType::Fbm(self), out),
+            4 => crate::fill_4d_noise(&NoiseType::Fbm(self), out),
+            5 => crate::fill_5d_noise(&NoiseType::Fbm(self), out),
+            6 => crate::fill_6d_noise(&NoiseType::Fbm(self), out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_scaled_into(self, min: f32, max: f32, out: &mut [f32]) {
+    fn fill_scaled(self, min: f32, max: f32, out: &mut [f32]) {
         let d = self.dim.dim;
         let mut new_self = self;
         new_self.dim.min = min;
         new_self.dim.max = max;
         match d {
-            1 => crate::get_1d_scaled_noise_into(&NoiseType::Fbm(new_self), out),
-            2 => crate::get_2d_scaled_noise_into(&NoiseType::Fbm(new_self), out),
-            3 => crate::get_3d_scaled_noise_into(&NoiseType::Fbm(new_self), out),
-            4 => crate::get_4d_scaled_noise_into(&NoiseType::Fbm(new_self), out),
-            5 => crate::get_5d_scaled_noise_into(&NoiseType::Fbm(new_self), out),
-            6 => crate::get_6d_scaled_noise_into(&NoiseType::Fbm(new_self), out),
+            1 => crate::fill_1d_scaled_noise(&NoiseType::Fbm(new_self), out),
+            2 => crate::fill_2d_scaled_noise(&NoiseType::Fbm(new_self), out),
+            3 => crate::fill_3d_scaled_noise(&NoiseType::Fbm(new_self), out),
+            4 => crate::fill_4d_scaled_noise(&NoiseType::Fbm(new_self), out),
+            5 => crate::fill_5d_scaled_noise(&NoiseType::Fbm(new_self), out),
+            6 => crate::fill_6d_scaled_noise(&NoiseType::Fbm(new_self), out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_into_64(self, out: &mut [f64]) -> (f64, f64) {
+    fn fill_f64(self, out: &mut [f64]) -> (f64, f64) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_into_64(&NoiseType::Fbm(self), out),
-            2 => crate::get_2d_noise_into_64(&NoiseType::Fbm(self), out),
-            3 => crate::get_3d_noise_into_64(&NoiseType::Fbm(self), out),
-            4 => crate::get_4d_noise_into_64(&NoiseType::Fbm(self), out),
-            5 => crate::get_5d_noise_into_64(&NoiseType::Fbm(self), out),
-            6 => crate::get_6d_noise_into_64(&NoiseType::Fbm(self), out),
+            1 => crate::fill_1d_noise_f64(&NoiseType::Fbm(self), out),
+            2 => crate::fill_2d_noise_f64(&NoiseType::Fbm(self), out),
+            3 => crate::fill_3d_noise_f64(&NoiseType::Fbm(self), out),
+            4 => crate::fill_4d_noise_f64(&NoiseType::Fbm(self), out),
+            5 => crate::fill_5d_noise_f64(&NoiseType::Fbm(self), out),
+            6 => crate::fill_6d_noise_f64(&NoiseType::Fbm(self), out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]) {
+    fn fill_scaled_f64(self, min: f64, max: f64, out: &mut [f64]) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_scaled_noise_into_64(&NoiseType::Fbm(self), min, max, out),
-            2 => crate::get_2d_scaled_noise_into_64(&NoiseType::Fbm(self), min, max, out),
-            3 => crate::get_3d_scaled_noise_into_64(&NoiseType::Fbm(self), min, max, out),
-            4 => crate::get_4d_scaled_noise_into_64(&NoiseType::Fbm(self), min, max, out),
-            5 => crate::get_5d_scaled_noise_into_64(&NoiseType::Fbm(self), min, max, out),
-            6 => crate::get_6d_scaled_noise_into_64(&NoiseType::Fbm(self), min, max, out),
+            1 => crate::fill_1d_scaled_noise_f64(&NoiseType::Fbm(self), min, max, out),
+            2 => crate::fill_2d_scaled_noise_f64(&NoiseType::Fbm(self), min, max, out),
+            3 => crate::fill_3d_scaled_noise_f64(&NoiseType::Fbm(self), min, max, out),
+            4 => crate::fill_4d_scaled_noise_f64(&NoiseType::Fbm(self), min, max, out),
+            5 => crate::fill_5d_scaled_noise_f64(&NoiseType::Fbm(self), min, max, out),
+            6 => crate::fill_6d_scaled_noise_f64(&NoiseType::Fbm(self), min, max, out),
             _ => panic!("not implemented"),
         }
     }
 
-    fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
+    fn fill_range<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
         let d = self.dim.dim;
         match d {
-            1 => crate::get_1d_noise_range_into::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
-            2 => crate::get_2d_noise_range_into::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
-            3 => crate::get_3d_noise_range_into::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
-            4 => crate::get_4d_noise_range_into::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
-            5 => crate::get_5d_noise_range_into::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
-            6 => crate::get_6d_noise_range_into::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
+            1 => crate::fill_1d_noise_range::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
+            2 => crate::fill_2d_noise_range::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
+            3 => crate::fill_3d_noise_range::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
+            4 => crate::fill_4d_noise_range::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
+            5 => crate::fill_5d_noise_range::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
+            6 => crate::fill_6d_noise_range::<T>(&NoiseType::Fbm(self), src_min, src_max, out),
             _ => panic!("not implemented"),
         }
     }
@@ -739,7 +739,7 @@ impl FbmSettings {
     /// Generate fBm (fractal) noise **together with its analytic gradient** in a
     /// single pass (issue #24).
     ///
-    /// Like [`GradientSettings::generate_with_derivative`](crate::GradientSettings::generate_with_derivative),
+    /// Like [`GradientSettings::generate_with_gradient`](crate::GradientSettings::generate_with_gradient),
     /// but for the full octave stack: the returned [`NoiseAndGradient`] carries
     /// the fBm `values` (identical to [`generate`](Settings::generate)) and the
     /// matching per-sample `gradients`, obtained by differentiating every octave
@@ -752,34 +752,34 @@ impl FbmSettings {
     ///
     /// # Panics
     /// Panics if the configured dimensionality is not in 1..=6.
-    pub fn generate_with_derivative(self) -> NoiseAndGradient {
+    pub fn generate_with_gradient(self) -> NoiseAndGradient {
         let d = self.dim.dim;
         match d {
-            1 => get_1d_fbm_gradient(&self),
-            2 => get_2d_fbm_gradient(&self),
-            3 => get_3d_fbm_gradient(&self),
-            4 => get_4d_fbm_gradient(&self),
-            5 => get_5d_fbm_gradient(&self),
-            6 => get_6d_fbm_gradient(&self),
-            _ => panic!("generate_with_derivative: invalid dimension {}", d),
+            1 => generate_1d_fbm_gradient(&self),
+            2 => generate_2d_fbm_gradient(&self),
+            3 => generate_3d_fbm_gradient(&self),
+            4 => generate_4d_fbm_gradient(&self),
+            5 => generate_5d_fbm_gradient(&self),
+            6 => generate_6d_fbm_gradient(&self),
+            _ => panic!("generate_with_gradient: invalid dimension {}", d),
         }
     }
 
-    /// f64 counterpart of [`generate_with_derivative`](Self::generate_with_derivative),
-    /// returning a [`NoiseAndGradient64`]. Supported for all dimensions 1D–6D.
+    /// f64 counterpart of [`generate_with_gradient`](Self::generate_with_gradient),
+    /// returning a [`NoiseAndGradientF64`]. Supported for all dimensions 1D–6D.
     ///
     /// # Panics
     /// Panics if the configured dimensionality is not in 1..=6.
-    pub fn generate_with_derivative_64(self) -> NoiseAndGradient64 {
+    pub fn generate_with_gradient_f64(self) -> NoiseAndGradientF64 {
         let d = self.dim.dim;
         match d {
-            1 => get_1d_fbm_gradient_64(&self),
-            2 => get_2d_fbm_gradient_64(&self),
-            3 => get_3d_fbm_gradient_64(&self),
-            4 => get_4d_fbm_gradient_64(&self),
-            5 => get_5d_fbm_gradient_64(&self),
-            6 => get_6d_fbm_gradient_64(&self),
-            _ => panic!("generate_with_derivative_64: invalid dimension {}", d),
+            1 => generate_1d_fbm_gradient_f64(&self),
+            2 => generate_2d_fbm_gradient_f64(&self),
+            3 => generate_3d_fbm_gradient_f64(&self),
+            4 => generate_4d_fbm_gradient_f64(&self),
+            5 => generate_5d_fbm_gradient_f64(&self),
+            6 => generate_6d_fbm_gradient_f64(&self),
+            _ => panic!("generate_with_gradient_f64: invalid dimension {}", d),
         }
     }
 }

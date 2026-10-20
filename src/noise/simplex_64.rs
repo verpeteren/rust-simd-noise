@@ -6,7 +6,7 @@ use simdeez::prelude::*;
 
 use crate::noise::cellular_32::{X_PRIME_64, Y_PRIME_64, Z_PRIME_64};
 use crate::noise::gradient_64::grad3d_dot;
-use crate::noise::ops::gather_64;
+use crate::noise::ops::gather_f64;
 use crate::noise::simplex_32::{
     F2_64, F3_64, F4_64, F5_64, F6_64, G22_64, G24_64, G25_64, G26_64, G2_64, G33_64, G34_64,
     G35_64, G36_64, G3_64, G44_64, G45_64, G46_64, G4_64, G55_64, G56_64, G5_64, G66_64, G6_64,
@@ -64,8 +64,8 @@ pub fn simplex_1d_deriv<S: Simd>(x: S::Vf64, seed: i64) -> (S::Vf64, S::Vf64) {
     i0 &= S::Vi64::set1(0xff);
     let (gi0, gi1) = unsafe {
         // Safety: We just masked i0 and i1 with 0xff, so they're in 0..255.
-        let gi0 = gather_64::<S>(&PERM64, i0);
-        let gi1 = gather_64::<S>(&PERM64, i1);
+        let gi0 = gather_f64::<S>(&PERM64, i0);
+        let gi1 = gather_f64::<S>(&PERM64, i1);
         (gi0, gi1)
     };
 
@@ -166,9 +166,9 @@ pub fn simplex_2d_deriv<S: Simd>(x: S::Vf64, y: S::Vf64, seed: i64) -> (S::Vf64,
         assert_in_perm_range::<S>(ii + 1);
         assert_in_perm_range::<S>(jj + 1);
 
-        let gi0 = gather_64::<S>(&PERM64, ii + gather_64::<S>(&PERM64, jj));
-        let gi1 = gather_64::<S>(&PERM64, (ii - i1) + gather_64::<S>(&PERM64, jj - j1));
-        let gi2 = gather_64::<S>(&PERM64, (ii - -1) + gather_64::<S>(&PERM64, jj - -1));
+        let gi0 = gather_f64::<S>(&PERM64, ii + gather_f64::<S>(&PERM64, jj));
+        let gi1 = gather_f64::<S>(&PERM64, (ii - i1) + gather_f64::<S>(&PERM64, jj - j1));
+        let gi2 = gather_f64::<S>(&PERM64, (ii - -1) + gather_f64::<S>(&PERM64, jj - -1));
 
         (gi0, gi1, gi2)
     };
@@ -509,30 +509,30 @@ pub fn simplex_4d_deriv<S: Simd>(
     let (gi0, gi1, gi2, gi3, gi4) = unsafe {
         // Safety: ii, jj, kk, and ll are all 0..255. All other temporary variables were fetched from PERM, which only
         // contains elements in the range 0..255.
-        let lp = gather_64::<S>(&PERM64, ll);
-        let kp = gather_64::<S>(&PERM64, kk + lp);
-        let jp = gather_64::<S>(&PERM64, jj + kp);
-        let gi0 = gather_64::<S>(&PERM64, ii + jp);
+        let lp = gather_f64::<S>(&PERM64, ll);
+        let kp = gather_f64::<S>(&PERM64, kk + lp);
+        let jp = gather_f64::<S>(&PERM64, jj + kp);
+        let gi0 = gather_f64::<S>(&PERM64, ii + jp);
 
-        let lp = gather_64::<S>(&PERM64, ll + l1);
-        let kp = gather_64::<S>(&PERM64, kk + k1 + lp);
-        let jp = gather_64::<S>(&PERM64, jj + j1 + kp);
-        let gi1 = gather_64::<S>(&PERM64, ii + i1 + jp);
+        let lp = gather_f64::<S>(&PERM64, ll + l1);
+        let kp = gather_f64::<S>(&PERM64, kk + k1 + lp);
+        let jp = gather_f64::<S>(&PERM64, jj + j1 + kp);
+        let gi1 = gather_f64::<S>(&PERM64, ii + i1 + jp);
 
-        let lp = gather_64::<S>(&PERM64, ll + l2);
-        let kp = gather_64::<S>(&PERM64, kk + k2 + lp);
-        let jp = gather_64::<S>(&PERM64, jj + j2 + kp);
-        let gi2 = gather_64::<S>(&PERM64, ii + i2 + jp);
+        let lp = gather_f64::<S>(&PERM64, ll + l2);
+        let kp = gather_f64::<S>(&PERM64, kk + k2 + lp);
+        let jp = gather_f64::<S>(&PERM64, jj + j2 + kp);
+        let gi2 = gather_f64::<S>(&PERM64, ii + i2 + jp);
 
-        let lp = gather_64::<S>(&PERM64, ll + l3);
-        let kp = gather_64::<S>(&PERM64, kk + k3 + lp);
-        let jp = gather_64::<S>(&PERM64, jj + j3 + kp);
-        let gi3 = gather_64::<S>(&PERM64, ii + i3 + jp);
+        let lp = gather_f64::<S>(&PERM64, ll + l3);
+        let kp = gather_f64::<S>(&PERM64, kk + k3 + lp);
+        let jp = gather_f64::<S>(&PERM64, jj + j3 + kp);
+        let gi3 = gather_f64::<S>(&PERM64, ii + i3 + jp);
 
-        let lp = gather_64::<S>(&PERM64, ll + S::Vi64::set1(1));
-        let kp = gather_64::<S>(&PERM64, kk + S::Vi64::set1(1) + lp);
-        let jp = gather_64::<S>(&PERM64, jj + S::Vi64::set1(1) + kp);
-        let gi4 = gather_64::<S>(&PERM64, ii + S::Vi64::set1(1) + jp);
+        let lp = gather_f64::<S>(&PERM64, ll + S::Vi64::set1(1));
+        let kp = gather_f64::<S>(&PERM64, kk + S::Vi64::set1(1) + lp);
+        let jp = gather_f64::<S>(&PERM64, jj + S::Vi64::set1(1) + kp);
+        let gi4 = gather_f64::<S>(&PERM64, ii + S::Vi64::set1(1) + jp);
         (gi0, gi1, gi2, gi3, gi4)
     };
 
@@ -760,11 +760,11 @@ pub fn simplex_5d_deriv<S: Simd>(
     let (gi0, gi1, gi2, gi3, gi4, gi5) = unsafe {
         macro_rules! corner {
             ($i:expr, $j:expr, $k:expr, $l:expr, $m:expr) => {{
-                let mp = gather_64::<S>(&PERM64, mm + $m);
-                let lp = gather_64::<S>(&PERM64, ll + $l + mp);
-                let kp = gather_64::<S>(&PERM64, kk + $k + lp);
-                let jp = gather_64::<S>(&PERM64, jj + $j + kp);
-                gather_64::<S>(&PERM64, ii + $i + jp)
+                let mp = gather_f64::<S>(&PERM64, mm + $m);
+                let lp = gather_f64::<S>(&PERM64, ll + $l + mp);
+                let kp = gather_f64::<S>(&PERM64, kk + $k + lp);
+                let jp = gather_f64::<S>(&PERM64, jj + $j + kp);
+                gather_f64::<S>(&PERM64, ii + $i + jp)
             }};
         }
         let z0i = S::Vi64::zeroes();
@@ -1038,12 +1038,12 @@ pub fn simplex_6d_deriv<S: Simd>(
     let (gi0, gi1, gi2, gi3, gi4, gi5, gi6) = unsafe {
         macro_rules! corner {
             ($i:expr, $j:expr, $k:expr, $l:expr, $m:expr, $n:expr) => {{
-                let np = gather_64::<S>(&PERM64, nn + $n);
-                let mp = gather_64::<S>(&PERM64, mm + $m + np);
-                let lp = gather_64::<S>(&PERM64, ll + $l + mp);
-                let kp = gather_64::<S>(&PERM64, kk + $k + lp);
-                let jp = gather_64::<S>(&PERM64, jj + $j + kp);
-                gather_64::<S>(&PERM64, ii + $i + jp)
+                let np = gather_f64::<S>(&PERM64, nn + $n);
+                let mp = gather_f64::<S>(&PERM64, mm + $m + np);
+                let lp = gather_f64::<S>(&PERM64, ll + $l + mp);
+                let kp = gather_f64::<S>(&PERM64, kk + $k + lp);
+                let jp = gather_f64::<S>(&PERM64, jj + $j + kp);
+                gather_f64::<S>(&PERM64, ii + $i + jp)
             }};
         }
         let z0i = S::Vi64::zeroes();
