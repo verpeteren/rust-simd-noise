@@ -10,7 +10,7 @@
 
 use simdeez::prelude::*;
 use simdeez::scalar::Scalar;
-use simdnoise::noise::{fbm_32, fbm_64, ridge_32, ridge_64, turbulence_32, turbulence_64};
+use crate::noise::{fbm_32, fbm_64, ridge_32, ridge_64, turbulence_32, turbulence_64};
 
 const LAC: f32 = 0.5;
 const GAIN: f32 = 2.0;

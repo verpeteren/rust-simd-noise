@@ -141,6 +141,11 @@ mod noise_helpers_64;
 mod noise_type;
 mod shared;
 
+// White-box tests for the crate-internal noise kernels (not part of the public
+// API). They live in-crate so they can reach the `pub(crate)` kernel modules.
+#[cfg(test)]
+mod kernel_tests;
+
 pub use shared::NoiseInto;
 use shared::{
     generate_scaled_noise, generate_scaled_noise_f64, fill_scaled_noise, fill_scaled_noise_f64,

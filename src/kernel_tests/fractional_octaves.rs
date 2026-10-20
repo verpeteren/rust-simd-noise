@@ -13,8 +13,8 @@
 
 use simdeez::prelude::*;
 use simdeez::scalar::Scalar;
-use simdnoise::noise::{fbm_32, fbm_64, ridge_32, turbulence_32};
-use simdnoise::{NoiseBuilder, Settings, SimplexSettings};
+use crate::noise::{fbm_32, fbm_64, ridge_32, turbulence_32};
+use crate::{NoiseBuilder, Settings, SimplexSettings};
 
 const LAC: f32 = 0.5;
 const GAIN: f32 = 2.0;
@@ -211,8 +211,8 @@ fn fractional_matches_across_engines() {
         .with_freq_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .wrap();
-    let (runtime, _, _) = simdnoise::generate_2d_noise(&nt);
-    let (scalar, _, _) = unsafe { simdnoise::intrinsics::scalar::generate_2d_noise::<Scalar>(&nt) };
+    let (runtime, _, _) = crate::generate_2d_noise(&nt);
+    let (scalar, _, _) = unsafe { crate::intrinsics::scalar::generate_2d_noise::<Scalar>(&nt) };
     assert_eq!(runtime.len(), scalar.len());
     let md = runtime
         .iter()
