@@ -13,10 +13,10 @@ use simdnoise::{
 
 fn dims(dim: usize, w: usize, h: usize, d: usize, t: usize) -> NoiseDimensions {
     let mut nd = NoiseDimensions::default(dim);
-    nd.width = w;
-    nd.height = h;
-    nd.depth = d;
-    nd.time = t;
+    nd.extent_x = w;
+    nd.extent_y = h;
+    nd.extent_z = d;
+    nd.extent_w = t;
     nd
 }
 
