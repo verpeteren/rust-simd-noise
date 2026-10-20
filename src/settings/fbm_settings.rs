@@ -20,7 +20,7 @@ use crate::{
     get_2d_scaled_noise, get_3d_fbm_gradient, get_3d_noise, get_3d_scaled_noise,
     get_4d_fbm_gradient, get_4d_noise, get_4d_scaled_noise, get_5d_fbm_gradient, get_5d_noise,
     get_5d_scaled_noise, get_6d_fbm_gradient, get_6d_noise, get_6d_scaled_noise,
-    get_fbm_gradient_64, NoiseAndGradient, NoiseAndGradient64,
+    get_1d_fbm_gradient_64, get_2d_fbm_gradient_64, get_3d_fbm_gradient_64, get_4d_fbm_gradient_64, get_5d_fbm_gradient_64, get_6d_fbm_gradient_64, NoiseAndGradient, NoiseAndGradient64,
 };
 
 use super::{Settings, SimplexSettings};
@@ -771,6 +771,15 @@ impl FbmSettings {
     /// # Panics
     /// Panics if the configured dimensionality is not in 1..=6.
     pub fn generate_with_derivative_64(self) -> NoiseAndGradient64 {
-        get_fbm_gradient_64(&self)
+        let d = self.dim.dim;
+        match d {
+            1 => get_1d_fbm_gradient_64(&self),
+            2 => get_2d_fbm_gradient_64(&self),
+            3 => get_3d_fbm_gradient_64(&self),
+            4 => get_4d_fbm_gradient_64(&self),
+            5 => get_5d_fbm_gradient_64(&self),
+            6 => get_6d_fbm_gradient_64(&self),
+            _ => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
     }
 }

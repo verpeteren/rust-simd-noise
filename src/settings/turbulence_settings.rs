@@ -23,7 +23,7 @@ use crate::{
     get_2d_scaled_noise, get_2d_turbulence_gradient, get_3d_noise, get_3d_scaled_noise,
     get_3d_turbulence_gradient, get_4d_noise, get_4d_scaled_noise, get_4d_turbulence_gradient,
     get_5d_noise, get_5d_scaled_noise, get_5d_turbulence_gradient, get_6d_noise,
-    get_6d_scaled_noise, get_6d_turbulence_gradient, get_turbulence_gradient_64, NoiseAndGradient,
+    get_6d_scaled_noise, get_6d_turbulence_gradient, get_1d_turbulence_gradient_64, get_2d_turbulence_gradient_64, get_3d_turbulence_gradient_64, get_4d_turbulence_gradient_64, get_5d_turbulence_gradient_64, get_6d_turbulence_gradient_64, NoiseAndGradient,
     NoiseAndGradient64,
 };
 
@@ -692,7 +692,16 @@ impl TurbulenceSettings {
     /// # Panics
     /// Panics if the configured dimensionality is not in 1..=6.
     pub fn generate_with_derivative_64(self) -> NoiseAndGradient64 {
-        get_turbulence_gradient_64(&self)
+        let d = self.dim.dim;
+        match d {
+            1 => get_1d_turbulence_gradient_64(&self),
+            2 => get_2d_turbulence_gradient_64(&self),
+            3 => get_3d_turbulence_gradient_64(&self),
+            4 => get_4d_turbulence_gradient_64(&self),
+            5 => get_5d_turbulence_gradient_64(&self),
+            6 => get_6d_turbulence_gradient_64(&self),
+            _ => panic!("generate_with_derivative_64: invalid dimension {}", d),
+        }
     }
 }
 
