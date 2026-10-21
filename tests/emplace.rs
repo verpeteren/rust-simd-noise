@@ -140,18 +140,14 @@ fn emplace_chunks_compose() {
 #[should_panic]
 fn emplace_wrong_len_panics_f32() {
     let mut out = vec![0.0f32; 10];
-    NoiseBuilder::fbm_2d(64, 32)
-        .with_seed(1)
-        .fill(&mut out);
+    NoiseBuilder::fbm_2d(64, 32).with_seed(1).fill(&mut out);
 }
 
 #[test]
 #[should_panic]
 fn emplace_wrong_len_panics_f64() {
     let mut out = vec![0.0f64; 10];
-    NoiseBuilder::fbm_2d(64, 32)
-        .with_seed(1)
-        .fill_f64(&mut out);
+    NoiseBuilder::fbm_2d(64, 32).with_seed(1).fill_f64(&mut out);
 }
 
 // --- typed (integer) range emplace: fill_range / fill_Nd_noise_range ---

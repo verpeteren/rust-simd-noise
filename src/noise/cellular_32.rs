@@ -3,8 +3,6 @@
 //! Useful for writing your own SIMD-generic code for use cases not covered by the higher level
 //! interfaces.
 
-use std::f32;
-
 use simdeez::prelude::*;
 
 pub const BIT_10_MASK_32: i32 = 1023;

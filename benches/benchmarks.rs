@@ -28,7 +28,9 @@ fn d4(c: &mut Criterion) {
         b.iter(|| unsafe { avx2::generate_4d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 4d", move |b| b.iter(|| neon::generate_4d_noise(&setting)));
+    group.bench_function("neon 4d", move |b| {
+        b.iter(|| neon::generate_4d_noise(&setting))
+    });
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -54,7 +56,9 @@ fn d3(c: &mut Criterion) {
         b.iter(|| unsafe { avx2::generate_3d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 3d", move |b| b.iter(|| neon::generate_3d_noise(&setting)));
+    group.bench_function("neon 3d", move |b| {
+        b.iter(|| neon::generate_3d_noise(&setting))
+    });
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -80,7 +84,9 @@ fn d2(c: &mut Criterion) {
         b.iter(|| unsafe { avx2::generate_2d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 2d", move |b| b.iter(|| neon::generate_2d_noise(&setting)));
+    group.bench_function("neon 2d", move |b| {
+        b.iter(|| neon::generate_2d_noise(&setting))
+    });
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -106,7 +112,9 @@ fn d1(c: &mut Criterion) {
         b.iter(|| unsafe { avx2::generate_1d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 1d", move |b| b.iter(|| neon::generate_1d_noise(&setting)));
+    group.bench_function("neon 1d", move |b| {
+        b.iter(|| neon::generate_1d_noise(&setting))
+    });
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -134,7 +142,9 @@ fn d2_cell(c: &mut Criterion) {
         b.iter(|| unsafe { avx2::generate_2d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 2d", move |b| b.iter(|| neon::generate_2d_noise(&setting)));
+    group.bench_function("neon 2d", move |b| {
+        b.iter(|| neon::generate_2d_noise(&setting))
+    });
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -160,7 +170,9 @@ fn d3_cell(c: &mut Criterion) {
         b.iter(|| unsafe { avx2::generate_3d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 3d", move |b| b.iter(|| neon::generate_3d_noise(&setting)));
+    group.bench_function("neon 3d", move |b| {
+        b.iter(|| neon::generate_3d_noise(&setting))
+    });
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))

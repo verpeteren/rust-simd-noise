@@ -11,7 +11,8 @@ use simdnoise::{NoiseBuilder, Settings};
 fn public_api_uses_scalar_engine() {
     let nt = NoiseBuilder::gradient_2d(32, 16).with_seed(1).wrap();
     let via_public = simdnoise::generate_2d_noise(&nt).0;
-    let via_scalar =
-        unsafe { simdnoise::intrinsics::scalar::generate_2d_noise::<simdeez::scalar::Scalar>(&nt).0 };
+    let via_scalar = unsafe {
+        simdnoise::intrinsics::scalar::generate_2d_noise::<simdeez::scalar::Scalar>(&nt).0
+    };
     assert_eq!(via_public, via_scalar);
 }

@@ -136,9 +136,10 @@ pub mod intrinsics;
 pub mod noise;
 mod noise_builder;
 mod noise_dimensions;
-mod noise_helpers_32;
-mod noise_helpers_64;
+pub(crate) mod noise_helpers_32;
+pub(crate) mod noise_helpers_64;
 mod noise_type;
+pub mod point;
 mod shared;
 
 // White-box tests for the crate-internal noise kernels (not part of the public
@@ -148,7 +149,7 @@ mod kernel_tests;
 
 pub use shared::NoiseInto;
 use shared::{
-    generate_scaled_noise, generate_scaled_noise_f64, fill_scaled_noise, fill_scaled_noise_f64,
+    fill_scaled_noise, fill_scaled_noise_f64, generate_scaled_noise, generate_scaled_noise_f64,
 };
 #[cfg(not(feature = "scalar"))]
 use simdeez::prelude::*;
@@ -162,6 +163,11 @@ pub use noise::cell_return_type::CellReturnType;
 pub use noise_builder::NoiseBuilder;
 pub use noise_dimensions::NoiseDimensions;
 pub use noise_type::NoiseType;
+pub use point::{
+    PhasorSample2, PhasorSample3, PhasorValue2, PhasorValue3, PointSample2, PointSample3,
+    PointSample3F64, PointSample4, PointSample4F64, PointSampleHessian2, PointSampleHessian3,
+    PointSampleHessian3F64, PointSampleHessian4, PointSampleHessian4F64,
+};
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
@@ -194,6 +200,134 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn generate_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
     unsafe { noise_helpers_32::generate_3d_noise::<simdeez::scalar::Scalar>(noise_type) }
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn steerable_perlin_2d(settings: &SteerablePerlinSettings) -> (Vec<f32>, f32, f32) {
+        settings::steerable_perlin_settings::steerable_perlin_2d_block::<S>(settings)
+    }
+);
+/// Generate a 2D steerable Perlin block on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn steerable_perlin_2d(settings: &SteerablePerlinSettings) -> (Vec<f32>, f32, f32) {
+    settings::steerable_perlin_settings::steerable_perlin_2d_block::<simdeez::scalar::Scalar>(
+        settings,
+    )
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn steerable_perlin_3d(settings: &SteerablePerlinSettings) -> (Vec<f32>, f32, f32) {
+        settings::steerable_perlin_settings::steerable_perlin_3d_block::<S>(settings)
+    }
+);
+/// Generate a 3D steerable Perlin block on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn steerable_perlin_3d(settings: &SteerablePerlinSettings) -> (Vec<f32>, f32, f32) {
+    settings::steerable_perlin_settings::steerable_perlin_3d_block::<simdeez::scalar::Scalar>(
+        settings,
+    )
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn steerable_perlin_2d_gradient(settings: &SteerablePerlinSettings) -> NoiseAndGradient {
+        settings::steerable_perlin_settings::steerable_perlin_2d_gradient_block::<S>(settings)
+    }
+);
+/// Generate a 2D steerable Perlin block with gradients on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn steerable_perlin_2d_gradient(settings: &SteerablePerlinSettings) -> NoiseAndGradient {
+    settings::steerable_perlin_settings::steerable_perlin_2d_gradient_block::<simdeez::scalar::Scalar>(
+        settings,
+    )
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn steerable_perlin_3d_gradient(settings: &SteerablePerlinSettings) -> NoiseAndGradient {
+        settings::steerable_perlin_settings::steerable_perlin_3d_gradient_block::<S>(settings)
+    }
+);
+/// Generate a 3D steerable Perlin block with gradients on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn steerable_perlin_3d_gradient(settings: &SteerablePerlinSettings) -> NoiseAndGradient {
+    settings::steerable_perlin_settings::steerable_perlin_3d_gradient_block::<simdeez::scalar::Scalar>(
+        settings,
+    )
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn gabor_2d(settings: &GaborSettings) -> (Vec<f32>, f32, f32) {
+        noise::gabor_32::gabor_2d_block::<S>(settings)
+    }
+);
+/// Generate a 2D Gabor block on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn gabor_2d(settings: &GaborSettings) -> (Vec<f32>, f32, f32) {
+    noise::gabor_32::gabor_2d_block::<simdeez::scalar::Scalar>(settings)
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn gabor_3d(settings: &GaborSettings) -> (Vec<f32>, f32, f32) {
+        noise::gabor_32::gabor_3d_block::<S>(settings)
+    }
+);
+/// Generate a 3D Gabor block on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn gabor_3d(settings: &GaborSettings) -> (Vec<f32>, f32, f32) {
+    noise::gabor_32::gabor_3d_block::<simdeez::scalar::Scalar>(settings)
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn gabor_2d_gradient(settings: &GaborSettings) -> NoiseAndGradient {
+        noise::gabor_32::gabor_2d_gradient::<S>(settings)
+    }
+);
+/// Generate a 2D Gabor block with analytic gradients on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn gabor_2d_gradient(settings: &GaborSettings) -> NoiseAndGradient {
+    noise::gabor_32::gabor_2d_gradient::<simdeez::scalar::Scalar>(settings)
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn gabor_3d_gradient(settings: &GaborSettings) -> NoiseAndGradient {
+        noise::gabor_32::gabor_3d_gradient::<S>(settings)
+    }
+);
+/// Generate a 3D Gabor block with analytic gradients on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn gabor_3d_gradient(settings: &GaborSettings) -> NoiseAndGradient {
+    noise::gabor_32::gabor_3d_gradient::<simdeez::scalar::Scalar>(settings)
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn gabor_4d(settings: &GaborSettings) -> (Vec<f32>, f32, f32) {
+        noise::gabor_32::gabor_4d_block::<S>(settings)
+    }
+);
+/// Generate a 4D Gabor block on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn gabor_4d(settings: &GaborSettings) -> (Vec<f32>, f32, f32) {
+    noise::gabor_32::gabor_4d_block::<simdeez::scalar::Scalar>(settings)
+}
+
+#[cfg(not(feature = "scalar"))]
+simd_runtime_generate!(
+    pub fn gabor_4d_gradient(settings: &GaborSettings) -> NoiseAndGradient {
+        noise::gabor_32::gabor_4d_gradient::<S>(settings)
+    }
+);
+/// Generate a 4D Gabor block with analytic gradients on the scalar backend.
+#[cfg(feature = "scalar")]
+pub fn gabor_4d_gradient(settings: &GaborSettings) -> NoiseAndGradient {
+    noise::gabor_32::gabor_4d_gradient::<simdeez::scalar::Scalar>(settings)
 }
 
 /// Noise **values together with their analytic gradient**, produced by
@@ -457,7 +591,9 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn generate_4d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
     unsafe {
-        noise_helpers_32::generate_4d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(settings)
+        noise_helpers_32::generate_4d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+            settings,
+        )
     }
 }
 
@@ -470,7 +606,9 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn generate_5d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
     unsafe {
-        noise_helpers_32::generate_5d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(settings)
+        noise_helpers_32::generate_5d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+            settings,
+        )
     }
 }
 
@@ -483,7 +621,9 @@ simd_runtime_generate!(
 #[cfg(feature = "scalar")]
 pub fn generate_6d_fbm_gradient(settings: &FbmSettings) -> NoiseAndGradient {
     unsafe {
-        noise_helpers_32::generate_6d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(settings)
+        noise_helpers_32::generate_6d_fractal_gradient::<simdeez::scalar::Scalar, FbmSettings>(
+            settings,
+        )
     }
 }
 
@@ -852,7 +992,9 @@ pub fn generate_6d_ridge_gradient_f64(settings: &RidgeSettings) -> NoiseAndGradi
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
-    pub fn generate_1d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> NoiseAndGradientF64 {
+    pub fn generate_1d_turbulence_gradient_f64(
+        settings: &TurbulenceSettings,
+    ) -> NoiseAndGradientF64 {
         noise_helpers_64::generate_1d_fractal_gradient::<S, TurbulenceSettings>(settings)
     }
 );
@@ -867,7 +1009,9 @@ pub fn generate_1d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> Noi
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
-    pub fn generate_2d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> NoiseAndGradientF64 {
+    pub fn generate_2d_turbulence_gradient_f64(
+        settings: &TurbulenceSettings,
+    ) -> NoiseAndGradientF64 {
         noise_helpers_64::generate_2d_fractal_gradient::<S, TurbulenceSettings>(settings)
     }
 );
@@ -882,7 +1026,9 @@ pub fn generate_2d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> Noi
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
-    pub fn generate_3d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> NoiseAndGradientF64 {
+    pub fn generate_3d_turbulence_gradient_f64(
+        settings: &TurbulenceSettings,
+    ) -> NoiseAndGradientF64 {
         noise_helpers_64::generate_3d_fractal_gradient::<S, TurbulenceSettings>(settings)
     }
 );
@@ -897,7 +1043,9 @@ pub fn generate_3d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> Noi
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
-    pub fn generate_4d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> NoiseAndGradientF64 {
+    pub fn generate_4d_turbulence_gradient_f64(
+        settings: &TurbulenceSettings,
+    ) -> NoiseAndGradientF64 {
         noise_helpers_64::generate_4d_fractal_gradient::<S, TurbulenceSettings>(settings)
     }
 );
@@ -912,7 +1060,9 @@ pub fn generate_4d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> Noi
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
-    pub fn generate_5d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> NoiseAndGradientF64 {
+    pub fn generate_5d_turbulence_gradient_f64(
+        settings: &TurbulenceSettings,
+    ) -> NoiseAndGradientF64 {
         noise_helpers_64::generate_5d_fractal_gradient::<S, TurbulenceSettings>(settings)
     }
 );
@@ -927,7 +1077,9 @@ pub fn generate_5d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> Noi
 
 #[cfg(not(feature = "scalar"))]
 simd_runtime_generate!(
-    pub fn generate_6d_turbulence_gradient_f64(settings: &TurbulenceSettings) -> NoiseAndGradientF64 {
+    pub fn generate_6d_turbulence_gradient_f64(
+        settings: &TurbulenceSettings,
+    ) -> NoiseAndGradientF64 {
         noise_helpers_64::generate_6d_fractal_gradient::<S, TurbulenceSettings>(settings)
     }
 );
@@ -1214,11 +1366,22 @@ simd_runtime_generate!(
         scale_min: f64,
         scale_max: f64,
     ) -> Vec<f64> {
-        unsafe { generate_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, generate_1d_noise_f64) }
+        unsafe {
+            generate_scaled_noise_f64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                generate_1d_noise_f64,
+            )
+        }
     }
 );
 #[cfg(feature = "scalar")]
-pub fn generate_1d_scaled_noise_f64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+pub fn generate_1d_scaled_noise_f64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+) -> Vec<f64> {
     unsafe {
         generate_scaled_noise_f64::<simdeez::scalar::Scalar, _>(
             noise_type,
@@ -1236,11 +1399,22 @@ simd_runtime_generate!(
         scale_min: f64,
         scale_max: f64,
     ) -> Vec<f64> {
-        unsafe { generate_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, generate_2d_noise_f64) }
+        unsafe {
+            generate_scaled_noise_f64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                generate_2d_noise_f64,
+            )
+        }
     }
 );
 #[cfg(feature = "scalar")]
-pub fn generate_2d_scaled_noise_f64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+pub fn generate_2d_scaled_noise_f64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+) -> Vec<f64> {
     unsafe {
         generate_scaled_noise_f64::<simdeez::scalar::Scalar, _>(
             noise_type,
@@ -1258,11 +1432,22 @@ simd_runtime_generate!(
         scale_min: f64,
         scale_max: f64,
     ) -> Vec<f64> {
-        unsafe { generate_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, generate_3d_noise_f64) }
+        unsafe {
+            generate_scaled_noise_f64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                generate_3d_noise_f64,
+            )
+        }
     }
 );
 #[cfg(feature = "scalar")]
-pub fn generate_3d_scaled_noise_f64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+pub fn generate_3d_scaled_noise_f64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+) -> Vec<f64> {
     unsafe {
         generate_scaled_noise_f64::<simdeez::scalar::Scalar, _>(
             noise_type,
@@ -1280,11 +1465,22 @@ simd_runtime_generate!(
         scale_min: f64,
         scale_max: f64,
     ) -> Vec<f64> {
-        unsafe { generate_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, generate_4d_noise_f64) }
+        unsafe {
+            generate_scaled_noise_f64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                generate_4d_noise_f64,
+            )
+        }
     }
 );
 #[cfg(feature = "scalar")]
-pub fn generate_4d_scaled_noise_f64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+pub fn generate_4d_scaled_noise_f64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+) -> Vec<f64> {
     unsafe {
         generate_scaled_noise_f64::<simdeez::scalar::Scalar, _>(
             noise_type,
@@ -1302,11 +1498,22 @@ simd_runtime_generate!(
         scale_min: f64,
         scale_max: f64,
     ) -> Vec<f64> {
-        unsafe { generate_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, generate_5d_noise_f64) }
+        unsafe {
+            generate_scaled_noise_f64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                generate_5d_noise_f64,
+            )
+        }
     }
 );
 #[cfg(feature = "scalar")]
-pub fn generate_5d_scaled_noise_f64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+pub fn generate_5d_scaled_noise_f64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+) -> Vec<f64> {
     unsafe {
         generate_scaled_noise_f64::<simdeez::scalar::Scalar, _>(
             noise_type,
@@ -1324,11 +1531,22 @@ simd_runtime_generate!(
         scale_min: f64,
         scale_max: f64,
     ) -> Vec<f64> {
-        unsafe { generate_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, generate_6d_noise_f64) }
+        unsafe {
+            generate_scaled_noise_f64::<S, _>(
+                noise_type,
+                scale_min,
+                scale_max,
+                generate_6d_noise_f64,
+            )
+        }
     }
 );
 #[cfg(feature = "scalar")]
-pub fn generate_6d_scaled_noise_f64(noise_type: &NoiseType, scale_min: f64, scale_max: f64) -> Vec<f64> {
+pub fn generate_6d_scaled_noise_f64(
+    noise_type: &NoiseType,
+    scale_min: f64,
+    scale_max: f64,
+) -> Vec<f64> {
     unsafe {
         generate_scaled_noise_f64::<simdeez::scalar::Scalar, _>(
             noise_type,
@@ -1419,9 +1637,7 @@ simd_runtime_generate!(
 );
 #[cfg(feature = "scalar")]
 pub fn fill_1d_scaled_noise(noise_type: &NoiseType, out: &mut [f32]) {
-    unsafe {
-        fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_1d_noise)
-    }
+    unsafe { fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_1d_noise) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -1432,9 +1648,7 @@ simd_runtime_generate!(
 );
 #[cfg(feature = "scalar")]
 pub fn fill_2d_scaled_noise(noise_type: &NoiseType, out: &mut [f32]) {
-    unsafe {
-        fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_2d_noise)
-    }
+    unsafe { fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_2d_noise) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -1445,9 +1659,7 @@ simd_runtime_generate!(
 );
 #[cfg(feature = "scalar")]
 pub fn fill_3d_scaled_noise(noise_type: &NoiseType, out: &mut [f32]) {
-    unsafe {
-        fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_3d_noise)
-    }
+    unsafe { fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_3d_noise) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -1458,9 +1670,7 @@ simd_runtime_generate!(
 );
 #[cfg(feature = "scalar")]
 pub fn fill_4d_scaled_noise(noise_type: &NoiseType, out: &mut [f32]) {
-    unsafe {
-        fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_4d_noise)
-    }
+    unsafe { fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_4d_noise) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -1471,9 +1681,7 @@ simd_runtime_generate!(
 );
 #[cfg(feature = "scalar")]
 pub fn fill_5d_scaled_noise(noise_type: &NoiseType, out: &mut [f32]) {
-    unsafe {
-        fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_5d_noise)
-    }
+    unsafe { fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_5d_noise) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -1484,9 +1692,7 @@ simd_runtime_generate!(
 );
 #[cfg(feature = "scalar")]
 pub fn fill_6d_scaled_noise(noise_type: &NoiseType, out: &mut [f32]) {
-    unsafe {
-        fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_6d_noise)
-    }
+    unsafe { fill_scaled_noise::<simdeez::scalar::Scalar, _>(noise_type, out, fill_6d_noise) }
 }
 
 #[cfg(not(feature = "scalar"))]
@@ -1564,13 +1770,7 @@ simd_runtime_generate!(
         out: &mut [f64],
     ) {
         unsafe {
-            fill_scaled_noise_f64::<S, _>(
-                noise_type,
-                scale_min,
-                scale_max,
-                out,
-                fill_1d_noise_f64,
-            )
+            fill_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, out, fill_1d_noise_f64)
         }
     }
 );
@@ -1601,13 +1801,7 @@ simd_runtime_generate!(
         out: &mut [f64],
     ) {
         unsafe {
-            fill_scaled_noise_f64::<S, _>(
-                noise_type,
-                scale_min,
-                scale_max,
-                out,
-                fill_2d_noise_f64,
-            )
+            fill_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, out, fill_2d_noise_f64)
         }
     }
 );
@@ -1638,13 +1832,7 @@ simd_runtime_generate!(
         out: &mut [f64],
     ) {
         unsafe {
-            fill_scaled_noise_f64::<S, _>(
-                noise_type,
-                scale_min,
-                scale_max,
-                out,
-                fill_3d_noise_f64,
-            )
+            fill_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, out, fill_3d_noise_f64)
         }
     }
 );
@@ -1675,13 +1863,7 @@ simd_runtime_generate!(
         out: &mut [f64],
     ) {
         unsafe {
-            fill_scaled_noise_f64::<S, _>(
-                noise_type,
-                scale_min,
-                scale_max,
-                out,
-                fill_4d_noise_f64,
-            )
+            fill_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, out, fill_4d_noise_f64)
         }
     }
 );
@@ -1712,13 +1894,7 @@ simd_runtime_generate!(
         out: &mut [f64],
     ) {
         unsafe {
-            fill_scaled_noise_f64::<S, _>(
-                noise_type,
-                scale_min,
-                scale_max,
-                out,
-                fill_5d_noise_f64,
-            )
+            fill_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, out, fill_5d_noise_f64)
         }
     }
 );
@@ -1749,13 +1925,7 @@ simd_runtime_generate!(
         out: &mut [f64],
     ) {
         unsafe {
-            fill_scaled_noise_f64::<S, _>(
-                noise_type,
-                scale_min,
-                scale_max,
-                out,
-                fill_6d_noise_f64,
-            )
+            fill_scaled_noise_f64::<S, _>(noise_type, scale_min, scale_max, out, fill_6d_noise_f64)
         }
     }
 );
@@ -2014,8 +2184,8 @@ pub fn fill_6d_noise_range<T: NoiseInto>(
 
 mod settings;
 pub use settings::{
-    Cellular2Settings, CellularSettings, FbmSettings, GradientSettings, RidgeSettings, Settings,
-    SimplexSettings, TurbulenceSettings,
+    Cellular2Settings, CellularSettings, FbmSettings, GaborSettings, GradientSettings,
+    RidgeSettings, Settings, SimplexSettings, SteerablePerlinSettings, TurbulenceSettings,
 };
 
 /*
