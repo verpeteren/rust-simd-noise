@@ -11,9 +11,6 @@ use crate::noise::ops::gather_32;
 
 use simdeez::prelude::*;
 
-use std::f32;
-use std::f64;
-
 /// Skew factor for 2D simplex noise
 const F2_32: f32 = 0.366_025_42;
 pub const F2_64: f64 = 0.36602540378;

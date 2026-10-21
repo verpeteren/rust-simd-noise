@@ -8,7 +8,9 @@
 //! relative bound for the `|·|`-based ridge/turbulence). Run under
 //! `--features scalar` too for cross-engine coverage.
 
-use simdnoise::{generate_2d_noise_f64, generate_6d_noise_f64, NoiseBuilder, Settings, SimplexSettings};
+use simdnoise::{
+    generate_2d_noise_f64, generate_6d_noise_f64, NoiseBuilder, Settings, SimplexSettings,
+};
 
 fn max_abs_diff(a: &[f64], b: &[f64]) -> f64 {
     assert_eq!(a.len(), b.len());

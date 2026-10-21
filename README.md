@@ -3,6 +3,9 @@
 # SIMDNoise
 [![](https://img.shields.io/crates/v/simdnoise.svg)](https://crates.io/crates/simdnoise) [![](https://docs.rs/simdnoise/badge.svg)](https://docs.rs/simdnoise)
 
+The crate is published as `simdnoise`; the repository is `rust-simd-noise`.
+`simdnoise::point` refers to this crate, not a separate project.
+
 Super fast SIMD noise library for Rust. PRs welcome!
 This library was created by Jack Mott.
 The current maintainer is Peter Reijnders.
@@ -16,6 +19,9 @@ The current maintainer is Peter Reijnders.
 * Gradient Noise (Simplex aka Perlin) 1D,2D,3D,4D, and **5D/6D (experimental)**
 * Fractal Brownian Motion, Ridge, and Turbulence
 * Cellular Noise (aka Voronoi) 1D,2D,3D,4D, and **5D/6D (experimental)**
+* Gabor noise (anisotropic, 2D/3D/4D) with analytic gradients
+* Phasor (complex Gabor) point sampling 2D/3D with analytic gradients
+* Steerable Perlin noise (anisotropic metric, 2D/3D) with analytic gradients
 * `f32` and `f64` output for every algorithm and dimension
 * SSE2, SSE41, AVX2, and AVX-512 instruction sets, plus NEON and a non-SIMD fallback
 * AVX2 version also leverages FMA3
@@ -29,15 +35,18 @@ blank = not applicable. Entries marked `v*` are **experimental** (see below).
 
 | Algorithm | knobs | 1D | 2D | 3D | 4D | 5D | 6D |
 |---|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| Gradient (raw Simplex) | seed, freq | v | v | v | v | v* | v* |
+| Gradient (raw Simplex) | seed, frequency | v | v | v | v | v* | v* |
 | FBM | + lacunarity, gain, octaves | v | v | v | v | v* | v* |
 | Ridge | + lacunarity, gain, octaves | v | v | v | v | v* | v* |
 | Turbulence | + lacunarity, gain, octaves | v | v | v | v | v* | v* |
-| Cellular (Voronoi F1) | seed, freq, distance_fn, return_type, jitter | v | v | v | v | v* | v* |
+| Cellular (Voronoi F1) | seed, frequency, distance_fn, return_type, jitter | v | v | v | v | v* | v* |
 | Cellular2 (Voronoi F2) | + return_type2, index0, index1 | v | v | v | v | v* | v* |
+| Gabor (anisotropic) | seed, frequency, orientation, bandwidth, radius, density, carrier, gain |  | v | v | v |  |  |
+| Steerable Perlin | seed, frequency, direction, metric eigenvalues, gain |  | v | v |  |  |  |
 
-Every `v`/`v*` cell is available for both `f32` (`generate()`, …) and `f64`
-(`generate_f64()`, …).
+Every simplex/cellular `v`/`v*` cell is available for both `f32`
+(`generate()`, …) and `f64` (`generate_f64()`, …). Gabor and steerable Perlin
+are f32 only. Steerable Perlin ships value and analytic-gradient generation.
 
 #### Engines
 
@@ -210,9 +219,9 @@ use wasm_bindgen::prelude::*;
 /// From JavaScript this comes back as a `Uint8Array` of length `width * height`
 /// — e.g. ready to drop into a grayscale `ImageData` / canvas.
 #[wasm_bindgen]
-pub fn fbm_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
+pub fn fbm_2d(width: usize, height: usize, frequency: f32, seed: i32) -> Vec<u8> {
     let noise = NoiseBuilder::fbm_2d(width, height)
-        .with_frequency(freq)
+        .with_frequency(frequency)
         .with_seed(seed)
         .generate_scaled(0.0, 255.0);
     noise.into_iter().map(|v| v as u8).collect()
@@ -221,9 +230,9 @@ pub fn fbm_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
 /// Generate a `width * height` block of 2D gradient (simplex) noise, scaled to
 /// `[0, 255]` and returned as one byte per sample (row-major).
 #[wasm_bindgen]
-pub fn gradient_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
+pub fn gradient_2d(width: usize, height: usize, frequency: f32, seed: i32) -> Vec<u8> {
     let noise = NoiseBuilder::gradient_2d(width, height)
-        .with_frequency(freq)
+        .with_frequency(frequency)
         .with_seed(seed)
         .generate_scaled(0.0, 255.0);
     noise.into_iter().map(|v| v as u8).collect()
@@ -262,7 +271,7 @@ Two workspace apps are included:
 cargo run --bin viewer
 
 # Open the viewer pre-populated, or render one-shot with the CLI (same options)
-cargo run --bin generate -- --dim 2 --width 512 --height 512 --seed 1 --freq 0.02 \
+cargo run --bin generate -- --dimension 2 --width 512 --height 512 --seed 1 --frequency 0.02 \
     fbm --lacunarity 0.5 --gain 2 --octaves 3
 
 # A bare `cargo run` lists the available binaries.
@@ -311,7 +320,7 @@ unsafe {
     // avx2 turbulence
     let x = _mm256_set1_ps(5.0);
     let y = _mm256_set1_ps(10.0);
-    let freq = _mm256_set1_ps(1.0);
+    let frequency = _mm256_set1_ps(1.0);
     let lacunarity = _mm256_set1_ps(0.5);
     let gain = _mm256_set1_ps(2.0);
     let octaves = 3;
@@ -320,6 +329,63 @@ unsafe {
 };
 
 ```
+
+## Arbitrary-point sampling
+
+The block API evaluates a regular grid. For path tracers, per-vertex geometry
+and shading, use the point API: it packs arbitrary points into SIMD lanes and
+writes into a caller-owned slice.
+
+The unqualified functions return **values only**; the `_with_gradient` twins
+return the value plus its analytic first derivative:
+
+```rust
+use simdnoise::point::{sample_points_3d, sample_points_3d_with_gradient, PointSample3};
+use simdnoise::{NoiseBuilder, Settings};
+
+let noise_type = NoiseBuilder::gradient_3d(1, 1, 1)
+    .with_seed(7)
+    .with_frequency_3d(0.02, 0.02, 0.02)
+    .wrap();
+
+let points = [[1.0, 2.0, 3.0], [-4.0, 0.5, 2.0], [10.0, -1.0, 0.25]];
+
+let mut values = [0.0f32; 3];
+sample_points_3d(&noise_type, &points, &mut values);
+
+let mut samples = [PointSample3::default(); 3];
+sample_points_3d_with_gradient(&noise_type, &points, &mut samples);
+
+for sample in samples {
+    // sample.value, sample.gradient = [∂v/∂x, ∂v/∂y, ∂v/∂z]
+    println!("{} {:?}", sample.value, sample.gradient);
+}
+```
+
+Coverage:
+
+| Family | Value-only | Value + gradient | Dimensions |
+|---|---|---|---|
+| gradient, fBm, ridge, turbulence | `sample_points_*` | `sample_points_*_with_gradient` | 2D/3D/4D f32, 3D/4D f64 |
+| cellular F1/F2 | `sample_points_*` | `_with_gradient` (2D/3D only) | 2D/3D/4D f32, 3D/4D f64 |
+| Gabor | `sample_gabor_points_*` | `_with_gradient` | 2D/3D/4D f32 |
+| phasor (complex Gabor) | `sample_phasor_points_*` | `_with_gradient` | 2D/3D f32 |
+
+`sample_phasor_points_*` returns `PhasorValue2`/`PhasorValue3`; the
+`_with_gradient` twins return `PhasorSample2`/`PhasorSample3` with
+real/imaginary gradients and `modulus()`/`phase()` helpers. Gradients are in the
+settings' coordinate space and include the configured frequency, matching the
+block `generate_with_gradient` API.
+
+`sample_points_2d_with_hessian`, `sample_points_3d_with_hessian`,
+`sample_points_4d_with_hessian` (and their `_f64` twins for 3D/4D) additionally
+return a finite-difference Hessian built from the analytic gradient. The Hessian
+costs five (2D), seven (3D) or nine (4D) batch evaluations, so use it only when
+curvature is required. 4D cellular values are supported; 4D cellular gradients
+and Hessians are not.
+
+1D and 5D/6D point batches are not implemented; use the block or `intrinsics`
+APIs there.
 
 ## Generating into caller-owned memory (`fill_*`)
 

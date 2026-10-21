@@ -19,12 +19,15 @@ use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
 use crate::noise_helpers_64::{Sample64, SampleFractalDeriv64};
 pub use crate::noise_type::NoiseType;
 use crate::{
-    generate_1d_noise, generate_1d_scaled_noise, generate_1d_turbulence_gradient, generate_2d_noise,
-    generate_2d_scaled_noise, generate_2d_turbulence_gradient, generate_3d_noise, generate_3d_scaled_noise,
-    generate_3d_turbulence_gradient, generate_4d_noise, generate_4d_scaled_noise, generate_4d_turbulence_gradient,
-    generate_5d_noise, generate_5d_scaled_noise, generate_5d_turbulence_gradient, generate_6d_noise,
-    generate_6d_scaled_noise, generate_6d_turbulence_gradient, generate_1d_turbulence_gradient_f64, generate_2d_turbulence_gradient_f64, generate_3d_turbulence_gradient_f64, generate_4d_turbulence_gradient_f64, generate_5d_turbulence_gradient_f64, generate_6d_turbulence_gradient_f64, NoiseAndGradient,
-    NoiseAndGradientF64,
+    generate_1d_noise, generate_1d_scaled_noise, generate_1d_turbulence_gradient,
+    generate_1d_turbulence_gradient_f64, generate_2d_noise, generate_2d_scaled_noise,
+    generate_2d_turbulence_gradient, generate_2d_turbulence_gradient_f64, generate_3d_noise,
+    generate_3d_scaled_noise, generate_3d_turbulence_gradient, generate_3d_turbulence_gradient_f64,
+    generate_4d_noise, generate_4d_scaled_noise, generate_4d_turbulence_gradient,
+    generate_4d_turbulence_gradient_f64, generate_5d_noise, generate_5d_scaled_noise,
+    generate_5d_turbulence_gradient, generate_5d_turbulence_gradient_f64, generate_6d_noise,
+    generate_6d_scaled_noise, generate_6d_turbulence_gradient, generate_6d_turbulence_gradient_f64,
+    NoiseAndGradient, NoiseAndGradientF64,
 };
 
 use super::{Settings, SimplexSettings};
@@ -117,7 +120,12 @@ impl Settings for TurbulenceSettings {
         self
     }
 
-    fn with_frequency_3d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32) -> &mut TurbulenceSettings {
+    fn with_frequency_3d(
+        &mut self,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+    ) -> &mut TurbulenceSettings {
         self.frequency_x = frequency_x;
         self.frequency_y = frequency_y;
         self.frequency_z = frequency_z;
@@ -318,42 +326,24 @@ impl Settings for TurbulenceSettings {
     fn fill_range<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
         let d = self.dim.dimension;
         match d {
-            1 => crate::fill_1d_noise_range::<T>(
-                &NoiseType::Turbulence(self),
-                src_min,
-                src_max,
-                out,
-            ),
-            2 => crate::fill_2d_noise_range::<T>(
-                &NoiseType::Turbulence(self),
-                src_min,
-                src_max,
-                out,
-            ),
-            3 => crate::fill_3d_noise_range::<T>(
-                &NoiseType::Turbulence(self),
-                src_min,
-                src_max,
-                out,
-            ),
-            4 => crate::fill_4d_noise_range::<T>(
-                &NoiseType::Turbulence(self),
-                src_min,
-                src_max,
-                out,
-            ),
-            5 => crate::fill_5d_noise_range::<T>(
-                &NoiseType::Turbulence(self),
-                src_min,
-                src_max,
-                out,
-            ),
-            6 => crate::fill_6d_noise_range::<T>(
-                &NoiseType::Turbulence(self),
-                src_min,
-                src_max,
-                out,
-            ),
+            1 => {
+                crate::fill_1d_noise_range::<T>(&NoiseType::Turbulence(self), src_min, src_max, out)
+            }
+            2 => {
+                crate::fill_2d_noise_range::<T>(&NoiseType::Turbulence(self), src_min, src_max, out)
+            }
+            3 => {
+                crate::fill_3d_noise_range::<T>(&NoiseType::Turbulence(self), src_min, src_max, out)
+            }
+            4 => {
+                crate::fill_4d_noise_range::<T>(&NoiseType::Turbulence(self), src_min, src_max, out)
+            }
+            5 => {
+                crate::fill_5d_noise_range::<T>(&NoiseType::Turbulence(self), src_min, src_max, out)
+            }
+            6 => {
+                crate::fill_6d_noise_range::<T>(&NoiseType::Turbulence(self), src_min, src_max, out)
+            }
             _ => panic!("not implemented"),
         }
     }
