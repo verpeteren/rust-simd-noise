@@ -117,7 +117,10 @@ pub unsafe fn scale_noise_f64<S: Simd>(
 /// Like the f32 path, the *source* range is the offset-independent theoretical
 /// range (widened from f32) so adjacent blocks line up seamlessly (#39/#23);
 /// cellular returns without a closed form fall back to the observed range.
-pub(crate) unsafe fn generate_scaled_noise_f64<S: Simd, F: Fn(&NoiseType) -> (Vec<f64>, f64, f64)>(
+pub(crate) unsafe fn generate_scaled_noise_f64<
+    S: Simd,
+    F: Fn(&NoiseType) -> (Vec<f64>, f64, f64),
+>(
     noise_type: &NoiseType,
     scale_min: f64,
     scale_max: f64,
@@ -155,10 +158,7 @@ pub(crate) unsafe fn fill_scaled_noise<S: Simd, F: Fn(&NoiseType, &mut [f32]) ->
 /// Emplace+scale helper for f64; the target range is passed explicitly. Mirrors
 /// [`generate_scaled_noise_f64`]: scales by the offset-independent theoretical range
 /// (observed fallback for cellular) so emplace matches the Vec path seamlessly.
-pub(crate) unsafe fn fill_scaled_noise_f64<
-    S: Simd,
-    F: Fn(&NoiseType, &mut [f64]) -> (f64, f64),
->(
+pub(crate) unsafe fn fill_scaled_noise_f64<S: Simd, F: Fn(&NoiseType, &mut [f64]) -> (f64, f64)>(
     noise_type: &NoiseType,
     scale_min: f64,
     scale_max: f64,

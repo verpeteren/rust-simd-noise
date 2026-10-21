@@ -2,12 +2,23 @@ pub use crate::noise_dimensions::NoiseDimensions;
 pub use crate::noise_type::NoiseType;
 
 pub trait Settings {
-    fn default(dim: NoiseDimensions) -> Self;
+    fn default(dimension: NoiseDimensions) -> Self;
     fn with_seed(&mut self, seed: i32) -> &mut Self;
     fn with_frequency(&mut self, frequency: f32) -> &mut Self;
     fn with_frequency_2d(&mut self, frequency_x: f32, frequency_y: f32) -> &mut Self;
-    fn with_frequency_3d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32) -> &mut Self;
-    fn with_frequency_4d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32, frequency_w: f32) -> &mut Self;
+    fn with_frequency_3d(
+        &mut self,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+    ) -> &mut Self;
+    fn with_frequency_4d(
+        &mut self,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
+    ) -> &mut Self;
     fn with_frequency_5d(
         &mut self,
         frequency_x: f32,
@@ -106,13 +117,17 @@ pub trait SimplexSettings {
 mod cellular2_settings;
 mod cellular_settings;
 mod fbm_settings;
+mod gabor_settings;
 mod gradient_settings;
 mod ridge_settings;
+pub(crate) mod steerable_perlin_settings;
 mod turbulence_settings;
 
 pub use cellular2_settings::Cellular2Settings;
 pub use cellular_settings::CellularSettings;
 pub use fbm_settings::FbmSettings;
+pub use gabor_settings::GaborSettings;
 pub use gradient_settings::GradientSettings;
 pub use ridge_settings::RidgeSettings;
+pub use steerable_perlin_settings::SteerablePerlinSettings;
 pub use turbulence_settings::TurbulenceSettings;

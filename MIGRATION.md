@@ -139,6 +139,12 @@ touches it. Two differences if you do:
 - **Fill-into-your-own-buffer** ([#5]) — `Settings::fill` / `fill_scaled` /
   `fill_range::<T>` and the free `fill_Nd_noise*` functions write into a slice
   you already own instead of allocating a `Vec`.
+- **Arbitrary-point evaluation** — `simdnoise::point`: value-only
+  `sample_points_*`, `*_with_gradient` for analytic first derivatives, and
+  `*_with_hessian` for finite-difference curvature. Covers 2D/3D/4D (f32) and
+  3D/4D (f64), plus Gabor and complex-phasor fields.
+- **Steerable Perlin** — anisotropic Perlin with a steerable metric
+  (Rice, SIGGRAPH 2025), 2D/3D value and analytic gradient.
 - **5D and 6D** noise (experimental — the 5D/6D output may still change).
 - **Per-axis frequency** — `with_frequency_2d`…`with_frequency_6d` and `frequency_x()`…`frequency_v()`.
 - **More engines & the `scalar` feature** — AVX-512 and NEON (aarch64) engines,
@@ -172,7 +178,5 @@ the old names, so they can skip this section.)
 | `get_gradient_64` / `get_fbm_gradient_64` / `get_ridge_gradient_64` / `get_turbulence_gradient_64` (one dimensionless fn each) | `generate_Nd_gradient_f64` / `generate_Nd_fbm_gradient_f64` / … (now per-dimension, 1–6) |
 | `Settings::generate_with_derivative[_64]` | `Settings::generate_with_gradient[_f64]` |
 | `Settings::get_freq_x` … `get_freq_v` | `frequency_x()` … `frequency_v()` |
-| `Settings::with_freq` / `with_freq_2d` … `with_freq_6d` | `with_frequency` / `with_frequency_2d` … `with_frequency_6d` |
-| `NoiseDimensions` field `dim` | `dimension` |
 | `NoiseDimensions` fields `x/y/z/w`, `offset5/6`, `width/height/depth/time`, `extent5/6` | `offset_x..offset_v`, `extent_x..extent_v` |
 | `simdnoise::noise::{simplex,fbm,cell,…}_{32,64}` kernels | crate-internal; use `simdnoise::intrinsics` |

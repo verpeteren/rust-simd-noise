@@ -12,8 +12,8 @@
 //! `--features scalar` too for cross-engine coverage.
 
 use simdnoise::{
-    generate_2d_noise, generate_2d_noise_f64, generate_3d_noise, generate_3d_noise_f64, Cell2ReturnType, NoiseBuilder,
-    Settings,
+    generate_2d_noise, generate_2d_noise_f64, generate_3d_noise, generate_3d_noise_f64,
+    Cell2ReturnType, NoiseBuilder, Settings,
 };
 
 fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
@@ -131,7 +131,9 @@ fn cellular_2d_value_matches_plain() {
 fn cellular_2d_matches_finite_difference() {
     let (w, h) = (64, 48);
     let mut s = NoiseBuilder::cellular_2d(w, h);
-    s.with_seed(9).with_frequency_2d(0.03, 0.03).with_jitter(0.3);
+    s.with_seed(9)
+        .with_frequency_2d(0.03, 0.03)
+        .with_jitter(0.3);
     let ng = s.generate_with_gradient();
     let (frac, mag) = fd_good_fraction(&ng.values, &ng.gradients, 2, &[w, h]);
     assert!(mag > 1e-3, "2D cellular gradient degenerate (mag {})", mag);
@@ -182,7 +184,9 @@ fn cellular_2d_f64_value_matches_plain() {
 fn cellular_2d_f64_matches_finite_difference() {
     let (w, h) = (64, 48);
     let mut s = NoiseBuilder::cellular_2d(w, h);
-    s.with_seed(9).with_frequency_2d(0.03, 0.03).with_jitter(0.3);
+    s.with_seed(9)
+        .with_frequency_2d(0.03, 0.03)
+        .with_jitter(0.3);
     let ng = s.generate_with_gradient_f64();
     let (frac, mag) = fd_good_fraction_64(&ng.values, &ng.gradients, 2, &[w, h]);
     assert!(
@@ -224,7 +228,9 @@ fn cellular2_2d_value_matches_plain_all_returns() {
     let (w, h) = (64, 48);
     for (idx, &rt) in RETURN_TYPES.iter().enumerate() {
         let mut s = NoiseBuilder::cellular2_2d(w, h);
-        s.with_seed(3).with_frequency_2d(0.03, 0.03).with_return_type(rt);
+        s.with_seed(3)
+            .with_frequency_2d(0.03, 0.03)
+            .with_return_type(rt);
         let ng = s.generate_with_gradient();
         let (plain, _, _) = generate_2d_noise(&s.wrap());
         assert_eq!(ng.stride, 2);

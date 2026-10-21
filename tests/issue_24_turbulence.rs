@@ -15,7 +15,8 @@
 //! Running under `--features scalar` adds cross-engine coverage.
 
 use simdnoise::{
-    generate_1d_noise, generate_2d_noise, generate_3d_noise, NoiseBuilder, Settings, SimplexSettings,
+    generate_1d_noise, generate_2d_noise, generate_3d_noise, NoiseBuilder, Settings,
+    SimplexSettings,
 };
 
 fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {

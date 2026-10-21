@@ -11,10 +11,10 @@
 //! it stabilizes.
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 
-use simdeez::prelude::*;
-use simdeez::scalar::Scalar;
 use crate::noise::simplex_32::{simplex_5d as s5_32, simplex_6d as s6_32};
 use crate::noise::simplex_64::{simplex_5d as s5_64, simplex_6d as s6_64};
+use simdeez::prelude::*;
+use simdeez::scalar::Scalar;
 
 fn g5_32<S: Simd>(p: [f32; 5], seed: i32) -> f32 {
     s5_32::<S>(

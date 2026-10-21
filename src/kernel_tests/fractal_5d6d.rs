@@ -8,9 +8,9 @@
 //! stand in until it stabilizes.
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 
+use crate::noise::{fbm_32, fbm_64, ridge_32, ridge_64, turbulence_32, turbulence_64};
 use simdeez::prelude::*;
 use simdeez::scalar::Scalar;
-use crate::noise::{fbm_32, fbm_64, ridge_32, ridge_64, turbulence_32, turbulence_64};
 
 const LAC: f32 = 0.5;
 const GAIN: f32 = 2.0;

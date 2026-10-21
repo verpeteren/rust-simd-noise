@@ -8,10 +8,10 @@
 //! excluded crate-wide because its `rsqrt` approximation yields NaN).
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 
-use simdeez::prelude::*;
-use simdeez::scalar::Scalar;
 use crate::noise::cell_strategy::{Distance, Distance2, Euclidean};
 use crate::noise::{cell2_32, cell2_64, cell_32, cell_64};
+use simdeez::prelude::*;
+use simdeez::scalar::Scalar;
 
 const JITTER: f32 = 0.25;
 const SEED: i32 = 1337;
