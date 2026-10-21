@@ -212,7 +212,7 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 pub fn fbm_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
     let noise = NoiseBuilder::fbm_2d(width, height)
-        .with_freq(freq)
+        .with_frequency(freq)
         .with_seed(seed)
         .generate_scaled(0.0, 255.0);
     noise.into_iter().map(|v| v as u8).collect()
@@ -223,7 +223,7 @@ pub fn fbm_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
 #[wasm_bindgen]
 pub fn gradient_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
     let noise = NoiseBuilder::gradient_2d(width, height)
-        .with_freq(freq)
+        .with_frequency(freq)
         .with_seed(seed)
         .generate_scaled(0.0, 255.0);
     noise.into_iter().map(|v| v as u8).collect()
@@ -278,7 +278,7 @@ let noise = NoiseBuilder::fbm_2d(100, 100).generate_scaled(0.0, 1.0);
 
 // Get a block of 3d ridge noise, custom settings, 32x32x32 unscaled
 let (noise, min, max) = NoiseBuilder::ridge_3d(32, 32, 32)
-    .with_freq_3d(0.05, 0.04, 0.01)
+    .with_frequency_3d(0.05, 0.04, 0.01)
     .with_octaves(5.0)
     .with_gain(2.0)
     .with_seed(1337)
@@ -292,7 +292,7 @@ Sometimes you may want to use SSE41 even with AVX2 is available.
 
 ```rust
 let noise_setting = NoiseBuilder::ridge_3d(32, 32, 32)
-    .with_freq_3d(0.05, 0.04, 0.01)
+    .with_frequency_3d(0.05, 0.04, 0.01)
     .with_octaves(5.0)
     .with_gain(2.0)
     .with_lacunarity(0.5)
@@ -339,7 +339,7 @@ fn main() {
     let mut buffer = vec![0.0f32; width * height];
     let (min, max) = NoiseBuilder::fbm_2d(width, height)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
+        .with_frequency_2d(0.02, 0.02)
         .fill(&mut buffer);
     println!(
         "1) filled {} values in place; range [{min:.3}, {max:.3}]",
@@ -361,7 +361,7 @@ fn main() {
                 let y_offset = (band * band_h) as f32;
                 NoiseBuilder::fbm_2d_offset(0.0, w, y_offset, band_h)
                     .with_seed(1337)
-                    .with_freq_2d(0.02, 0.02)
+                    .with_frequency_2d(0.02, 0.02)
                     .fill(chunk);
             });
         }
@@ -389,7 +389,7 @@ fn main() {
     let mut heightmap = vec![0u16; width * height];
     NoiseBuilder::fbm_2d(width, height)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
+        .with_frequency_2d(0.02, 0.02)
         .fill_range(-1.0, 1.0, &mut heightmap); // [-1.0, 1.0] -> [0, 65535]
     println!("5) u16 heightmap sample: {}", heightmap[0]);
 

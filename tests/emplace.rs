@@ -117,18 +117,18 @@ fn emplace_chunks_compose() {
     let half = h / 2;
     let (full, _, _) = NoiseBuilder::gradient_2d(w, h)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
+        .with_frequency_2d(0.05, 0.05)
         .generate();
 
     let mut top = vec![0.0f32; w * half];
     let mut bot = vec![0.0f32; w * half];
     NoiseBuilder::gradient_2d_offset(0.0, w, 0.0, half)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
+        .with_frequency_2d(0.05, 0.05)
         .fill(&mut top);
     NoiseBuilder::gradient_2d_offset(0.0, w, half as f32, half)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
+        .with_frequency_2d(0.05, 0.05)
         .fill(&mut bot);
 
     let mut joined = top;
@@ -178,13 +178,13 @@ fn range_into_u16_matches_manual_map() {
     let (lo, hi) = (-1.0f32, 1.0f32);
     let (noise, _, _) = NoiseBuilder::fbm_2d(w, h)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
+        .with_frequency_2d(0.02, 0.02)
         .generate();
     let expect = ref_quantize_u16(&noise, lo, hi);
     let mut out = vec![0u16; w * h];
     NoiseBuilder::fbm_2d(w, h)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
+        .with_frequency_2d(0.02, 0.02)
         .fill_range(lo, hi, &mut out);
     assert_eq!(expect, out);
 }
@@ -197,13 +197,13 @@ fn range_into_u8_saturates_out_of_range() {
     let (lo, hi) = (-0.2f32, 0.2f32);
     let (noise, _, _) = NoiseBuilder::fbm_2d(w, h)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
+        .with_frequency_2d(0.05, 0.05)
         .generate();
     let expect = ref_quantize_u8(&noise, lo, hi);
     let mut out = vec![0u8; w * h];
     NoiseBuilder::fbm_2d(w, h)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
+        .with_frequency_2d(0.05, 0.05)
         .fill_range(lo, hi, &mut out);
     assert_eq!(expect, out);
     assert!(

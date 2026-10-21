@@ -39,7 +39,7 @@ The `NoiseBuilder` entry point is unchanged, but two things around it changed.
 In 3.1.6 the builder methods were inherent on each `*Settings` struct, so they
 worked with no imports. In 4.0 they live on two traits that must be in scope:
 
-- `Settings`: `with_seed`, `with_freq`, `wrap`, `generate`, `generate_scaled`.
+- `Settings`: `with_seed`, `with_frequency`, `wrap`, `generate`, `generate_scaled`.
 - `SimplexSettings`: `with_lacunarity`, `with_gain`, `with_octaves`.
 
 ```rust
@@ -140,7 +140,7 @@ touches it. Two differences if you do:
   `fill_range::<T>` and the free `fill_Nd_noise*` functions write into a slice
   you already own instead of allocating a `Vec`.
 - **5D and 6D** noise (experimental — the 5D/6D output may still change).
-- **Per-axis frequency** — `with_freq_2d`…`with_freq_6d` and `freq_x()`…`freq_v()`.
+- **Per-axis frequency** — `with_frequency_2d`…`with_frequency_6d` and `frequency_x()`…`frequency_v()`.
 - **More engines & the `scalar` feature** — AVX-512 and NEON (aarch64) engines,
   and a `scalar` cargo feature that forces the non-SIMD backend for the whole
   public API.
@@ -171,6 +171,8 @@ the old names, so they can skip this section.)
 | `get_Nd_gradient` / `get_Nd_fbm_gradient` / … | `generate_Nd_gradient` / `generate_Nd_fbm_gradient` / … |
 | `get_gradient_64` / `get_fbm_gradient_64` / `get_ridge_gradient_64` / `get_turbulence_gradient_64` (one dimensionless fn each) | `generate_Nd_gradient_f64` / `generate_Nd_fbm_gradient_f64` / … (now per-dimension, 1–6) |
 | `Settings::generate_with_derivative[_64]` | `Settings::generate_with_gradient[_f64]` |
-| `Settings::get_freq_x` … `get_freq_v` | `freq_x()` … `freq_v()` |
+| `Settings::get_freq_x` … `get_freq_v` | `frequency_x()` … `frequency_v()` |
+| `Settings::with_freq` / `with_freq_2d` … `with_freq_6d` | `with_frequency` / `with_frequency_2d` … `with_frequency_6d` |
+| `NoiseDimensions` field `dim` | `dimension` |
 | `NoiseDimensions` fields `x/y/z/w`, `offset5/6`, `width/height/depth/time`, `extent5/6` | `offset_x..offset_v`, `extent_x..extent_v` |
 | `simdnoise::noise::{simplex,fbm,cell,…}_{32,64}` kernels | crate-internal; use `simdnoise::intrinsics` |

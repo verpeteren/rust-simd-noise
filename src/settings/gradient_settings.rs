@@ -50,18 +50,18 @@ pub struct GradientSettings {
     /// Frequency along the X axis: how quickly the noise varies per sample step.
     /// Higher means finer, busier detail (features packed closer together); lower
     /// means larger, smoother blobs. Think of it as the inverse of feature size.
-    pub freq_x: f32,
-    /// Frequency along the Y axis; see [`freq_x`](Self::freq_x). Setting the axes
+    pub frequency_x: f32,
+    /// Frequency along the Y axis; see [`frequency_x`](Self::frequency_x). Setting the axes
     /// to different values stretches or squashes the pattern in that direction.
-    pub freq_y: f32,
-    /// Frequency along the Z axis; see [`freq_x`](Self::freq_x).
-    pub freq_z: f32,
-    /// Frequency along the 4th (W) axis; see [`freq_x`](Self::freq_x).
-    pub freq_w: f32,
-    /// Frequency along the 5th (U) axis; see [`freq_x`](Self::freq_x).
-    pub freq_u: f32,
-    /// Frequency along the 6th (V) axis; see [`freq_x`](Self::freq_x).
-    pub freq_v: f32,
+    pub frequency_y: f32,
+    /// Frequency along the Z axis; see [`frequency_x`](Self::frequency_x).
+    pub frequency_z: f32,
+    /// Frequency along the 4th (W) axis; see [`frequency_x`](Self::frequency_x).
+    pub frequency_w: f32,
+    /// Frequency along the 5th (U) axis; see [`frequency_x`](Self::frequency_x).
+    pub frequency_u: f32,
+    /// Frequency along the 6th (V) axis; see [`frequency_x`](Self::frequency_x).
+    pub frequency_v: f32,
 }
 
 impl DimensionalBeing for GradientSettings {
@@ -74,12 +74,12 @@ impl Settings for GradientSettings {
     fn default(dim: NoiseDimensions) -> GradientSettings {
         GradientSettings {
             dim,
-            freq_x: 0.02,
-            freq_y: 0.02,
-            freq_z: 0.02,
-            freq_w: 0.02,
-            freq_u: 0.02,
-            freq_v: 0.02,
+            frequency_x: 0.02,
+            frequency_y: 0.02,
+            frequency_z: 0.02,
+            frequency_w: 0.02,
+            frequency_u: 0.02,
+            frequency_v: 0.02,
         }
     }
     fn with_seed(&mut self, seed: i32) -> &mut GradientSettings {
@@ -87,99 +87,99 @@ impl Settings for GradientSettings {
         self
     }
 
-    fn with_freq(&mut self, freq: f32) -> &mut GradientSettings {
-        self.freq_x = freq;
-        self.freq_y = freq;
-        self.freq_z = freq;
-        self.freq_w = freq;
-        self.freq_u = freq;
-        self.freq_v = freq;
+    fn with_frequency(&mut self, frequency: f32) -> &mut GradientSettings {
+        self.frequency_x = frequency;
+        self.frequency_y = frequency;
+        self.frequency_z = frequency;
+        self.frequency_w = frequency;
+        self.frequency_u = frequency;
+        self.frequency_v = frequency;
         self
     }
 
-    fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut GradientSettings {
-        self.freq_x = freq_x;
-        self.freq_y = freq_y;
+    fn with_frequency_2d(&mut self, frequency_x: f32, frequency_y: f32) -> &mut GradientSettings {
+        self.frequency_x = frequency_x;
+        self.frequency_y = frequency_y;
         self
     }
 
-    fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut GradientSettings {
-        self.freq_x = freq_x;
-        self.freq_y = freq_y;
-        self.freq_z = freq_z;
+    fn with_frequency_3d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32) -> &mut GradientSettings {
+        self.frequency_x = frequency_x;
+        self.frequency_y = frequency_y;
+        self.frequency_z = frequency_z;
         self
     }
 
-    fn with_freq_4d(
+    fn with_frequency_4d(
         &mut self,
-        freq_x: f32,
-        freq_y: f32,
-        freq_z: f32,
-        freq_w: f32,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
     ) -> &mut GradientSettings {
-        self.freq_x = freq_x;
-        self.freq_y = freq_y;
-        self.freq_z = freq_z;
-        self.freq_w = freq_w;
+        self.frequency_x = frequency_x;
+        self.frequency_y = frequency_y;
+        self.frequency_z = frequency_z;
+        self.frequency_w = frequency_w;
         self
     }
 
-    fn with_freq_5d(
+    fn with_frequency_5d(
         &mut self,
-        freq_x: f32,
-        freq_y: f32,
-        freq_z: f32,
-        freq_w: f32,
-        freq_u: f32,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
+        frequency_u: f32,
     ) -> &mut GradientSettings {
-        self.freq_x = freq_x;
-        self.freq_y = freq_y;
-        self.freq_z = freq_z;
-        self.freq_w = freq_w;
-        self.freq_u = freq_u;
+        self.frequency_x = frequency_x;
+        self.frequency_y = frequency_y;
+        self.frequency_z = frequency_z;
+        self.frequency_w = frequency_w;
+        self.frequency_u = frequency_u;
         self
     }
 
-    fn with_freq_6d(
+    fn with_frequency_6d(
         &mut self,
-        freq_x: f32,
-        freq_y: f32,
-        freq_z: f32,
-        freq_w: f32,
-        freq_u: f32,
-        freq_v: f32,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
+        frequency_u: f32,
+        frequency_v: f32,
     ) -> &mut GradientSettings {
-        self.freq_x = freq_x;
-        self.freq_y = freq_y;
-        self.freq_z = freq_z;
-        self.freq_w = freq_w;
-        self.freq_u = freq_u;
-        self.freq_v = freq_v;
+        self.frequency_x = frequency_x;
+        self.frequency_y = frequency_y;
+        self.frequency_z = frequency_z;
+        self.frequency_w = frequency_w;
+        self.frequency_u = frequency_u;
+        self.frequency_v = frequency_v;
         self
     }
 
-    fn freq_x(&self) -> f32 {
-        self.freq_x
+    fn frequency_x(&self) -> f32 {
+        self.frequency_x
     }
 
-    fn freq_y(&self) -> f32 {
-        self.freq_y
+    fn frequency_y(&self) -> f32 {
+        self.frequency_y
     }
 
-    fn freq_z(&self) -> f32 {
-        self.freq_z
+    fn frequency_z(&self) -> f32 {
+        self.frequency_z
     }
 
-    fn freq_w(&self) -> f32 {
-        self.freq_w
+    fn frequency_w(&self) -> f32 {
+        self.frequency_w
     }
 
-    fn freq_u(&self) -> f32 {
-        self.freq_u
+    fn frequency_u(&self) -> f32 {
+        self.frequency_u
     }
 
-    fn freq_v(&self) -> f32 {
-        self.freq_v
+    fn frequency_v(&self) -> f32 {
+        self.frequency_v
     }
 
     fn wrap(self) -> NoiseType {
@@ -192,7 +192,7 @@ impl Settings for GradientSettings {
     }
 
     fn generate(self) -> (Vec<f32>, f32, f32) {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => generate_1d_noise(&NoiseType::Gradient(self)),
             2 => generate_2d_noise(&NoiseType::Gradient(self)),
@@ -205,7 +205,7 @@ impl Settings for GradientSettings {
     }
 
     fn generate_scaled(self, min: f32, max: f32) -> Vec<f32> {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         let mut new_self = self;
         new_self.dim.min = min;
         new_self.dim.max = max;
@@ -221,7 +221,7 @@ impl Settings for GradientSettings {
     }
 
     fn generate_f64(self) -> (Vec<f64>, f64, f64) {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => crate::generate_1d_noise_f64(&NoiseType::Gradient(self)),
             2 => crate::generate_2d_noise_f64(&NoiseType::Gradient(self)),
@@ -234,7 +234,7 @@ impl Settings for GradientSettings {
     }
 
     fn generate_scaled_f64(self, min: f64, max: f64) -> Vec<f64> {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => crate::generate_1d_scaled_noise_f64(&NoiseType::Gradient(self), min, max),
             2 => crate::generate_2d_scaled_noise_f64(&NoiseType::Gradient(self), min, max),
@@ -247,7 +247,7 @@ impl Settings for GradientSettings {
     }
 
     fn fill(self, out: &mut [f32]) -> (f32, f32) {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => crate::fill_1d_noise(&NoiseType::Gradient(self), out),
             2 => crate::fill_2d_noise(&NoiseType::Gradient(self), out),
@@ -260,7 +260,7 @@ impl Settings for GradientSettings {
     }
 
     fn fill_scaled(self, min: f32, max: f32, out: &mut [f32]) {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         let mut new_self = self;
         new_self.dim.min = min;
         new_self.dim.max = max;
@@ -276,7 +276,7 @@ impl Settings for GradientSettings {
     }
 
     fn fill_f64(self, out: &mut [f64]) -> (f64, f64) {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => crate::fill_1d_noise_f64(&NoiseType::Gradient(self), out),
             2 => crate::fill_2d_noise_f64(&NoiseType::Gradient(self), out),
@@ -289,7 +289,7 @@ impl Settings for GradientSettings {
     }
 
     fn fill_scaled_f64(self, min: f64, max: f64, out: &mut [f64]) {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => crate::fill_1d_scaled_noise_f64(&NoiseType::Gradient(self), min, max, out),
             2 => crate::fill_2d_scaled_noise_f64(&NoiseType::Gradient(self), min, max, out),
@@ -302,7 +302,7 @@ impl Settings for GradientSettings {
     }
 
     fn fill_range<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]) {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => crate::fill_1d_noise_range::<T>(
                 &NoiseType::Gradient(self),
@@ -543,7 +543,7 @@ impl GradientSettings {
     /// # Panics
     /// Panics if the configured dimensionality is not in 1..=6.
     pub fn generate_with_gradient(self) -> NoiseAndGradient {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => generate_1d_gradient(&self),
             2 => generate_2d_gradient(&self),
@@ -561,7 +561,7 @@ impl GradientSettings {
     /// # Panics
     /// Panics if the configured dimensionality is not in 1..=6.
     pub fn generate_with_gradient_f64(self) -> NoiseAndGradientF64 {
-        let d = self.dim.dim;
+        let d = self.dim.dimension;
         match d {
             1 => generate_1d_gradient_f64(&self),
             2 => generate_2d_gradient_f64(&self),

@@ -3,7 +3,7 @@
 ///
 /// Noise is defined over a continuous, effectively infinite space; generating a
 /// "block" means **sampling it on a regular grid**. This struct says how many
-/// dimensions that grid has (`dim`), how many samples to take along each axis
+/// dimensions that grid has (`dimension`), how many samples to take along each axis
 /// (the *extents*: `extent_x`, `extent_y`, …), and where the grid starts in
 /// noise space (the per-axis *offsets*: `offset_x`, `offset_y`, …). Shifting an
 /// offset slides the sampling window across the field — i.e. it pans the
@@ -18,8 +18,8 @@
 #[derive(Copy, Clone)]
 pub struct NoiseDimensions {
     /// Number of dimensions of the noise, 1–6. Determines which axes below are
-    /// used (e.g. `dim = 2` uses `offset_x`/`offset_y` and `extent_x`/`extent_y`).
-    pub dim: usize,
+    /// used (e.g. `dimension = 2` uses `offset_x`/`offset_y` and `extent_x`/`extent_y`).
+    pub dimension: usize,
     /// Coordinate offset (start position in noise space) of the 1st axis (X).
     /// Adds to every sample's X coordinate, so changing it pans the pattern
     /// horizontally. Measured in grid steps: an offset of `1.0` shifts the
@@ -69,7 +69,7 @@ impl NoiseDimensions {
             panic!("dimension invalid: must be between 1 and 6");
         }
         NoiseDimensions {
-            dim: d,
+            dimension: d,
             offset_x: 0.0,
             offset_y: 0.0,
             offset_z: 0.0,

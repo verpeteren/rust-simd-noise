@@ -38,7 +38,7 @@ fn fbm_1d_values_match_plain_generator() {
     // Fractional octaves + gain != 1 exercise the 1D gain path (PR #77) and the
     // weighted final octave (#14).
     s.with_seed(7)
-        .with_freq(0.02)
+        .with_frequency(0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
@@ -61,7 +61,7 @@ fn fbm_1d_matches_finite_difference() {
     let width = 512;
     let mut s = NoiseBuilder::fbm_1d(width);
     s.with_seed(7)
-        .with_freq(0.02)
+        .with_frequency(0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
@@ -92,7 +92,7 @@ fn fbm_2d_values_match_plain_generator() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::fbm_2d(w, h);
     s.with_seed(3)
-        .with_freq_2d(0.02, 0.025)
+        .with_frequency_2d(0.02, 0.025)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
@@ -115,7 +115,7 @@ fn fbm_2d_matches_finite_difference() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::fbm_2d(w, h);
     s.with_seed(3)
-        .with_freq_2d(0.02, 0.025)
+        .with_frequency_2d(0.02, 0.025)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
@@ -149,7 +149,7 @@ fn fbm_3d_values_match_plain_generator() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::fbm_3d(w, h, d);
     s.with_seed(5)
-        .with_freq_3d(0.02, 0.025, 0.03)
+        .with_frequency_3d(0.02, 0.025, 0.03)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -172,7 +172,7 @@ fn fbm_3d_matches_finite_difference() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::fbm_3d(w, h, d);
     s.with_seed(5)
-        .with_freq_3d(0.02, 0.025, 0.03)
+        .with_frequency_3d(0.02, 0.025, 0.03)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -215,7 +215,7 @@ fn fbm_1d_high_lacunarity_values_match_plain_generator() {
     let width = 256;
     let mut s = NoiseBuilder::fbm_1d(width);
     s.with_seed(11)
-        .with_freq(0.01)
+        .with_frequency(0.01)
         .with_lacunarity(2.0)
         .with_gain(2.0)
         .with_octaves(4.0);

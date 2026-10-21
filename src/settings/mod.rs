@@ -4,34 +4,34 @@ pub use crate::noise_type::NoiseType;
 pub trait Settings {
     fn default(dim: NoiseDimensions) -> Self;
     fn with_seed(&mut self, seed: i32) -> &mut Self;
-    fn with_freq(&mut self, freq: f32) -> &mut Self;
-    fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut Self;
-    fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut Self;
-    fn with_freq_4d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32, freq_w: f32) -> &mut Self;
-    fn with_freq_5d(
+    fn with_frequency(&mut self, frequency: f32) -> &mut Self;
+    fn with_frequency_2d(&mut self, frequency_x: f32, frequency_y: f32) -> &mut Self;
+    fn with_frequency_3d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32) -> &mut Self;
+    fn with_frequency_4d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32, frequency_w: f32) -> &mut Self;
+    fn with_frequency_5d(
         &mut self,
-        freq_x: f32,
-        freq_y: f32,
-        freq_z: f32,
-        freq_w: f32,
-        freq_u: f32,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
+        frequency_u: f32,
     ) -> &mut Self;
-    fn with_freq_6d(
+    fn with_frequency_6d(
         &mut self,
-        freq_x: f32,
-        freq_y: f32,
-        freq_z: f32,
-        freq_w: f32,
-        freq_u: f32,
-        freq_v: f32,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
+        frequency_u: f32,
+        frequency_v: f32,
     ) -> &mut Self;
 
-    fn freq_x(&self) -> f32;
-    fn freq_y(&self) -> f32;
-    fn freq_z(&self) -> f32;
-    fn freq_w(&self) -> f32;
-    fn freq_u(&self) -> f32;
-    fn freq_v(&self) -> f32;
+    fn frequency_x(&self) -> f32;
+    fn frequency_y(&self) -> f32;
+    fn frequency_z(&self) -> f32;
+    fn frequency_w(&self) -> f32;
+    fn frequency_u(&self) -> f32;
+    fn frequency_v(&self) -> f32;
 
     /// If you want to call noise functions by hand, call wrap on the settings
     /// to get back a NoiseType to call the noise functions with

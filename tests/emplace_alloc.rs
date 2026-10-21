@@ -35,7 +35,7 @@ fn typed_emplace_does_not_allocate_output_sized_scratch() {
     let before = ALLOCATED.load(Ordering::Relaxed);
     NoiseBuilder::fbm_2d(w, h)
         .with_seed(1)
-        .with_freq_2d(0.02, 0.02)
+        .with_frequency_2d(0.02, 0.02)
         .fill_range(-1.0, 1.0, &mut out);
     let delta = ALLOCATED.load(Ordering::Relaxed) - before;
 

@@ -84,7 +84,7 @@ fn fd_stats(values: &[f32], grads: &[f32], stride: usize, extents: &[usize]) -> 
 fn gradient_4d() {
     let (a, b, c, e) = (12, 10, 8, 6);
     let mut s = NoiseBuilder::gradient_4d(a, b, c, e);
-    s.with_seed(7).with_freq_4d(0.01, 0.012, 0.014, 0.016);
+    s.with_seed(7).with_frequency_4d(0.01, 0.012, 0.014, 0.016);
     let ng = s.generate_with_gradient();
     let (plain, _, _) = generate_4d_noise(&s.wrap());
     assert_eq!(ng.stride, 4);
@@ -103,7 +103,7 @@ fn gradient_4d() {
 fn gradient_5d() {
     let ext = [8usize, 6, 5, 4, 4];
     let mut s = NoiseBuilder::gradient_5d(ext[0], ext[1], ext[2], ext[3], ext[4]);
-    s.with_seed(7).with_freq(0.01);
+    s.with_seed(7).with_frequency(0.01);
     let ng = s.generate_with_gradient();
     let (plain, _, _) = generate_5d_noise(&s.wrap());
     assert_eq!(ng.stride, 5);
@@ -121,7 +121,7 @@ fn gradient_6d() {
     let ext = [6usize, 5, 4, 4, 3, 3];
     let mut s = NoiseBuilder::gradient_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(7)
-        .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02);
+        .with_frequency_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02);
     let ng = s.generate_with_gradient();
     let (plain, _, _) = generate_6d_noise(&s.wrap());
     assert_eq!(ng.stride, 6);
@@ -141,7 +141,7 @@ fn fbm_4d() {
     let (a, b, c, e) = (12, 10, 8, 6);
     let mut s = NoiseBuilder::fbm_4d(a, b, c, e);
     s.with_seed(3)
-        .with_freq_4d(0.01, 0.012, 0.014, 0.016)
+        .with_frequency_4d(0.01, 0.012, 0.014, 0.016)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -162,7 +162,7 @@ fn fbm_5d() {
     let ext = [8usize, 6, 5, 4, 4];
     let mut s = NoiseBuilder::fbm_5d(ext[0], ext[1], ext[2], ext[3], ext[4]);
     s.with_seed(3)
-        .with_freq_5d(0.01, 0.012, 0.014, 0.016, 0.018)
+        .with_frequency_5d(0.01, 0.012, 0.014, 0.016, 0.018)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -182,7 +182,7 @@ fn fbm_6d() {
     let ext = [6usize, 5, 4, 4, 3, 3];
     let mut s = NoiseBuilder::fbm_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(3)
-        .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
+        .with_frequency_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -210,7 +210,7 @@ fn ridge_4d() {
     let (a, b, c, e) = (12, 10, 8, 6);
     let mut s = NoiseBuilder::ridge_4d(a, b, c, e);
     s.with_seed(5)
-        .with_freq_4d(0.01, 0.012, 0.014, 0.016)
+        .with_frequency_4d(0.01, 0.012, 0.014, 0.016)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -230,7 +230,7 @@ fn ridge_6d() {
     let ext = [6usize, 5, 4, 4, 3, 3];
     let mut s = NoiseBuilder::ridge_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(5)
-        .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
+        .with_frequency_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -251,7 +251,7 @@ fn turbulence_4d() {
     let (a, b, c, e) = (12, 10, 8, 6);
     let mut s = NoiseBuilder::turbulence_4d(a, b, c, e);
     s.with_seed(5)
-        .with_freq_4d(0.01, 0.012, 0.014, 0.016)
+        .with_frequency_4d(0.01, 0.012, 0.014, 0.016)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -271,7 +271,7 @@ fn turbulence_5d() {
     let ext = [8usize, 6, 5, 4, 4];
     let mut s = NoiseBuilder::turbulence_5d(ext[0], ext[1], ext[2], ext[3], ext[4]);
     s.with_seed(5)
-        .with_freq_5d(0.01, 0.012, 0.014, 0.016, 0.018)
+        .with_frequency_5d(0.01, 0.012, 0.014, 0.016, 0.018)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);

@@ -160,17 +160,17 @@ fn scaled_output_stays_in_range_at_fractional_octaves() {
     let eps = 1.0f32;
     let fbm = NoiseBuilder::fbm_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .generate_scaled(0.0, 255.0);
     let ridge = NoiseBuilder::ridge_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .generate_scaled(0.0, 255.0);
     let turb = NoiseBuilder::turbulence_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .generate_scaled(0.0, 255.0);
     for (label, vals) in [("fbm", fbm), ("ridge", ridge), ("turbulence", turb)] {
@@ -208,7 +208,7 @@ fn f32_and_f64_fractional_agree() {
 fn fractional_matches_across_engines() {
     let nt = NoiseBuilder::fbm_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .wrap();
     let (runtime, _, _) = crate::generate_2d_noise(&nt);

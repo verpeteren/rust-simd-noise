@@ -73,7 +73,7 @@ unsafe fn fill_1d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     result: &mut [f64],
 ) -> (f64, f64) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf64::set1(settings.freq_x() as f64);
+    let frequency_x = S::Vf64::set1(settings.frequency_x() as f64);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     assert_eq!(
@@ -99,7 +99,7 @@ unsafe fn fill_1d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     x_arr.set_len(vector_width);
     let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
     for _ in 0..extent_x / vector_width {
-        let f = settings.sample_1d(x * freq_x);
+        let f = settings.sample_1d(x * frequency_x);
         max_s = max_s.max(f);
         min_s = min_s.min(f);
         f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -107,7 +107,7 @@ unsafe fn fill_1d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
         x += S::Vf64::set1(vector_width as f64);
     }
     if remainder != 0 {
-        let f = settings.sample_1d(x * freq_x);
+        let f = settings.sample_1d(x * frequency_x);
         for j in 0..remainder {
             let n = f[j];
             result_ptr.add(i).write(n);
@@ -148,8 +148,8 @@ unsafe fn fill_2d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     result: &mut [f64],
 ) -> (f64, f64) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf64::set1(settings.freq_x() as f64);
-    let freq_y = S::Vf64::set1(settings.freq_y() as f64);
+    let frequency_x = S::Vf64::set1(settings.frequency_x() as f64);
+    let frequency_y = S::Vf64::set1(settings.frequency_y() as f64);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -179,7 +179,7 @@ unsafe fn fill_2d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     for _ in 0..extent_y {
         let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
         for _ in 0..extent_x / vector_width {
-            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            let f = settings.sample_2d(x * frequency_x, y * frequency_y);
             max_s = max_s.max(f);
             min_s = min_s.min(f);
             f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -187,7 +187,7 @@ unsafe fn fill_2d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
             x += S::Vf64::set1(vector_width as f64);
         }
         if remainder != 0 {
-            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            let f = settings.sample_2d(x * frequency_x, y * frequency_y);
             for j in 0..remainder {
                 let n = f[j];
                 result_ptr.add(i).write(n);
@@ -230,9 +230,9 @@ unsafe fn fill_3d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     result: &mut [f64],
 ) -> (f64, f64) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf64::set1(settings.freq_x() as f64);
-    let freq_y = S::Vf64::set1(settings.freq_y() as f64);
-    let freq_z = S::Vf64::set1(settings.freq_z() as f64);
+    let frequency_x = S::Vf64::set1(settings.frequency_x() as f64);
+    let frequency_y = S::Vf64::set1(settings.frequency_y() as f64);
+    let frequency_z = S::Vf64::set1(settings.frequency_z() as f64);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -267,7 +267,7 @@ unsafe fn fill_3d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
         for _ in 0..extent_y {
             let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
             for _ in 0..extent_x / vector_width {
-                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                let f = settings.sample_3d(x * frequency_x, y * frequency_y, z * frequency_z);
                 max_s = max_s.max(f);
                 min_s = min_s.min(f);
                 f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -275,7 +275,7 @@ unsafe fn fill_3d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                 x += S::Vf64::set1(vector_width as f64);
             }
             if remainder != 0 {
-                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                let f = settings.sample_3d(x * frequency_x, y * frequency_y, z * frequency_z);
                 for j in 0..remainder {
                     let n = f[j];
                     result_ptr.add(i).write(n);
@@ -320,10 +320,10 @@ unsafe fn fill_4d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     result: &mut [f64],
 ) -> (f64, f64) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf64::set1(settings.freq_x() as f64);
-    let freq_y = S::Vf64::set1(settings.freq_y() as f64);
-    let freq_z = S::Vf64::set1(settings.freq_z() as f64);
-    let freq_w = S::Vf64::set1(settings.freq_w() as f64);
+    let frequency_x = S::Vf64::set1(settings.frequency_x() as f64);
+    let frequency_y = S::Vf64::set1(settings.frequency_y() as f64);
+    let frequency_z = S::Vf64::set1(settings.frequency_z() as f64);
+    let frequency_w = S::Vf64::set1(settings.frequency_w() as f64);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -361,7 +361,7 @@ unsafe fn fill_4d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
             for _ in 0..extent_y {
                 let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
                 for _ in 0..extent_x / vector_width {
-                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    let f = settings.sample_4d(x * frequency_x, y * frequency_y, z * frequency_z, w * frequency_w);
                     max_s = max_s.max(f);
                     min_s = min_s.min(f);
                     f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -369,7 +369,7 @@ unsafe fn fill_4d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                     x += S::Vf64::set1(vector_width as f64);
                 }
                 if remainder != 0 {
-                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    let f = settings.sample_4d(x * frequency_x, y * frequency_y, z * frequency_z, w * frequency_w);
                     for j in 0..remainder {
                         let n = f[j];
                         result_ptr.add(i).write(n);
@@ -417,11 +417,11 @@ unsafe fn fill_5d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     result: &mut [f64],
 ) -> (f64, f64) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf64::set1(settings.freq_x() as f64);
-    let freq_y = S::Vf64::set1(settings.freq_y() as f64);
-    let freq_z = S::Vf64::set1(settings.freq_z() as f64);
-    let freq_w = S::Vf64::set1(settings.freq_w() as f64);
-    let freq_u = S::Vf64::set1(settings.freq_u() as f64);
+    let frequency_x = S::Vf64::set1(settings.frequency_x() as f64);
+    let frequency_y = S::Vf64::set1(settings.frequency_y() as f64);
+    let frequency_z = S::Vf64::set1(settings.frequency_z() as f64);
+    let frequency_w = S::Vf64::set1(settings.frequency_w() as f64);
+    let frequency_u = S::Vf64::set1(settings.frequency_u() as f64);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -464,11 +464,11 @@ unsafe fn fill_5d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                     let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
                     for _ in 0..extent_x / vector_width {
                         let f = settings.sample_5d(
-                            x * freq_x,
-                            y * freq_y,
-                            z * freq_z,
-                            w * freq_w,
-                            u * freq_u,
+                            x * frequency_x,
+                            y * frequency_y,
+                            z * frequency_z,
+                            w * frequency_w,
+                            u * frequency_u,
                         );
                         max_s = max_s.max(f);
                         min_s = min_s.min(f);
@@ -478,11 +478,11 @@ unsafe fn fill_5d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                     }
                     if remainder != 0 {
                         let f = settings.sample_5d(
-                            x * freq_x,
-                            y * freq_y,
-                            z * freq_z,
-                            w * freq_w,
-                            u * freq_u,
+                            x * frequency_x,
+                            y * frequency_y,
+                            z * frequency_z,
+                            w * frequency_w,
+                            u * frequency_u,
                         );
                         for j in 0..remainder {
                             let n = f[j];
@@ -532,12 +532,12 @@ unsafe fn fill_6d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
     result: &mut [f64],
 ) -> (f64, f64) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf64::set1(settings.freq_x() as f64);
-    let freq_y = S::Vf64::set1(settings.freq_y() as f64);
-    let freq_z = S::Vf64::set1(settings.freq_z() as f64);
-    let freq_w = S::Vf64::set1(settings.freq_w() as f64);
-    let freq_u = S::Vf64::set1(settings.freq_u() as f64);
-    let freq_v = S::Vf64::set1(settings.freq_v() as f64);
+    let frequency_x = S::Vf64::set1(settings.frequency_x() as f64);
+    let frequency_y = S::Vf64::set1(settings.frequency_y() as f64);
+    let frequency_z = S::Vf64::set1(settings.frequency_z() as f64);
+    let frequency_w = S::Vf64::set1(settings.frequency_w() as f64);
+    let frequency_u = S::Vf64::set1(settings.frequency_u() as f64);
+    let frequency_v = S::Vf64::set1(settings.frequency_v() as f64);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -584,12 +584,12 @@ unsafe fn fill_6d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                         let mut x = S::Vf64::load_from_ptr_unaligned(&x_arr[0]);
                         for _ in 0..extent_x / vector_width {
                             let f = settings.sample_6d(
-                                x * freq_x,
-                                y * freq_y,
-                                z * freq_z,
-                                w * freq_w,
-                                u * freq_u,
-                                v * freq_v,
+                                x * frequency_x,
+                                y * frequency_y,
+                                z * frequency_z,
+                                w * frequency_w,
+                                u * frequency_u,
+                                v * frequency_v,
                             );
                             max_s = max_s.max(f);
                             min_s = min_s.min(f);
@@ -599,12 +599,12 @@ unsafe fn fill_6d_noise_helper_f64<S: Simd, Settings: Sample64<S>>(
                         }
                         if remainder != 0 {
                             let f = settings.sample_6d(
-                                x * freq_x,
-                                y * freq_y,
-                                z * freq_z,
-                                w * freq_w,
-                                u * freq_u,
-                                v * freq_v,
+                                x * frequency_x,
+                                y * frequency_y,
+                                z * frequency_z,
+                                w * frequency_w,
+                                u * frequency_u,
+                                v * frequency_v,
                             );
                             for j in 0..remainder {
                                 let n = f[j];
@@ -660,8 +660,8 @@ pub unsafe fn generate_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
     settings: &T,
 ) -> NoiseAndGradientF64 {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
+    let frequency_x = settings.frequency_x() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
 
@@ -686,7 +686,7 @@ pub unsafe fn generate_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
         for j in 0..count {
             let v = f[j];
             values[i] = v;
-            gradients[i] = d[j] * freq_x;
+            gradients[i] = d[j] * frequency_x;
             if v < min {
                 min = v;
             }
@@ -711,10 +711,10 @@ pub unsafe fn generate_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
     settings: &T,
 ) -> NoiseAndGradientF64 {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -745,8 +745,8 @@ pub unsafe fn generate_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
             for j in 0..count {
                 let v = f[j];
                 values[i] = v;
-                gradients[i * 2] = d[0][j] * freq_x;
-                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                gradients[i * 2] = d[0][j] * frequency_x;
+                gradients[i * 2 + 1] = d[1][j] * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -774,12 +774,12 @@ pub unsafe fn generate_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
     settings: &T,
 ) -> NoiseAndGradientF64 {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_z = settings.freq_z() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
-    let freq_z_s = S::Vf64::set1(freq_z);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let frequency_z = settings.frequency_z() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
+    let freq_z_s = S::Vf64::set1(frequency_z);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -814,9 +814,9 @@ pub unsafe fn generate_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
                 for j in 0..count {
                     let v = f[j];
                     values[i] = v;
-                    gradients[i * 3] = d[0][j] * freq_x;
-                    gradients[i * 3 + 1] = d[1][j] * freq_y;
-                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    gradients[i * 3] = d[0][j] * frequency_x;
+                    gradients[i * 3 + 1] = d[1][j] * frequency_y;
+                    gradients[i * 3 + 2] = d[2][j] * frequency_z;
                     if v < min {
                         min = v;
                     }
@@ -846,14 +846,14 @@ pub unsafe fn generate_4d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
     settings: &T,
 ) -> NoiseAndGradientF64 {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_z = settings.freq_z() as f64;
-    let freq_w = settings.freq_w() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
-    let freq_z_s = S::Vf64::set1(freq_z);
-    let freq_w_s = S::Vf64::set1(freq_w);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let frequency_z = settings.frequency_z() as f64;
+    let frequency_w = settings.frequency_w() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
+    let freq_z_s = S::Vf64::set1(frequency_z);
+    let freq_w_s = S::Vf64::set1(frequency_w);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -897,10 +897,10 @@ pub unsafe fn generate_4d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
                     for j in 0..count {
                         let v = f[j];
                         values[i] = v;
-                        gradients[i * 4] = d[0][j] * freq_x;
-                        gradients[i * 4 + 1] = d[1][j] * freq_y;
-                        gradients[i * 4 + 2] = d[2][j] * freq_z;
-                        gradients[i * 4 + 3] = d[3][j] * freq_w;
+                        gradients[i * 4] = d[0][j] * frequency_x;
+                        gradients[i * 4 + 1] = d[1][j] * frequency_y;
+                        gradients[i * 4 + 2] = d[2][j] * frequency_z;
+                        gradients[i * 4 + 3] = d[3][j] * frequency_w;
                         if v < min {
                             min = v;
                         }
@@ -932,16 +932,16 @@ pub unsafe fn generate_5d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
     settings: &T,
 ) -> NoiseAndGradientF64 {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_z = settings.freq_z() as f64;
-    let freq_w = settings.freq_w() as f64;
-    let freq_u = settings.freq_u() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
-    let freq_z_s = S::Vf64::set1(freq_z);
-    let freq_w_s = S::Vf64::set1(freq_w);
-    let freq_u_s = S::Vf64::set1(freq_u);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let frequency_z = settings.frequency_z() as f64;
+    let frequency_w = settings.frequency_w() as f64;
+    let frequency_u = settings.frequency_u() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
+    let freq_z_s = S::Vf64::set1(frequency_z);
+    let freq_w_s = S::Vf64::set1(frequency_w);
+    let freq_u_s = S::Vf64::set1(frequency_u);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -990,11 +990,11 @@ pub unsafe fn generate_5d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
                         for j in 0..count {
                             let val = f[j];
                             values[i] = val;
-                            gradients[i * 5] = d[0][j] * freq_x;
-                            gradients[i * 5 + 1] = d[1][j] * freq_y;
-                            gradients[i * 5 + 2] = d[2][j] * freq_z;
-                            gradients[i * 5 + 3] = d[3][j] * freq_w;
-                            gradients[i * 5 + 4] = d[4][j] * freq_u;
+                            gradients[i * 5] = d[0][j] * frequency_x;
+                            gradients[i * 5 + 1] = d[1][j] * frequency_y;
+                            gradients[i * 5 + 2] = d[2][j] * frequency_z;
+                            gradients[i * 5 + 3] = d[3][j] * frequency_w;
+                            gradients[i * 5 + 4] = d[4][j] * frequency_u;
                             if val < min {
                                 min = val;
                             }
@@ -1028,18 +1028,18 @@ pub unsafe fn generate_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
     settings: &T,
 ) -> NoiseAndGradientF64 {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_z = settings.freq_z() as f64;
-    let freq_w = settings.freq_w() as f64;
-    let freq_u = settings.freq_u() as f64;
-    let freq_v = settings.freq_v() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
-    let freq_z_s = S::Vf64::set1(freq_z);
-    let freq_w_s = S::Vf64::set1(freq_w);
-    let freq_u_s = S::Vf64::set1(freq_u);
-    let freq_v_s = S::Vf64::set1(freq_v);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let frequency_z = settings.frequency_z() as f64;
+    let frequency_w = settings.frequency_w() as f64;
+    let frequency_u = settings.frequency_u() as f64;
+    let frequency_v = settings.frequency_v() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
+    let freq_z_s = S::Vf64::set1(frequency_z);
+    let freq_w_s = S::Vf64::set1(frequency_w);
+    let freq_u_s = S::Vf64::set1(frequency_u);
+    let freq_v_s = S::Vf64::set1(frequency_v);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -1093,12 +1093,12 @@ pub unsafe fn generate_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv64<S>>(
                             for j in 0..count {
                                 let val = f[j];
                                 values[i] = val;
-                                gradients[i * 6] = d[0][j] * freq_x;
-                                gradients[i * 6 + 1] = d[1][j] * freq_y;
-                                gradients[i * 6 + 2] = d[2][j] * freq_z;
-                                gradients[i * 6 + 3] = d[3][j] * freq_w;
-                                gradients[i * 6 + 4] = d[4][j] * freq_u;
-                                gradients[i * 6 + 5] = d[5][j] * freq_v;
+                                gradients[i * 6] = d[0][j] * frequency_x;
+                                gradients[i * 6 + 1] = d[1][j] * frequency_y;
+                                gradients[i * 6 + 2] = d[2][j] * frequency_z;
+                                gradients[i * 6 + 3] = d[3][j] * frequency_w;
+                                gradients[i * 6 + 4] = d[4][j] * frequency_u;
+                                gradients[i * 6 + 5] = d[5][j] * frequency_v;
                                 if val < min {
                                     min = val;
                                 }
@@ -1136,10 +1136,10 @@ pub unsafe fn generate_2d_cellular_gradient<S: Simd>(settings: &CellularSettings
     let dim = settings.dimensions();
     let seed = dim.seed as i64;
     let jitter = S::Vf64::set1(settings.jitter as f64);
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -1170,8 +1170,8 @@ pub unsafe fn generate_2d_cellular_gradient<S: Simd>(settings: &CellularSettings
             for j in 0..count {
                 let v = f[j];
                 values[i] = v;
-                gradients[i * 2] = d[0][j] * freq_x;
-                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                gradients[i * 2] = d[0][j] * frequency_x;
+                gradients[i * 2 + 1] = d[1][j] * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -1201,12 +1201,12 @@ pub unsafe fn generate_3d_cellular_gradient<S: Simd>(settings: &CellularSettings
     let dim = settings.dimensions();
     let seed = dim.seed as i64;
     let jitter = S::Vf64::set1(settings.jitter as f64);
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_z = settings.freq_z() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
-    let freq_z_s = S::Vf64::set1(freq_z);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let frequency_z = settings.frequency_z() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
+    let freq_z_s = S::Vf64::set1(frequency_z);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -1242,9 +1242,9 @@ pub unsafe fn generate_3d_cellular_gradient<S: Simd>(settings: &CellularSettings
                 for j in 0..count {
                     let v = f[j];
                     values[i] = v;
-                    gradients[i * 3] = d[0][j] * freq_x;
-                    gradients[i * 3 + 1] = d[1][j] * freq_y;
-                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    gradients[i * 3] = d[0][j] * frequency_x;
+                    gradients[i * 3 + 1] = d[1][j] * frequency_y;
+                    gradients[i * 3 + 2] = d[2][j] * frequency_z;
                     if v < min {
                         min = v;
                     }
@@ -1306,10 +1306,10 @@ pub unsafe fn generate_2d_cellular2_gradient<S: Simd>(
     let ret = settings.return_type;
     let i0 = settings.index0;
     let i1 = settings.index1;
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -1357,8 +1357,8 @@ pub unsafe fn generate_2d_cellular2_gradient<S: Simd>(
                     -2.0 * delta[1][i0][j],
                     -2.0 * delta[1][i1][j],
                 );
-                gradients[i * 2] = gx * freq_x;
-                gradients[i * 2 + 1] = gy * freq_y;
+                gradients[i * 2] = gx * frequency_x;
+                gradients[i * 2 + 1] = gy * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -1393,12 +1393,12 @@ pub unsafe fn generate_3d_cellular2_gradient<S: Simd>(
     let ret = settings.return_type;
     let i0 = settings.index0;
     let i1 = settings.index1;
-    let freq_x = settings.freq_x() as f64;
-    let freq_y = settings.freq_y() as f64;
-    let freq_z = settings.freq_z() as f64;
-    let freq_x_s = S::Vf64::set1(freq_x);
-    let freq_y_s = S::Vf64::set1(freq_y);
-    let freq_z_s = S::Vf64::set1(freq_z);
+    let frequency_x = settings.frequency_x() as f64;
+    let frequency_y = settings.frequency_y() as f64;
+    let frequency_z = settings.frequency_z() as f64;
+    let freq_x_s = S::Vf64::set1(frequency_x);
+    let freq_y_s = S::Vf64::set1(frequency_y);
+    let freq_z_s = S::Vf64::set1(frequency_z);
     let start_x = dim.offset_x as f64;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y as f64;
@@ -1463,9 +1463,9 @@ pub unsafe fn generate_3d_cellular2_gradient<S: Simd>(
                         -2.0 * delta[2][i0][j],
                         -2.0 * delta[2][i1][j],
                     );
-                    gradients[i * 3] = gx * freq_x;
-                    gradients[i * 3 + 1] = gy * freq_y;
-                    gradients[i * 3 + 2] = gz * freq_z;
+                    gradients[i * 3] = gx * frequency_x;
+                    gradients[i * 3 + 1] = gy * frequency_y;
+                    gradients[i * 3 + 2] = gz * frequency_z;
                     if v < min {
                         min = v;
                     }

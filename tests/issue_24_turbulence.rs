@@ -106,7 +106,7 @@ fn turbulence_1d_values_match_plain_generator() {
     let width = 512;
     let mut s = NoiseBuilder::turbulence_1d(width);
     s.with_seed(7)
-        .with_freq(0.02)
+        .with_frequency(0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
@@ -129,7 +129,7 @@ fn turbulence_1d_matches_finite_difference() {
     let width = 512;
     let mut s = NoiseBuilder::turbulence_1d(width);
     s.with_seed(7)
-        .with_freq(0.02)
+        .with_frequency(0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
@@ -147,7 +147,7 @@ fn turbulence_2d_values_match_plain_generator() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::turbulence_2d(w, h);
     s.with_seed(3)
-        .with_freq_2d(0.02, 0.025)
+        .with_frequency_2d(0.02, 0.025)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
@@ -170,7 +170,7 @@ fn turbulence_2d_matches_finite_difference() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::turbulence_2d(w, h);
     s.with_seed(3)
-        .with_freq_2d(0.02, 0.025)
+        .with_frequency_2d(0.02, 0.025)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
@@ -188,7 +188,7 @@ fn turbulence_3d_values_match_plain_generator() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::turbulence_3d(w, h, d);
     s.with_seed(5)
-        .with_freq_3d(0.02, 0.025, 0.03)
+        .with_frequency_3d(0.02, 0.025, 0.03)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -211,7 +211,7 @@ fn turbulence_3d_matches_finite_difference() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::turbulence_3d(w, h, d);
     s.with_seed(5)
-        .with_freq_3d(0.02, 0.025, 0.03)
+        .with_frequency_3d(0.02, 0.025, 0.03)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);

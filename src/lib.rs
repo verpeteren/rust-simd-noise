@@ -78,7 +78,7 @@
 //!
 //! // Get a block of 4d ridge noise, custom settings, 32x32x32x32 unscaled
 //! let (noise,min,max) =  NoiseBuilder::ridge_4d(32,32,32,32)
-//!        .with_freq(0.05)
+//!        .with_frequency(0.05)
 //!        .with_octaves(5.0)
 //!        .with_gain(2.0)
 //!        .with_seed(1337)
@@ -101,7 +101,7 @@
 //! use core::arch::x86_64::*;
 //!
 //! let noise_setting =  NoiseBuilder::cellular2_3d(32,32,32)
-//!         .with_freq(0.05)
+//!         .with_frequency(0.05)
 //!         .with_return_type(Cell2ReturnType::Distance2Mul)
 //!         .with_jitter(0.5)
 //!         .wrap();

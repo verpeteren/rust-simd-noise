@@ -79,7 +79,7 @@ unsafe fn fill_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     result: &mut [f32],
 ) -> (f32, f32) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     assert_eq!(
@@ -105,7 +105,7 @@ unsafe fn fill_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     x_arr.set_len(vector_width);
     let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
     for _ in 0..extent_x / vector_width {
-        let f = settings.sample_1d(x * freq_x);
+        let f = settings.sample_1d(x * frequency_x);
         max_s = max_s.max(f);
         min_s = min_s.min(f);
         f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -113,7 +113,7 @@ unsafe fn fill_1d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         x += S::Vf32::set1(vector_width as f32);
     }
     if remainder != 0 {
-        let f = settings.sample_1d(x * freq_x);
+        let f = settings.sample_1d(x * frequency_x);
         for j in 0..remainder {
             let n = f[j];
             result_ptr.add(i).write(n);
@@ -154,8 +154,8 @@ unsafe fn fill_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     result: &mut [f32],
 ) -> (f32, f32) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -185,7 +185,7 @@ unsafe fn fill_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     for _ in 0..extent_y {
         let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
         for _ in 0..extent_x / vector_width {
-            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            let f = settings.sample_2d(x * frequency_x, y * frequency_y);
             max_s = max_s.max(f);
             min_s = min_s.min(f);
             f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -193,7 +193,7 @@ unsafe fn fill_2d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             x += S::Vf32::set1(vector_width as f32);
         }
         if remainder != 0 {
-            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            let f = settings.sample_2d(x * frequency_x, y * frequency_y);
             for j in 0..remainder {
                 let n = f[j];
                 result_ptr.add(i).write(n);
@@ -236,9 +236,9 @@ unsafe fn fill_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     result: &mut [f32],
 ) -> (f32, f32) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -273,7 +273,7 @@ unsafe fn fill_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
         for _ in 0..extent_y {
             let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
             for _ in 0..extent_x / vector_width {
-                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                let f = settings.sample_3d(x * frequency_x, y * frequency_y, z * frequency_z);
                 max_s = max_s.max(f);
                 min_s = min_s.min(f);
                 f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -281,7 +281,7 @@ unsafe fn fill_3d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                 x += S::Vf32::set1(vector_width as f32);
             }
             if remainder != 0 {
-                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                let f = settings.sample_3d(x * frequency_x, y * frequency_y, z * frequency_z);
                 for j in 0..remainder {
                     let n = f[j];
                     result_ptr.add(i).write(n);
@@ -326,10 +326,10 @@ unsafe fn fill_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     result: &mut [f32],
 ) -> (f32, f32) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
-    let freq_w = S::Vf32::set1(settings.freq_w());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
+    let frequency_w = S::Vf32::set1(settings.frequency_w());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -367,7 +367,7 @@ unsafe fn fill_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
             for _ in 0..extent_y {
                 let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
                 for _ in 0..extent_x / vector_width {
-                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    let f = settings.sample_4d(x * frequency_x, y * frequency_y, z * frequency_z, w * frequency_w);
                     max_s = max_s.max(f);
                     min_s = min_s.min(f);
                     f.copy_to_ptr_unaligned(result_ptr.add(i));
@@ -375,7 +375,7 @@ unsafe fn fill_4d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                     x += S::Vf32::set1(vector_width as f32);
                 }
                 if remainder != 0 {
-                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    let f = settings.sample_4d(x * frequency_x, y * frequency_y, z * frequency_z, w * frequency_w);
                     for j in 0..remainder {
                         let n = f[j];
                         result_ptr.add(i).write(n);
@@ -423,11 +423,11 @@ unsafe fn fill_5d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     result: &mut [f32],
 ) -> (f32, f32) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
-    let freq_w = S::Vf32::set1(settings.freq_w());
-    let freq_u = S::Vf32::set1(settings.freq_u());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
+    let frequency_w = S::Vf32::set1(settings.frequency_w());
+    let frequency_u = S::Vf32::set1(settings.frequency_u());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -470,11 +470,11 @@ unsafe fn fill_5d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                     let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
                     for _ in 0..extent_x / vector_width {
                         let f = settings.sample_5d(
-                            x * freq_x,
-                            y * freq_y,
-                            z * freq_z,
-                            w * freq_w,
-                            u * freq_u,
+                            x * frequency_x,
+                            y * frequency_y,
+                            z * frequency_z,
+                            w * frequency_w,
+                            u * frequency_u,
                         );
                         max_s = max_s.max(f);
                         min_s = min_s.min(f);
@@ -484,11 +484,11 @@ unsafe fn fill_5d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                     }
                     if remainder != 0 {
                         let f = settings.sample_5d(
-                            x * freq_x,
-                            y * freq_y,
-                            z * freq_z,
-                            w * freq_w,
-                            u * freq_u,
+                            x * frequency_x,
+                            y * frequency_y,
+                            z * frequency_z,
+                            w * frequency_w,
+                            u * frequency_u,
                         );
                         for j in 0..remainder {
                             let n = f[j];
@@ -538,12 +538,12 @@ unsafe fn fill_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
     result: &mut [f32],
 ) -> (f32, f32) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
-    let freq_w = S::Vf32::set1(settings.freq_w());
-    let freq_u = S::Vf32::set1(settings.freq_u());
-    let freq_v = S::Vf32::set1(settings.freq_v());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
+    let frequency_w = S::Vf32::set1(settings.frequency_w());
+    let frequency_u = S::Vf32::set1(settings.frequency_u());
+    let frequency_v = S::Vf32::set1(settings.frequency_v());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -590,12 +590,12 @@ unsafe fn fill_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                         let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
                         for _ in 0..extent_x / vector_width {
                             let f = settings.sample_6d(
-                                x * freq_x,
-                                y * freq_y,
-                                z * freq_z,
-                                w * freq_w,
-                                u * freq_u,
-                                v * freq_v,
+                                x * frequency_x,
+                                y * frequency_y,
+                                z * frequency_z,
+                                w * frequency_w,
+                                u * frequency_u,
+                                v * frequency_v,
                             );
                             max_s = max_s.max(f);
                             min_s = min_s.min(f);
@@ -605,12 +605,12 @@ unsafe fn fill_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
                         }
                         if remainder != 0 {
                             let f = settings.sample_6d(
-                                x * freq_x,
-                                y * freq_y,
-                                z * freq_z,
-                                w * freq_w,
-                                u * freq_u,
-                                v * freq_v,
+                                x * frequency_x,
+                                y * frequency_y,
+                                z * frequency_z,
+                                w * frequency_w,
+                                u * frequency_u,
+                                v * frequency_v,
                             );
                             for j in 0..remainder {
                                 let n = f[j];
@@ -667,7 +667,7 @@ unsafe fn generate_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
 //
 // The gradient is reported in *sample space*: component `k` is the derivative
 // of the value with respect to the sample position along axis `k`. The kernel
-// is evaluated at `position * freq`, so by the chain rule that equals
+// is evaluated at `position * frequency`, so by the chain rule that equals
 // `freq_k * dnoise/dcoord_k` — hence each kernel-space derivative is multiplied
 // by its axis frequency before being stored.
 // ---------------------------------------------------------------------------
@@ -676,8 +676,8 @@ unsafe fn generate_6d_noise_helper_f32<S: Simd, Settings: Sample32<S>>(
 pub unsafe fn generate_1d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
     let dim = settings.dimensions();
     let seed = dim.seed;
-    let freq_x = settings.freq_x();
-    let freq_x_s = S::Vf32::set1(freq_x);
+    let frequency_x = settings.frequency_x();
+    let freq_x_s = S::Vf32::set1(frequency_x);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
 
@@ -702,7 +702,7 @@ pub unsafe fn generate_1d_gradient<S: Simd>(settings: &GradientSettings) -> Nois
         for j in 0..count {
             let v = f[j];
             values[i] = v;
-            gradients[i] = d[j] * freq_x;
+            gradients[i] = d[j] * frequency_x;
             if v < min {
                 min = v;
             }
@@ -726,10 +726,10 @@ pub unsafe fn generate_1d_gradient<S: Simd>(settings: &GradientSettings) -> Nois
 pub unsafe fn generate_2d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
     let dim = settings.dimensions();
     let seed = dim.seed;
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -760,8 +760,8 @@ pub unsafe fn generate_2d_gradient<S: Simd>(settings: &GradientSettings) -> Nois
             for j in 0..count {
                 let v = f[j];
                 values[i] = v;
-                gradients[i * 2] = d[0][j] * freq_x;
-                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                gradients[i * 2] = d[0][j] * frequency_x;
+                gradients[i * 2 + 1] = d[1][j] * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -788,12 +788,12 @@ pub unsafe fn generate_2d_gradient<S: Simd>(settings: &GradientSettings) -> Nois
 pub unsafe fn generate_3d_gradient<S: Simd>(settings: &GradientSettings) -> NoiseAndGradient {
     let dim = settings.dimensions();
     let seed = dim.seed;
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -828,9 +828,9 @@ pub unsafe fn generate_3d_gradient<S: Simd>(settings: &GradientSettings) -> Nois
                 for j in 0..count {
                     let v = f[j];
                     values[i] = v;
-                    gradients[i * 3] = d[0][j] * freq_x;
-                    gradients[i * 3 + 1] = d[1][j] * freq_y;
-                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    gradients[i * 3] = d[0][j] * frequency_x;
+                    gradients[i * 3 + 1] = d[1][j] * frequency_y;
+                    gradients[i * 3 + 2] = d[2][j] * frequency_z;
                     if v < min {
                         min = v;
                     }
@@ -867,8 +867,8 @@ pub unsafe fn generate_1d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> Noise
     let lac = S::Vf32::set1(settings.lacunarity);
     let gain = S::Vf32::set1(settings.gain);
     let octaves = settings.octaves;
-    let freq_x = settings.freq_x();
-    let freq_x_s = S::Vf32::set1(freq_x);
+    let frequency_x = settings.frequency_x();
+    let freq_x_s = S::Vf32::set1(frequency_x);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
 
@@ -893,7 +893,7 @@ pub unsafe fn generate_1d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> Noise
         for j in 0..count {
             let v = f[j];
             values[i] = v;
-            gradients[i] = d[j] * freq_x;
+            gradients[i] = d[j] * frequency_x;
             if v < min {
                 min = v;
             }
@@ -920,10 +920,10 @@ pub unsafe fn generate_2d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> Noise
     let lac = S::Vf32::set1(settings.lacunarity);
     let gain = S::Vf32::set1(settings.gain);
     let octaves = settings.octaves;
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -954,8 +954,8 @@ pub unsafe fn generate_2d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> Noise
             for j in 0..count {
                 let v = f[j];
                 values[i] = v;
-                gradients[i * 2] = d[0][j] * freq_x;
-                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                gradients[i * 2] = d[0][j] * frequency_x;
+                gradients[i * 2 + 1] = d[1][j] * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -985,12 +985,12 @@ pub unsafe fn generate_3d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> Noise
     let lac = S::Vf32::set1(settings.lacunarity);
     let gain = S::Vf32::set1(settings.gain);
     let octaves = settings.octaves;
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1033,9 +1033,9 @@ pub unsafe fn generate_3d_fbm_gradient<S: Simd>(settings: &FbmSettings) -> Noise
                 for j in 0..count {
                     let v = f[j];
                     values[i] = v;
-                    gradients[i * 3] = d[0][j] * freq_x;
-                    gradients[i * 3 + 1] = d[1][j] * freq_y;
-                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    gradients[i * 3] = d[0][j] * frequency_x;
+                    gradients[i * 3 + 1] = d[1][j] * frequency_y;
+                    gradients[i * 3 + 2] = d[2][j] * frequency_z;
                     if v < min {
                         min = v;
                     }
@@ -1070,8 +1070,8 @@ pub unsafe fn generate_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x();
-    let freq_x_s = S::Vf32::set1(freq_x);
+    let frequency_x = settings.frequency_x();
+    let freq_x_s = S::Vf32::set1(frequency_x);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
 
@@ -1096,7 +1096,7 @@ pub unsafe fn generate_1d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
         for j in 0..count {
             let v = f[j];
             values[i] = v;
-            gradients[i] = d[j] * freq_x;
+            gradients[i] = d[j] * frequency_x;
             if v < min {
                 min = v;
             }
@@ -1121,10 +1121,10 @@ pub unsafe fn generate_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1155,8 +1155,8 @@ pub unsafe fn generate_2d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
             for j in 0..count {
                 let v = f[j];
                 values[i] = v;
-                gradients[i * 2] = d[0][j] * freq_x;
-                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                gradients[i * 2] = d[0][j] * frequency_x;
+                gradients[i * 2 + 1] = d[1][j] * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -1184,12 +1184,12 @@ pub unsafe fn generate_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1224,9 +1224,9 @@ pub unsafe fn generate_3d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
                 for j in 0..count {
                     let v = f[j];
                     values[i] = v;
-                    gradients[i * 3] = d[0][j] * freq_x;
-                    gradients[i * 3 + 1] = d[1][j] * freq_y;
-                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    gradients[i * 3] = d[0][j] * frequency_x;
+                    gradients[i * 3 + 1] = d[1][j] * frequency_y;
+                    gradients[i * 3 + 2] = d[2][j] * frequency_z;
                     if v < min {
                         min = v;
                     }
@@ -1256,14 +1256,14 @@ pub unsafe fn generate_4d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_w = settings.freq_w();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
-    let freq_w_s = S::Vf32::set1(freq_w);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let frequency_w = settings.frequency_w();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
+    let freq_w_s = S::Vf32::set1(frequency_w);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1307,10 +1307,10 @@ pub unsafe fn generate_4d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
                     for j in 0..count {
                         let v = f[j];
                         values[i] = v;
-                        gradients[i * 4] = d[0][j] * freq_x;
-                        gradients[i * 4 + 1] = d[1][j] * freq_y;
-                        gradients[i * 4 + 2] = d[2][j] * freq_z;
-                        gradients[i * 4 + 3] = d[3][j] * freq_w;
+                        gradients[i * 4] = d[0][j] * frequency_x;
+                        gradients[i * 4 + 1] = d[1][j] * frequency_y;
+                        gradients[i * 4 + 2] = d[2][j] * frequency_z;
+                        gradients[i * 4 + 3] = d[3][j] * frequency_w;
                         if v < min {
                             min = v;
                         }
@@ -1342,16 +1342,16 @@ pub unsafe fn generate_5d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_w = settings.freq_w();
-    let freq_u = settings.freq_u();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
-    let freq_w_s = S::Vf32::set1(freq_w);
-    let freq_u_s = S::Vf32::set1(freq_u);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let frequency_w = settings.frequency_w();
+    let frequency_u = settings.frequency_u();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
+    let freq_w_s = S::Vf32::set1(frequency_w);
+    let freq_u_s = S::Vf32::set1(frequency_u);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1400,11 +1400,11 @@ pub unsafe fn generate_5d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
                         for j in 0..count {
                             let val = f[j];
                             values[i] = val;
-                            gradients[i * 5] = d[0][j] * freq_x;
-                            gradients[i * 5 + 1] = d[1][j] * freq_y;
-                            gradients[i * 5 + 2] = d[2][j] * freq_z;
-                            gradients[i * 5 + 3] = d[3][j] * freq_w;
-                            gradients[i * 5 + 4] = d[4][j] * freq_u;
+                            gradients[i * 5] = d[0][j] * frequency_x;
+                            gradients[i * 5 + 1] = d[1][j] * frequency_y;
+                            gradients[i * 5 + 2] = d[2][j] * frequency_z;
+                            gradients[i * 5 + 3] = d[3][j] * frequency_w;
+                            gradients[i * 5 + 4] = d[4][j] * frequency_u;
                             if val < min {
                                 min = val;
                             }
@@ -1438,18 +1438,18 @@ pub unsafe fn generate_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
     settings: &T,
 ) -> NoiseAndGradient {
     let dim = settings.dimensions();
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_w = settings.freq_w();
-    let freq_u = settings.freq_u();
-    let freq_v = settings.freq_v();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
-    let freq_w_s = S::Vf32::set1(freq_w);
-    let freq_u_s = S::Vf32::set1(freq_u);
-    let freq_v_s = S::Vf32::set1(freq_v);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let frequency_w = settings.frequency_w();
+    let frequency_u = settings.frequency_u();
+    let frequency_v = settings.frequency_v();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
+    let freq_w_s = S::Vf32::set1(frequency_w);
+    let freq_u_s = S::Vf32::set1(frequency_u);
+    let freq_v_s = S::Vf32::set1(frequency_v);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1503,12 +1503,12 @@ pub unsafe fn generate_6d_fractal_gradient<S: Simd, T: SampleFractalDeriv32<S>>(
                             for j in 0..count {
                                 let val = f[j];
                                 values[i] = val;
-                                gradients[i * 6] = d[0][j] * freq_x;
-                                gradients[i * 6 + 1] = d[1][j] * freq_y;
-                                gradients[i * 6 + 2] = d[2][j] * freq_z;
-                                gradients[i * 6 + 3] = d[3][j] * freq_w;
-                                gradients[i * 6 + 4] = d[4][j] * freq_u;
-                                gradients[i * 6 + 5] = d[5][j] * freq_v;
+                                gradients[i * 6] = d[0][j] * frequency_x;
+                                gradients[i * 6 + 1] = d[1][j] * frequency_y;
+                                gradients[i * 6 + 2] = d[2][j] * frequency_z;
+                                gradients[i * 6 + 3] = d[3][j] * frequency_w;
+                                gradients[i * 6 + 4] = d[4][j] * frequency_u;
+                                gradients[i * 6 + 5] = d[5][j] * frequency_v;
                                 if val < min {
                                     min = val;
                                 }
@@ -1548,10 +1548,10 @@ pub unsafe fn generate_2d_cellular_gradient<S: Simd>(settings: &CellularSettings
     let dim = settings.dimensions();
     let seed = dim.seed;
     let jitter = S::Vf32::set1(settings.jitter);
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1582,8 +1582,8 @@ pub unsafe fn generate_2d_cellular_gradient<S: Simd>(settings: &CellularSettings
             for j in 0..count {
                 let v = f[j];
                 values[i] = v;
-                gradients[i * 2] = d[0][j] * freq_x;
-                gradients[i * 2 + 1] = d[1][j] * freq_y;
+                gradients[i * 2] = d[0][j] * frequency_x;
+                gradients[i * 2 + 1] = d[1][j] * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -1611,12 +1611,12 @@ pub unsafe fn generate_3d_cellular_gradient<S: Simd>(settings: &CellularSettings
     let dim = settings.dimensions();
     let seed = dim.seed;
     let jitter = S::Vf32::set1(settings.jitter);
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1652,9 +1652,9 @@ pub unsafe fn generate_3d_cellular_gradient<S: Simd>(settings: &CellularSettings
                 for j in 0..count {
                     let v = f[j];
                     values[i] = v;
-                    gradients[i * 3] = d[0][j] * freq_x;
-                    gradients[i * 3 + 1] = d[1][j] * freq_y;
-                    gradients[i * 3 + 2] = d[2][j] * freq_z;
+                    gradients[i * 3] = d[0][j] * frequency_x;
+                    gradients[i * 3 + 1] = d[1][j] * frequency_y;
+                    gradients[i * 3 + 2] = d[2][j] * frequency_z;
                     if v < min {
                         min = v;
                     }
@@ -1716,10 +1716,10 @@ pub unsafe fn generate_2d_cellular2_gradient<S: Simd>(settings: &Cellular2Settin
     let ret = settings.return_type;
     let i0 = settings.index0;
     let i1 = settings.index1;
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1767,8 +1767,8 @@ pub unsafe fn generate_2d_cellular2_gradient<S: Simd>(settings: &Cellular2Settin
                     -2.0 * delta[1][i0][j],
                     -2.0 * delta[1][i1][j],
                 );
-                gradients[i * 2] = gx * freq_x;
-                gradients[i * 2 + 1] = gy * freq_y;
+                gradients[i * 2] = gx * frequency_x;
+                gradients[i * 2 + 1] = gy * frequency_y;
                 if v < min {
                     min = v;
                 }
@@ -1800,12 +1800,12 @@ pub unsafe fn generate_3d_cellular2_gradient<S: Simd>(settings: &Cellular2Settin
     let ret = settings.return_type;
     let i0 = settings.index0;
     let i1 = settings.index1;
-    let freq_x = settings.freq_x();
-    let freq_y = settings.freq_y();
-    let freq_z = settings.freq_z();
-    let freq_x_s = S::Vf32::set1(freq_x);
-    let freq_y_s = S::Vf32::set1(freq_y);
-    let freq_z_s = S::Vf32::set1(freq_z);
+    let frequency_x = settings.frequency_x();
+    let frequency_y = settings.frequency_y();
+    let frequency_z = settings.frequency_z();
+    let freq_x_s = S::Vf32::set1(frequency_x);
+    let freq_y_s = S::Vf32::set1(frequency_y);
+    let freq_z_s = S::Vf32::set1(frequency_z);
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -1870,9 +1870,9 @@ pub unsafe fn generate_3d_cellular2_gradient<S: Simd>(settings: &Cellular2Settin
                         -2.0 * delta[2][i0][j],
                         -2.0 * delta[2][i1][j],
                     );
-                    gradients[i * 3] = gx * freq_x;
-                    gradients[i * 3 + 1] = gy * freq_y;
-                    gradients[i * 3 + 2] = gz * freq_z;
+                    gradients[i * 3] = gx * frequency_x;
+                    gradients[i * 3 + 1] = gy * frequency_y;
+                    gradients[i * 3 + 2] = gz * frequency_z;
                     if v < min {
                         min = v;
                     }
@@ -2101,7 +2101,7 @@ unsafe fn fill_1d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     out: &mut [T],
 ) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     assert_eq!(
@@ -2123,7 +2123,7 @@ unsafe fn fill_1d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     x_arr.set_len(vector_width);
     let mut x = S::Vf32::load_from_ptr_unaligned(x_ptr);
     for _ in 0..extent_x / vector_width {
-        let f = settings.sample_1d(x * freq_x);
+        let f = settings.sample_1d(x * frequency_x);
         for lane in 0..vector_width {
             out_ptr
                 .add(i + lane)
@@ -2133,7 +2133,7 @@ unsafe fn fill_1d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
         x += S::Vf32::set1(vector_width as f32);
     }
     if remainder != 0 {
-        let f = settings.sample_1d(x * freq_x);
+        let f = settings.sample_1d(x * frequency_x);
         for j in 0..remainder {
             out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
             i += 1;
@@ -2149,8 +2149,8 @@ unsafe fn fill_2d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     out: &mut [T],
 ) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -2176,7 +2176,7 @@ unsafe fn fill_2d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     for _ in 0..extent_y {
         let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
         for _ in 0..extent_x / vector_width {
-            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            let f = settings.sample_2d(x * frequency_x, y * frequency_y);
             for lane in 0..vector_width {
                 out_ptr
                     .add(i + lane)
@@ -2186,7 +2186,7 @@ unsafe fn fill_2d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
             x += S::Vf32::set1(vector_width as f32);
         }
         if remainder != 0 {
-            let f = settings.sample_2d(x * freq_x, y * freq_y);
+            let f = settings.sample_2d(x * frequency_x, y * frequency_y);
             for j in 0..remainder {
                 out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
                 i += 1;
@@ -2204,9 +2204,9 @@ unsafe fn fill_3d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     out: &mut [T],
 ) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -2236,7 +2236,7 @@ unsafe fn fill_3d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
         for _ in 0..extent_y {
             let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
             for _ in 0..extent_x / vector_width {
-                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                let f = settings.sample_3d(x * frequency_x, y * frequency_y, z * frequency_z);
                 for lane in 0..vector_width {
                     out_ptr
                         .add(i + lane)
@@ -2246,7 +2246,7 @@ unsafe fn fill_3d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
                 x += S::Vf32::set1(vector_width as f32);
             }
             if remainder != 0 {
-                let f = settings.sample_3d(x * freq_x, y * freq_y, z * freq_z);
+                let f = settings.sample_3d(x * frequency_x, y * frequency_y, z * frequency_z);
                 for j in 0..remainder {
                     out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
                     i += 1;
@@ -2266,10 +2266,10 @@ unsafe fn fill_4d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     out: &mut [T],
 ) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
-    let freq_w = S::Vf32::set1(settings.freq_w());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
+    let frequency_w = S::Vf32::set1(settings.frequency_w());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -2303,7 +2303,7 @@ unsafe fn fill_4d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
             for _ in 0..extent_y {
                 let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
                 for _ in 0..extent_x / vector_width {
-                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    let f = settings.sample_4d(x * frequency_x, y * frequency_y, z * frequency_z, w * frequency_w);
                     for lane in 0..vector_width {
                         out_ptr
                             .add(i + lane)
@@ -2313,7 +2313,7 @@ unsafe fn fill_4d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
                     x += S::Vf32::set1(vector_width as f32);
                 }
                 if remainder != 0 {
-                    let f = settings.sample_4d(x * freq_x, y * freq_y, z * freq_z, w * freq_w);
+                    let f = settings.sample_4d(x * frequency_x, y * frequency_y, z * frequency_z, w * frequency_w);
                     for j in 0..remainder {
                         out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
                         i += 1;
@@ -2335,11 +2335,11 @@ unsafe fn fill_5d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     out: &mut [T],
 ) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
-    let freq_w = S::Vf32::set1(settings.freq_w());
-    let freq_u = S::Vf32::set1(settings.freq_u());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
+    let frequency_w = S::Vf32::set1(settings.frequency_w());
+    let frequency_u = S::Vf32::set1(settings.frequency_u());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -2378,11 +2378,11 @@ unsafe fn fill_5d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
                     let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
                     for _ in 0..extent_x / vector_width {
                         let f = settings.sample_5d(
-                            x * freq_x,
-                            y * freq_y,
-                            z * freq_z,
-                            w * freq_w,
-                            u * freq_u,
+                            x * frequency_x,
+                            y * frequency_y,
+                            z * frequency_z,
+                            w * frequency_w,
+                            u * frequency_u,
                         );
                         for lane in 0..vector_width {
                             out_ptr
@@ -2394,11 +2394,11 @@ unsafe fn fill_5d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
                     }
                     if remainder != 0 {
                         let f = settings.sample_5d(
-                            x * freq_x,
-                            y * freq_y,
-                            z * freq_z,
-                            w * freq_w,
-                            u * freq_u,
+                            x * frequency_x,
+                            y * frequency_y,
+                            z * frequency_z,
+                            w * frequency_w,
+                            u * frequency_u,
                         );
                         for j in 0..remainder {
                             out_ptr.add(i).write(T::from_noise(f[j] * mult + off));
@@ -2423,12 +2423,12 @@ unsafe fn fill_6d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
     out: &mut [T],
 ) {
     let dim = settings.dimensions();
-    let freq_x = S::Vf32::set1(settings.freq_x());
-    let freq_y = S::Vf32::set1(settings.freq_y());
-    let freq_z = S::Vf32::set1(settings.freq_z());
-    let freq_w = S::Vf32::set1(settings.freq_w());
-    let freq_u = S::Vf32::set1(settings.freq_u());
-    let freq_v = S::Vf32::set1(settings.freq_v());
+    let frequency_x = S::Vf32::set1(settings.frequency_x());
+    let frequency_y = S::Vf32::set1(settings.frequency_y());
+    let frequency_z = S::Vf32::set1(settings.frequency_z());
+    let frequency_w = S::Vf32::set1(settings.frequency_w());
+    let frequency_u = S::Vf32::set1(settings.frequency_u());
+    let frequency_v = S::Vf32::set1(settings.frequency_v());
     let start_x = dim.offset_x;
     let extent_x = dim.extent_x;
     let start_y = dim.offset_y;
@@ -2471,12 +2471,12 @@ unsafe fn fill_6d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
                         let mut x = S::Vf32::load_from_ptr_unaligned(&x_arr[0]);
                         for _ in 0..extent_x / vector_width {
                             let f = settings.sample_6d(
-                                x * freq_x,
-                                y * freq_y,
-                                z * freq_z,
-                                w * freq_w,
-                                u * freq_u,
-                                v * freq_v,
+                                x * frequency_x,
+                                y * frequency_y,
+                                z * frequency_z,
+                                w * frequency_w,
+                                u * frequency_u,
+                                v * frequency_v,
                             );
                             for lane in 0..vector_width {
                                 out_ptr
@@ -2488,12 +2488,12 @@ unsafe fn fill_6d_noise_range_helper_f32<S: Simd, T: NoiseInto, Settings: Sample
                         }
                         if remainder != 0 {
                             let f = settings.sample_6d(
-                                x * freq_x,
-                                y * freq_y,
-                                z * freq_z,
-                                w * freq_w,
-                                u * freq_u,
-                                v * freq_v,
+                                x * frequency_x,
+                                y * frequency_y,
+                                z * frequency_z,
+                                w * frequency_w,
+                                u * frequency_u,
+                                v * frequency_v,
                             );
                             for j in 0..remainder {
                                 out_ptr.add(i).write(T::from_noise(f[j] * mult + off));

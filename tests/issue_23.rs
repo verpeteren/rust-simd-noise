@@ -44,7 +44,7 @@ fn assert_seamless_64(name: &str, build: impl Fn(f64, usize) -> Vec<f64>) {
 fn fbm_2d_scaled_64_is_seamless() {
     assert_seamless_64("fbm_2d_64", |x_off, w| {
         NoiseBuilder::fbm_2d_offset(x_off as f32, w, 0.0, H)
-            .with_freq(FREQ)
+            .with_frequency(FREQ)
             .with_octaves(OCTAVES)
             .generate_scaled_f64(0.0, 255.0)
     });
@@ -54,7 +54,7 @@ fn fbm_2d_scaled_64_is_seamless() {
 fn turbulence_2d_scaled_64_is_seamless() {
     assert_seamless_64("turbulence_2d_64", |x_off, w| {
         NoiseBuilder::turbulence_2d_offset(x_off as f32, w, 0.0, H)
-            .with_freq(FREQ)
+            .with_frequency(FREQ)
             .with_octaves(OCTAVES)
             .generate_scaled_f64(0.0, 255.0)
     });
@@ -64,7 +64,7 @@ fn turbulence_2d_scaled_64_is_seamless() {
 fn ridge_3d_scaled_64_is_seamless() {
     assert_seamless_64("ridge_3d_64", |x_off, w| {
         NoiseBuilder::ridge_3d_offset(x_off as f32, w, 0.0, H, 0.0, 1)
-            .with_freq(FREQ)
+            .with_frequency(FREQ)
             .with_octaves(OCTAVES)
             .generate_scaled_f64(0.0, 255.0)
     });
@@ -77,7 +77,7 @@ fn ridge_turbulence_1d_gain_gt_1_scaled_in_range() {
     let eps = 1e-3;
     for octaves in [1.0f32, 3.0, 5.5, 8.0] {
         let t = NoiseBuilder::turbulence_1d(256)
-            .with_freq(0.03)
+            .with_frequency(0.03)
             .with_seed(1)
             .with_octaves(octaves)
             .with_gain(2.0)
@@ -89,7 +89,7 @@ fn ridge_turbulence_1d_gain_gt_1_scaled_in_range() {
         );
 
         let r = NoiseBuilder::ridge_1d(256)
-            .with_freq(0.03)
+            .with_frequency(0.03)
             .with_seed(1)
             .with_octaves(octaves)
             .with_gain(2.0)

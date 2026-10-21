@@ -66,7 +66,7 @@ fn fd_stats(values: &[f64], grads: &[f64], stride: usize, extents: &[usize]) -> 
 fn gradient_2d_64() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::gradient_2d(w, h);
-    s.with_seed(7).with_freq_2d(0.02, 0.025);
+    s.with_seed(7).with_frequency_2d(0.02, 0.025);
     let ng = s.generate_with_gradient_f64();
     let (plain, _, _) = generate_2d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 2);
@@ -83,7 +83,7 @@ fn gradient_6d_64() {
     let ext = [6usize, 5, 4, 4, 3, 3];
     let mut s = NoiseBuilder::gradient_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(7)
-        .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02);
+        .with_frequency_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02);
     let ng = s.generate_with_gradient_f64();
     let (plain, _, _) = generate_6d_noise_f64(&s.wrap());
     assert_eq!(ng.stride, 6);
@@ -100,7 +100,7 @@ fn fbm_2d_64() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::fbm_2d(w, h);
     s.with_seed(3)
-        .with_freq_2d(0.02, 0.025)
+        .with_frequency_2d(0.02, 0.025)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -119,7 +119,7 @@ fn fbm_6d_64() {
     let ext = [6usize, 5, 4, 4, 3, 3];
     let mut s = NoiseBuilder::fbm_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(3)
-        .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
+        .with_frequency_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -138,7 +138,7 @@ fn ridge_2d_64() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::ridge_2d(w, h);
     s.with_seed(5)
-        .with_freq_2d(0.01, 0.012)
+        .with_frequency_2d(0.01, 0.012)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -159,7 +159,7 @@ fn ridge_6d_64() {
     let ext = [6usize, 5, 4, 4, 3, 3];
     let mut s = NoiseBuilder::ridge_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(5)
-        .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
+        .with_frequency_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -179,7 +179,7 @@ fn turbulence_2d_64() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::turbulence_2d(w, h);
     s.with_seed(5)
-        .with_freq_2d(0.01, 0.012)
+        .with_frequency_2d(0.01, 0.012)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
@@ -198,7 +198,7 @@ fn turbulence_6d_64() {
     let ext = [6usize, 5, 4, 4, 3, 3];
     let mut s = NoiseBuilder::turbulence_6d(ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
     s.with_seed(5)
-        .with_freq_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
+        .with_frequency_6d(0.01, 0.012, 0.014, 0.016, 0.018, 0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);

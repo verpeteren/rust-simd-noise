@@ -232,22 +232,22 @@ fn apply_freq<S: Settings>(s: &mut S, p: &Params) {
     let f = &p.freq;
     match p.dim {
         1 => {
-            s.with_freq(f[0]);
+            s.with_frequency(f[0]);
         }
         2 => {
-            s.with_freq_2d(f[0], f[1]);
+            s.with_frequency_2d(f[0], f[1]);
         }
         3 => {
-            s.with_freq_3d(f[0], f[1], f[2]);
+            s.with_frequency_3d(f[0], f[1], f[2]);
         }
         4 => {
-            s.with_freq_4d(f[0], f[1], f[2], f[3]);
+            s.with_frequency_4d(f[0], f[1], f[2], f[3]);
         }
         5 => {
-            s.with_freq_5d(f[0], f[1], f[2], f[3], f[4]);
+            s.with_frequency_5d(f[0], f[1], f[2], f[3], f[4]);
         }
         _ => {
-            s.with_freq_6d(f[0], f[1], f[2], f[3], f[4], f[5]);
+            s.with_frequency_6d(f[0], f[1], f[2], f[3], f[4], f[5]);
         }
     }
 }
