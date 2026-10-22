@@ -15,73 +15,73 @@ use crate::NoiseType;
 use simdeez::prelude::*;
 
 simd_compiletime_select!(
-    pub fn get_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-        noise_helpers_32::get_1d_noise::<S>(noise_type)
+    pub fn generate_1d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::generate_1d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-        noise_helpers_32::get_2d_noise::<S>(noise_type)
+    pub fn generate_2d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::generate_2d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-        noise_helpers_32::get_3d_noise::<S>(noise_type)
+    pub fn generate_3d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::generate_3d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-        noise_helpers_32::get_4d_noise::<S>(noise_type)
+    pub fn generate_4d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::generate_4d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_5d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-        noise_helpers_32::get_5d_noise::<S>(noise_type)
+    pub fn generate_5d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::generate_5d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_6d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
-        noise_helpers_32::get_6d_noise::<S>(noise_type)
+    pub fn generate_6d_noise(noise_type: &NoiseType) -> (Vec<f32>, f32, f32) {
+        noise_helpers_32::generate_6d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_1d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-        noise_helpers_64::get_1d_noise::<S>(noise_type)
+    pub fn generate_1d_noise_f64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::generate_1d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_2d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-        noise_helpers_64::get_2d_noise::<S>(noise_type)
+    pub fn generate_2d_noise_f64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::generate_2d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_3d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-        noise_helpers_64::get_3d_noise::<S>(noise_type)
+    pub fn generate_3d_noise_f64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::generate_3d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_4d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-        noise_helpers_64::get_4d_noise::<S>(noise_type)
+    pub fn generate_4d_noise_f64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::generate_4d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_5d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-        noise_helpers_64::get_5d_noise::<S>(noise_type)
+    pub fn generate_5d_noise_f64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::generate_5d_noise::<S>(noise_type)
     }
 );
 
 simd_compiletime_select!(
-    pub fn get_6d_noise_64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
-        noise_helpers_64::get_6d_noise::<S>(noise_type)
+    pub fn generate_6d_noise_f64(noise_type: &NoiseType) -> (Vec<f64>, f64, f64) {
+        noise_helpers_64::generate_6d_noise::<S>(noise_type)
     }
 );

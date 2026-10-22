@@ -1,23 +1,26 @@
-pub mod cell2_32;
-pub mod cell2_64;
+// Noise kernels are crate-internal implementation detail. The low-level public
+// entry point is `crate::intrinsics`; the public enum modules below are
+// re-exported at the crate root.
+pub(crate) mod cell2_32;
+pub(crate) mod cell2_64;
 pub mod cell2_return_type;
-pub mod cell_32;
-pub mod cell_64;
+pub(crate) mod cell_32;
+pub(crate) mod cell_64;
 pub mod cell_distance_function;
 pub mod cell_return_type;
 pub mod cell_strategy;
-mod cellular_32;
-mod cellular_64;
-pub mod fbm_32;
-pub mod fbm_64;
-mod gradient_32;
-mod gradient_64;
-mod hash3d_32;
-mod hash3d_64;
-pub mod ops;
-pub mod ridge_32;
-pub mod ridge_64;
-pub mod simplex_32;
-pub mod simplex_64;
-pub mod turbulence_32;
-pub mod turbulence_64;
+pub(crate) mod cellular_32;
+pub(crate) mod cellular_64;
+pub(crate) mod fbm_32;
+pub(crate) mod fbm_64;
+pub(crate) mod gradient_32;
+pub(crate) mod gradient_64;
+pub(crate) mod hash3d_32;
+pub(crate) mod hash3d_64;
+pub(crate) mod ops;
+pub(crate) mod ridge_32;
+pub(crate) mod ridge_64;
+pub(crate) mod simplex_32;
+pub(crate) mod simplex_64;
+pub(crate) mod turbulence_32;
+pub(crate) mod turbulence_64;

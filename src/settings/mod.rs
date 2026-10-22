@@ -4,34 +4,34 @@ pub use crate::noise_type::NoiseType;
 pub trait Settings {
     fn default(dim: NoiseDimensions) -> Self;
     fn with_seed(&mut self, seed: i32) -> &mut Self;
-    fn with_freq(&mut self, freq: f32) -> &mut Self;
-    fn with_freq_2d(&mut self, freq_x: f32, freq_y: f32) -> &mut Self;
-    fn with_freq_3d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32) -> &mut Self;
-    fn with_freq_4d(&mut self, freq_x: f32, freq_y: f32, freq_z: f32, freq_w: f32) -> &mut Self;
-    fn with_freq_5d(
+    fn with_frequency(&mut self, frequency: f32) -> &mut Self;
+    fn with_frequency_2d(&mut self, frequency_x: f32, frequency_y: f32) -> &mut Self;
+    fn with_frequency_3d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32) -> &mut Self;
+    fn with_frequency_4d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32, frequency_w: f32) -> &mut Self;
+    fn with_frequency_5d(
         &mut self,
-        freq_x: f32,
-        freq_y: f32,
-        freq_z: f32,
-        freq_w: f32,
-        freq_u: f32,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
+        frequency_u: f32,
     ) -> &mut Self;
-    fn with_freq_6d(
+    fn with_frequency_6d(
         &mut self,
-        freq_x: f32,
-        freq_y: f32,
-        freq_z: f32,
-        freq_w: f32,
-        freq_u: f32,
-        freq_v: f32,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+        frequency_w: f32,
+        frequency_u: f32,
+        frequency_v: f32,
     ) -> &mut Self;
 
-    fn get_freq_x(&self) -> f32;
-    fn get_freq_y(&self) -> f32;
-    fn get_freq_z(&self) -> f32;
-    fn get_freq_w(&self) -> f32;
-    fn get_freq_u(&self) -> f32;
-    fn get_freq_v(&self) -> f32;
+    fn frequency_x(&self) -> f32;
+    fn frequency_y(&self) -> f32;
+    fn frequency_z(&self) -> f32;
+    fn frequency_w(&self) -> f32;
+    fn frequency_u(&self) -> f32;
+    fn frequency_v(&self) -> f32;
 
     /// If you want to call noise functions by hand, call wrap on the settings
     /// to get back a NoiseType to call the noise functions with
@@ -63,35 +63,43 @@ pub trait Settings {
     fn generate_scaled(self, min: f32, max: f32) -> Vec<f32>;
 
     /// f64 counterpart of [`generate`](Settings::generate).
-    fn generate_64(self) -> (Vec<f64>, f64, f64);
+    fn generate_f64(self) -> (Vec<f64>, f64, f64);
 
     /// f64 counterpart of [`generate_scaled`](Settings::generate_scaled); the
     /// target range is given as f64.
-    fn generate_scaled_64(self, min: f64, max: f64) -> Vec<f64>;
+    fn generate_scaled_f64(self, min: f64, max: f64) -> Vec<f64>;
 
     /// Emplace unscaled noise into `out`, whose length must equal the product of
     /// the configured dimensions. Returns the slice's `(min, max)`.
-    fn generate_into(self, out: &mut [f32]) -> (f32, f32);
+    fn fill(self, out: &mut [f32]) -> (f32, f32);
 
     /// Emplace noise scaled to `[min, max]` into `out` (same length rule).
-    fn generate_scaled_into(self, min: f32, max: f32, out: &mut [f32]);
+    fn fill_scaled(self, min: f32, max: f32, out: &mut [f32]);
 
-    /// f64 counterpart of [`generate_into`](Settings::generate_into).
-    fn generate_into_64(self, out: &mut [f64]) -> (f64, f64);
+    /// f64 counterpart of [`fill`](Settings::fill).
+    fn fill_f64(self, out: &mut [f64]) -> (f64, f64);
 
-    /// f64 counterpart of [`generate_scaled_into`](Settings::generate_scaled_into).
-    fn generate_scaled_into_64(self, min: f64, max: f64, out: &mut [f64]);
+    /// f64 counterpart of [`fill_scaled`](Settings::fill_scaled).
+    fn fill_scaled_f64(self, min: f64, max: f64, out: &mut [f64]);
 
     /// Emplace noise quantized to an integer type into `out`, mapping
     /// `[src_min, src_max]` onto the target type's full range (see
     /// [`NoiseInto`](crate::NoiseInto)). `out.len()` must equal the dimension
     /// product.
-    fn generate_range_into<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]);
+    fn fill_range<T: crate::NoiseInto>(self, src_min: f32, src_max: f32, out: &mut [T]);
 }
 
 pub trait SimplexSettings {
     fn with_lacunarity(&mut self, lacunarity: f32) -> &mut Self;
     fn with_gain(&mut self, gain: f32) -> &mut Self;
+    /// Number of octaves summed by the fractal.
+    ///
+    /// Intentionally an `f32`, not an integer: a **fractional** octave count is
+    /// supported (issue #14). The whole part contributes full octaves and the
+    /// fractional part fades the next octave in smoothly, which keeps the output
+    /// continuous as the count is animated across integer boundaries instead of
+    /// jumping when a new octave appears. Pass e.g. `5.0` for five octaves, or
+    /// `5.5` to blend halfway into the sixth.
     fn with_octaves(&mut self, octaves: f32) -> &mut Self;
 }
 

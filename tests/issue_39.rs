@@ -46,7 +46,7 @@ fn assert_seamless(name: &str, build: impl Fn(f32, usize) -> Vec<f32>) {
 fn turbulence_2d_scaled_is_seamless() {
     assert_seamless("turbulence_2d", |x_off, w| {
         NoiseBuilder::turbulence_2d_offset(x_off, w, 0.0, H)
-            .with_freq(FREQ)
+            .with_frequency(FREQ)
             .with_octaves(OCTAVES)
             .generate_scaled(0.0, 255.0)
     });
@@ -56,7 +56,7 @@ fn turbulence_2d_scaled_is_seamless() {
 fn fbm_2d_scaled_is_seamless() {
     assert_seamless("fbm_2d", |x_off, w| {
         NoiseBuilder::fbm_2d_offset(x_off, w, 0.0, H)
-            .with_freq(FREQ)
+            .with_frequency(FREQ)
             .with_octaves(OCTAVES)
             .generate_scaled(0.0, 255.0)
     });
@@ -68,7 +68,7 @@ fn ridge_3d_scaled_is_seamless() {
     // (x, y) layout identical to the 2D case.
     assert_seamless("ridge_3d", |x_off, w| {
         NoiseBuilder::ridge_3d_offset(x_off, w, 0.0, H, 0.0, 1)
-            .with_freq(FREQ)
+            .with_frequency(FREQ)
             .with_octaves(OCTAVES)
             .generate_scaled(0.0, 255.0)
     });

@@ -13,8 +13,8 @@
 
 use simdeez::prelude::*;
 use simdeez::scalar::Scalar;
-use simdnoise::noise::{fbm_32, fbm_64, ridge_32, turbulence_32};
-use simdnoise::{NoiseBuilder, Settings, SimplexSettings};
+use crate::noise::{fbm_32, fbm_64, ridge_32, turbulence_32};
+use crate::{NoiseBuilder, Settings, SimplexSettings};
 
 const LAC: f32 = 0.5;
 const GAIN: f32 = 2.0;
@@ -160,17 +160,17 @@ fn scaled_output_stays_in_range_at_fractional_octaves() {
     let eps = 1.0f32;
     let fbm = NoiseBuilder::fbm_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .generate_scaled(0.0, 255.0);
     let ridge = NoiseBuilder::ridge_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .generate_scaled(0.0, 255.0);
     let turb = NoiseBuilder::turbulence_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .generate_scaled(0.0, 255.0);
     for (label, vals) in [("fbm", fbm), ("ridge", ridge), ("turbulence", turb)] {
@@ -208,11 +208,11 @@ fn f32_and_f64_fractional_agree() {
 fn fractional_matches_across_engines() {
     let nt = NoiseBuilder::fbm_2d(64, 64)
         .with_seed(SEED)
-        .with_freq_2d(FREQ, FREQ)
+        .with_frequency_2d(FREQ, FREQ)
         .with_octaves(4.5)
         .wrap();
-    let (runtime, _, _) = simdnoise::get_2d_noise(&nt);
-    let (scalar, _, _) = unsafe { simdnoise::intrinsics::scalar::get_2d_noise::<Scalar>(&nt) };
+    let (runtime, _, _) = crate::generate_2d_noise(&nt);
+    let (scalar, _, _) = unsafe { crate::intrinsics::scalar::generate_2d_noise::<Scalar>(&nt) };
     assert_eq!(runtime.len(), scalar.len());
     let md = runtime
         .iter()

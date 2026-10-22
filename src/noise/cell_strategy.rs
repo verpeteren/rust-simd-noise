@@ -1,7 +1,7 @@
 //! Compile-time strategies for cellular noise configuration (issue #48).
 //!
-//! The cellular kernels in [`cell_32`](super::cell_32)/[`cell_64`](super::cell_64)
-//! and [`cell2_32`](super::cell2_32)/[`cell2_64`](super::cell2_64) used to take
+//! The cellular kernels in `cell_32`/`cell_64`
+//! and `cell2_32`/`cell2_64` used to take
 //! the distance function and the return type as runtime `enum` values and
 //! `match` on them on every sample (for 3D cellular and both cellular2
 //! functions, on every one of the 9/27 inner-loop iterations). That branch is

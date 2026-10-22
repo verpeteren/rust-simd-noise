@@ -13,10 +13,10 @@ use simdnoise::{
 
 fn dims(dim: usize, w: usize, h: usize, d: usize, t: usize) -> NoiseDimensions {
     let mut nd = NoiseDimensions::default(dim);
-    nd.width = w;
-    nd.height = h;
-    nd.depth = d;
-    nd.time = t;
+    nd.extent_x = w;
+    nd.extent_y = h;
+    nd.extent_z = d;
+    nd.extent_w = t;
     nd
 }
 
@@ -35,9 +35,9 @@ fn cellular_1d4d_64_distance_sane() {
                 .wrap();
             let noise = unsafe {
                 if dim == 1 {
-                    scalar::get_1d_noise_64::<simdeez::scalar::Scalar>(&nt).0
+                    scalar::generate_1d_noise_f64::<simdeez::scalar::Scalar>(&nt).0
                 } else {
-                    scalar::get_4d_noise_64::<simdeez::scalar::Scalar>(&nt).0
+                    scalar::generate_4d_noise_f64::<simdeez::scalar::Scalar>(&nt).0
                 }
             };
             assert!(noise.iter().all(|v| v.is_finite()), "finite dim={}", dim);

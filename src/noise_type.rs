@@ -15,14 +15,14 @@ pub enum NoiseType {
 }
 
 impl DimensionalBeing for NoiseType {
-    fn get_dimensions(&self) -> NoiseDimensions {
+    fn dimensions(&self) -> NoiseDimensions {
         match self {
-            NoiseType::Fbm(s) => s.get_dimensions(),
-            NoiseType::Ridge(s) => s.get_dimensions(),
-            NoiseType::Turbulence(s) => s.get_dimensions(),
-            NoiseType::Gradient(s) => s.get_dimensions(),
-            NoiseType::Cellular(s) => s.get_dimensions(),
-            NoiseType::Cellular2(s) => s.get_dimensions(),
+            NoiseType::Fbm(s) => s.dimensions(),
+            NoiseType::Ridge(s) => s.dimensions(),
+            NoiseType::Turbulence(s) => s.dimensions(),
+            NoiseType::Gradient(s) => s.dimensions(),
+            NoiseType::Cellular(s) => s.dimensions(),
+            NoiseType::Cellular2(s) => s.dimensions(),
         }
     }
 }

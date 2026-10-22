@@ -10,8 +10,8 @@
 
 use simdeez::prelude::*;
 use simdeez::scalar::Scalar;
-use simdnoise::noise::cell_strategy::{Distance, Distance2, Euclidean};
-use simdnoise::noise::{cell2_32, cell2_64, cell_32, cell_64};
+use crate::noise::cell_strategy::{Distance, Distance2, Euclidean};
+use crate::noise::{cell2_32, cell2_64, cell_32, cell_64};
 
 const JITTER: f32 = 0.25;
 const SEED: i32 = 1337;

@@ -21,7 +21,7 @@ macro_rules! check {
         // f32 unscaled
         let (v, vmin, vmax) = $make.generate();
         let mut out = vec![0.0f32; $len];
-        let (omin, omax) = $make.generate_into(&mut out);
+        let (omin, omax) = $make.fill(&mut out);
         assert!(same_f32(&v, &out), "f32 emplace mismatch");
         assert_eq!(vmin.to_bits(), omin.to_bits(), "f32 min mismatch");
         assert_eq!(vmax.to_bits(), omax.to_bits(), "f32 max mismatch");
@@ -29,21 +29,21 @@ macro_rules! check {
         // f32 scaled
         let vs = $make.generate_scaled(0.0, 255.0);
         let mut outs = vec![0.0f32; $len];
-        $make.generate_scaled_into(0.0, 255.0, &mut outs);
+        $make.fill_scaled(0.0, 255.0, &mut outs);
         assert!(same_f32(&vs, &outs), "f32 scaled emplace mismatch");
 
         // f64 unscaled
-        let (v64, vmin64, vmax64) = $make.generate_64();
+        let (v64, vmin64, vmax64) = $make.generate_f64();
         let mut out64 = vec![0.0f64; $len];
-        let (omin64, omax64) = $make.generate_into_64(&mut out64);
+        let (omin64, omax64) = $make.fill_f64(&mut out64);
         assert!(same_f64(&v64, &out64), "f64 emplace mismatch");
         assert_eq!(vmin64.to_bits(), omin64.to_bits(), "f64 min mismatch");
         assert_eq!(vmax64.to_bits(), omax64.to_bits(), "f64 max mismatch");
 
         // f64 scaled
-        let vs64 = $make.generate_scaled_64(0.0, 255.0);
+        let vs64 = $make.generate_scaled_f64(0.0, 255.0);
         let mut outs64 = vec![0.0f64; $len];
-        $make.generate_scaled_into_64(0.0, 255.0, &mut outs64);
+        $make.fill_scaled_f64(0.0, 255.0, &mut outs64);
         assert!(same_f64(&vs64, &outs64), "f64 scaled emplace mismatch");
     }};
 }
@@ -54,14 +54,14 @@ macro_rules! check_f32 {
     ($len:expr, $make:expr) => {{
         let (v, vmin, vmax) = $make.generate();
         let mut out = vec![0.0f32; $len];
-        let (omin, omax) = $make.generate_into(&mut out);
+        let (omin, omax) = $make.fill(&mut out);
         assert!(same_f32(&v, &out), "f32 emplace mismatch");
         assert_eq!(vmin.to_bits(), omin.to_bits(), "f32 min mismatch");
         assert_eq!(vmax.to_bits(), omax.to_bits(), "f32 max mismatch");
 
         let vs = $make.generate_scaled(0.0, 255.0);
         let mut outs = vec![0.0f32; $len];
-        $make.generate_scaled_into(0.0, 255.0, &mut outs);
+        $make.fill_scaled(0.0, 255.0, &mut outs);
         assert!(same_f32(&vs, &outs), "f32 scaled emplace mismatch");
     }};
 }
@@ -117,19 +117,19 @@ fn emplace_chunks_compose() {
     let half = h / 2;
     let (full, _, _) = NoiseBuilder::gradient_2d(w, h)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
+        .with_frequency_2d(0.05, 0.05)
         .generate();
 
     let mut top = vec![0.0f32; w * half];
     let mut bot = vec![0.0f32; w * half];
     NoiseBuilder::gradient_2d_offset(0.0, w, 0.0, half)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
-        .generate_into(&mut top);
+        .with_frequency_2d(0.05, 0.05)
+        .fill(&mut top);
     NoiseBuilder::gradient_2d_offset(0.0, w, half as f32, half)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
-        .generate_into(&mut bot);
+        .with_frequency_2d(0.05, 0.05)
+        .fill(&mut bot);
 
     let mut joined = top;
     joined.extend_from_slice(&bot);
@@ -142,7 +142,7 @@ fn emplace_wrong_len_panics_f32() {
     let mut out = vec![0.0f32; 10];
     NoiseBuilder::fbm_2d(64, 32)
         .with_seed(1)
-        .generate_into(&mut out);
+        .fill(&mut out);
 }
 
 #[test]
@@ -151,10 +151,10 @@ fn emplace_wrong_len_panics_f64() {
     let mut out = vec![0.0f64; 10];
     NoiseBuilder::fbm_2d(64, 32)
         .with_seed(1)
-        .generate_into_64(&mut out);
+        .fill_f64(&mut out);
 }
 
-// --- typed (integer) range emplace: generate_range_into / get_Nd_noise_range_into ---
+// --- typed (integer) range emplace: fill_range / fill_Nd_noise_range ---
 
 /// Reference: the exact affine map + saturating cast the typed path must produce.
 /// `v * mult + off` then `as T`, with mult/off derived from the source range and
@@ -178,14 +178,14 @@ fn range_into_u16_matches_manual_map() {
     let (lo, hi) = (-1.0f32, 1.0f32);
     let (noise, _, _) = NoiseBuilder::fbm_2d(w, h)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
+        .with_frequency_2d(0.02, 0.02)
         .generate();
     let expect = ref_quantize_u16(&noise, lo, hi);
     let mut out = vec![0u16; w * h];
     NoiseBuilder::fbm_2d(w, h)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
-        .generate_range_into(lo, hi, &mut out);
+        .with_frequency_2d(0.02, 0.02)
+        .fill_range(lo, hi, &mut out);
     assert_eq!(expect, out);
 }
 
@@ -197,14 +197,14 @@ fn range_into_u8_saturates_out_of_range() {
     let (lo, hi) = (-0.2f32, 0.2f32);
     let (noise, _, _) = NoiseBuilder::fbm_2d(w, h)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
+        .with_frequency_2d(0.05, 0.05)
         .generate();
     let expect = ref_quantize_u8(&noise, lo, hi);
     let mut out = vec![0u8; w * h];
     NoiseBuilder::fbm_2d(w, h)
         .with_seed(7)
-        .with_freq_2d(0.05, 0.05)
-        .generate_range_into(lo, hi, &mut out);
+        .with_frequency_2d(0.05, 0.05)
+        .fill_range(lo, hi, &mut out);
     assert_eq!(expect, out);
     assert!(
         out.contains(&0) && out.contains(&255),
@@ -217,11 +217,11 @@ fn range_into_free_fn_matches_builder() {
     let (w, h) = (32usize, 16usize);
     let nt = NoiseBuilder::gradient_2d(w, h).with_seed(3).wrap();
     let mut via_free = vec![0u16; w * h];
-    simdnoise::get_2d_noise_range_into::<u16>(&nt, -1.0, 1.0, &mut via_free);
+    simdnoise::fill_2d_noise_range::<u16>(&nt, -1.0, 1.0, &mut via_free);
     let mut via_builder = vec![0u16; w * h];
     NoiseBuilder::gradient_2d(w, h)
         .with_seed(3)
-        .generate_range_into(-1.0, 1.0, &mut via_builder);
+        .fill_range(-1.0, 1.0, &mut via_builder);
     assert_eq!(via_free, via_builder);
 }
 
@@ -231,5 +231,5 @@ fn range_into_wrong_len_panics() {
     let mut out = vec![0u16; 10];
     NoiseBuilder::fbm_2d(64, 32)
         .with_seed(1)
-        .generate_range_into(-1.0, 1.0, &mut out);
+        .fill_range(-1.0, 1.0, &mut out);
 }

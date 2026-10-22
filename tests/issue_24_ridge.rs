@@ -1,6 +1,6 @@
 //! Sanity + regression tests for issue #24, ridge derivatives.
 //!
-//! [`RidgeSettings::generate_with_derivative`] returns the ridge value and its
+//! [`RidgeSettings::generate_with_gradient`] returns the ridge value and its
 //! analytic gradient. Ridge sums `amp_k · (1 − |simplex(lacunarity^k·x)|)`, so
 //! the gradient is continuous except at the ridge crests where `|·|` kinks. We
 //! check:
@@ -15,7 +15,7 @@
 //! Running under `--features scalar` adds cross-engine coverage.
 
 use simdnoise::{
-    get_1d_noise, get_2d_noise, get_3d_noise, NoiseBuilder, Settings, SimplexSettings,
+    generate_1d_noise, generate_2d_noise, generate_3d_noise, NoiseBuilder, Settings, SimplexSettings,
 };
 
 fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
@@ -103,12 +103,12 @@ fn ridge_1d_values_match_plain_generator() {
     let width = 512;
     let mut s = NoiseBuilder::ridge_1d(width);
     s.with_seed(7)
-        .with_freq(0.02)
+        .with_frequency(0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_1d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_1d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), width);
     assert_eq!(ng.gradients.len(), width);
@@ -122,11 +122,11 @@ fn ridge_1d_matches_finite_difference() {
     let width = 512;
     let mut s = NoiseBuilder::ridge_1d(width);
     s.with_seed(7)
-        .with_freq(0.02)
+        .with_frequency(0.02)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.5);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     assert!(
         mean_abs(&ng.gradients) > 1e-2,
         "1D ridge gradient degenerate"
@@ -140,12 +140,12 @@ fn ridge_2d_values_match_plain_generator() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::ridge_2d(w, h);
     s.with_seed(3)
-        .with_freq_2d(0.02, 0.025)
+        .with_frequency_2d(0.02, 0.025)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_2d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_2d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), w * h);
     assert_eq!(ng.gradients.len(), w * h * 2);
@@ -159,11 +159,11 @@ fn ridge_2d_matches_finite_difference() {
     let (w, h) = (48, 40);
     let mut s = NoiseBuilder::ridge_2d(w, h);
     s.with_seed(3)
-        .with_freq_2d(0.02, 0.025)
+        .with_frequency_2d(0.02, 0.025)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(4.0);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     assert!(
         mean_abs(&ng.gradients) > 1e-2,
         "2D ridge gradient degenerate"
@@ -177,12 +177,12 @@ fn ridge_3d_values_match_plain_generator() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::ridge_3d(w, h, d);
     s.with_seed(5)
-        .with_freq_3d(0.02, 0.025, 0.03)
+        .with_frequency_3d(0.02, 0.025, 0.03)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
-    let (plain, _, _) = get_3d_noise(&s.wrap());
+    let ng = s.generate_with_gradient();
+    let (plain, _, _) = generate_3d_noise(&s.wrap());
 
     assert_eq!(ng.values.len(), w * h * d);
     assert_eq!(ng.gradients.len(), w * h * d * 3);
@@ -196,11 +196,11 @@ fn ridge_3d_matches_finite_difference() {
     let (w, h, d) = (20, 18, 16);
     let mut s = NoiseBuilder::ridge_3d(w, h, d);
     s.with_seed(5)
-        .with_freq_3d(0.02, 0.025, 0.03)
+        .with_frequency_3d(0.02, 0.025, 0.03)
         .with_lacunarity(0.5)
         .with_gain(2.0)
         .with_octaves(3.0);
-    let ng = s.generate_with_derivative();
+    let ng = s.generate_with_gradient();
     assert!(
         mean_abs(&ng.gradients) > 1e-2,
         "3D ridge gradient degenerate"

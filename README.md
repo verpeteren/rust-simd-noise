@@ -7,11 +7,15 @@ Super fast SIMD noise library for Rust. PRs welcome!
 This library was created by Jack Mott.
 The current maintainer is Peter Reijnders.
 
+> **Upgrading from 3.1.6?** 4.0 is a breaking release. See
+> [MIGRATION.md](MIGRATION.md) for the 3.1.6 → 4.0 changes (what moved,
+> what was renamed, and what's new).
+
 ## Features
 
 * Gradient Noise (Simplex aka Perlin) 1D,2D,3D,4D, and **5D/6D (experimental)**
 * Fractal Brownian Motion, Ridge, and Turbulence
-* Cellular Noise (aka Voroni) 1D,2D,3D,4D, and **5D/6D (experimental)**
+* Cellular Noise (aka Voronoi) 1D,2D,3D,4D, and **5D/6D (experimental)**
 * `f32` and `f64` output for every algorithm and dimension
 * SSE2, SSE41, AVX2, and AVX-512 instruction sets, plus NEON and a non-SIMD fallback
 * AVX2 version also leverages FMA3
@@ -33,7 +37,7 @@ blank = not applicable. Entries marked `v*` are **experimental** (see below).
 | Cellular2 (Voronoi F2) | + return_type2, index0, index1 | v | v | v | v | v* | v* |
 
 Every `v`/`v*` cell is available for both `f32` (`generate()`, …) and `f64`
-(`generate_64()`, …).
+(`generate_f64()`, …).
 
 #### Engines
 
@@ -100,7 +104,7 @@ backend, so no CPU SIMD intrinsic is ever executed:
 
 ```toml
 [dependencies]
-simdnoise = { version = "3", features = ["scalar"] }
+simdnoise = { version = "4", features = ["scalar"] }
 ```
 
 This makes the crate usable under such toolchains (e.g. with Cranelift for
@@ -208,7 +212,7 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 pub fn fbm_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
     let noise = NoiseBuilder::fbm_2d(width, height)
-        .with_freq(freq)
+        .with_frequency(freq)
         .with_seed(seed)
         .generate_scaled(0.0, 255.0);
     noise.into_iter().map(|v| v as u8).collect()
@@ -219,7 +223,7 @@ pub fn fbm_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
 #[wasm_bindgen]
 pub fn gradient_2d(width: usize, height: usize, freq: f32, seed: i32) -> Vec<u8> {
     let noise = NoiseBuilder::gradient_2d(width, height)
-        .with_freq(freq)
+        .with_frequency(freq)
         .with_seed(seed)
         .generate_scaled(0.0, 255.0);
     noise.into_iter().map(|v| v as u8).collect()
@@ -274,8 +278,8 @@ let noise = NoiseBuilder::fbm_2d(100, 100).generate_scaled(0.0, 1.0);
 
 // Get a block of 3d ridge noise, custom settings, 32x32x32 unscaled
 let (noise, min, max) = NoiseBuilder::ridge_3d(32, 32, 32)
-    .with_freq_3d(0.05, 0.04, 0.01)
-    .with_octaves(5)
+    .with_frequency_3d(0.05, 0.04, 0.01)
+    .with_octaves(5.0)
     .with_gain(2.0)
     .with_seed(1337)
     .with_lacunarity(0.5)
@@ -288,14 +292,14 @@ Sometimes you may want to use SSE41 even with AVX2 is available.
 
 ```rust
 let noise_setting = NoiseBuilder::ridge_3d(32, 32, 32)
-    .with_freq_3d(0.05, 0.04, 0.01)
-    .with_octaves(5)
+    .with_frequency_3d(0.05, 0.04, 0.01)
+    .with_octaves(5.0)
     .with_gain(2.0)
     .with_lacunarity(0.5)
     .wrap();
 
 // get a block of noise with the sse41 version, using the above settings
-let (noise, min, max) = unsafe { simdnoise::intrinsics::sse41::get_2d_noise(&noise_setting) };
+let (noise, min, max) = unsafe { simdnoise::intrinsics::sse41::generate_2d_noise(&noise_setting) };
 
 // send your own SIMD x,y values to the noise functions directly
 unsafe {
@@ -317,26 +321,26 @@ unsafe {
 
 ```
 
-## Generating into caller-owned memory (`*_into`)
+## Generating into caller-owned memory (`fill_*`)
 
-Every generator has an `*_into` / `generate_into` variant that writes into a
+Every generator has a `fill_*` variant that writes into a
 buffer **you already own** (issue #5) instead of returning a freshly allocated
 `Vec`. This lets you fill a preallocated block, split one big buffer across
 threads with no per-chunk allocation or copy-back, scale in place, and quantize
-straight into an integer buffer; `*_into_64` variants exist for `f64`.
+straight into an integer buffer; `fill_*_f64` variants exist for `f64`.
 
 ```rust
 use simdnoise::{NoiseBuilder, Settings};
 
 fn main() {
-    // 1. Fill a buffer you already own. `generate_into` writes into the slice and
+    // 1. Fill a buffer you already own. `fill` writes into the slice and
     //    returns the generated (min, max) so you can scale it yourself later.
     let (width, height) = (256, 256);
     let mut buffer = vec![0.0f32; width * height];
     let (min, max) = NoiseBuilder::fbm_2d(width, height)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
-        .generate_into(&mut buffer);
+        .with_frequency_2d(0.02, 0.02)
+        .fill(&mut buffer);
     println!(
         "1) filled {} values in place; range [{min:.3}, {max:.3}]",
         buffer.len()
@@ -357,8 +361,8 @@ fn main() {
                 let y_offset = (band * band_h) as f32;
                 NoiseBuilder::fbm_2d_offset(0.0, w, y_offset, band_h)
                     .with_seed(1337)
-                    .with_freq_2d(0.02, 0.02)
-                    .generate_into(chunk);
+                    .with_frequency_2d(0.02, 0.02)
+                    .fill(chunk);
             });
         }
     });
@@ -368,14 +372,14 @@ fn main() {
     let mut scaled = vec![0.0f32; width * height];
     NoiseBuilder::gradient_2d(width, height)
         .with_seed(42)
-        .generate_scaled_into(0.0, 255.0, &mut scaled);
+        .fill_scaled(0.0, 255.0, &mut scaled);
     println!("3) scaled-in-place sample: {:.3}", scaled[0]);
 
-    // 4. ...and f64 variants exist for every entry point (`*_into_64`).
+    // 4. ...and f64 variants exist for every entry point (`fill_*_f64`).
     let mut doubles = vec![0.0f64; width];
     NoiseBuilder::fbm_1d(width)
         .with_seed(42)
-        .generate_into_64(&mut doubles);
+        .fill_f64(&mut doubles);
     println!("4) f64 sample: {:.6}", doubles[0]);
 
     // 5. Typed output: quantize straight into an integer buffer (e.g. a u16
@@ -385,14 +389,14 @@ fn main() {
     let mut heightmap = vec![0u16; width * height];
     NoiseBuilder::fbm_2d(width, height)
         .with_seed(1337)
-        .with_freq_2d(0.02, 0.02)
-        .generate_range_into(-1.0, 1.0, &mut heightmap); // [-1.0, 1.0] -> [0, 65535]
+        .with_frequency_2d(0.02, 0.02)
+        .fill_range(-1.0, 1.0, &mut heightmap); // [-1.0, 1.0] -> [0, 65535]
     println!("5) u16 heightmap sample: {}", heightmap[0]);
 
     // The same, via the free function, into a u8 grayscale buffer:
     let nt = NoiseBuilder::gradient_2d(width, height).with_seed(7).wrap();
     let mut grayscale = vec![0u8; width * height];
-    simdnoise::get_2d_noise_range_into::<u8>(&nt, -1.0, 1.0, &mut grayscale);
+    simdnoise::fill_2d_noise_range::<u8>(&nt, -1.0, 1.0, &mut grayscale);
     println!("6) u8 grayscale sample: {}", grayscale[0]);
 }
 ```

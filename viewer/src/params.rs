@@ -62,7 +62,7 @@ pub enum Colormap {
 }
 
 /// What the canvas draws: the scalar noise value, or a view derived from the
-/// analytic gradient (`generate_with_derivative`). Gradient views are a 2D
+/// analytic gradient (`generate_with_gradient`). Gradient views are a 2D
 /// heightfield visualization, so they apply only at `dim == 2` (see
 /// [`gradient_capable`]); other configurations fall back to [`RenderMode::Value`].
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -335,7 +335,7 @@ impl Params {
 
 /// Whether the analytic-gradient render modes ([`RenderMode`] other than
 /// `Value`) are available for this configuration. They are a 2D heightfield
-/// visualization driven by `generate_with_derivative`, which the viewer wires
+/// visualization driven by `generate_with_gradient`, which the viewer wires
 /// up only through the auto engine, so they require `dim == 2`, the auto engine,
 /// and a derivative-capable algorithm (every simplex-family variant; cellular
 /// only under the Euclidean metric with the smooth `Distance` return; cellular2

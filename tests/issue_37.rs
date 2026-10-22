@@ -71,7 +71,7 @@ fn assert_continuous_in_z(name: &str, sample: impl Fn(f32) -> f32) {
 fn cellular2_3d_is_continuous_in_z() {
     assert_continuous_in_z("cellular2_3d", |z| {
         NoiseBuilder::cellular2_3d_offset(500.0, 1, 1000.0, 1, z, 1)
-            .with_freq(1.0)
+            .with_frequency(1.0)
             .with_seed(1)
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_return_type(Cell2ReturnType::Distance2)
@@ -85,7 +85,7 @@ fn cellular2_3d_is_continuous_in_z() {
 fn cellular_3d_is_continuous_in_z() {
     assert_continuous_in_z("cellular_3d", |z| {
         NoiseBuilder::cellular_3d_offset(500.0, 1, 1000.0, 1, z, 1)
-            .with_freq(1.0)
+            .with_frequency(1.0)
             .with_seed(1)
             .with_distance_function(CellDistanceFunction::Euclidean)
             .with_jitter(0.3)

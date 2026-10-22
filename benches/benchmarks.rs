@@ -13,22 +13,22 @@ fn d4(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_4d(8, 8, 8, 8).wrap();
     let mut group = c.benchmark_group("fbm4d");
     group.bench_function("scalar 4d", move |b| {
-        b.iter(|| unsafe { scalar::get_4d_noise::<simdeez::scalar::Scalar>(&setting) })
+        b.iter(|| unsafe { scalar::generate_4d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 4d", move |b| {
-        b.iter(|| unsafe { sse2::get_4d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
+        b.iter(|| unsafe { sse2::generate_4d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 4d", move |b| {
-        b.iter(|| unsafe { sse41::get_4d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
+        b.iter(|| unsafe { sse41::generate_4d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 4d", move |b| {
-        b.iter(|| unsafe { avx2::get_4d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
+        b.iter(|| unsafe { avx2::generate_4d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 4d", move |b| b.iter(|| neon::get_4d_noise(&setting)));
+    group.bench_function("neon 4d", move |b| b.iter(|| neon::generate_4d_noise(&setting)));
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -39,22 +39,22 @@ fn d3(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_3d(64, 64, 64).wrap();
     let mut group = c.benchmark_group("fbm3d");
     group.bench_function("scalar 3d", move |b| {
-        b.iter(|| unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>(&setting) })
+        b.iter(|| unsafe { scalar::generate_3d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 3d", move |b| {
-        b.iter(|| unsafe { sse2::get_3d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
+        b.iter(|| unsafe { sse2::generate_3d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 3d", move |b| {
-        b.iter(|| unsafe { sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
+        b.iter(|| unsafe { sse41::generate_3d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 3d", move |b| {
-        b.iter(|| unsafe { avx2::get_3d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
+        b.iter(|| unsafe { avx2::generate_3d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 3d", move |b| b.iter(|| neon::get_3d_noise(&setting)));
+    group.bench_function("neon 3d", move |b| b.iter(|| neon::generate_3d_noise(&setting)));
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -65,22 +65,22 @@ fn d2(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_2d(3840, 2160).wrap();
     let mut group = c.benchmark_group("fbm2d");
     group.bench_function("scalar 2d", move |b| {
-        b.iter(|| unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>(&setting) })
+        b.iter(|| unsafe { scalar::generate_2d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 2d", move |b| {
-        b.iter(|| unsafe { sse2::get_2d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
+        b.iter(|| unsafe { sse2::generate_2d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 2d", move |b| {
-        b.iter(|| unsafe { sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
+        b.iter(|| unsafe { sse41::generate_2d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 2d", move |b| {
-        b.iter(|| unsafe { avx2::get_2d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
+        b.iter(|| unsafe { avx2::generate_2d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 2d", move |b| b.iter(|| neon::get_2d_noise(&setting)));
+    group.bench_function("neon 2d", move |b| b.iter(|| neon::generate_2d_noise(&setting)));
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -91,22 +91,22 @@ fn d1(c: &mut Criterion) {
     let setting = NoiseBuilder::fbm_1d(1024).wrap();
     let mut group = c.benchmark_group("fbm1d");
     group.bench_function("scalar 1d", move |b| {
-        b.iter(|| unsafe { scalar::get_1d_noise::<simdeez::scalar::Scalar>(&setting) })
+        b.iter(|| unsafe { scalar::generate_1d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 1d", move |b| {
-        b.iter(|| unsafe { sse2::get_1d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
+        b.iter(|| unsafe { sse2::generate_1d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 1d", move |b| {
-        b.iter(|| unsafe { sse41::get_1d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
+        b.iter(|| unsafe { sse41::generate_1d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 1d", move |b| {
-        b.iter(|| unsafe { avx2::get_1d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
+        b.iter(|| unsafe { avx2::generate_1d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 1d", move |b| b.iter(|| neon::get_1d_noise(&setting)));
+    group.bench_function("neon 1d", move |b| b.iter(|| neon::generate_1d_noise(&setting)));
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -119,22 +119,22 @@ fn d2_cell(c: &mut Criterion) {
         .wrap();
     let mut group = c.benchmark_group("cellular2d");
     group.bench_function("scalar 2d", move |b| {
-        b.iter(|| unsafe { scalar::get_2d_noise::<simdeez::scalar::Scalar>(&setting) })
+        b.iter(|| unsafe { scalar::generate_2d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 2d", move |b| {
-        b.iter(|| unsafe { sse2::get_2d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
+        b.iter(|| unsafe { sse2::generate_2d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 2d", move |b| {
-        b.iter(|| unsafe { sse41::get_2d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
+        b.iter(|| unsafe { sse41::generate_2d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 2d", move |b| {
-        b.iter(|| unsafe { avx2::get_2d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
+        b.iter(|| unsafe { avx2::generate_2d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 2d", move |b| b.iter(|| neon::get_2d_noise(&setting)));
+    group.bench_function("neon 2d", move |b| b.iter(|| neon::generate_2d_noise(&setting)));
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -145,22 +145,22 @@ fn d3_cell(c: &mut Criterion) {
     let setting = NoiseBuilder::cellular_3d(128, 128, 128).wrap();
     let mut group = c.benchmark_group("cellular3d");
     group.bench_function("scalar 3d", move |b| {
-        b.iter(|| unsafe { scalar::get_3d_noise::<simdeez::scalar::Scalar>(&setting) })
+        b.iter(|| unsafe { scalar::generate_3d_noise::<simdeez::scalar::Scalar>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse2 3d", move |b| {
-        b.iter(|| unsafe { sse2::get_3d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
+        b.iter(|| unsafe { sse2::generate_3d_noise::<simdeez::engines::sse2::Sse2>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("sse41 3d", move |b| {
-        b.iter(|| unsafe { sse41::get_3d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
+        b.iter(|| unsafe { sse41::generate_3d_noise::<simdeez::engines::sse41::Sse41>(&setting) })
     });
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     group.bench_function("avx2 3d", move |b| {
-        b.iter(|| unsafe { avx2::get_3d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
+        b.iter(|| unsafe { avx2::generate_3d_noise::<simdeez::engines::avx2::Avx2>(&setting) })
     });
     #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-    group.bench_function("neon 3d", move |b| b.iter(|| neon::get_3d_noise(&setting)));
+    group.bench_function("neon 3d", move |b| b.iter(|| neon::generate_3d_noise(&setting)));
     group
         .sample_size(10)
         .warm_up_time(Duration::from_millis(1))
@@ -174,7 +174,7 @@ fn d2_range(c: &mut Criterion) {
     let mut buf = vec![0u16; 3840 * 2160];
     let mut group = c.benchmark_group("fbm2d_range_u16");
     group.bench_function("runtime u16", move |b| {
-        b.iter(|| get_2d_noise_range_into::<u16>(&setting, -1.0, 1.0, &mut buf))
+        b.iter(|| fill_2d_noise_range::<u16>(&setting, -1.0, 1.0, &mut buf))
     });
     group
         .sample_size(10)

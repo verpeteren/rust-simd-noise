@@ -94,21 +94,21 @@ fn turbulence_slice(dims: u8) -> Vec<f32> {
     match dims {
         2 => {
             NoiseBuilder::turbulence_2d_offset(0.0, W, 0.0, H)
-                .with_freq(FREQ)
+                .with_frequency(FREQ)
                 .with_octaves(OCTAVES)
                 .generate()
                 .0
         }
         4 => {
             NoiseBuilder::turbulence_4d_offset(0.0, W, 0.0, H, 0.0, 1, 0.0, 1)
-                .with_freq(FREQ)
+                .with_frequency(FREQ)
                 .with_octaves(OCTAVES)
                 .generate()
                 .0
         }
         _ => {
             NoiseBuilder::turbulence_3d_offset(0.0, W, 0.0, H, 0.0, 1)
-                .with_freq(FREQ)
+                .with_frequency(FREQ)
                 .with_octaves(OCTAVES)
                 .generate()
                 .0
