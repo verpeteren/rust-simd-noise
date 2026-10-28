@@ -36,8 +36,6 @@ use crate::shared::scale_noise;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use simdeez::{SimdTransmuteF32, SimdTransmuteF64};
 
-use std::f32;
-
 cellular!(
     "2d",
     cellular_2d,
@@ -588,12 +586,42 @@ generate_noise!(generate_3d_noise, generate_3d_noise, f32, noise_helpers_32);
 generate_noise!(generate_4d_noise, generate_4d_noise, f32, noise_helpers_32);
 generate_noise!(generate_5d_noise, generate_5d_noise, f32, noise_helpers_32);
 generate_noise!(generate_6d_noise, generate_6d_noise, f32, noise_helpers_32);
-generate_noise!(generate_1d_noise, generate_1d_noise_f64, f64, noise_helpers_64);
-generate_noise!(generate_2d_noise, generate_2d_noise_f64, f64, noise_helpers_64);
-generate_noise!(generate_3d_noise, generate_3d_noise_f64, f64, noise_helpers_64);
-generate_noise!(generate_4d_noise, generate_4d_noise_f64, f64, noise_helpers_64);
-generate_noise!(generate_5d_noise, generate_5d_noise_f64, f64, noise_helpers_64);
-generate_noise!(generate_6d_noise, generate_6d_noise_f64, f64, noise_helpers_64);
+generate_noise!(
+    generate_1d_noise,
+    generate_1d_noise_f64,
+    f64,
+    noise_helpers_64
+);
+generate_noise!(
+    generate_2d_noise,
+    generate_2d_noise_f64,
+    f64,
+    noise_helpers_64
+);
+generate_noise!(
+    generate_3d_noise,
+    generate_3d_noise_f64,
+    f64,
+    noise_helpers_64
+);
+generate_noise!(
+    generate_4d_noise,
+    generate_4d_noise_f64,
+    f64,
+    noise_helpers_64
+);
+generate_noise!(
+    generate_5d_noise,
+    generate_5d_noise_f64,
+    f64,
+    noise_helpers_64
+);
+generate_noise!(
+    generate_6d_noise,
+    generate_6d_noise_f64,
+    f64,
+    noise_helpers_64
+);
 generate_noise_scaled!(generate_1d_noise, generate_1d_scaled_noise, f32);
 generate_noise_scaled!(generate_2d_noise, generate_2d_scaled_noise, f32);
 generate_noise_scaled!(generate_3d_noise, generate_3d_scaled_noise, f32);

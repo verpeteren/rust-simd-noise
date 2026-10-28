@@ -11,10 +11,10 @@
 //! the new fractional behaviour: clamping, continuity, monotone fade-in, that
 //! the scaled range still bounds the output, and f32/f64 + cross-engine parity.
 
-use simdeez::prelude::*;
-use simdeez::scalar::Scalar;
 use crate::noise::{fbm_32, fbm_64, ridge_32, turbulence_32};
 use crate::{NoiseBuilder, Settings, SimplexSettings};
+use simdeez::prelude::*;
+use simdeez::scalar::Scalar;
 
 const LAC: f32 = 0.5;
 const GAIN: f32 = 2.0;

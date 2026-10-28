@@ -16,11 +16,15 @@ use crate::noise_helpers_32::{Sample32, SampleFractalDeriv32};
 use crate::noise_helpers_64::{Sample64, SampleFractalDeriv64};
 pub use crate::noise_type::NoiseType;
 use crate::{
-    generate_1d_fbm_gradient, generate_1d_noise, generate_1d_scaled_noise, generate_2d_fbm_gradient, generate_2d_noise,
-    generate_2d_scaled_noise, generate_3d_fbm_gradient, generate_3d_noise, generate_3d_scaled_noise,
-    generate_4d_fbm_gradient, generate_4d_noise, generate_4d_scaled_noise, generate_5d_fbm_gradient, generate_5d_noise,
-    generate_5d_scaled_noise, generate_6d_fbm_gradient, generate_6d_noise, generate_6d_scaled_noise,
-    generate_1d_fbm_gradient_f64, generate_2d_fbm_gradient_f64, generate_3d_fbm_gradient_f64, generate_4d_fbm_gradient_f64, generate_5d_fbm_gradient_f64, generate_6d_fbm_gradient_f64, NoiseAndGradient, NoiseAndGradientF64,
+    generate_1d_fbm_gradient, generate_1d_fbm_gradient_f64, generate_1d_noise,
+    generate_1d_scaled_noise, generate_2d_fbm_gradient, generate_2d_fbm_gradient_f64,
+    generate_2d_noise, generate_2d_scaled_noise, generate_3d_fbm_gradient,
+    generate_3d_fbm_gradient_f64, generate_3d_noise, generate_3d_scaled_noise,
+    generate_4d_fbm_gradient, generate_4d_fbm_gradient_f64, generate_4d_noise,
+    generate_4d_scaled_noise, generate_5d_fbm_gradient, generate_5d_fbm_gradient_f64,
+    generate_5d_noise, generate_5d_scaled_noise, generate_6d_fbm_gradient,
+    generate_6d_fbm_gradient_f64, generate_6d_noise, generate_6d_scaled_noise, NoiseAndGradient,
+    NoiseAndGradientF64,
 };
 
 use super::{Settings, SimplexSettings};
@@ -121,7 +125,12 @@ impl Settings for FbmSettings {
         self
     }
 
-    fn with_frequency_3d(&mut self, frequency_x: f32, frequency_y: f32, frequency_z: f32) -> &mut FbmSettings {
+    fn with_frequency_3d(
+        &mut self,
+        frequency_x: f32,
+        frequency_y: f32,
+        frequency_z: f32,
+    ) -> &mut FbmSettings {
         self.frequency_x = frequency_x;
         self.frequency_y = frequency_y;
         self.frequency_z = frequency_z;
